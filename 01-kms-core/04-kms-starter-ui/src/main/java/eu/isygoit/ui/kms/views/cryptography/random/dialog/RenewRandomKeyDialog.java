@@ -5,12 +5,13 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
-import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
+import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import org.springframework.http.ResponseEntity;
 
-public class RenewRandomKeyDialog extends KmsPinActionDialog {
+public class RenewRandomKeyDialog extends PinBaseActionDialog {
 
     private final RandomKeyService keyService;
     private final String keyName;
@@ -27,8 +28,9 @@ public class RenewRandomKeyDialog extends KmsPinActionDialog {
         this.keyName = keyName;
         this.length = 32;      // default
         this.charSet = IEnumCharSet.Types.ALL;
+        addClassName("kms-dialog");
         setOkButtonText(I18n.t("kms.random.key.dialog.renew.button"));
-        setWidth("500px");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
         buildForm();
         addContent(createFormLayout());
     }
@@ -51,9 +53,8 @@ public class RenewRandomKeyDialog extends KmsPinActionDialog {
     }
 
     private FormLayout createFormLayout() {
-        FormLayout form = new FormLayout();
+        FormLayout form = DialogLayout.responsiveForm();
         form.add(lengthField, charSetCombo);
-        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         return form;
     }
 

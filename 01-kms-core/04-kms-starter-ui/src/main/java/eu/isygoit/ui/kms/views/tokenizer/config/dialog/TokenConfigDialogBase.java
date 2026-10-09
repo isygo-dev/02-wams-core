@@ -1,12 +1,11 @@
 package eu.isygoit.ui.kms.views.tokenizer.config.dialog;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -19,15 +18,17 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
+import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.exception.InvalidUnitException;
 import eu.isygoit.exception.UnsupportedAsymmetricAlgorithmException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
+import eu.isygoit.ui.kms.views.secrets.SecretsDialogSupport;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -40,8 +41,26 @@ import java.security.spec.ECGenParameterSpec;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * Shared form of the token configuration create/update dialogs.
+ *
+ * <p>Mapping of the form to {@link TokenConfigDto}:
+ * <ul>
+ *   <li>{@code code}, {@code tenant}: read-only (assigned by the server);</li>
+ *   <li>{@code tokenType}, {@code issuer}, {@code audience}: type combo, issuer field, audience chips;</li>
+ *   <li>{@code lifeTimeInMs}: UI representation = value + unit + "no expiration" checkbox
+ *       (see {@link #getLifeTimeInMs()} / {@link #setLifeTimeFromMs(Integer)});</li>
+ *   <li>{@code kmsKeyId}: KMS key combo, used when the key source is "KMS";</li>
+ *   <li>{@code signatureAlgorithm}: algorithm combo, used when the key source is "custom";</li>
+ *   <li>{@code secretKey}: UI representation = HMAC secret field, or the private key area
+ *       for asymmetric algorithms;</li>
+ *   <li>{@code publicKey}: read-only area filled by "generate key pair".</li>
+ * </ul>
+ * {@code id} is never shown. Subclasses decide how the DTO is built and sent.
+ */
 @Slf4j
 public abstract class TokenConfigDialogBase extends KmsActionDialog {
 
@@ -68,20 +87,17 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
     // UI components
     protected RadioButtonGroup<String> keySourceGroup;
     protected ComboBox<KeyOption> kmsKeyCombo;
-    protected VerticalLayout kmsKeyLayout;
     protected VerticalLayout customKeyLayout;
-    protected Card metadataCard;
-    protected Card cryptoCard;
-    protected VerticalLayout cryptoCardContent;
 
-    // Metadata fields
+    // Identity / metadata fields
+    protected TextField codeField;
+    protected TextField tenantField;
     protected ComboBox<IEnumToken.Types> tokenTypeCombo;
     protected TextField issuerField;
     protected AudienceInput audienceInput;
     protected IntegerField lifeTimeValueField;
     protected ComboBox<String> lifeTimeUnitCombo;
     protected Checkbox noExpirationCheckbox;
-    protected HorizontalLayout lifetimeRow;
 
     // Custom key fields
     protected ComboBox<String> signatureAlgorithmCombo;
@@ -95,32 +111,24 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
     protected TokenConfigDialogBase(String title, Runnable onSuccess, KmsApiService kmsApiService) {
         super(title, onSuccess);
         this.kmsApiService = kmsApiService;
-        addClassName("token-config-dialog");
-        setWidth("850px");
-        setMaxWidth("95%");
-        setResizable(true);
+        DialogLayout.size(this, DialogLayout.WIDTH_L);
     }
 
     protected void initUI() {
         buildComponents();
-        VerticalLayout mainLayout = new VerticalLayout(metadataCard, cryptoCard);
-        mainLayout.setSpacing(true);
-        mainLayout.setPadding(true);
-        mainLayout.setWidthFull();
-        add(mainLayout);
+
+        VerticalLayout root = DialogLayout.stack();
+        root.add(buildMetadataSection(), buildCryptoSection());
+        add(root);
+
         setupKeySourceListener();
         setupAlgorithmChangeListener();
         loadKmsKeys();
     }
 
     private void buildComponents() {
-        // ---------- Metadata Card ----------
-        metadataCard = new Card();
-        metadataCard.addClassName("config-metadata-card");
-        metadataCard.setWidthFull();
-        Span metaTitle = new Span(I18n.t("kms.dialog.token.metadata"));
-        metaTitle.addClassName(LumoUtility.FontWeight.BOLD);
-        metaTitle.addClassName(LumoUtility.FontSize.MEDIUM);
+        codeField = SecretsDialogSupport.readOnlyField(I18n.t("kms.dialog.token.code"));
+        tenantField = SecretsDialogSupport.readOnlyField(I18n.t("kms.token.details.field.tenant"));
 
         // Token type
         tokenTypeCombo = new ComboBox<>(I18n.t("kms.dialog.token.token.type"));
@@ -143,7 +151,7 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
         audienceInput.setWidthFull();
         audienceInput.setTooltipText(I18n.t("kms.dialog.token.audience.tooltip"));
 
-        // Lifetime row with "No expiration" checkbox
+        // Lifetime: value + unit, with an optional "No expiration"
         noExpirationCheckbox = new Checkbox(I18n.t("kms.dialog.token.no.expiration"));
         noExpirationCheckbox.setTooltipText(I18n.t("kms.dialog.token.no.expiration.tooltip"));
         noExpirationCheckbox.addValueChangeListener(e -> {
@@ -156,16 +164,16 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
             }
         });
 
-        lifeTimeValueField = new IntegerField();
+        lifeTimeValueField = new IntegerField(I18n.t("kms.dialog.token.lifetime.field"));
         lifeTimeValueField.setPlaceholder(I18n.t("kms.dialog.token.lifetime.value.placeholder"));
         lifeTimeValueField.setValue(1);
-        lifeTimeValueField.setWidth("50%");
+        lifeTimeValueField.setWidthFull();
         lifeTimeValueField.setStepButtonsVisible(true);
         lifeTimeValueField.setMin(1);
         lifeTimeValueField.setEnabled(true);
         lifeTimeValueField.setTooltipText(I18n.t("kms.dialog.token.lifetime.tooltip"));
 
-        lifeTimeUnitCombo = new ComboBox<>();
+        lifeTimeUnitCombo = new ComboBox<>(I18n.t("kms.dialog.token.lifetime.unit.field"));
         lifeTimeUnitCombo.setItems(
                 I18n.t("kms.dialog.token.lifetime.unit.seconds"),
                 I18n.t("kms.dialog.token.lifetime.unit.minutes"),
@@ -173,39 +181,9 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
                 I18n.t("kms.dialog.token.lifetime.unit.days")
         );
         lifeTimeUnitCombo.setValue(I18n.t("kms.dialog.token.lifetime.unit.hours"));
-        lifeTimeUnitCombo.setWidth("30%");
+        lifeTimeUnitCombo.setWidthFull();
         lifeTimeUnitCombo.setEnabled(true);
         lifeTimeUnitCombo.setTooltipText(I18n.t("kms.dialog.token.lifetime.unit.tooltip"));
-
-        Span lifetimeLabel = new Span(I18n.t("kms.dialog.token.lifetime"));
-        lifetimeLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        lifetimeLabel.addClassName("lifetime-label");
-
-        lifetimeRow = new HorizontalLayout(lifetimeLabel, lifeTimeValueField, lifeTimeUnitCombo, noExpirationCheckbox);
-        lifetimeRow.setWidthFull();
-        lifetimeRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        lifetimeRow.setFlexGrow(1, lifeTimeValueField);
-        lifetimeRow.setSpacing(true);
-
-        VerticalLayout metaForm = new VerticalLayout();
-        metaForm.setSpacing(true);
-        metaForm.setPadding(false);
-        metaForm.add(tokenTypeCombo, issuerField, audienceInput, lifetimeRow);
-        metadataCard.add(metaTitle, metaForm);
-
-        // ---------- Crypto Card ----------
-        cryptoCard = new Card();
-        cryptoCard.addClassName("config-crypto-card");
-        cryptoCard.setWidthFull();
-        Span cryptoTitle = new Span(I18n.t("kms.dialog.token.crypto"));
-        cryptoTitle.addClassName(LumoUtility.FontWeight.BOLD);
-        cryptoTitle.addClassName(LumoUtility.FontSize.MEDIUM);
-        cryptoCard.add(cryptoTitle);
-
-        cryptoCardContent = new VerticalLayout();
-        cryptoCardContent.setPadding(false);
-        cryptoCardContent.setSpacing(true);
-        cryptoCard.add(cryptoCardContent);
 
         // Key source selection
         keySourceGroup = new RadioButtonGroup<>();
@@ -214,28 +192,22 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
         keySourceGroup.setValue(I18n.t("kms.dialog.token.key.source.custom"));
         keySourceGroup.setWidthFull();
         keySourceGroup.setTooltipText(I18n.t("kms.dialog.token.key.source.tooltip"));
-        cryptoCardContent.add(keySourceGroup);
 
-        // KMS key selection layout
-        kmsKeyLayout = new VerticalLayout();
-        kmsKeyLayout.setPadding(false);
-        kmsKeyLayout.setSpacing(true);
-        kmsKeyLayout.setVisible(false);
-        Span kmsKeyLabel = new Span(I18n.t("kms.dialog.token.select.kms.key"));
-        kmsKeyLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        kmsKeyCombo = new ComboBox<>();
+        // KMS key selection
+        kmsKeyCombo = new ComboBox<>(I18n.t("kms.dialog.token.kms.key.field"));
         kmsKeyCombo.setPlaceholder(I18n.t("kms.dialog.token.choose.kms.key"));
         kmsKeyCombo.setItemLabelGenerator(KeyOption::getDisplayName);
         kmsKeyCombo.setWidthFull();
         kmsKeyCombo.setRequired(true);
+        kmsKeyCombo.setRequiredIndicatorVisible(true);
+        kmsKeyCombo.setVisible(false);
         kmsKeyCombo.setTooltipText(I18n.t("kms.dialog.token.kms.key.tooltip"));
-        kmsKeyLayout.add(kmsKeyLabel, kmsKeyCombo);
-        cryptoCardContent.add(kmsKeyLayout);
 
         // Custom key layout (dynamic)
         customKeyLayout = new VerticalLayout();
         customKeyLayout.setPadding(false);
         customKeyLayout.setSpacing(true);
+        customKeyLayout.setWidthFull();
 
         signatureAlgorithmCombo = new ComboBox<>(I18n.t("kms.dialog.token.signature.algorithm"));
         signatureAlgorithmCombo.setItems(SUPPORTED_ALGORITHMS);
@@ -252,19 +224,14 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
         secretKeyField.setWidthFull();
         secretKeyField.setTooltipText(I18n.t("kms.dialog.token.secret.tooltip"));
 
-        privateKeyArea = new TextArea(I18n.t("kms.dialog.token.private.key"));
+        privateKeyArea = DialogLayout.tall(new TextArea(I18n.t("kms.dialog.token.private.key")));
         privateKeyArea.setRequired(true);
         privateKeyArea.setRequiredIndicatorVisible(true);
-        privateKeyArea.setWidthFull();
-        privateKeyArea.setHeight("150px");
         privateKeyArea.setPlaceholder(I18n.t("kms.dialog.token.private.key.placeholder"));
-        privateKeyArea.addClassName("no-copy");
         privateKeyArea.setTooltipText(I18n.t("kms.dialog.token.private.tooltip"));
 
-        publicKeyArea = new TextArea();
+        publicKeyArea = DialogLayout.tall(new TextArea(I18n.t("kms.dialog.token.public.key")));
         publicKeyArea.setReadOnly(true);
-        publicKeyArea.setWidthFull();
-        publicKeyArea.setHeight("100px");
         publicKeyArea.setPlaceholder(I18n.t("kms.dialog.token.public.key.placeholder"));
         publicKeyArea.setTooltipText(I18n.t("kms.dialog.token.public.tooltip"));
 
@@ -276,25 +243,39 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
         publicKeyComponent = createPublicKeyComponent();
 
         customKeyLayout.add(secretKeyField); // initially HMAC (HS256)
-        cryptoCardContent.add(customKeyLayout);
+    }
+
+    private VerticalLayout buildMetadataSection() {
+        VerticalLayout section = DialogLayout.section(I18n.t("kms.dialog.token.metadata"), VaadinIcon.KEY);
+        FormLayout form = DialogLayout.responsiveForm();
+
+        form.add(codeField, tenantField, tokenTypeCombo, issuerField, audienceInput,
+                lifeTimeValueField, lifeTimeUnitCombo, noExpirationCheckbox);
+        form.setColspan(audienceInput, 2);
+        form.setColspan(noExpirationCheckbox, 2);
+        section.add(form);
+        return section;
+    }
+
+    private VerticalLayout buildCryptoSection() {
+        VerticalLayout section = DialogLayout.section(I18n.t("kms.dialog.token.crypto"), VaadinIcon.LOCK);
+        section.add(keySourceGroup, kmsKeyCombo, customKeyLayout);
+        return section;
     }
 
     private VerticalLayout createPublicKeyComponent() {
-        HorizontalLayout header = new HorizontalLayout();
-        Span label = new Span(I18n.t("kms.dialog.token.public.key"));
-        label.addClassName("public-key-label");
-
         copyPublicKeyButton = new Button(new Icon(VaadinIcon.COPY));
         copyPublicKeyButton.addClickListener(e -> copyToClipboard(publicKeyArea.getValue()));
         copyPublicKeyButton.setTooltipText(I18n.t("kms.dialog.token.copy.public.key"));
-        copyPublicKeyButton.addClassName("copy-public-key-button");
-        copyPublicKeyButton.addThemeVariants(ButtonVariant.LUMO_SMALL);
+        copyPublicKeyButton.setAriaLabel(I18n.t("kms.dialog.token.copy.public.key"));
+        copyPublicKeyButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
 
-        header.add(label, copyPublicKeyButton);
-        header.setWidthFull();
-        header.setAlignItems(FlexComponent.Alignment.CENTER);
+        HorizontalLayout actions = new HorizontalLayout(copyPublicKeyButton);
+        actions.setWidthFull();
+        actions.setPadding(false);
+        actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
-        VerticalLayout wrapper = new VerticalLayout(header, publicKeyArea);
+        VerticalLayout wrapper = new VerticalLayout(publicKeyArea, actions);
         wrapper.setPadding(false);
         wrapper.setSpacing(false);
         wrapper.setWidthFull();
@@ -305,14 +286,14 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
         keySourceGroup.addValueChangeListener(event -> {
             String value = event.getValue();
             if (I18n.t("kms.dialog.token.key.source.kms").equals(value)) {
-                kmsKeyLayout.setVisible(true);
+                kmsKeyCombo.setVisible(true);
                 customKeyLayout.setVisible(false);
                 secretKeyField.clear();
                 privateKeyArea.clear();
                 publicKeyArea.clear();
                 signatureAlgorithmCombo.setRequired(false);
             } else {
-                kmsKeyLayout.setVisible(false);
+                kmsKeyCombo.setVisible(false);
                 customKeyLayout.setVisible(true);
                 kmsKeyCombo.clear();
                 signatureAlgorithmCombo.setRequired(true);
@@ -514,12 +495,110 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
     }
 
     protected void handleFeignException(FeignException ex) {
-        String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-        this.append(errorMsg);
+        this.append(SecretsDialogSupport.feignMessage(ex));
     }
 
     protected void handleGenericException(Exception ex) {
         this.append(ex.getMessage());
+    }
+
+    // ---------- Form <-> DTO ----------
+
+    /** Fills the read-only identity fields ({@code code}, {@code tenant}) from a loaded DTO. */
+    protected final void bindIdentity(TokenConfigDto dto) {
+        SecretsDialogSupport.setText(codeField, dto.getCode());
+        SecretsDialogSupport.setText(tenantField, dto.getTenant());
+    }
+
+    /**
+     * Validates the form and, only when everything is valid, copies the edited
+     * values into {@code dto}. {@code id}, {@code code}, {@code tenant} and the
+     * audit fields are left untouched, so an update keeps everything it does not edit.
+     *
+     * @return false (after appending an error message) when the form is invalid
+     */
+    protected final boolean collectInto(TokenConfigDto dto) {
+        IEnumToken.Types tokenType = tokenTypeCombo.getValue();
+        if (tokenType == null) {
+            append(I18n.t("kms.dialog.token.type.required"));
+            return false;
+        }
+
+        Integer lifeTime = getLifeTimeInMs();
+
+        String kmsKeyId = null;
+        String signatureAlgorithm = null;
+        String secretOrPrivateKey = null;
+        String publicKey = null;
+
+        boolean useKmsKey = I18n.t("kms.dialog.token.key.source.kms").equals(keySourceGroup.getValue());
+        if (useKmsKey) {
+            KeyOption selected = kmsKeyCombo.getValue();
+            if (selected == null) {
+                append(I18n.t("kms.dialog.token.kms.select"));
+                return false;
+            }
+            kmsKeyId = selected.getKeyId();
+        } else {
+            signatureAlgorithm = signatureAlgorithmCombo.getValue();
+            if (signatureAlgorithm == null || signatureAlgorithm.isBlank()) {
+                append(I18n.t("kms.dialog.token.algorithm.required"));
+                return false;
+            }
+            if (HMAC_ALGORITHMS.contains(signatureAlgorithm)) {
+                String secretKey = secretKeyField.getValue();
+                if (secretKey == null || secretKey.isBlank()) {
+                    append(I18n.t("kms.dialog.token.secret.required", signatureAlgorithm));
+                    return false;
+                }
+                if (!validateHmacKey(signatureAlgorithm, secretKey)) return false;
+                secretOrPrivateKey = secretKey;
+            } else if (ASYMMETRIC_ALGORITHMS.contains(signatureAlgorithm)) {
+                String privateKey = privateKeyArea.getValue();
+                if (privateKey == null || privateKey.isBlank()) {
+                    append(I18n.t("kms.dialog.token.private.required", signatureAlgorithm));
+                    return false;
+                }
+                secretOrPrivateKey = privateKey;
+                publicKey = publicKeyArea.getValue();
+            } else {
+                append(I18n.t("kms.dialog.token.unsupported.algorithm", signatureAlgorithm));
+                return false;
+            }
+        }
+
+        dto.setTokenType(tokenType);
+        dto.setIssuer(issuerField.getValue());
+        dto.setAudience(getAudienceList());
+        dto.setLifeTimeInMs(lifeTime);
+        dto.setKmsKeyId(kmsKeyId);
+        dto.setSignatureAlgorithm(signatureAlgorithm);
+        dto.setSecretKey(secretOrPrivateKey);
+        dto.setPublicKey(publicKey);
+        return true;
+    }
+
+    /**
+     * Runs the service call and reports the outcome; returns true on a 2xx answer.
+     *
+     * @param statusFailedKey i18n key used when the service answers with a non-2xx status
+     */
+    protected final boolean send(Supplier<ResponseEntity<TokenConfigDto>> call, String statusFailedKey) {
+        try {
+            ResponseEntity<TokenConfigDto> response = call.get();
+            if (response.getStatusCode().is2xxSuccessful()) {
+                onSaveSuccess();
+                return true;
+            }
+            append(I18n.t(statusFailedKey, response.getStatusCode()));
+            return false;
+        } catch (FeignException ex) {
+            handleFeignException(ex);
+            return false;
+        } catch (Exception e) {
+            handleGenericException(e);
+            return false;
+        }
     }
 
     // ---------- Audience Management ----------
@@ -620,10 +699,10 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
         }
     }
 
-    // Custom audience input component
+    /** Audience editor: a text input and removable chips; the audience list is kept as a model. */
     protected static class AudienceInput extends VerticalLayout {
+        private final List<String> audiences = new ArrayList<>();
         private final TextField inputField;
-        private final Button addButton;
         private final HorizontalLayout chipsContainer;
 
         public AudienceInput() {
@@ -634,17 +713,20 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
             inputField.setPlaceholder(I18n.t("kms.dialog.token.audience.placeholder"));
             inputField.setWidthFull();
 
-            addButton = new Button(I18n.t("kms.dialog.token.audience.add"), new Icon(VaadinIcon.PLUS));
+            Button addButton = new Button(I18n.t("kms.dialog.token.audience.add"), new Icon(VaadinIcon.PLUS));
             addButton.addClickListener(e -> addAudience());
 
             HorizontalLayout inputRow = new HorizontalLayout(inputField, addButton);
             inputRow.setWidthFull();
+            inputRow.setPadding(false);
+            inputRow.setAlignItems(FlexComponent.Alignment.END);
             inputRow.setFlexGrow(1, inputField);
 
             chipsContainer = new HorizontalLayout();
-            chipsContainer.setSpacing(true);
+            chipsContainer.setSpacing(false);
+            chipsContainer.setPadding(false);
             chipsContainer.setWidthFull();
-            chipsContainer.addClassName("audience-chips-container");
+            chipsContainer.addClassName(DialogLayout.CLASS_ROW);
 
             add(inputRow, chipsContainer);
         }
@@ -661,7 +743,7 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
                 return;
             }
             value = value.trim();
-            if (getAudiences().contains(value)) {
+            if (audiences.contains(value)) {
                 Notification.show(I18n.t("kms.dialog.token.audience.exists"), 2000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
                 return;
@@ -671,32 +753,32 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
         }
 
         private void addChip(String audience) {
-            Span chip = new Span(audience);
-            chip.addClassName("audience-chip");
+            audiences.add(audience);
 
             Button removeButton = new Button(new Icon(VaadinIcon.CLOSE_SMALL));
-            removeButton.addThemeName("tertiary-inline");
-            removeButton.addClickListener(e -> chipsContainer.remove(chip));
-            chip.add(removeButton);
+            removeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
+            removeButton.setAriaLabel(I18n.t("kms.dialog.token.audience.remove", audience));
+
+            Span chip = new Span(new Span(audience), removeButton);
+            chip.getElement().getThemeList().add("badge");
+            chip.addClassName(DialogLayout.CLASS_CHIP);
+
+            removeButton.addClickListener(e -> {
+                audiences.remove(audience);
+                chipsContainer.remove(chip);
+            });
             chipsContainer.add(chip);
         }
 
         public List<String> getAudiences() {
-            List<String> list = new ArrayList<>();
-            for (Component component : chipsContainer.getChildren().collect(Collectors.toList())) {
-                if (component instanceof Span) {
-                    String text = ((Span) component).getText();
-                    text = text.replace("✕", "").trim();
-                    if (!text.isEmpty()) list.add(text);
-                }
-            }
-            return list;
+            return new ArrayList<>(audiences);
         }
 
-        public void setAudiences(List<String> audiences) {
+        public void setAudiences(List<String> newAudiences) {
+            audiences.clear();
             chipsContainer.removeAll();
-            if (audiences != null) {
-                audiences.forEach(this::addChip);
+            if (newAudiences != null) {
+                newAudiences.forEach(this::addChip);
             }
         }
     }

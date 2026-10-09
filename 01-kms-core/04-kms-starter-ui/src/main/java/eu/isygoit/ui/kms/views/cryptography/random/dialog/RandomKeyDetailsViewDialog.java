@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.common.component.ClipboardCopyButton;
 import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
@@ -42,11 +43,9 @@ public class RandomKeyDetailsViewDialog extends KmsDetailsDialog {
         this.keyService = keyService;
         this.dto = dto;
 
-        setWidth("700px");
-        setMaxWidth("95%");
+        applyWidth(DialogLayout.WIDTH_M);
         setModal(true);
         setDraggable(true);
-        setResizable(true);
         addClassName("random-key-details-dialog");
 
         buildContent();
@@ -64,16 +63,11 @@ public class RandomKeyDetailsViewDialog extends KmsDetailsDialog {
         addTab(I18n.t("kms.random.key.dialog.details.section.value"),
                 createSection(I18n.t("kms.random.key.dialog.details.section.value"), buildValueRow()));
 
-        // Section 3: Audit — created/updated by/date.
-        Div auditGrid = createDetailGrid();
-        addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("kms.random.key.dialog.details.field.created.by"), dto.getCreatedBy());
-        addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("kms.random.key.dialog.details.field.created.date"),
-                dto.getCreateDate() != null ? DateHelper.formatToHumanReadable(dto.getCreateDate()) : null);
-        addFieldToGrid(auditGrid, VaadinIcon.EDIT, I18n.t("kms.random.key.dialog.details.field.updated.by"), dto.getUpdatedBy());
-        addFieldToGrid(auditGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.random.key.dialog.details.field.updated.date"),
+        // Section 3: Audit - created/updated by/date.
+        addAuditTab(dto.getCreatedBy(),
+                dto.getCreateDate() != null ? DateHelper.formatToHumanReadable(dto.getCreateDate()) : null,
+                dto.getUpdatedBy(),
                 dto.getUpdateDate() != null ? DateHelper.formatToHumanReadable(dto.getUpdateDate()) : null);
-        addTab(I18n.t("kms.random.key.dialog.details.section.audit"),
-                createSection(I18n.t("kms.random.key.dialog.details.section.audit"), auditGrid));
     }
 
     /**
@@ -113,6 +107,7 @@ public class RandomKeyDetailsViewDialog extends KmsDetailsDialog {
         revealButton = new Button(new Icon(VaadinIcon.EYE));
         revealButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
         revealButton.setTooltipText(I18n.t("kms.random.key.dialog.details.reveal.tooltip"));
+        revealButton.setAriaLabel(I18n.t("kms.random.key.dialog.details.reveal.tooltip"));
         revealButton.addClickListener(e -> toggleReveal());
 
         Button copyBtn = new ClipboardCopyButton(dto.getValue(), I18n.t("kms.random.key.card.copy.tooltip"));
@@ -130,9 +125,11 @@ public class RandomKeyDetailsViewDialog extends KmsDetailsDialog {
         valueSpan.setText(valueRevealed ? (dto.getValue() != null ? dto.getValue() : I18n.t("kms.random.key.card.masked"))
                 : maskKey(dto.getValue()));
         revealButton.setIcon(new Icon(valueRevealed ? VaadinIcon.EYE_SLASH : VaadinIcon.EYE));
-        revealButton.setTooltipText(valueRevealed
+        String revealTip = valueRevealed
                 ? I18n.t("kms.random.key.dialog.details.hide.tooltip")
-                : I18n.t("kms.random.key.dialog.details.reveal.tooltip"));
+                : I18n.t("kms.random.key.dialog.details.reveal.tooltip");
+        revealButton.setTooltipText(revealTip);
+        revealButton.setAriaLabel(revealTip);
     }
 
     private String maskKey(String full) {

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -15,7 +13,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -24,6 +21,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.component.RowCard;
+import eu.isygoit.ui.common.component.RowCardList;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
@@ -56,12 +55,9 @@ public class GrantsView extends ManagementVerticalView {
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.grants.view.select.key"));
     private final TextField filterField = new TextField();
     private final Button clearFilterButton = new Button(new Icon(VaadinIcon.CLOSE));
-    private final Grid<KmsDtos.ListGrantsResponse.Grant> grantsGrid = new Grid<>();
+    private final RowCardList<KmsDtos.ListGrantsResponse.Grant> grantsList = new RowCardList<>();
     private final Button refreshButton = new Button(I18n.t("kms.grants.view.refresh.button"), new Icon(VaadinIcon.REFRESH));
     private final Button createGrantButton = new Button(I18n.t("kms.grants.view.create.grant.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
-    private final Button revokeGrantButton = new Button(I18n.t("kms.grants.view.revoke.button"), new Icon(VaadinIcon.BAN));
-    private final Button retireGrantButton = new Button(I18n.t("kms.grants.view.retire.button"), new Icon(VaadinIcon.CLOSE_CIRCLE));
-    private final Button viewDetailsButton = new Button(I18n.t("kms.grants.view.details.button"), new Icon(VaadinIcon.EYE));
     private final ProgressBar loadingBar = new ProgressBar();
 
     private String selectedKeyId = null;
@@ -87,9 +83,6 @@ public class GrantsView extends ManagementVerticalView {
 
         refreshButton.addClickListener(e -> loadGrants());
         createGrantButton.addClickListener(e -> openCreateGrantDialog());
-        revokeGrantButton.addClickListener(e -> revokeSelectedGrant());
-        retireGrantButton.addClickListener(e -> retireSelectedGrant());
-        viewDetailsButton.addClickListener(e -> showGrantDetails());
 
         filterField.addValueChangeListener(e -> applyFilter());
         clearFilterButton.addClickListener(e -> {
@@ -126,7 +119,7 @@ public class GrantsView extends ManagementVerticalView {
                 loadGrants();
             } else {
                 allGrants.clear();
-                grantsGrid.setItems(new ArrayList<>());
+                grantsList.setItems(new ArrayList<>());
             }
         });
 
@@ -161,11 +154,7 @@ public class GrantsView extends ManagementVerticalView {
     }
 
     private void buildActionBar() {
-        // Same conceptual order as card action bars: refresh/create (neutral/primary),
-        // details/view (info-style), then destructive actions last, danger-styled and
-        // rightmost (retire before revoke — revoke is the more severe/irreversible action).
-        HorizontalLayout actionBar = new HorizontalLayout(refreshButton, createGrantButton,
-                viewDetailsButton, retireGrantButton, revokeGrantButton);
+        HorizontalLayout actionBar = new HorizontalLayout(refreshButton, createGrantButton);
         actionBar.setSpacing(true);
         actionBar.addClassName("grants-action-bar");
 
@@ -174,49 +163,28 @@ public class GrantsView extends ManagementVerticalView {
         refreshButton.setTooltipText(I18n.t("kms.grants.view.refresh.grants.tooltip"));
         createGrantButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         createGrantButton.setTooltipText(I18n.t("kms.grants.view.create.grant.tooltip"));
-        viewDetailsButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        viewDetailsButton.addClassName("wams-action-btn");
-        viewDetailsButton.setTooltipText(I18n.t("kms.grants.view.details.tooltip"));
-        retireGrantButton.addThemeVariants(ButtonVariant.LUMO_WARNING);
-        retireGrantButton.addClassName("wams-action-btn");
-        retireGrantButton.addClassName("wams-action-btn--danger");
-        retireGrantButton.setTooltipText(I18n.t("kms.grants.view.retire.grant.tooltip"));
-        revokeGrantButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        revokeGrantButton.addClassName("wams-action-btn");
-        revokeGrantButton.addClassName("wams-action-btn--danger");
-        revokeGrantButton.setTooltipText(I18n.t("kms.grants.view.revoke.grant.tooltip"));
 
         add(actionBar);
     }
 
     private void buildGrantsGrid() {
-        grantsGrid.setWidthFull();
-        grantsGrid.setHeight("500px");
-        grantsGrid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_COLUMN_BORDERS);
-        grantsGrid.addClassName("grants-grid");
+        grantsList.setWidthFull();
+        grantsList.cardFactory(this::buildGrantCard);
 
-        grantsGrid.addColumn(KmsDtos.ListGrantsResponse.Grant::getGrantId)
-                .setHeader(I18n.t("kms.grants.view.grid.column.grant.id")).setSortable(true).setFlexGrow(0).setWidth("200px");
-        grantsGrid.addColumn(KmsDtos.ListGrantsResponse.Grant::getGranteePrincipal)
-                .setHeader(I18n.t("kms.grants.view.grid.column.grantee")).setSortable(true);
-        grantsGrid.addColumn(KmsDtos.ListGrantsResponse.Grant::getRetiringPrincipal)
-                .setHeader(I18n.t("kms.grants.view.grid.column.retiring")).setSortable(true);
-        grantsGrid.addColumn(grant -> grant.getOperations() != null ? String.join(", ", grant.getOperations()) : "[]")
-                .setHeader(I18n.t("kms.grants.view.grid.column.operations")).setSortable(true);
-        grantsGrid.addColumn(new ComponentRenderer<>(grant -> {
-            String status = grant.getStatus() != null ? grant.getStatus() : "ACTIVE";
-            return KmsEnumTag.ofValue(status, null);
-        })).setHeader(I18n.t("kms.grants.view.grid.column.status")).setSortable(true);
+        add(grantsList);
+    }
 
-        grantsGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
-        grantsGrid.addSelectionListener(selection -> {
-            boolean hasSelection = selection.getFirstSelectedItem().isPresent();
-            revokeGrantButton.setEnabled(hasSelection);
-            retireGrantButton.setEnabled(hasSelection);
-            viewDetailsButton.setEnabled(hasSelection);
-        });
-
-        add(grantsGrid);
+    private RowCard buildGrantCard(KmsDtos.ListGrantsResponse.Grant grant) {
+        String status = grant.getStatus() != null ? grant.getStatus() : "ACTIVE";
+        return RowCard.create()
+                .title(grant.getGrantId())
+                .tag(KmsEnumTag.ofValues(grant.getOperations(), "kms.enum"))
+                .tag(KmsEnumTag.ofValue(status, null))
+                .fact(I18n.t("kms.grants.view.grid.column.grantee"), grant.getGranteePrincipal())
+                .fact(I18n.t("kms.grants.view.grid.column.retiring"), grant.getRetiringPrincipal())
+                .action(VaadinIcon.EYE, I18n.t("kms.grants.view.details.button"), () -> showGrantDetails(grant))
+                .action(VaadinIcon.CLOSE_CIRCLE, I18n.t("kms.grants.view.retire.button"), () -> retireGrant(grant))
+                .dangerAction(VaadinIcon.BAN, I18n.t("kms.grants.view.revoke.button"), () -> revokeGrant(grant));
     }
 
     private void buildLoadingIndicator() {
@@ -248,7 +216,7 @@ public class GrantsView extends ManagementVerticalView {
                 selectedKeyId = null;
                 keyCombo.clear();
                 allGrants.clear();
-                grantsGrid.setItems(new ArrayList<>());
+                grantsList.setItems(new ArrayList<>());
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
@@ -285,19 +253,19 @@ public class GrantsView extends ManagementVerticalView {
                 applyFilter();
             } else {
                 allGrants.clear();
-                grantsGrid.setItems(new ArrayList<>());
+                grantsList.setItems(new ArrayList<>());
             }
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError(I18n.t("kms.grants.view.load.grants.error", errorMsg));
             log.error("Failed to load grants for key {}: {}", selectedKeyId, errorMsg);
             allGrants.clear();
-            grantsGrid.setItems(new ArrayList<>());
+            grantsList.setItems(new ArrayList<>());
         } catch (Exception e) {
             showError(I18n.t("kms.grants.view.load.grants.error", e.getMessage()));
             log.error("Failed to load grants for key {}: {}", selectedKeyId, e.getMessage());
             allGrants.clear();
-            grantsGrid.setItems(new ArrayList<>());
+            grantsList.setItems(new ArrayList<>());
         } finally {
             showLoading(false);
         }
@@ -307,13 +275,13 @@ public class GrantsView extends ManagementVerticalView {
         String filter = filterField.getValue();
         clearFilterButton.setEnabled(StringUtils.hasText(filter));
         if (!StringUtils.hasText(filter)) {
-            grantsGrid.setItems(allGrants);
+            grantsList.setItems(allGrants);
         } else {
             List<KmsDtos.ListGrantsResponse.Grant> filtered = allGrants.stream()
                     .filter(g -> g.getGranteePrincipal() != null &&
                             g.getGranteePrincipal().toLowerCase().contains(filter.toLowerCase()))
                     .collect(Collectors.toList());
-            grantsGrid.setItems(filtered);
+            grantsList.setItems(filtered);
         }
     }
 
@@ -330,33 +298,18 @@ public class GrantsView extends ManagementVerticalView {
         dialog.open();
     }
 
-    private void revokeSelectedGrant() {
-        KmsDtos.ListGrantsResponse.Grant selected = grantsGrid.asSingleSelect().getValue();
-        if (selected == null) {
-            showWarning(I18n.t("kms.grants.view.no.grant.selected"));
-            return;
-        }
-        RevokeGrantDialog dialog = new RevokeGrantDialog(selectedKeyId, selected, kmsApiService, this::loadGrants);
+    private void revokeGrant(KmsDtos.ListGrantsResponse.Grant grant) {
+        RevokeGrantDialog dialog = new RevokeGrantDialog(selectedKeyId, grant, kmsApiService, this::loadGrants);
         dialog.open();
     }
 
-    private void retireSelectedGrant() {
-        KmsDtos.ListGrantsResponse.Grant selected = grantsGrid.asSingleSelect().getValue();
-        if (selected == null) {
-            showWarning(I18n.t("kms.grants.view.no.grant.selected"));
-            return;
-        }
-        RetireGrantDialog dialog = new RetireGrantDialog(selectedKeyId, selected, kmsApiService, this::loadGrants);
+    private void retireGrant(KmsDtos.ListGrantsResponse.Grant grant) {
+        RetireGrantDialog dialog = new RetireGrantDialog(selectedKeyId, grant, kmsApiService, this::loadGrants);
         dialog.open();
     }
 
-    private void showGrantDetails() {
-        KmsDtos.ListGrantsResponse.Grant selected = grantsGrid.asSingleSelect().getValue();
-        if (selected == null) {
-            showWarning(I18n.t("kms.grants.view.no.grant.selected"));
-            return;
-        }
-        GrantDetailsViewDialog dialog = new GrantDetailsViewDialog(selected, objectMapper);
+    private void showGrantDetails(KmsDtos.ListGrantsResponse.Grant grant) {
+        GrantDetailsViewDialog dialog = new GrantDetailsViewDialog(grant, objectMapper);
         dialog.open();
     }
 
@@ -366,12 +319,9 @@ public class GrantsView extends ManagementVerticalView {
 
     private void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        grantsGrid.setVisible(!show);
+        grantsList.setVisible(!show);
         refreshButton.setEnabled(!show);
         createGrantButton.setEnabled(!show);
-        revokeGrantButton.setEnabled(!show && grantsGrid.asSingleSelect().getValue() != null);
-        retireGrantButton.setEnabled(!show && grantsGrid.asSingleSelect().getValue() != null);
-        viewDetailsButton.setEnabled(!show && grantsGrid.asSingleSelect().getValue() != null);
         keyCombo.setEnabled(!show);
         filterField.setEnabled(!show);
     }
@@ -412,4 +362,4 @@ public class GrantsView extends ManagementVerticalView {
             return displayName;
         }
     }
-}
+}

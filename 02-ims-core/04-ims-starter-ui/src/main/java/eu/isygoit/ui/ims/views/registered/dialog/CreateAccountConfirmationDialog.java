@@ -2,54 +2,38 @@ package eu.isygoit.ui.ims.views.registered.dialog;
 
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
+import eu.isygoit.ui.common.dialog.PinConfirmActionDialog;
 import eu.isygoit.ui.ims.views.registered.RegisteredManagementView;
 
 /**
  * Confirmation dialog for creating an account from a NEW registration.
- * Extends PinBaseActionDialog to require PIN confirmation before proceeding.
+ * PIN confirmation is required before the confirmation callback is executed.
  */
-public class CreateAccountConfirmationDialog extends ImsPinActionDialog {
-
-    private final RegisteredManagementView parentView;
-    private final Runnable onConfirmAction;
+public class CreateAccountConfirmationDialog extends PinConfirmActionDialog {
 
     public CreateAccountConfirmationDialog(RegisteredManagementView parentView,
                                            String userEmail,
                                            Runnable onConfirmAction,
                                            Runnable onSuccess) {
-        super(I18n.t("ims.registered.dialog.confirm.title"),
-                I18n.t("ims.registered.dialog.confirm.message", userEmail),
-                onSuccess);
-        this.parentView = parentView;
-        this.onConfirmAction = onConfirmAction;
-
-        setOkButtonText(I18n.t("ims.registered.dialog.confirm.proceed"));
-        addThemeVariantsOkButton(ButtonVariant.LUMO_PRIMARY);
-        setWidth("480px");
+        super(new Texts(
+                        I18n.t("ims.registered.dialog.confirm.title"),
+                        I18n.t("ims.registered.dialog.confirm.message", userEmail),
+                        I18n.t("ims.registered.dialog.confirm.proceed"),
+                        I18n.t("common.dialog.pin.invalid"),
+                        I18n.t("ims.registered.dialog.confirm.success"),
+                        detail -> I18n.t("ims.registered.dialog.confirm.error", detail)),
+                () -> {
+                    // Execute the confirmation action
+                    if (onConfirmAction != null) {
+                        onConfirmAction.run();
+                    }
+                    return null;
+                },
+                onSuccess,
+                parentView::showLoading,
+                "ims-dialog",
+                true,
+                ButtonVariant.LUMO_PRIMARY);
         addClassName("wams-confirmation-dialog");
-    }
-
-    @Override
-    protected boolean onOk() {
-        if (!validatePin()) {
-            append(I18n.t("common.dialog.pin.invalid"));
-            return false;
-        }
-
-        parentView.showLoading(true);
-        try {
-            // Execute the confirmation action
-            if (onConfirmAction != null) {
-                onConfirmAction.run();
-            }
-            append(I18n.t("ims.registered.dialog.confirm.success"));
-            return true;
-        } catch (Exception e) {
-            append(I18n.t("ims.registered.dialog.confirm.error", e.getMessage()));
-            return false;
-        } finally {
-            parentView.showLoading(false);
-        }
     }
 }

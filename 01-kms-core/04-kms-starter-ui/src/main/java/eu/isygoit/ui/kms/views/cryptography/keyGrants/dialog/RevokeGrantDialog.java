@@ -4,45 +4,24 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
-import feign.FeignException;
+import eu.isygoit.ui.common.dialog.PinConfirmActionDialog;
 
-public class RevokeGrantDialog extends KmsPinActionDialog {
-
-    private final String keyId;
-    private final KmsApiService kmsApiService;
-    private final KmsDtos.ListGrantsResponse.Grant grant;
+public class RevokeGrantDialog extends PinConfirmActionDialog {
 
     public RevokeGrantDialog(String keyId, KmsDtos.ListGrantsResponse.Grant grant,
                              KmsApiService kmsApiService, Runnable onSuccess) {
-        super(I18n.t("kms.grant.revoke.title"),
-                I18n.t("kms.grant.revoke.message"),
-                onSuccess);
-        this.keyId = keyId;
-        this.grant = grant;
-        this.kmsApiService = kmsApiService;
-        setOkButtonText(I18n.t("kms.grant.revoke.button"));
-        addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
-        setWidth("500px");
-    }
-
-    @Override
-    protected boolean onOk() {
-        if (!validatePin()) {
-            append(I18n.t("kms.grant.revoke.invalid.code"));
-            return false;
-        }
-        try {
-            kmsApiService.revokeGrant(keyId, grant.getGrantId());
-
-            append(I18n.t("kms.grant.revoke.success"));
-            return true;
-        } catch (FeignException ex) {
-            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
-        } catch (Exception e) {
-            append(I18n.t("kms.grant.revoke.failed", e.getMessage()));
-        }
-
-        return false;
+        super(new Texts(
+                        I18n.t("kms.grant.revoke.title"),
+                        I18n.t("kms.grant.revoke.message"),
+                        I18n.t("kms.grant.revoke.button"),
+                        I18n.t("kms.grant.revoke.invalid.code"),
+                        I18n.t("kms.grant.revoke.success"),
+                        detail -> I18n.t("kms.grant.revoke.failed", detail)),
+                () -> kmsApiService.revokeGrant(keyId, grant.getGrantId()),
+                onSuccess,
+                null,
+                "kms-dialog",
+                true,
+                ButtonVariant.LUMO_ERROR);
     }
 }

@@ -136,18 +136,6 @@
     font-size: var(--mms-font-size-md);
 }
 
-.mms-dialog-tabs,
-.wams-dialog-tabs {
-    width: 100%;
-    --vaadin-tabs-background-color: transparent;
-    --vaadin-tabs-border-color: var(--mms-color-border);
-}
-
-.mms-dialog-tabs::part(content),
-.wams-dialog-tabs::part(content) {
-    padding-block-start: var(--mms-space-4);
-}
-
 .mms-tone--primary {
     --mms-tone-color: var(--mms-color-primary);
     --mms-tone-soft: var(--mms-color-primary-soft);

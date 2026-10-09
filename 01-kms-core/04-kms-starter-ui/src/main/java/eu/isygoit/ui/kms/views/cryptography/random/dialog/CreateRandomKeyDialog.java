@@ -6,6 +6,7 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
@@ -25,7 +26,7 @@ public class CreateRandomKeyDialog extends KmsActionDialog {
         this.keyService = keyService;
         this.onSuccess = onSuccess;
         setOkButtonText(I18n.t("kms.random.key.dialog.create.button"));
-        setWidth("550px");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
         buildForm();
         addContent(createFormLayout());
     }
@@ -55,9 +56,8 @@ public class CreateRandomKeyDialog extends KmsActionDialog {
     }
 
     private FormLayout createFormLayout() {
-        FormLayout form = new FormLayout();
+        FormLayout form = DialogLayout.responsiveForm();
         form.add(nameField, lengthField, charSetCombo);
-        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         return form;
     }
 

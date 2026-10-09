@@ -8,7 +8,7 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
 
-@CssImport("./styles/dms.css")
+@CssImport("./styles/dms.scss")
 public class DmsMainLayout extends BaseMainLayout {
 
     @Override

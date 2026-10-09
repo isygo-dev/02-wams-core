@@ -94,18 +94,6 @@
     --lumo-box-shadow-m: var(--dms-shadow-md);
 }
 
-.dms-dialog-tabs,
-.wams-dialog-tabs {
-    width: 100%;
-    --vaadin-tabs-background-color: transparent;
-    --vaadin-tabs-border-color: var(--dms-color-border);
-}
-
-.dms-dialog-tabs::part(content),
-.wams-dialog-tabs::part(content) {
-    padding-block-start: var(--dms-space-4);
-}
-
 /* ── Dashboard (DmsMainView) ──────────────────────────────────────────────── */
 
 .dms-dashboard .wams-dashboard-header {

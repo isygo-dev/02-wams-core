@@ -2,21 +2,20 @@ package eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
+import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.UpdateAliasRequest;
 import eu.isygoit.dto.KmsDtos.UpdateAliasResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.AliasesView;
 import feign.FeignException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
 /**
  * Dialog for reassigning an alias to a different KMS key.
  */
-@Slf4j
 public class UpdateAliasDialog extends KmsActionDialog {
 
     private final AliasesView parentView;
@@ -24,6 +23,7 @@ public class UpdateAliasDialog extends KmsActionDialog {
 
     private final String aliasName;
     private final String currentTargetKeyId;
+    private TextField aliasNameField;
     private ComboBox<String> targetKeyCombo;
 
     public UpdateAliasDialog(AliasesView parentView,
@@ -38,7 +38,7 @@ public class UpdateAliasDialog extends KmsActionDialog {
         this.currentTargetKeyId = currentTargetKeyId;
 
         setOkButtonText(I18n.t("kms.alias.dialog.update.button"));
-        setWidth("500px");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
 
         buildForm();
         add(createFormLayout());
@@ -78,30 +78,20 @@ public class UpdateAliasDialog extends KmsActionDialog {
     }
 
     private void buildForm() {
-        targetKeyCombo = new ComboBox<>(I18n.t("kms.alias.dialog.field.target.key"));
-        targetKeyCombo.setRequiredIndicatorVisible(true);
-        targetKeyCombo.setPlaceholder(I18n.t("kms.alias.dialog.field.target.key.placeholder"));
-        targetKeyCombo.setItems(parentView.fetchKeyIds());
-        targetKeyCombo.setItemLabelGenerator(keyId -> {
-            try {
-                ResponseEntity<DescribeKeyResponse> desc = kmsApiService.describeKey(keyId);
-                DescribeKeyResponse descBody = desc.getBody();
-                if (descBody != null && descBody.getKeyMetadata() != null) {
-                    String alias = descBody.getKeyMetadata().getKeyAlias();
-                    if (alias != null && !alias.isEmpty()) return alias + " (" + keyId + ")";
-                }
-            } catch (Exception ignored) {
-                log.error("Failed to fetch key metadata for keyId: {}", keyId, ignored);
-            }
-            return keyId;
-        });
+        // Alias name identifies the alias being reassigned: shown read-only (UpdateAliasRequest.aliasName)
+        aliasNameField = new TextField(I18n.t("kms.alias.dialog.field.alias.name"));
+        aliasNameField.setValue(aliasName != null ? aliasName : "");
+        aliasNameField.setReadOnly(true);
+        aliasNameField.setWidthFull();
+
+        targetKeyCombo = AliasDialogSupport.createTargetKeyCombo(kmsApiService, AliasDialogSupport.fetchKeyIds(kmsApiService));
         targetKeyCombo.setValue(currentTargetKeyId);
     }
 
     private FormLayout createFormLayout() {
-        FormLayout form = new FormLayout();
-        form.add(targetKeyCombo);
-        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
+        FormLayout form = DialogLayout.responsiveForm();
+        form.add(aliasNameField, targetKeyCombo);
+        form.setColspan(targetKeyCombo, 2);
         return form;
     }
 }

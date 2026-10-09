@@ -29,9 +29,13 @@ public class LeafletMap extends Div {
     private static final String OSM_ATTRIBUTION =
             "© <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" "
                     + "rel=\"noopener noreferrer\">OpenStreetMap contributors</a>";
-    private static final String MARKER_ICON_URL = "/images/leaflet/marker-icon.png";
-    private static final String MARKER_ICON_RETINA_URL = "/images/leaflet/marker-icon-2x.png";
-    private static final String MARKER_SHADOW_URL = "/images/leaflet/marker-shadow.png";
+    private static final String MARKER_IMAGES_PATH = "/images/leaflet/";
+    // The marker images are embedded in the page (data URI) instead of being fetched by the
+    // browser: an HTTP fetch can be refused by the host application's security rules, a servlet
+    // context path or a static-resource mapping, and then no marker is drawn.
+    private static final String MARKER_ICON_URL = imageUrl("marker-icon.png");
+    private static final String MARKER_ICON_RETINA_URL = imageUrl("marker-icon-2x.png");
+    private static final String MARKER_SHADOW_URL = imageUrl("marker-shadow.png");
     private static final int MAX_ZOOM = 19;
 
     private final LComponentManagementRegistry registry;
@@ -115,6 +119,23 @@ public class LeafletMap extends Div {
                 .withShadowSize(new LPoint(registry, 41, 41))
                 .withShadowAnchor(new LPoint(registry, 12, 41));
         return new LIcon(registry, options);
+    }
+
+    /**
+     * Returns the marker image as a {@code data:} URI read from the classpath, or the plain
+     * resource URL when the file cannot be read.
+     */
+    private static String imageUrl(String fileName) {
+        String resource = "/META-INF/resources" + MARKER_IMAGES_PATH + fileName;
+        try (java.io.InputStream in = LeafletMap.class.getResourceAsStream(resource)) {
+            if (in != null) {
+                return "data:image/png;base64,"
+                        + java.util.Base64.getEncoder().encodeToString(in.readAllBytes());
+            }
+        } catch (java.io.IOException ignored) {
+            // fall back to the URL below
+        }
+        return MARKER_IMAGES_PATH + fileName;
     }
 
     private void validateCoordinates(double latitude, double longitude) {

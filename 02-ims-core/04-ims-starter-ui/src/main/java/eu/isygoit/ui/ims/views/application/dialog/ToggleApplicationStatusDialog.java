@@ -1,75 +1,36 @@
 package eu.isygoit.ui.ims.views.application.dialog;
 
-import eu.isygoit.dto.data.ApplicationDto;
+import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationService;
+import eu.isygoit.ui.common.dialog.PinConfirmActionDialog;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
-import eu.isygoit.ui.ims.views.common.ImsPinActionDialog;
-import feign.FeignException;
-import org.springframework.http.ResponseEntity;
 
-public class ToggleApplicationStatusDialog extends ImsPinActionDialog {
-
-    private final ApplicationManagementView parentView;
-    private final ApplicationService applicationService;
-    private final Long applicationId;
-    private final IEnumEnabledBinaryStatus.Types currentStatus;
+public class ToggleApplicationStatusDialog extends PinConfirmActionDialog {
 
     public ToggleApplicationStatusDialog(ApplicationManagementView parentView,
                                          ApplicationService applicationService,
                                          Long applicationId,
                                          IEnumEnabledBinaryStatus.Types currentStatus,
                                          Runnable onSuccess) {
-        super(
-                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.app.dialog.toggle.title.disable") : I18n.t("ims.app.dialog.toggle.title.enable"),
-                currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
-                        ? I18n.t("ims.app.dialog.toggle.message.disable")
-                        : I18n.t("ims.app.dialog.toggle.message.enable"),
+        super(new Texts(
+                        currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.app.dialog.toggle.title.disable") : I18n.t("ims.app.dialog.toggle.title.enable"),
+                        currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.app.dialog.toggle.message.disable") : I18n.t("ims.app.dialog.toggle.message.enable"),
+                        currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.app.dialog.toggle.button.disable") : I18n.t("ims.app.dialog.toggle.button.enable"),
+                        I18n.t("common.dialog.pin.invalid"),
+                        I18n.t("ims.app.dialog.toggle.success." + (currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "disable" : "enable")),
+                        detail -> detail != null && detail.startsWith("HTTP ")
+                                ? I18n.t("ims.app.dialog.toggle.failed", detail.substring(5))
+                                : I18n.t("ims.app.dialog.toggle.error", detail)),
+                () -> applicationService.updateStatus(applicationId,
+                        currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
+                                ? IEnumEnabledBinaryStatus.Types.DISABLED
+                                : IEnumEnabledBinaryStatus.Types.ENABLED),
                 onSuccess,
-                false // requirePin = false (simple confirmation)
-        );
-        this.parentView = parentView;
-        this.applicationService = applicationService;
-        this.applicationId = applicationId;
-        this.currentStatus = currentStatus;
-
-        setOkButtonText(currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? I18n.t("ims.app.dialog.toggle.button.disable") : I18n.t("ims.app.dialog.toggle.button.enable"));
-        setWidth("450px");
-    }
-
-    @Override
-    protected boolean onOk() {
-        parentView.showLoading(true);
-        try {
-            IEnumEnabledBinaryStatus.Types newStatus = currentStatus == IEnumEnabledBinaryStatus.Types.ENABLED
-                    ? IEnumEnabledBinaryStatus.Types.DISABLED
-                    : IEnumEnabledBinaryStatus.Types.ENABLED;
-
-            ResponseEntity<ApplicationDto> response = applicationService.updateStatus(applicationId, newStatus);
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("ims.app.dialog.toggle.failed", response.getStatusCodeValue()));
-                return false;
-            }
-
-            append(I18n.t("ims.app.dialog.toggle.success." + (newStatus == IEnumEnabledBinaryStatus.Types.ENABLED ? "enable" : "disable")));
-            return true;
-        } catch (FeignException ex) {
-            append(extractErrorMessage(ex));
-        } catch (Exception e) {
-            append(I18n.t("ims.app.dialog.toggle.error", e.getMessage()));
-        } finally {
-            parentView.showLoading(false);
-        }
-        return false;
-    }
-
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
-                return ex.contentUTF8();
-        } catch (Exception ignored) {
-        }
-        return ex.getMessage();
+                parentView::showLoading,
+                "ims-dialog",
+                false, // simple confirmation, no PIN
+                ButtonVariant.LUMO_PRIMARY);
     }
 }

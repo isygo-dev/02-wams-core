@@ -1,11 +1,9 @@
 package eu.isygoit.ui.kms.views.cryptography.keyPolicy.dialog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -13,6 +11,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.KeyPolicy;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.RowCard;
+import eu.isygoit.ui.common.component.RowCardList;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ public class PolicyBuilderDialog extends KmsActionDialog {
     private final List<KeyPolicy.Statement> statements = new ArrayList<>();
     private final TextField versionField = new TextField(I18n.t("kms.policy.builder.field.version"));
     private final TextField idField = new TextField(I18n.t("kms.policy.builder.field.id"));
-    private final Grid<KeyPolicy.Statement> statementGrid = new Grid<>();
+    private final RowCardList<KeyPolicy.Statement> statementList = new RowCardList<>();
     private final KeyPolicy policy;
 
     public PolicyBuilderDialog(ObjectMapper objectMapper, KeyPolicy existingPolicy, Consumer<KeyPolicy> onSave) {
@@ -36,9 +38,7 @@ public class PolicyBuilderDialog extends KmsActionDialog {
         this.policy = (existingPolicy != null) ? existingPolicy : createDefaultPolicy();
 
         setOkButtonText(I18n.t("kms.policy.builder.apply"));
-        setWidth("1000px");
-        setMaxWidth("95%");
-        setResizable(true);
+        DialogLayout.size(this, DialogLayout.WIDTH_L);
 
         buildContent();
     }
@@ -51,10 +51,7 @@ public class PolicyBuilderDialog extends KmsActionDialog {
     }
 
     private void buildContent() {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setSpacing(true);
-        mainLayout.setPadding(true);
-        mainLayout.setWidthFull();
+        VerticalLayout mainLayout = DialogLayout.stack();
 
         String version = policy.getVersion();
         versionField.setValue(version != null ? version : "2012-10-17");
@@ -66,73 +63,55 @@ public class PolicyBuilderDialog extends KmsActionDialog {
         idField.setWidthFull();
         idField.setHelperText(I18n.t("kms.policy.builder.field.id.helper"));
 
-        mainLayout.add(versionField, idField);
-        mainLayout.add(new H3(I18n.t("kms.policy.builder.statements")));
+        FormLayout policyForm = DialogLayout.responsiveForm();
+        policyForm.add(versionField, idField);
+        mainLayout.add(policyForm);
+        VerticalLayout statementsSection = DialogLayout.section(
+                I18n.t("kms.policy.builder.statements"), VaadinIcon.LIST);
+        mainLayout.add(statementsSection);
 
         HorizontalLayout toolbar = new HorizontalLayout();
         Button addStatementBtn = new Button(I18n.t("kms.policy.builder.add.statement"), new Icon(VaadinIcon.PLUS));
         addStatementBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
         toolbar.add(addStatementBtn);
-        mainLayout.add(toolbar);
+        statementsSection.add(toolbar);
 
-        statementGrid.setItems(statements);
-        statementGrid.addColumn(KeyPolicy.Statement::getSid)
-                .setHeader(I18n.t("kms.policy.builder.grid.column.sid"))
-                .setFlexGrow(1);
-        statementGrid.addColumn(KeyPolicy.Statement::getEffect)
-                .setHeader(I18n.t("kms.policy.builder.grid.column.effect"))
-                .setWidth("100px");
-        statementGrid.addComponentColumn(this::createStatementActions)
-                .setHeader(I18n.t("kms.policy.builder.grid.column.actions"))
-                .setWidth("120px");
-        statementGrid.setHeight("350px");
-        mainLayout.add(statementGrid);
+        statementList.emptyText(I18n.t("kms.policy.builder.empty.error"));
+        statementList.cardFactory(this::buildStatementCard);
+        statementList.setItems(statements);
+        statementsSection.add(statementList);
 
         if (policy.getStatements() != null) {
             statements.addAll(policy.getStatements());
-            refreshStatementGrid();
+            refreshStatementList();
         }
 
         addStatementBtn.addClickListener(e -> editStatement(null, newStatement -> {
             statements.add(newStatement);
-            refreshStatementGrid();
+            refreshStatementList();
         }));
 
         add(mainLayout);
     }
 
-    private Component createStatementActions(KeyPolicy.Statement stmt) {
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.setSpacing(true);
-
-        // Same conceptual order/styling as card action bars: edit-style action first,
-        // destructive action last and danger-styled (wams-action-btn / wams-action-btn--danger).
-        Button editBtn = new Button(new Icon(VaadinIcon.EDIT));
-        editBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_SMALL);
-        editBtn.addClassName("wams-action-btn");
-        editBtn.setTooltipText(I18n.t("kms.policy.builder.edit.tooltip"));
-        editBtn.addClickListener(e -> editStatement(stmt, updated -> {
-            int idx = statements.indexOf(stmt);
-            if (idx >= 0) statements.set(idx, updated);
-            refreshStatementGrid();
-        }));
-
-        Button deleteBtn = new Button(new Icon(VaadinIcon.TRASH));
-        deleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
-        deleteBtn.addClassName("wams-action-btn");
-        deleteBtn.addClassName("wams-action-btn--danger");
-        deleteBtn.setTooltipText(I18n.t("kms.policy.builder.delete.tooltip"));
-        deleteBtn.addClickListener(e -> {
-            statements.remove(stmt);
-            refreshStatementGrid();
-        });
-
-        layout.add(editBtn, deleteBtn);
-        return layout;
+    private RowCard buildStatementCard(KeyPolicy.Statement stmt) {
+        return RowCard.create()
+                .title(stmt.getSid())
+                .tag(KmsEnumTag.ofValue(stmt.getEffect(), "kms.enum"))
+                .action(VaadinIcon.EDIT, I18n.t("kms.policy.builder.edit.tooltip"),
+                        () -> editStatement(stmt, updated -> {
+                            int idx = statements.indexOf(stmt);
+                            if (idx >= 0) statements.set(idx, updated);
+                            refreshStatementList();
+                        }))
+                .dangerAction(VaadinIcon.TRASH, I18n.t("kms.policy.builder.delete.tooltip"), () -> {
+                    statements.remove(stmt);
+                    refreshStatementList();
+                });
     }
 
-    private void refreshStatementGrid() {
-        statementGrid.getDataProvider().refreshAll();
+    private void refreshStatementList() {
+        statementList.setItems(statements);
     }
 
     private void editStatement(KeyPolicy.Statement existing, Consumer<KeyPolicy.Statement> onDone) {
@@ -157,4 +136,4 @@ public class PolicyBuilderDialog extends KmsActionDialog {
         }
         return true;
     }
-}
+}

@@ -12,7 +12,7 @@ import eu.isygoit.ui.common.layout.BaseMainLayout;
 
 import java.util.List;
 
-@CssImport("./styles/kms.css")
+@CssImport("./styles/kms.scss")
 public class KmsMainLayout extends BaseMainLayout {
 
     @Override

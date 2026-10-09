@@ -9,18 +9,18 @@ import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import eu.isygoit.dto.data.SenderConfigDto;
-import eu.isygoit.exception.TransferNotSupportedException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.common.dialog.DialogLayout;
+import eu.isygoit.ui.mms.views.common.MmsDialogSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +60,7 @@ public abstract class BaseMsgTemplateDialog extends BaseActionDialog {
         this.uploadedFileName = null;
         this.uploadedFileData = null;
 
-        setWidth("700px");
-        setMaxWidth("95vw");
+        DialogLayout.size(this, DialogLayout.WIDTH_M);
         setDraggable(true);
         setResizable(true);
 
@@ -210,69 +209,8 @@ public abstract class BaseMsgTemplateDialog extends BaseActionDialog {
                 // Read the file data
                 byte[] data = inputStream.readAllBytes();
                 uploadedFileData = data;
-
-                final String fileName = uploadedFileName;
-                final byte[] fileData = data;
-
-                return new MultipartFile() {
-                    @Override
-                    public String getName() {
-                        return fileName;
-                    }
-
-                    @Override
-                    public String getOriginalFilename() {
-                        return fileName;
-                    }
-
-                    @Override
-                    public String getContentType() {
-                        // Try to determine content type from file extension
-                        String contentType = "application/octet-stream";
-                        if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
-                            contentType = "text/html";
-                        } else if (fileName.endsWith(".txt")) {
-                            contentType = "text/plain";
-                        } else if (fileName.endsWith(".xml")) {
-                            contentType = "application/xml";
-                        } else if (fileName.endsWith(".json")) {
-                            contentType = "application/json";
-                        } else if (fileName.endsWith(".ftl")) {
-                            contentType = "text/plain";
-                        } else if (fileName.endsWith(".vm")) {
-                            contentType = "text/plain";
-                        } else if (fileName.endsWith(".properties")) {
-                            contentType = "text/plain";
-                        }
-                        return contentType;
-                    }
-
-                    @Override
-                    public boolean isEmpty() {
-                        return fileData == null || fileData.length == 0;
-                    }
-
-                    @Override
-                    public long getSize() {
-                        return fileData != null ? fileData.length : 0;
-                    }
-
-                    @Override
-                    public byte[] getBytes() {
-                        return fileData;
-                    }
-
-                    @Override
-                    public InputStream getInputStream() {
-                        return new ByteArrayInputStream(fileData);
-                    }
-
-                    @Override
-                    public void transferTo(java.io.File dest) throws IllegalStateException {
-                        // Not implemented - use getBytes() or getInputStream() instead
-                        throw new TransferNotSupportedException("transferTo not supported");
-                    }
-                };
+                return MmsDialogSupport.multipartOf(uploadedFileName, uploadedFileName, data,
+                        "application/octet-stream");
             }
         } catch (Exception e) {
             log.error("Failed to get uploaded file", e);
@@ -282,15 +220,6 @@ public abstract class BaseMsgTemplateDialog extends BaseActionDialog {
 
     protected boolean hasFileUploaded() {
         return uploadedFileName != null && !uploadedFileName.isEmpty();
-    }
-
-    protected boolean isValidEmail(String email) {
-        if (email == null || email.isBlank()) {
-            return true; // Empty is allowed (optional field)
-        }
-        // Simple email validation
-        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-        return email.matches(emailRegex);
     }
 
     // Inner class for sender config options

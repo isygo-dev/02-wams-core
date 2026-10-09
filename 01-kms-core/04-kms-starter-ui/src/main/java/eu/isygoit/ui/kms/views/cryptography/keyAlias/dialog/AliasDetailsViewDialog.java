@@ -11,23 +11,22 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
 
 /**
  * Read-only dialog showing every field of a key alias, for use when the
  * compact {@code AliasCard} isn't enough (i.e. "Details" action).
  */
-@CssImport("./styles/kms.css")
+@CssImport("./styles/kms.scss")
 public class AliasDetailsViewDialog extends KmsDetailsDialog {
 
     public AliasDetailsViewDialog(ListAliasesResponse.AliasEntry entry) {
         super(I18n.t("kms.alias.details.title"));
 
-        setWidth("600px");
-        setMaxWidth("95%");
+        applyWidth(DialogLayout.WIDTH_M);
         setModal(true);
         setDraggable(true);
-        setResizable(true);
         addClassName("alias-details-dialog");
 
         buildContent(entry);

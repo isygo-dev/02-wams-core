@@ -23,6 +23,7 @@ public class JwtAuthFilter extends JwtKmsClientAuthFilter {
     @Override
     public List<String> skipUriPatterns() {
         return List.of("/",
+                "/images/leaflet/**",
                 "/login/**",
                 "/VAADIN/**");
     }

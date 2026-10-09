@@ -1,0 +1,165 @@
+// Shared building blocks for form and details dialogs of every module
+// (see eu.isygoit.ui.common.dialog.DialogLayout). One look for all dialogs:
+// modules must not restyle these classes.
+
+$dlg-space-1: 0.25rem;
+$dlg-space-1_5: 0.375rem;
+$dlg-space-2: 0.5rem;
+$dlg-space-2_5: 0.625rem;
+$dlg-space-3: 0.75rem;
+$dlg-space-3_5: 0.875rem;
+$dlg-space-4: 1rem;
+$dlg-space-4_5: 1.125rem;
+$dlg-space-5: 1.25rem;
+$dlg-radius-control: 0.625rem;
+$dlg-radius-panel: 0.75rem;
+$dlg-radius-hero: 0.875rem;
+$dlg-font-xs: 0.75rem;
+$dlg-font-sm: 0.875rem;
+$dlg-font-compact: 0.8125rem;
+$dlg-font-body: 0.9375rem;
+$dlg-font-display: 1.375rem;
+$dlg-shadow-avatar: 0 4px 14px rgba(0, 0, 0, 0.08);
+
+.wams-dlg-stack {
+  gap: $dlg-space-4_5;
+}
+
+.wams-dlg-list {
+  gap: $dlg-space-3;
+}
+
+.wams-dlg-hero {
+  padding: $dlg-space-4_5;
+  border-radius: $dlg-radius-hero;
+  background: linear-gradient(135deg, var(--lumo-primary-color-5pct), var(--lumo-contrast-5pct));
+  border: 1px solid var(--lumo-contrast-10pct);
+  gap: $dlg-space-5;
+}
+
+.wams-dlg-hero__info {
+  gap: $dlg-space-1_5;
+}
+
+.wams-dlg-hero__title {
+  font-weight: 600;
+  font-size: $dlg-font-body;
+}
+
+.wams-dlg-hero__name {
+  font-size: $dlg-font-display;
+  font-weight: 600;
+}
+
+.wams-dlg-hero__chips {
+  gap: $dlg-space-2;
+}
+
+.wams-dlg-hero__subtitle {
+  font-size: $dlg-font-compact;
+  color: var(--lumo-secondary-text-color);
+}
+
+.wams-dlg-avatar {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--lumo-base-color);
+  border: 3px solid var(--lumo-primary-color-50pct);
+  box-shadow: $dlg-shadow-avatar;
+}
+
+.wams-dlg-avatar__icon {
+  color: var(--lumo-contrast-40pct);
+  width: 2.6rem;
+  height: 2.6rem;
+}
+
+.wams-dlg-avatar__img {
+  object-fit: cover;
+}
+
+.wams-dlg-help {
+  font-size: $dlg-font-xs;
+  color: var(--lumo-secondary-text-color);
+}
+
+.wams-dlg-section {
+  padding: $dlg-space-4;
+  border-radius: $dlg-radius-panel;
+  background: var(--lumo-base-color);
+  border: 1px solid var(--lumo-contrast-10pct);
+  gap: $dlg-space-2_5;
+}
+
+.wams-dlg-section__title {
+  font-weight: 600;
+  font-size: $dlg-font-sm;
+  display: inline-flex;
+  align-items: center;
+}
+
+.wams-dlg-section__icon {
+  color: var(--lumo-primary-color);
+  width: 1rem;
+  height: 1rem;
+}
+
+.wams-dlg-textarea {
+  min-height: 5rem;
+}
+
+.wams-dlg-empty {
+  color: var(--lumo-secondary-text-color);
+  font-size: $dlg-font-compact;
+}
+
+.wams-dlg-empty--boxed {
+  padding: $dlg-space-3_5;
+  border-radius: $dlg-radius-control;
+  border: 1px dashed var(--lumo-contrast-20pct);
+  text-align: center;
+}
+
+.wams-dlg-card {
+  padding: $dlg-space-3_5;
+  border-radius: $dlg-radius-panel;
+  background: var(--lumo-contrast-5pct);
+  border: 1px solid var(--lumo-contrast-10pct);
+  gap: $dlg-space-2;
+}
+
+.wams-dlg-row {
+  gap: $dlg-space-2;
+  flex-wrap: wrap;
+}
+
+.wams-dlg-note {
+  font-size: $dlg-font-xs;
+  color: var(--lumo-secondary-text-color);
+}
+
+.wams-dlg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $dlg-space-1;
+}
+
+// Mobile (~360px): stack the hero, tighten the sections.
+@media (max-width: 480px) {
+  .wams-dlg-hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: $dlg-space-4;
+  }
+
+  .wams-dlg-section {
+    padding: $dlg-space-2_5;
+  }
+}

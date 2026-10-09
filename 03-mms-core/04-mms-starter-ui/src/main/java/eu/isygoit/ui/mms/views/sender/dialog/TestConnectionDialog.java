@@ -12,6 +12,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.dialog.NoActionDialog;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,8 +35,7 @@ public class TestConnectionDialog extends NoActionDialog {
         this.config = config;
         this.onComplete = onComplete;
 
-        setWidth("500px");
-        setMaxWidth("95vw");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
         setModal(true);
         setDraggable(true);
         // Prevent dismissing the dialog while the test is still running –
@@ -93,7 +93,7 @@ public class TestConnectionDialog extends NoActionDialog {
 
         Icon spinner = VaadinIcon.SPINNER.create();
         spinner.addClassName("wams-dialog-spinner");
-        spinner.setSize("32px");
+        spinner.setSize("2rem");
         statusContent.add(spinner);
         statusContent.add(new Span(I18n.t("mms.sender.dialog.test.connecting")));
 
@@ -134,7 +134,7 @@ public class TestConnectionDialog extends NoActionDialog {
 
             Icon successIcon = VaadinIcon.CHECK_CIRCLE.create();
             successIcon.addClassName("mms-success-icon");
-            successIcon.setSize("48px");
+            successIcon.setSize("3rem");
 
             resultContent.add(successIcon);
             resultContent.add(new Span(message));
@@ -151,7 +151,7 @@ public class TestConnectionDialog extends NoActionDialog {
 
             Icon errorIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
             errorIcon.addClassName("mms-danger-icon");
-            errorIcon.setSize("48px");
+            errorIcon.setSize("3rem");
 
             resultContent.add(errorIcon);
             resultContent.add(new Span(message));

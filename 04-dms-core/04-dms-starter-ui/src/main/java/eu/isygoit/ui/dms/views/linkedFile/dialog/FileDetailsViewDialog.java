@@ -3,115 +3,80 @@ package eu.isygoit.ui.dms.views.linkedFile.dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.dms.views.common.DmsDetailsDialog;
+import eu.isygoit.ui.dms.views.common.DmsDialogSupport;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
  * Read-only file details, built entirely from the {@link LinkedFileResponseDto}
- * already held by the calling {@code LinkedFileCard}.
+ * already held by the calling {@code LinkedFileCard}: one details tab (identity,
+ * tags and categories) plus the audit tab.
  */
 public class FileDetailsViewDialog extends DmsDetailsDialog {
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss");
-
     public FileDetailsViewDialog(LinkedFileResponseDto file) {
         super(I18n.t("dms.linkedfile.details.title"));
-
-        setWidth("700px");
-        setMaxWidth("95%");
-        setModal(true);
-        setDraggable(true);
-        setResizable(true);
-        addClassName("file-details-dialog");
-
+        applyWidth(DialogLayout.WIDTH_M);
         buildContent(file);
     }
 
     private void buildContent(LinkedFileResponseDto file) {
-        // Identity section
-        Div identityGrid = createDetailGrid();
-        addFieldToGrid(identityGrid, VaadinIcon.FILE, I18n.t("dms.linkedfile.details.field.code"), file.getCode(), true);
-        addFieldToGrid(identityGrid, VaadinIcon.FILE_O, I18n.t("dms.linkedfile.details.field.original.name"), file.getOriginalFileName());
-        addFieldToGrid(identityGrid, VaadinIcon.FOLDER_O, I18n.t("dms.linkedfile.details.field.path"), file.getPath(), true);
-        addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("dms.linkedfile.details.field.tenant"), file.getTenant());
-        addTab(I18n.t("dms.linkedfile.details.section.identity"),
-                createSection(I18n.t("dms.linkedfile.details.section.identity"), identityGrid));
+        Div grid = createDetailGrid();
+        addFieldToGrid(grid, VaadinIcon.FILE, I18n.t("dms.linkedfile.details.field.code"), dash(file.getCode()), true);
+        addFieldToGrid(grid, VaadinIcon.FILE_O, I18n.t("dms.linkedfile.details.field.original.name"),
+                dash(file.getOriginalFileName()));
+        addFieldToGrid(grid, VaadinIcon.FOLDER_O, I18n.t("dms.linkedfile.details.field.path"),
+                dash(file.getPath()), true);
+        addFieldToGrid(grid, VaadinIcon.BUILDING, I18n.t("dms.linkedfile.details.field.tenant"),
+                dash(file.getTenant()));
 
-        // Tags section
+        VerticalLayout content = new VerticalLayout(grid);
+        content.setPadding(false);
+        content.setSpacing(true);
         if (file.getTags() != null && !file.getTags().isEmpty()) {
-            addTab(I18n.t("dms.linkedfile.details.section.tags"),
-                    createSection(I18n.t("dms.linkedfile.details.section.tags"),
-                            buildChipRow(VaadinIcon.TAGS, I18n.t("dms.linkedfile.details.field.tags"),
-                                    file.getTags(), "wams-tag-chip")));
+            content.add(buildChipRow(VaadinIcon.TAGS, I18n.t("dms.linkedfile.details.field.tags"),
+                    file.getTags(), "wams-tag-chip"));
         }
-
-        // Categories section
         if (file.getCategoryNames() != null && !file.getCategoryNames().isEmpty()) {
-            addTab(I18n.t("dms.linkedfile.details.section.categories"),
-                    createSection(I18n.t("dms.linkedfile.details.section.categories"),
-                            buildChipRow(VaadinIcon.LIST, I18n.t("dms.linkedfile.details.field.categories"),
-                                    file.getCategoryNames(), "wams-category-chip")));
+            content.add(buildChipRow(VaadinIcon.LIST, I18n.t("dms.linkedfile.details.field.categories"),
+                    file.getCategoryNames(), "wams-category-chip"));
         }
+        addTab(I18n.t("dms.linkedfile.details.section.identity"),
+                createSection(I18n.t("dms.linkedfile.details.section.identity"), content));
 
-        // Audit section
-        Div auditGrid = createDetailGrid();
-        if (file.getCreatedBy() != null) {
-            addFieldToGrid(auditGrid, VaadinIcon.USER, I18n.t("dms.linkedfile.details.field.created.by"), file.getCreatedBy());
-        }
-        if (file.getCreateDate() != null) {
-            addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("dms.linkedfile.details.field.created.date"), formatDateTime(file.getCreateDate()));
-        }
-        if (file.getUpdatedBy() != null) {
-            addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("dms.linkedfile.details.field.updated.by"), file.getUpdatedBy());
-        }
-        if (file.getUpdateDate() != null) {
-            addFieldToGrid(auditGrid, VaadinIcon.CALENDAR_CLOCK, I18n.t("dms.linkedfile.details.field.updated.date"), formatDateTime(file.getUpdateDate()));
-        }
-        addTab(I18n.t("dms.linkedfile.details.section.audit"),
-                createSection(I18n.t("dms.linkedfile.details.section.audit"), auditGrid));
-    }
-
-    private String formatDateTime(LocalDateTime dateTime) {
-        if (dateTime == null) return null;
-        return dateTime.format(DATE_FORMATTER);
+        addAuditTab(file.getCreatedBy(), DmsDialogSupport.formatDateTime(file.getCreateDate()),
+                file.getUpdatedBy(), DmsDialogSupport.formatDateTime(file.getUpdateDate()));
     }
 
     private VerticalLayout buildChipRow(VaadinIcon icon, String label, List<String> values, String chipClass) {
         VerticalLayout section = new VerticalLayout();
         section.setPadding(false);
-        section.setSpacing(true);
+        section.setSpacing(false);
 
-        HorizontalLayout header = new HorizontalLayout();
-        header.setAlignItems(FlexComponent.Alignment.CENTER);
-        header.setSpacing(true);
         com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
-        iconComponent.setSize("14px");
         iconComponent.addClassName("detail-field-icon");
-        Span labelSpan = new Span(label + ":");
+        iconComponent.getElement().setAttribute("aria-hidden", "true");
+        Span labelSpan = new Span(label);
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        header.add(iconComponent, labelSpan);
+        HorizontalLayout header = new HorizontalLayout(iconComponent, labelSpan);
+        header.setSpacing(true);
 
-        HorizontalLayout chipsContainer = new HorizontalLayout();
-        chipsContainer.setSpacing(true);
-        chipsContainer.addClassName("dms-chip-container");
-
+        HorizontalLayout chips = new HorizontalLayout();
+        chips.addClassName(DialogLayout.CLASS_ROW);
         for (String value : values) {
             Span chip = new Span(value);
-            chip.addClassName(chipClass);
-            chip.addClassName(LumoUtility.FontSize.XXSMALL);
-            chipsContainer.add(chip);
+            chip.addClassNames(chipClass, LumoUtility.FontSize.XXSMALL);
+            chips.add(chip);
         }
 
-        section.add(header, chipsContainer);
+        section.add(header, chips);
         return section;
     }
 }

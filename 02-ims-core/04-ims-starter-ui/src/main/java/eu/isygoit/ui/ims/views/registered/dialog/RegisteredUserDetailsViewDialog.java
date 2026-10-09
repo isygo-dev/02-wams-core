@@ -1,19 +1,31 @@
 package eu.isygoit.ui.ims.views.registered.dialog;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RegisteredUserService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.common.dialog.DetailHero;
+import eu.isygoit.ui.common.dialog.DialogLayout;
+import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.registered.RegisteredManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Read-only view of a {@link RegisteredUserDto}: every DTO field except {@code id}
+ * (never displayed) is shown, grouped in tabs (identity, classification, audit).
+ */
+public class RegisteredUserDetailsViewDialog extends ImsDetailsDialog {
 
     private final RegisteredManagementView parentView;
     private final RegisteredUserService registeredUserService;
@@ -23,17 +35,13 @@ public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
                                            RegisteredUserService registeredUserService,
                                            Long registeredUserId) {
         super(I18n.t("ims.registered.details.title"));
-        addClassName("ims-dialog");
         this.parentView = parentView;
         this.registeredUserService = registeredUserService;
         this.registeredUserId = registeredUserId;
 
-        setWidth("700px");
-        setMaxWidth("95%");
+        applyWidth(DialogLayout.WIDTH_M);
         setModal(true);
         setDraggable(true);
-        setResizable(true);
-        addClassName("registered-details-dialog");
 
         loadAndShowDetails();
     }
@@ -48,7 +56,8 @@ public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
                 add(new Span(I18n.t("ims.registered.details.not.found")));
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("ims.registered.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("ims.registered.details.load.error",
+                    RegisteredDialogSupport.extractErrorMessage(ex))));
         } catch (Exception e) {
             add(new Span(I18n.t("ims.registered.details.load.error", e.getMessage())));
         } finally {
@@ -56,62 +65,58 @@ public class RegisteredUserDetailsViewDialog extends DetailsViewDialog {
         }
     }
 
-    private void buildContent(RegisteredUserDto registeredUser) {
-        // Identity — name/email/phone/organisation
-        Div identityInfo = new Div();
-        identityInfo.addClassName("wams-card__detail-grid");
-
-        String fullName = (registeredUser.getFirstName() != null ? registeredUser.getFirstName() : "") +
-                " " + (registeredUser.getLastName() != null ? registeredUser.getLastName() : "");
-        addFieldToGrid(identityInfo, VaadinIcon.USER, I18n.t("ims.registered.details.field.name"), fullName.trim(), false);
-        addFieldToGrid(identityInfo, VaadinIcon.ENVELOPE, I18n.t("ims.registered.details.field.email"), registeredUser.getEmail(), true);
-        addFieldToGrid(identityInfo, VaadinIcon.PHONE, I18n.t("ims.registered.details.field.phone"), registeredUser.getPhoneNumber());
-        addFieldToGrid(identityInfo, VaadinIcon.BUILDING, I18n.t("ims.registered.details.field.organisation"), registeredUser.getOrganisation());
-
-        add(createSection(I18n.t("ims.registered.details.section.identity"), identityInfo));
-
-        // Classification & status — origin, function role, status
-        Div classificationInfo = new Div();
-        classificationInfo.addClassName("wams-card__detail-grid");
-
-        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.SITEMAP, I18n.t("ims.registered.details.field.origin"),
-                registeredUser.getOrigin(), "ims.enum.origin");
-        addFieldToGrid(classificationInfo, VaadinIcon.BRIEFCASE, I18n.t("ims.registered.details.field.function.role"),
-                registeredUser.getFunctionRole());
-
-        // Status chip field
-        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.registered.details.field.status"),
-                registeredUser.getStatus(), "ims.registered.card.status");
-
-        add(createSection(I18n.t("ims.registered.details.section.classification"), classificationInfo));
-
-        // Contact / relations — tenant
-        Div contactInfo = new Div();
-        contactInfo.addClassName("wams-card__detail-grid");
-
-        addFieldToGrid(contactInfo, VaadinIcon.BUILDING_O, I18n.t("ims.registered.details.field.tenant"), registeredUser.getTenant(), true);
-
-        add(createSection(I18n.t("ims.registered.details.section.contact"), contactInfo));
-
-        // Audit — created/updated by & date
-        Div auditInfo = new Div();
-        auditInfo.addClassName("wams-card__detail-grid");
-
-        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("ims.registered.details.field.created"), registeredUser.getCreateDate() != null ? DateHelper.formatToHumanReadable(registeredUser.getCreateDate()) : null);
-        addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("ims.registered.details.field.created.by"), registeredUser.getCreatedBy());
-        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.registered.details.field.updated"), registeredUser.getUpdateDate() != null ? DateHelper.formatToHumanReadable(registeredUser.getUpdateDate()) : null);
-        addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.registered.details.field.updated.by"), registeredUser.getUpdatedBy());
-
-        add(createSection(I18n.t("ims.registered.details.section.audit"), auditInfo));
-
+    private void buildContent(RegisteredUserDto user) {
+        addIdentityTab(user);
+        addClassificationTab(user);
+        addAuditTab(user.getCreatedBy(), formatDate(user.getCreateDate()),
+                user.getUpdatedBy(), formatDate(user.getUpdateDate()));
     }
 
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
-                return ex.contentUTF8();
-        } catch (Exception ignored) {
+    private void addIdentityTab(RegisteredUserDto user) {
+        Div grid = createDetailGrid();
+        addFieldToGrid(grid, VaadinIcon.USER, I18n.t("ims.registered.details.field.name"),
+                dash(fullName(user)));
+        addFieldToGrid(grid, VaadinIcon.ENVELOPE, I18n.t("ims.registered.details.field.email"),
+                dash(user.getEmail()), true);
+        addFieldToGrid(grid, VaadinIcon.PHONE, I18n.t("ims.registered.details.field.phone"),
+                dash(user.getPhoneNumber()));
+        addFieldToGrid(grid, VaadinIcon.BUILDING, I18n.t("ims.registered.details.field.organisation"),
+                dash(user.getOrganisation()));
+
+        VerticalLayout identity = DialogLayout.stack();
+        identity.add(buildHero(user),
+                createSection(I18n.t("ims.registered.details.section.identity"), grid));
+        addTab(I18n.t("ims.registered.details.section.identity"), identity);
+    }
+
+    private void addClassificationTab(RegisteredUserDto user) {
+        Div grid = createDetailGrid();
+        ImsEnumTag.addDetailField(grid, VaadinIcon.SITEMAP, I18n.t("ims.registered.details.field.origin"),
+                user.getOrigin(), "ims.enum.origin");
+        addFieldToGrid(grid, VaadinIcon.BRIEFCASE, I18n.t("ims.registered.details.field.function.role"),
+                dash(user.getFunctionRole()));
+        ImsEnumTag.addDetailField(grid, VaadinIcon.SHIELD, I18n.t("ims.registered.details.field.status"),
+                user.getStatus(), "ims.registered.card.status");
+        addFieldToGrid(grid, VaadinIcon.BUILDING_O, I18n.t("ims.registered.details.field.tenant"),
+                dash(user.getTenant()), true);
+        addTab(I18n.t("ims.registered.details.section.classification"),
+                createSection(I18n.t("ims.registered.details.section.classification"), grid));
+    }
+
+    private Component buildHero(RegisteredUserDto user) {
+        List<Component> chips = new ArrayList<>();
+        if (user.getStatus() != null) {
+            chips.add(ImsEnumTag.of(user.getStatus(), "ims.registered.card.status"));
         }
-        return ex.getMessage();
+        return new DetailHero(null, dash(fullName(user)), user.getEmail(), chips.toArray(Component[]::new));
+    }
+
+    private static String fullName(RegisteredUserDto user) {
+        return ((user.getFirstName() != null ? user.getFirstName() : "") + " "
+                + (user.getLastName() != null ? user.getLastName() : "")).trim();
+    }
+
+    private static String formatDate(LocalDateTime date) {
+        return date == null ? null : DateHelper.formatToHumanReadable(date);
     }
 }

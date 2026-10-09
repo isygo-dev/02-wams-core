@@ -7,13 +7,17 @@ import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.ims.views.application.ApplicationManagementView;
+import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
+import eu.isygoit.ui.ims.views.common.ImsDialogSupport;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class ApplicationDetailsViewDialog extends DetailsViewDialog {
+import java.time.LocalDateTime;
+
+public class ApplicationDetailsViewDialog extends ImsDetailsDialog {
 
     private final ApplicationManagementView parentView;
     private final ApplicationService applicationService;
@@ -23,13 +27,11 @@ public class ApplicationDetailsViewDialog extends DetailsViewDialog {
                                         ApplicationService applicationService,
                                         Long applicationId) {
         super(I18n.t("ims.app.details.title"));
-        addClassName("ims-dialog");
         this.parentView = parentView;
         this.applicationService = applicationService;
         this.applicationId = applicationId;
 
-        setWidth("700px");
-        setMaxWidth("95%");
+        applyWidth(DialogLayout.WIDTH_M);
         setModal(true);
         setDraggable(true);
         setResizable(true);
@@ -48,7 +50,7 @@ public class ApplicationDetailsViewDialog extends DetailsViewDialog {
                 add(new Span(I18n.t("ims.app.details.not.found")));
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("ims.app.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("ims.app.details.load.error", ImsDialogSupport.extractErrorMessage(ex))));
         } catch (Exception e) {
             add(new Span(I18n.t("ims.app.details.load.error", e.getMessage())));
         } finally {
@@ -57,61 +59,28 @@ public class ApplicationDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(ApplicationDto app) {
-        // Identity — name/title/code (text identifiers)
-        Div identityInfo = new Div();
-        identityInfo.addClassName("wams-card__detail-grid");
-
+        // Identity: name, title, code, tenant, url
+        Div identityInfo = createDetailGrid();
         addFieldToGrid(identityInfo, VaadinIcon.PLAY, I18n.t("ims.app.details.field.name"), app.getName());
         addFieldToGrid(identityInfo, VaadinIcon.FUNCTION, I18n.t("ims.app.details.field.title"), app.getTitle());
         addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.app.details.field.code"), app.getCode(), true);
+        addFieldToGrid(identityInfo, VaadinIcon.BUILDING, I18n.t("ims.app.details.field.tenant"), app.getTenant(), true);
+        addFieldToGrid(identityInfo, VaadinIcon.GLOBE, I18n.t("ims.app.details.field.url"), app.getUrl(), true);
+        addTab(I18n.t("ims.app.details.section.identity"), createSection(I18n.t("ims.app.details.section.identity"), identityInfo));
 
-        add(createSection(I18n.t("ims.app.details.section.identity"), identityInfo));
-
-        // Classification & status — category/order/admin status
-        Div classificationInfo = new Div();
-        classificationInfo.addClassName("wams-card__detail-grid");
-
+        // Classification and status: category, order, admin status, description
+        Div classificationInfo = createDetailGrid();
         addFieldToGrid(classificationInfo, VaadinIcon.DESKTOP, I18n.t("ims.app.details.field.category"), app.getCategory());
         addFieldToGrid(classificationInfo, VaadinIcon.SORT, I18n.t("ims.app.details.field.order"), app.getOrder() != null ? String.valueOf(app.getOrder()) : null);
         ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.SHIELD, I18n.t("ims.app.details.field.admin.status"), app.getAdminStatus(), null);
+        addFieldToGrid(classificationInfo, VaadinIcon.FILE_TEXT, I18n.t("ims.app.details.field.description"), app.getDescription(), false);
+        addTab(I18n.t("ims.app.details.section.classification"), createSection(I18n.t("ims.app.details.section.classification"), classificationInfo));
 
-        add(createSection(I18n.t("ims.app.details.section.classification"), classificationInfo));
-
-        // Contact / relations — tenant/url/description
-        Div contactInfo = new Div();
-        contactInfo.addClassName("wams-card__detail-grid");
-
-        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.app.details.field.tenant"), app.getTenant(), true);
-        addFieldToGrid(contactInfo, VaadinIcon.GLOBE, I18n.t("ims.app.details.field.url"), app.getUrl(), true);
-
-        add(createSection(I18n.t("ims.app.details.section.contact"), contactInfo));
-
-        if (app.getDescription() != null && !app.getDescription().isBlank()) {
-            Div descGrid = new Div();
-            descGrid.addClassName("wams-card__detail-grid");
-            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.app.details.field.description"), app.getDescription(), false);
-            add(descGrid);
-        }
-
-        // Audit — created/updated by & date
-        Div auditInfo = new Div();
-        auditInfo.addClassName("wams-card__detail-grid");
-
-        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("ims.app.details.field.created"), app.getCreateDate() != null ? DateHelper.formatToHumanReadable(app.getCreateDate()) : null);
-        addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("ims.app.details.field.created.by"), app.getCreatedBy());
-        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.app.details.field.updated"), app.getUpdateDate() != null ? DateHelper.formatToHumanReadable(app.getUpdateDate()) : null);
-        addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.app.details.field.updated.by"), app.getUpdatedBy());
-
-        add(createSection(I18n.t("ims.app.details.section.audit"), auditInfo));
-
+        addAuditTab(app.getCreatedBy(), formatDate(app.getCreateDate()),
+                app.getUpdatedBy(), formatDate(app.getUpdateDate()));
     }
 
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
-                return ex.contentUTF8();
-        } catch (Exception ignored) {
-        }
-        return ex.getMessage();
+    private static String formatDate(LocalDateTime date) {
+        return date != null ? DateHelper.formatToHumanReadable(date) : null;
     }
 }

@@ -4,6 +4,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -39,7 +40,7 @@ public class ScheduleKeyDeletionDialog extends KmsActionDialog {
         this.days = days != null ? days : 30; // default to 30 if not provided
 
         setOkButtonText(I18n.t("kms.key.dialog.schedule.button"));
-        setWidth("400px");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
 
         buildContent();
     }

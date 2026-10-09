@@ -1,58 +1,30 @@
 package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import eu.isygoit.dto.KmsDtos;
+import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
-import feign.FeignException;
-import org.springframework.http.ResponseEntity;
+import eu.isygoit.ui.common.dialog.PinConfirmActionDialog;
 
-public class EnableKeyVersionDialog extends KmsPinActionDialog {
-
-    private final KmsApiService kmsApiService;
-    private final String keyId;
-    private final String versionId;
-
+public class EnableKeyVersionDialog extends PinConfirmActionDialog {
 
     public EnableKeyVersionDialog(KmsApiService kmsApiService,
                                   String keyId,
                                   String versionId,
                                   Runnable onSuccess) {
-        super(I18n.t("kms.key.dialog.enable.version.title"),
-                I18n.t("kms.key.dialog.enable.version.message"),
-                onSuccess);
-        this.kmsApiService = kmsApiService;
-        this.keyId = keyId;
-        this.versionId = versionId;
-
-        setOkButtonText(I18n.t("kms.key.dialog.enable.version.button"));
-        setWidth("450px");
-    }
-
-    @Override
-    protected boolean onOk() {
-        try {
-            ResponseEntity<KmsDtos.EnableKeyVersionResponse> response =
-                    kmsApiService.enableKeyVersion(keyId, versionId);
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = I18n.t("kms.key.dialog.enable.version.failed", response.getStatusCode());
-                this.append(errorMsg);
-                return false;
-            }
-
-            Notification.show(I18n.t("kms.key.dialog.enable.version.success"), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            return true;
-        } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            this.append(errorMsg);
-        } catch (Exception e) {
-            String errorMsg = I18n.t("kms.key.dialog.enable.version.error", e.getMessage());
-            this.append(errorMsg);
-        }
-
-        return false;
+        super(new Texts(
+                        I18n.t("kms.key.dialog.enable.version.title"),
+                        I18n.t("kms.key.dialog.enable.version.message"),
+                        I18n.t("kms.key.dialog.enable.version.button"),
+                        I18n.t("common.dialog.pin.invalid"),
+                        I18n.t("kms.key.dialog.enable.version.success"),
+                        detail -> detail != null && detail.startsWith("HTTP ")
+                                ? I18n.t("kms.key.dialog.enable.version.failed", detail.substring(5))
+                                : I18n.t("kms.key.dialog.enable.version.error", detail)),
+                () -> kmsApiService.enableKeyVersion(keyId, versionId),
+                onSuccess,
+                null,
+                "kms-dialog",
+                true,
+                ButtonVariant.LUMO_PRIMARY);
     }
 }

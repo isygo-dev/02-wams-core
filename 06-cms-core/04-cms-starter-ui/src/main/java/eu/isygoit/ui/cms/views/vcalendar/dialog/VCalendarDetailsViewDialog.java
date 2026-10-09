@@ -8,6 +8,7 @@ import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
 import eu.isygoit.ui.cms.views.vcalendar.VCalendarManagementView;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.dialog.TabbedDetailsViewDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +25,12 @@ public class VCalendarDetailsViewDialog extends TabbedDetailsViewDialog {
         super(I18n.t("cms.calendar.details.title"),
                 I18n.t("cms.calendar.details.section.identity"),
                 I18n.t("cms.calendar.details.section.identity"));
-        addClassName("cms-dialog");
+        addClassName(VCalendarDialogSupport.CLASS_CMS_DIALOG);
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.calendarId = calendarId;
 
-        setWidth("700px");
-        setMaxWidth("95%");
+        applyWidth(DialogLayout.WIDTH_M);
         setModal(true);
         setDraggable(true);
         setResizable(true);
@@ -49,7 +49,7 @@ public class VCalendarDetailsViewDialog extends TabbedDetailsViewDialog {
                 add(new Span(I18n.t("cms.calendar.details.not.found")));
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("cms.calendar.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("cms.calendar.details.load.error", VCalendarDialogSupport.extractErrorMessage(ex))));
         } catch (Exception e) {
             add(new Span(I18n.t("cms.calendar.details.load.error", e.getMessage())));
         } finally {
@@ -61,8 +61,6 @@ public class VCalendarDetailsViewDialog extends TabbedDetailsViewDialog {
         // Identity fields: identifiers and location references.
         Div identityGrid = createDetailGrid();
 
-        // ID is a copyable identifier, force the copy button on even though it's short.
-        addFieldToGrid(identityGrid, VaadinIcon.HASH, I18n.t("cms.calendar.details.field.id"), calendar.getId() != null ? String.valueOf(calendar.getId()) : null, true);
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("cms.calendar.details.field.name"), calendar.getName());
         // Code is a short identifier users look up/search by elsewhere — force copyable.
         addFieldToGrid(identityGrid, VaadinIcon.CODE, I18n.t("cms.calendar.details.field.code"), calendar.getCode(), true);
@@ -89,24 +87,9 @@ public class VCalendarDetailsViewDialog extends TabbedDetailsViewDialog {
                     createSection(I18n.t("cms.calendar.details.section.description"), descriptionGrid));
         }
 
-        Div auditGrid = createDetailGrid();
-        addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("cms.calendar.details.field.created.by"), calendar.getCreatedBy());
-        addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("cms.calendar.details.field.created.date"),
-                calendar.getCreateDate() != null ? DateHelper.formatToHumanReadable(calendar.getCreateDate()) : null);
-        addFieldToGrid(auditGrid, VaadinIcon.EDIT, I18n.t("cms.calendar.details.field.updated.by"), calendar.getUpdatedBy());
-        addFieldToGrid(auditGrid, VaadinIcon.CALENDAR_O, I18n.t("cms.calendar.details.field.updated.date"),
+        addAuditTab(calendar.getCreatedBy(),
+                calendar.getCreateDate() != null ? DateHelper.formatToHumanReadable(calendar.getCreateDate()) : null,
+                calendar.getUpdatedBy(),
                 calendar.getUpdateDate() != null ? DateHelper.formatToHumanReadable(calendar.getUpdateDate()) : null);
-
-        addTab(I18n.t("cms.calendar.details.section.audit"),
-                createSection(I18n.t("cms.calendar.details.section.audit"), auditGrid));
-    }
-
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
-                return ex.contentUTF8();
-        } catch (Exception ignored) {
-        }
-        return ex.getMessage();
     }
 }

@@ -4,6 +4,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -35,7 +36,7 @@ public class CancelKeyDeletionDialog extends KmsActionDialog {
         this.parentView = parentView;
 
         setOkButtonText(I18n.t("kms.key.dialog.cancel.button"));
-        setWidth("450px");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
 
         buildContent();
     }

@@ -3,11 +3,8 @@ package eu.isygoit.ui.mms.views.msgtemplate.dialog;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -17,19 +14,17 @@ import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.SenderConfigService;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.mms.views.common.MmsDetailsDialog;
+import eu.isygoit.ui.mms.views.common.MmsDialogSupport;
 import eu.isygoit.ui.mms.views.common.MmsEnumTag;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 /**
- * Read-only details dialog for a {@link MsgTemplateDto}, organized into
- * titled sections (Identity, Configuration, Relations, Description, File,
- * Audit) with icon-labeled, vertically stacked fields — same shared
- * {@link DetailsViewDialog} convention used by
- * {@code ApplicationDetailsViewDialog}, {@code VCalendarDetailsViewDialog}
- * and the other {@code *DetailsViewDialog} classes across the app.
+ * Read-only details dialog for a {@link MsgTemplateDto}: Identity, Configuration,
+ * File and Audit tabs. {@code id} is never shown and {@code file} (upload payload)
+ * is not a displayable field.
  */
 @Slf4j
 public class MsgTemplateDetailsViewDialog extends MmsDetailsDialog {
@@ -51,8 +46,7 @@ public class MsgTemplateDetailsViewDialog extends MmsDetailsDialog {
         this.senderConfigService = senderConfigService;
         this.template = template;
 
-        setWidth("600px");
-        setMaxWidth("95vw");
+        applyWidth(DialogLayout.WIDTH_M);
         setModal(true);
         setDraggable(true);
         setResizable(true);
@@ -87,8 +81,6 @@ public class MsgTemplateDetailsViewDialog extends MmsDetailsDialog {
     private void buildContent() {
         // ── Identity — name/code/tenant (text identifiers) ───────────────────
         Div identityGrid = createDetailGrid();
-        addFieldToGrid(identityGrid, VaadinIcon.HASH, I18n.t("mms.msgtemplate.dialog.view.id"),
-                template.getId() != null ? template.getId().toString() : null, true);
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("mms.msgtemplate.dialog.view.code"),
                 template.getCode(), true);
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("mms.msgtemplate.dialog.view.tenant"),
@@ -96,6 +88,8 @@ public class MsgTemplateDetailsViewDialog extends MmsDetailsDialog {
         identityGrid.add(MmsEnumTag.detailField(VaadinIcon.FILE_TEXT,
                 I18n.t("mms.msgtemplate.dialog.view.name"),
                 MmsEnumTag.ofValue(template.getName(), "mms.msgtemplate.enum.name")));
+        addFieldToGrid(identityGrid, VaadinIcon.INFO_CIRCLE, I18n.t("mms.msgtemplate.dialog.view.description"),
+                dash(template.getDescription()));
         addTab(I18n.t("mms.msgtemplate.dialog.view.section.identity"),
                 createSection(I18n.t("mms.msgtemplate.dialog.view.section.identity"), identityGrid));
 
@@ -105,27 +99,13 @@ public class MsgTemplateDetailsViewDialog extends MmsDetailsDialog {
                 MmsEnumTag.ofOrUnknown(template.getLanguage(), "mms.msgtemplate.view.language")));
         addFieldToGrid(configGrid, VaadinIcon.ENVELOPE_O, I18n.t("mms.msgtemplate.dialog.view.defaultSender"),
                 template.getDefaultSender());
-        addTab(I18n.t("mms.msgtemplate.dialog.view.section.configuration"),
-                createSection(I18n.t("mms.msgtemplate.dialog.view.section.configuration"), configGrid));
-
-        // ── Relations — sender config reference ──────────────────────────────
-        Div relationsGrid = createDetailGrid();
         String senderConfigValue = senderConfigTooltip != null
                 ? senderConfigDisplayName + " – " + senderConfigTooltip
                 : senderConfigDisplayName;
-        addFieldToGrid(relationsGrid, VaadinIcon.ENVELOPE, I18n.t("mms.msgtemplate.dialog.view.senderConfig"),
+        addFieldToGrid(configGrid, VaadinIcon.ENVELOPE, I18n.t("mms.msgtemplate.dialog.view.senderConfig"),
                 senderConfigValue, true);
-        addTab(I18n.t("mms.msgtemplate.dialog.view.section.relations"),
-                createSection(I18n.t("mms.msgtemplate.dialog.view.section.relations"), relationsGrid));
-
-        // ── Description — free text, a full-width block rather than a grid
-        //    field, since it doesn't fit the short label/value pattern well ──
-        if (template.getDescription() != null && !template.getDescription().isBlank()) {
-            Paragraph descParagraph = new Paragraph(template.getDescription());
-            descParagraph.addClassName("wams-card__detail-field-value");
-            addTab(I18n.t("mms.msgtemplate.dialog.view.description"),
-                    createSection(I18n.t("mms.msgtemplate.dialog.view.description"), descParagraph));
-        }
+        addTab(I18n.t("mms.msgtemplate.dialog.view.section.configuration"),
+                createSection(I18n.t("mms.msgtemplate.dialog.view.section.configuration"), configGrid));
 
         // ── File ───────────────────────────────────────────────────────────
         Div fileGrid = createDetailGrid();
@@ -152,56 +132,13 @@ public class MsgTemplateDetailsViewDialog extends MmsDetailsDialog {
         addTab(I18n.t("mms.msgtemplate.dialog.view.section.file"),
                 createSection(I18n.t("mms.msgtemplate.dialog.view.section.file"), fileSection));
 
-        // ── Audit — created/updated by & date ─────────────────────────────
-        Div auditGrid = createDetailGrid();
-        addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("mms.msgtemplate.dialog.view.field.created"),
-                template.getCreateDate() != null ? DateHelper.formatToHumanReadable(template.getCreateDate()) : null);
-        addFieldToGrid(auditGrid, VaadinIcon.USER_CHECK, I18n.t("mms.msgtemplate.dialog.view.field.created.by"),
-                template.getCreatedBy());
-        addFieldToGrid(auditGrid, VaadinIcon.CALENDAR_O, I18n.t("mms.msgtemplate.dialog.view.field.updated"),
+        addAuditTab(template.getCreatedBy(),
+                template.getCreateDate() != null ? DateHelper.formatToHumanReadable(template.getCreateDate()) : null,
+                template.getUpdatedBy(),
                 template.getUpdateDate() != null ? DateHelper.formatToHumanReadable(template.getUpdateDate()) : null);
-        addFieldToGrid(auditGrid, VaadinIcon.EDIT, I18n.t("mms.msgtemplate.dialog.view.field.updated.by"),
-                template.getUpdatedBy());
-        addTab(I18n.t("mms.msgtemplate.dialog.view.section.audit"),
-                createSection(I18n.t("mms.msgtemplate.dialog.view.section.audit"), auditGrid));
     }
 
     private void downloadTemplate() {
-        if (template.getFileName() == null || template.getFileName().isEmpty()) {
-            return;
-        }
-        try {
-            ResponseEntity<Resource> response = templateFileService.downloadFile(template.getId(), 0L);
-            if (response.getBody() != null) {
-                Resource resource = response.getBody();
-                // Read the resource content as bytes
-                byte[] content = resource.getInputStream().readAllBytes();
-                // Encode to Base64
-                String base64Content = java.util.Base64.getEncoder().encodeToString(content);
-                String fileName = template.getOriginalFileName() != null ?
-                        template.getOriginalFileName() : template.getFileName();
-
-                getUI().ifPresent(ui -> ui.getPage().executeJs(
-                        "const byteCharacters = atob($0);" +
-                                "const byteNumbers = new Array(byteCharacters.length);" +
-                                "for (let i = 0; i < byteCharacters.length; i++) {" +
-                                "    byteNumbers[i] = byteCharacters.charCodeAt(i);" +
-                                "}" +
-                                "const byteArray = new Uint8Array(byteNumbers);" +
-                                "const blob = new Blob([byteArray]);" +
-                                "const url = URL.createObjectURL(blob);" +
-                                "const a = document.createElement('a');" +
-                                "a.href = url;" +
-                                "a.download = $1;" +
-                                "a.click();" +
-                                "URL.revokeObjectURL(url);",
-                        base64Content, fileName
-                ));
-            }
-        } catch (Exception e) {
-            log.error("Failed to download template file for {}", template.getId(), e);
-            Notification.show(I18n.t("mms.msgtemplate.download.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        }
+        MmsDialogSupport.downloadTemplateFile(this, templateFileService, template);
     }
 }

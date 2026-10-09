@@ -1,32 +1,27 @@
 package eu.isygoit.ui.sms.views.object.dialog;
 
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.sms.views.common.SmsActionDialog;
+import eu.isygoit.ui.sms.views.common.SmsDialogSupport;
+import eu.isygoit.ui.sms.views.common.SmsUploadPanel;
 import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
-import eu.isygoit.util.ByteArrayMultipartFile;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Uploads one object to the selected bucket: the file (see {@link SmsUploadPanel}),
+ * its target path, file name and tags, as expected by {@code ObjectStorageService.upload}.
+ */
 @Slf4j
 public class UploadFileDialog extends SmsActionDialog {
 
@@ -35,19 +30,10 @@ public class UploadFileDialog extends SmsActionDialog {
     private final String tenant;
     private final String bucketName;
 
-    private MemoryBuffer memoryBuffer;
-    private Upload upload;
+    private SmsUploadPanel uploadPanel;
     private TextField pathField;
     private TextArea tagsField;
     private TextField fileNameField;
-    private Span fileNameDisplay;
-    private Span fileSizeDisplay;
-    private Span uploadStatus;
-    private Icon uploadIcon;
-    private Span allowedFileTypes;
-
-    private String uploadedFileName;
-    private MultipartFile uploadedFile;
 
     public UploadFileDialog(ObjectStorageManagementView parentView, ObjectStorageService objectStorageService,
                             String tenant, String bucketName, Runnable onSuccess) {
@@ -58,126 +44,46 @@ public class UploadFileDialog extends SmsActionDialog {
         this.bucketName = bucketName;
 
         setOkButtonText(I18n.t("sms.objects.dialog.upload.file.button"));
-        setWidth("650px");
-        setMaxWidth("95%");
+        DialogLayout.size(this, DialogLayout.WIDTH_M);
 
         buildForm();
-        addContent(buildFormLayout());
         enableOkButton(false);
     }
 
     private void buildForm() {
-        memoryBuffer = new MemoryBuffer();
-        upload = new Upload(memoryBuffer);
-        upload.setDropAllowed(true);
-        upload.setMaxFiles(1);
-        upload.setMaxFileSize(100 * 1024 * 1024);
-        upload.setAcceptedFileTypes("application/pdf", "image/*", "application/msword",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                "text/plain", "application/zip", "application/json", "text/csv");
-        upload.addClassName("wams-upload-component");
-
-        upload.addSucceededListener(event -> {
-            uploadedFileName = event.getFileName();
-            try {
-                byte[] bytes = memoryBuffer.getInputStream().readAllBytes();
-                uploadedFile = new ByteArrayMultipartFile(bytes, uploadedFileName, memoryBuffer.getFileData().getMimeType());
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-            if (fileNameField.getValue() == null || fileNameField.getValue().isBlank()) {
-                fileNameField.setValue(uploadedFileName);
-            }
-            fileNameDisplay.setText(I18n.t("sms.objects.dialog.upload.file.name", uploadedFileName));
-            fileSizeDisplay.setText(I18n.t("sms.objects.dialog.upload.file.size", formatFileSize(uploadedFile.getSize())));
-            setUploadStatus(true, I18n.t("sms.objects.dialog.upload.success"));
-            enableOkButton(true);
-        });
-
-        upload.addFailedListener(event -> {
-            setUploadStatus(false, I18n.t("sms.objects.dialog.upload.failed", event.getReason().getMessage()));
-            enableOkButton(false);
-        });
-
-        upload.addFileRejectedListener(event -> {
-            setUploadStatus(false, I18n.t("sms.objects.dialog.upload.rejected", event.getErrorMessage()));
-            enableOkButton(false);
-        });
-
         pathField = new TextField(I18n.t("sms.objects.dialog.field.path"));
         pathField.setPlaceholder(I18n.t("sms.objects.dialog.field.path.placeholder"));
-        pathField.setWidthFull();
         pathField.setHelperText(I18n.t("sms.objects.dialog.field.path.helper"));
+        pathField.setWidthFull();
 
         fileNameField = new TextField(I18n.t("sms.objects.dialog.field.file.name"));
         fileNameField.setPlaceholder(I18n.t("sms.objects.dialog.field.file.name.placeholder"));
-        fileNameField.setWidthFull();
         fileNameField.setHelperText(I18n.t("sms.objects.dialog.field.file.name.helper"));
+        fileNameField.setWidthFull();
 
-        tagsField = new TextArea(I18n.t("sms.objects.dialog.field.tags"));
+        tagsField = DialogLayout.tall(new TextArea(I18n.t("sms.objects.dialog.field.tags")));
         tagsField.setPlaceholder(I18n.t("sms.objects.dialog.field.tags.placeholder"));
-        tagsField.setWidthFull();
-        tagsField.setHeight("80px");
 
-        allowedFileTypes = new Span(I18n.t("sms.objects.dialog.upload.allowed.types"));
-        allowedFileTypes.addClassName(LumoUtility.FontSize.XXSMALL);
-        allowedFileTypes.addClassName(LumoUtility.TextColor.SECONDARY);
+        uploadPanel = new SmsUploadPanel(ready -> {
+            if (ready && (fileNameField.getValue() == null || fileNameField.getValue().isBlank())) {
+                fileNameField.setValue(uploadPanel.getUploadedFileName());
+            }
+            enableOkButton(ready);
+        });
 
-        uploadIcon = VaadinIcon.UPLOAD.create();
-        uploadIcon.setSize("20px");
-        uploadIcon.addClassName("wams-upload-icon");
+        FormLayout form = DialogLayout.responsiveForm();
+        form.add(pathField, fileNameField, tagsField);
+        form.setColspan(tagsField, 2);
 
-        fileNameDisplay = new Span(I18n.t("sms.objects.dialog.upload.no.file.selected"));
-        fileNameDisplay.addClassName(LumoUtility.TextColor.SECONDARY);
-        fileSizeDisplay = new Span();
-        uploadStatus = new Span();
-    }
-
-    /**
-     * Toggles the success/error state of the status line and its icon via
-     * CSS classes (see {@code .wams-upload-status--success/error} in
-     * sms.css) instead of setting inline colors from Java.
-     */
-    private void setUploadStatus(boolean success, String message) {
-        uploadStatus.setText(message);
-        uploadStatus.removeClassName("wams-upload-status--success");
-        uploadStatus.removeClassName("wams-upload-status--error");
-        uploadStatus.addClassName(success ? "wams-upload-status--success" : "wams-upload-status--error");
-
-        uploadIcon.removeClassName("wams-upload-icon--success");
-        uploadIcon.removeClassName("wams-upload-icon--error");
-        uploadIcon.addClassName(success ? "wams-upload-icon--success" : "wams-upload-icon--error");
-    }
-
-    private FormLayout buildFormLayout() {
-        FormLayout form = new FormLayout();
-        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
-
-        VerticalLayout uploadLayout = new VerticalLayout();
-        uploadLayout.setSpacing(true);
-        uploadLayout.setPadding(false);
-        Span instruction = new Span(I18n.t("sms.objects.dialog.upload.instruction"));
-        instruction.addClassName(LumoUtility.FontSize.SMALL);
-        instruction.addClassName(LumoUtility.TextColor.SECONDARY);
-        uploadLayout.add(instruction);
-        uploadLayout.add(upload);
-        uploadLayout.add(allowedFileTypes);
-
-        HorizontalLayout fileInfoLayout = new HorizontalLayout();
-        fileInfoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        fileInfoLayout.setSpacing(true);
-        fileInfoLayout.add(uploadIcon, fileNameDisplay, fileSizeDisplay);
-        uploadLayout.add(fileInfoLayout);
-        uploadLayout.add(uploadStatus);
-
-        form.add(uploadLayout, pathField, fileNameField, tagsField);
-        return form;
+        VerticalLayout stack = DialogLayout.stack();
+        stack.add(uploadPanel, form);
+        addContent(stack);
     }
 
     @Override
     protected boolean onOk() {
-        if (uploadedFile == null) {
+        String uploadedFileName = uploadPanel.getUploadedFileName();
+        if (uploadPanel.getUploadedFile() == null) {
             append(I18n.t("sms.objects.dialog.upload.no.file"));
             return false;
         }
@@ -204,7 +110,8 @@ public class UploadFileDialog extends SmsActionDialog {
                 }
             }
 
-            ResponseEntity<Object> response = objectStorageService.upload(tenant, bucketName, path, fileName, tags, uploadedFile);
+            ResponseEntity<Object> response = objectStorageService.upload(
+                    tenant, bucketName, path, fileName, tags, uploadPanel.getUploadedFile());
             if (!response.getStatusCode().is2xxSuccessful()) {
                 append(I18n.t("sms.objects.dialog.upload.failed", response.getStatusCodeValue()));
                 return false;
@@ -213,27 +120,12 @@ public class UploadFileDialog extends SmsActionDialog {
             append(I18n.t("sms.objects.dialog.upload.success"));
             return true;
         } catch (FeignException ex) {
-            append(extractErrorMessage(ex));
+            append(SmsDialogSupport.extractErrorMessage(ex));
         } catch (Exception e) {
             append(I18n.t("sms.objects.dialog.upload.error", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
         return false;
-    }
-
-    private String formatFileSize(long size) {
-        if (size < 1024) return size + " B";
-        if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
-        if (size < 1024 * 1024 * 1024) return String.format("%.1f MB", size / (1024.0 * 1024));
-        return String.format("%.1f GB", size / (1024.0 * 1024 * 1024));
-    }
-
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) return ex.contentUTF8();
-        } catch (Exception ignored) {
-        }
-        return ex.getMessage() != null ? ex.getMessage() : "Unknown error";
     }
 }

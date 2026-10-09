@@ -1,219 +1,39 @@
 package eu.isygoit.ui.kms.views.secrets.digest.dialog;
 
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.data.DigestConfigDto;
-import eu.isygoit.enums.IEnumAlgoDigestConfig;
-import eu.isygoit.enums.IEnumProviderClassName;
-import eu.isygoit.enums.IEnumSaltGenerator;
-import eu.isygoit.enums.IEnumStringOutputType;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.DigestConfigService;
-import eu.isygoit.ui.kms.views.common.KmsActionDialog;
-import eu.isygoit.ui.kms.views.common.KmsEnumTag;
-import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+/**
+ * Update dialog for {@link DigestConfigDto}. The form lives in
+ * {@link AbstractDigestConfigFormDialog}; this class only updates the configuration.
+ * The loaded DTO is edited in place, so fields not edited in the form
+ * (id, code, tenant, audit) are sent back unchanged.
+ */
+public class UpdateDigestConfigDialog extends AbstractDigestConfigFormDialog {
 
-public class UpdateDigestConfigDialog extends KmsActionDialog {
-
-    private final DigestConfigService configService;
     private final DigestConfigDto original;
-    private final Map<String, String> classToProviderNameMap = new HashMap<>();
-    private TextField codeField;
-    private ComboBox<IEnumAlgoDigestConfig.Types> algorithmCombo;
-    private IntegerField iterationsField;
-    private IntegerField saltSizeField;
-    private ComboBox<IEnumSaltGenerator.Types> saltGeneratorCombo;
-    private ComboBox<String> providerClassCombo;
-    private ComboBox<String> providerNameCombo;
-    private Checkbox invertSaltPositionCheckbox;
-    private Checkbox invertPlainSaltCheckbox;
-    private Checkbox lenientSaltCheckbox;
-    private IntegerField poolSizeField;
-    private Checkbox unicodeIgnoreCheckbox;
-    private ComboBox<IEnumStringOutputType.Types> outputTypeCombo;
-    private TextField prefixField;
-    private TextField suffixField;
 
     public UpdateDigestConfigDialog(DigestConfigService configService, DigestConfigDto dto, Runnable onSuccess) {
-        super(I18n.t("kms.digest.dialog.update.title"), onSuccess);
-        this.configService = configService;
+        super(I18n.t("kms.digest.dialog.update.title"), onSuccess, configService,
+                "kms.digest.dialog.update.success",
+                "kms.digest.dialog.update.failed.status",
+                "kms.digest.dialog.update.failed");
         this.original = dto;
         setOkButtonText(I18n.t("kms.digest.dialog.update.button"));
-        setWidth("700px");
+
         buildForm();
-        addContent(createFormLayout());
-        bindData();
-    }
-
-    private void buildForm() {
-        codeField = new TextField(I18n.t("kms.digest.dialog.field.code"));
-        codeField.setReadOnly(true);
-        codeField.setWidthFull();
-
-        algorithmCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.algorithm"));
-        algorithmCombo.setItems(IEnumAlgoDigestConfig.Types.values());
-        KmsEnumTag.useTagRenderer(algorithmCombo, "kms.enum");
-        algorithmCombo.setRequired(true);
-        algorithmCombo.setWidthFull();
-
-        iterationsField = new IntegerField(I18n.t("kms.digest.dialog.field.iterations"));
-        iterationsField.setRequired(true);
-        iterationsField.setMin(1);
-        iterationsField.setWidthFull();
-
-        saltSizeField = new IntegerField(I18n.t("kms.digest.dialog.field.salt.size"));
-        saltSizeField.setMin(0);
-        saltSizeField.setWidthFull();
-
-        saltGeneratorCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.salt.generator"));
-        saltGeneratorCombo.setItems(IEnumSaltGenerator.Types.values());
-        KmsEnumTag.useTagRenderer(saltGeneratorCombo, "kms.enum");
-        saltGeneratorCombo.setWidthFull();
-
-        for (IEnumProviderClassName.Types type : IEnumProviderClassName.Types.values()) {
-            classToProviderNameMap.put(type.getClassPath(), type.getProviderName());
-        }
-
-        providerClassCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.provider.class"));
-        providerClassCombo.setAllowCustomValue(true);
-        providerClassCombo.setItems(
-                Arrays.stream(IEnumProviderClassName.Types.values())
-                        .map(IEnumProviderClassName.Types::getClassPath)
-                        .collect(Collectors.toList())
-        );
-        providerClassCombo.setPlaceholder(I18n.t("kms.digest.dialog.field.provider.class.placeholder"));
-        providerClassCombo.setClearButtonVisible(true);
-        providerClassCombo.setWidthFull();
-        providerClassCombo.addValueChangeListener(e -> {
-            String selectedClass = e.getValue();
-            if (selectedClass != null && classToProviderNameMap.containsKey(selectedClass)) {
-                providerNameCombo.setValue(classToProviderNameMap.get(selectedClass));
-            }
-        });
-
-        providerNameCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.provider.name"));
-        providerNameCombo.setAllowCustomValue(true);
-        providerNameCombo.setItems(
-                Arrays.stream(IEnumProviderClassName.Types.values())
-                        .map(IEnumProviderClassName.Types::getProviderName)
-                        .collect(Collectors.toList())
-        );
-        providerNameCombo.setPlaceholder(I18n.t("kms.digest.dialog.field.provider.name.placeholder"));
-        providerNameCombo.setClearButtonVisible(true);
-        providerNameCombo.setWidthFull();
-
-        invertSaltPositionCheckbox = new Checkbox(I18n.t("kms.digest.dialog.field.invert.salt.position"));
-        invertPlainSaltCheckbox = new Checkbox(I18n.t("kms.digest.dialog.field.invert.plain.salt"));
-        lenientSaltCheckbox = new Checkbox(I18n.t("kms.digest.dialog.field.lenient.salt"));
-
-        poolSizeField = new IntegerField(I18n.t("kms.digest.dialog.field.pool.size"));
-        poolSizeField.setMin(1);
-        poolSizeField.setWidthFull();
-
-        unicodeIgnoreCheckbox = new Checkbox(I18n.t("kms.digest.dialog.field.ignore.unicode"));
-
-        outputTypeCombo = new ComboBox<>(I18n.t("kms.digest.dialog.field.output.type"));
-        outputTypeCombo.setItems(IEnumStringOutputType.Types.values());
-        KmsEnumTag.useTagRenderer(outputTypeCombo, "kms.enum");
-        outputTypeCombo.setWidthFull();
-
-        prefixField = new TextField(I18n.t("kms.digest.dialog.field.prefix"));
-        prefixField.setWidthFull();
-
-        suffixField = new TextField(I18n.t("kms.digest.dialog.field.suffix"));
-        suffixField.setWidthFull();
-    }
-
-    private void bindData() {
-        codeField.setValue(original.getCode());
-        algorithmCombo.setValue(original.getAlgorithm());
-        iterationsField.setValue(original.getIterations());
-        saltSizeField.setValue(original.getSaltSizeBytes());
-        saltGeneratorCombo.setValue(original.getSaltGenerator());
-        providerClassCombo.setValue(original.getProviderClassName());
-        providerNameCombo.setValue(original.getProviderName());
-        invertSaltPositionCheckbox.setValue(original.getInvertPositionOfSaltInMessageBeforeDigesting());
-        invertPlainSaltCheckbox.setValue(original.getInvertPositionOfPlainSaltInEncryptionResults());
-        lenientSaltCheckbox.setValue(original.getUseLenientSaltSizeCheck());
-        poolSizeField.setValue(original.getPoolSize());
-        unicodeIgnoreCheckbox.setValue(original.getUnicodeNormalizationIgnored());
-        outputTypeCombo.setValue(original.getStringOutputType());
-        prefixField.setValue(original.getPrefix());
-        suffixField.setValue(original.getSuffix());
-    }
-
-    private FormLayout createFormLayout() {
-        FormLayout form = new FormLayout();
-        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
-        form.add(codeField, algorithmCombo, iterationsField, saltSizeField, saltGeneratorCombo,
-                providerClassCombo, providerNameCombo,
-                invertSaltPositionCheckbox, invertPlainSaltCheckbox,
-                lenientSaltCheckbox, poolSizeField, unicodeIgnoreCheckbox,
-                outputTypeCombo, prefixField, suffixField);
-        return form;
+        fillFrom(dto);
     }
 
     @Override
-    protected boolean onOk() {
-        IEnumAlgoDigestConfig.Types algo = algorithmCombo.getValue();
-        if (algo == null) {
-            append(I18n.t("kms.digest.dialog.field.algorithm.required"));
-            return false;
-        }
-        Integer iterations = iterationsField.getValue();
-        if (iterations == null || iterations < 1) {
-            append(I18n.t("kms.digest.dialog.field.iterations.required"));
-            return false;
-        }
-        Integer saltSize = saltSizeField.getValue();
-        if (saltSize == null || saltSize < 0) {
-            append(I18n.t("kms.digest.dialog.field.salt.size.required"));
-            return false;
-        }
+    DigestConfigDto target() {
+        return original;
+    }
 
-        DigestConfigDto updated = DigestConfigDto.builder()
-                .id(original.getId())
-                .code(original.getCode())
-                .algorithm(algo)
-                .iterations(iterations)
-                .saltSizeBytes(saltSize)
-                .saltGenerator(saltGeneratorCombo.getValue())
-                .providerClassName(providerClassCombo.getValue())
-                .providerName(providerNameCombo.getValue())
-                .invertPositionOfSaltInMessageBeforeDigesting(invertSaltPositionCheckbox.getValue())
-                .invertPositionOfPlainSaltInEncryptionResults(invertPlainSaltCheckbox.getValue())
-                .useLenientSaltSizeCheck(lenientSaltCheckbox.getValue())
-                .poolSize(poolSizeField.getValue())
-                .unicodeNormalizationIgnored(unicodeIgnoreCheckbox.getValue())
-                .stringOutputType(outputTypeCombo.getValue())
-                .prefix(prefixField.getValue())
-                .suffix(suffixField.getValue())
-                .build();
-
-        try {
-            ResponseEntity<DigestConfigDto> response = configService.update(original.getId(), updated);
-            if (response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("kms.digest.dialog.update.success"));
-                return true;
-            } else {
-                append(I18n.t("kms.digest.dialog.update.failed.status", response.getStatusCode()));
-                return false;
-            }
-        } catch (FeignException ex) {
-            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
-            return false;
-        } catch (Exception ex) {
-            append(I18n.t("kms.digest.dialog.update.failed", ex.getMessage()));
-            return false;
-        }
+    @Override
+    ResponseEntity<DigestConfigDto> send(DigestConfigDto dto) {
+        return configService.update(original.getId(), dto);
     }
 }

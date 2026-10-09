@@ -11,13 +11,15 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.s3.object.MetaData;
+import eu.isygoit.ui.common.dialog.DialogLayout;
+import eu.isygoit.ui.common.files.LinkedFilesSupport;
 import eu.isygoit.ui.sms.views.common.SmsDetailsDialog;
+import eu.isygoit.ui.sms.views.common.SmsDialogSupport;
 import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
-import java.time.format.DateTimeFormatter;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,13 +44,7 @@ public class FileDetailsDialog extends SmsDetailsDialog {
         this.bucketName = bucketName;
         this.file = file;
 
-        setWidth("700px");
-        setMaxWidth("95%");
-        setModal(true);
-        setDraggable(true);
-        setResizable(true);
-        addClassName("file-details-dialog");
-
+        applyWidth(DialogLayout.WIDTH_M);
         buildContent();
     }
 
@@ -60,7 +56,7 @@ public class FileDetailsDialog extends SmsDetailsDialog {
         addFieldToGrid(identityGrid, VaadinIcon.PICTURE, I18n.t("sms.objects.details.field.type"), file.getType());
         addFieldToGrid(identityGrid, VaadinIcon.HARDDRIVE, I18n.t("sms.objects.details.field.size"), file.getSizeDisplay());
         addFieldToGrid(identityGrid, VaadinIcon.CALENDAR, I18n.t("sms.objects.details.field.modified"),
-                file.getModifiedDate() != null ? file.getModifiedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : null);
+                SmsDialogSupport.formatDateTime(file.getModifiedDate()));
         addTab(I18n.t("sms.objects.details.section.identity"), identityGrid);
 
         metadataLayout.setPadding(false);
@@ -108,7 +104,7 @@ public class FileDetailsDialog extends SmsDetailsDialog {
             }
         } catch (FeignException ex) {
             metadataLayout.removeAll();
-            metadataLayout.add(new Span(I18n.t("sms.objects.details.metadata.error", extractErrorMessage(ex))));
+            metadataLayout.add(new Span(I18n.t("sms.objects.details.metadata.error", SmsDialogSupport.extractErrorMessage(ex))));
             log.error("Failed to fetch metadata for {}", file.getName(), ex);
         } catch (Exception e) {
             metadataLayout.removeAll();
@@ -122,7 +118,7 @@ public class FileDetailsDialog extends SmsDetailsDialog {
 
         addFieldToGrid(grid, VaadinIcon.FILE_O, I18n.t("sms.objects.details.field.content.type"), meta.getContentType());
         addFieldToGrid(grid, VaadinIcon.HARDDRIVE, I18n.t("sms.objects.details.field.size"),
-                meta.getSize() != 0 ? formatSize(meta.getSize()) : null);
+                meta.getSize() != 0 ? LinkedFilesSupport.formatFileSize(meta.getSize()) : null);
         addFieldToGrid(grid, VaadinIcon.CODE, I18n.t("sms.objects.details.field.etag"), meta.getEtag(), true);
         addFieldToGrid(grid, VaadinIcon.CHILD, I18n.t("sms.objects.details.field.version"), meta.getVersionID(), true);
         addFieldToGrid(grid, VaadinIcon.CALENDAR, I18n.t("sms.objects.details.field.last.modified"), meta.getLastModified());
@@ -139,23 +135,5 @@ public class FileDetailsDialog extends SmsDetailsDialog {
         }
 
         metadataLayout.add(grid);
-    }
-
-    private String formatSize(Long size) {
-        if (size == null) return null;
-        if (size < 1024) return size + " B";
-        if (size < 1024 * 1024) return String.format("%.1f KB", size / 1024.0);
-        if (size < 1024 * 1024 * 1024) return String.format("%.1f MB", size / (1024.0 * 1024));
-        return String.format("%.1f GB", size / (1024.0 * 1024 * 1024));
-    }
-
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) {
-                return ex.contentUTF8();
-            }
-        } catch (Exception ignored) {
-        }
-        return ex.getMessage() != null ? ex.getMessage() : "Unknown error";
     }
 }

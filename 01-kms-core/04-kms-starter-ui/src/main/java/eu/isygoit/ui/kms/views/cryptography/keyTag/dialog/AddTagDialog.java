@@ -3,6 +3,7 @@ package eu.isygoit.ui.kms.views.cryptography.keyTag.dialog;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import feign.FeignException;
@@ -26,7 +27,7 @@ public class AddTagDialog extends KmsActionDialog {
         this.onSuccess = onSuccess;
 
         setOkButtonText(I18n.t("kms.tag.dialog.add.button"));
-        setWidth("400px");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
 
         buildForm();
         addContent(keyField, valueField);

@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -14,6 +16,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import eu.isygoit.dto.KmsDtos.KeyPolicy;
 import eu.isygoit.enums.IKmsActionType;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 
@@ -49,9 +52,7 @@ public class PolicyStatementEditorDialog extends KmsActionDialog {
         this.statement = (existing != null) ? deepCopyStatement(existing) : createEmptyStatement();
 
         setOkButtonText(I18n.t("kms.policy.statement.dialog.save"));
-        setWidth("850px");
-        setMaxWidth("95%");
-        setResizable(true);
+        DialogLayout.size(this, DialogLayout.WIDTH_L);
 
         buildForm();
         bindData();
@@ -85,10 +86,7 @@ public class PolicyStatementEditorDialog extends KmsActionDialog {
     }
 
     private void buildForm() {
-        VerticalLayout layout = new VerticalLayout();
-        layout.setSpacing(true);
-        layout.setPadding(true);
-        layout.setWidthFull();
+        VerticalLayout layout = DialogLayout.stack();
 
         sidField.setWidthFull();
         sidField.setHelperText(I18n.t("kms.policy.statement.field.sid.helper"));
@@ -101,8 +99,7 @@ public class PolicyStatementEditorDialog extends KmsActionDialog {
         principalField.setHelperText(I18n.t("kms.policy.statement.field.principal.helper"));
 
         // ---- Actions section with shortcuts ----
-        actionsArea.setWidthFull();
-        actionsArea.setHeight("120px");
+        DialogLayout.tall(actionsArea);
         actionsArea.setHelperText(I18n.t("kms.policy.statement.field.actions.helper"));
 
         List<IKmsActionType.Types> importantActions = Arrays.asList(
@@ -134,8 +131,7 @@ public class PolicyStatementEditorDialog extends KmsActionDialog {
         actionShortcuts.add(allActionsBtn);
 
         // ---- Resources section with shortcuts ----
-        resourcesArea.setWidthFull();
-        resourcesArea.setHeight("120px");
+        DialogLayout.tall(resourcesArea);
         resourcesArea.setHelperText(I18n.t("kms.policy.statement.field.resources.helper"));
 
         resourceShortcuts.setWidthFull();
@@ -166,14 +162,30 @@ public class PolicyStatementEditorDialog extends KmsActionDialog {
         resourcesPreview.setText(I18n.t("kms.policy.statement.preview.stored.as", "[\"*\"]"));
         resourcesArea.addValueChangeListener(e -> updatePreview());
 
-        conditionArea.setWidthFull();
-        conditionArea.setHeight("120px");
+        DialogLayout.tall(conditionArea);
         conditionArea.setHelperText(I18n.t("kms.policy.statement.field.condition.helper"));
 
-        layout.add(sidField, effectCombo, principalField,
-                new Span(I18n.t("kms.policy.statement.field.actions")), actionsArea, actionShortcuts,
-                new Span(I18n.t("kms.policy.statement.field.resources")), resourcesArea, resourceShortcuts, resourcesPreview,
-                new Span(I18n.t("kms.policy.statement.field.condition")), conditionArea);
+        // Statement identity: sid, effect, principal
+        VerticalLayout identitySection = DialogLayout.section(
+                I18n.t("kms.policy.statement.section.identity"), VaadinIcon.SHIELD);
+        FormLayout identityForm = DialogLayout.responsiveForm();
+        identityForm.add(sidField, effectCombo, principalField);
+        identityForm.setColspan(principalField, 2);
+        identitySection.add(identityForm);
+
+        VerticalLayout actionsSection = DialogLayout.section(
+                I18n.t("kms.policy.statement.field.actions"), VaadinIcon.COG);
+        actionsSection.add(actionsArea, actionShortcuts);
+
+        VerticalLayout resourcesSection = DialogLayout.section(
+                I18n.t("kms.policy.statement.field.resources"), VaadinIcon.CUBES);
+        resourcesSection.add(resourcesArea, resourceShortcuts, resourcesPreview);
+
+        VerticalLayout conditionSection = DialogLayout.section(
+                I18n.t("kms.policy.statement.field.condition"), VaadinIcon.FILTER);
+        conditionSection.add(conditionArea);
+
+        layout.add(identitySection, actionsSection, resourcesSection, conditionSection);
         add(layout);
     }
 

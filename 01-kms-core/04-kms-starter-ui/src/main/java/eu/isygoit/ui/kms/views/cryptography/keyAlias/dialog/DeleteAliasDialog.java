@@ -1,71 +1,33 @@
 package eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog;
 
-import com.vaadin.flow.component.button.ButtonVariant;
-import eu.isygoit.dto.KmsDtos.DeleteAliasResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
+import eu.isygoit.ui.common.dialog.DeleteActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.AliasesView;
-import feign.FeignException;
-import org.springframework.http.ResponseEntity;
 
 /**
- * Dialog for deleting an alias.
- * If the alias is the primary key, a 9‑digit confirmation code is required.
- * Otherwise, it behaves like a simple confirmation dialog.
+ * Confirms the deletion of a key alias. The PIN is only required for the primary
+ * alias of a key; other aliases need the confirmation message only.
  */
-public class DeleteAliasDialog extends KmsPinActionDialog {
-
-    private final AliasesView parentView;
-    private final KmsApiService kmsApiService;
-    private final String aliasName;
+public class DeleteAliasDialog extends DeleteActionDialog {
 
     public DeleteAliasDialog(AliasesView parentView,
                              KmsApiService kmsApiService,
                              Runnable onSuccess,
                              String aliasName,
                              Boolean primaryKey) {
-        super(I18n.t("kms.alias.dialog.delete.title"),
-                primaryKey ? I18n.t("kms.alias.dialog.delete.primary.warning")
-                        : I18n.t("kms.alias.dialog.delete.confirmation", aliasName),
+        super(new Texts(
+                        I18n.t("kms.alias.dialog.delete.title"),
+                        primaryKey ? I18n.t("kms.alias.dialog.delete.primary.warning")
+                                : I18n.t("kms.alias.dialog.delete.confirmation", aliasName),
+                        I18n.t("kms.alias.dialog.delete.button"),
+                        I18n.t("kms.alias.dialog.delete.invalid.code"),
+                        I18n.t("kms.alias.dialog.delete.success"),
+                        detail -> I18n.t("kms.alias.dialog.delete.failed", detail)),
+                () -> kmsApiService.deleteAlias(aliasName),
                 onSuccess,
-                primaryKey); // only require PIN for primary key
-        this.parentView = parentView;
-        this.kmsApiService = kmsApiService;
-        this.aliasName = aliasName;
-
-        setOkButtonText(I18n.t("kms.alias.dialog.delete.button"));
-        addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
-        setWidth("500px");
-    }
-
-    @Override
-    protected boolean onOk() {
-        // Extra safety: validate PIN again (the base class already validated the button, but double-check)
-        if (!validatePin()) {
-            append(I18n.t("kms.alias.dialog.delete.invalid.code"));
-            parentView.showLoading(false);
-            return false;
-        }
-
-        parentView.showLoading(true);
-        try {
-            ResponseEntity<DeleteAliasResponse> response = kmsApiService.deleteAlias(aliasName);
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                append(I18n.t("kms.alias.dialog.delete.failed", response.getStatusCode()));
-                return false;
-            }
-
-            append(I18n.t("kms.alias.dialog.delete.success"));
-            return true;
-        } catch (FeignException ex) {
-            append((ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage());
-        } catch (Exception e) {
-            append(I18n.t("kms.alias.dialog.delete.failed.operation", e.getMessage()));
-        } finally {
-            parentView.showLoading(false);
-        }
-
-        return false;
+                parentView::showLoading,
+                "kms-dialog",
+                primaryKey);
     }
 }

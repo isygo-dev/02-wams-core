@@ -7,6 +7,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import eu.isygoit.dto.data.CustomerDto;
 import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.ims.views.common.ImsActionDialog;
@@ -23,7 +24,6 @@ public class LinkCustomerAccountDialog extends ImsActionDialog {
     private final CustomerService customerService;
     private final AccountService accountService;
     private final Long customerId;
-    private final Runnable onSuccess;
 
     private ComboBox<MinAccountDto> accountCombo;
     private List<MinAccountDto> availableAccounts = new ArrayList<>();
@@ -38,11 +38,9 @@ public class LinkCustomerAccountDialog extends ImsActionDialog {
         this.customerService = customerService;
         this.accountService = accountService;
         this.customerId = customerId;
-        this.onSuccess = onSuccess;
 
         setOkButtonText(I18n.t("ims.customer.dialog.link.button"));
-        setWidth("500px");
-        setMaxWidth("95%");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
 
         buildForm();
         addContent(buildLayout());
@@ -80,7 +78,7 @@ public class LinkCustomerAccountDialog extends ImsActionDialog {
                 append(I18n.t("ims.customer.dialog.link.accounts.load.error"));
             }
         } catch (FeignException ex) {
-            append(I18n.t("ims.customer.dialog.link.accounts.load.error.detail", extractErrorMessage(ex)));
+            append(I18n.t("ims.customer.dialog.link.accounts.load.error.detail", CustomerDialogSupport.extractErrorMessage(ex)));
         } catch (Exception e) {
             append(I18n.t("ims.customer.dialog.link.accounts.load.unexpected", e.getMessage()));
         } finally {
@@ -106,24 +104,14 @@ public class LinkCustomerAccountDialog extends ImsActionDialog {
             }
 
             append(I18n.t("ims.customer.dialog.link.success", accountCode));
-            if (onSuccess != null) onSuccess.run();
             return true;
         } catch (FeignException ex) {
-            append(extractErrorMessage(ex));
+            append(CustomerDialogSupport.extractErrorMessage(ex));
         } catch (Exception e) {
             append(I18n.t("ims.customer.dialog.link.operation.failed", e.getMessage()));
         } finally {
             parentView.showLoading(false);
         }
         return false;
-    }
-
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
-                return ex.contentUTF8();
-        } catch (Exception ignored) {
-        }
-        return ex.getMessage();
     }
 }

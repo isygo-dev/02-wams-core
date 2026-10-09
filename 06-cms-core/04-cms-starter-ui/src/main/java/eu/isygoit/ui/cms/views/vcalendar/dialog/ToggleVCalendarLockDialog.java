@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.data.VCalendarDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
 import eu.isygoit.ui.cms.views.vcalendar.VCalendarManagementView;
 import feign.FeignException;
@@ -36,7 +37,7 @@ public class ToggleVCalendarLockDialog extends PinBaseActionDialog {
                 onSuccess,
                 false
         );
-        addClassName("cms-dialog");
+        addClassName(VCalendarDialogSupport.CLASS_CMS_DIALOG);
         this.parentView = parentView;
         this.calendarService = calendarService;
         this.calendar = calendar;
@@ -46,7 +47,7 @@ public class ToggleVCalendarLockDialog extends PinBaseActionDialog {
                 ? I18n.t("cms.calendar.dialog.toggle.button.unlock")
                 : I18n.t("cms.calendar.dialog.toggle.button.lock"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_PRIMARY);
-        setWidth("450px");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class ToggleVCalendarLockDialog extends PinBaseActionDialog {
             return true;
         } catch (FeignException ex) {
             calendar.setLocked(currentlyLocked);
-            append(extractErrorMessage(ex));
+            append(VCalendarDialogSupport.extractErrorMessage(ex));
         } catch (Exception e) {
             calendar.setLocked(currentlyLocked);
             append(I18n.t("cms.calendar.dialog.toggle.error", e.getMessage()));
@@ -78,12 +79,4 @@ public class ToggleVCalendarLockDialog extends PinBaseActionDialog {
         return false;
     }
 
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
-                return ex.contentUTF8();
-        } catch (Exception ignored) {
-        }
-        return ex.getMessage();
-    }
 }

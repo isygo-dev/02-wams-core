@@ -1,0 +1,171 @@
+// Compact horizontal cards that replace table rows (see eu.isygoit.ui.common.component.RowCard).
+// One design for every module; modules must not restyle them.
+
+.wams-row-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lumo-space-s);
+  width: 100%;
+  min-width: 0;
+}
+
+.wams-row-card {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "lead main side";
+  align-items: center;
+  gap: var(--lumo-space-xs) var(--lumo-space-m);
+  width: 100%;
+  min-width: 0;
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-l);
+  background: var(--lumo-base-color);
+}
+
+.wams-row-card--no-lead {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "main side";
+}
+
+.wams-row-card--clickable {
+  cursor: pointer;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.wams-row-card--clickable:hover,
+.wams-row-card--clickable:focus-visible {
+  border-color: var(--lumo-primary-color-50pct);
+  box-shadow: var(--lumo-box-shadow-xs);
+  outline: none;
+}
+
+.wams-row-card__lead {
+  grid-area: lead;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wams-row-card__lead-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--lumo-primary-color);
+}
+
+.wams-row-card__main {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.wams-row-card__title {
+  font-size: var(--lumo-font-size-m);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.wams-row-card__subtitle {
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-secondary-text-color);
+  overflow-wrap: anywhere;
+}
+
+.wams-row-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--lumo-space-xs) var(--lumo-space-m);
+  margin-top: var(--lumo-space-xs);
+}
+
+.wams-row-card__fact {
+  display: inline-flex;
+  gap: var(--lumo-space-xs);
+  font-size: var(--lumo-font-size-xs);
+}
+
+.wams-row-card__fact-label {
+  color: var(--lumo-secondary-text-color);
+}
+
+.wams-row-card__fact-value {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.wams-row-card__side {
+  grid-area: side;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--lumo-space-xs) var(--lumo-space-m);
+}
+
+.wams-row-card__figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-xs) var(--lumo-space-l);
+}
+
+.wams-row-card__figure {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.wams-row-card__figure-label {
+  font-size: var(--lumo-font-size-xxs);
+  color: var(--lumo-secondary-text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.wams-row-card__figure-value {
+  font-size: var(--lumo-font-size-s);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.wams-row-card__actions {
+  display: flex;
+  align-items: center;
+}
+
+// Small screens: the figures and actions go under the text, full width.
+@media (max-width: 36rem) {
+  .wams-row-card {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "lead main"
+      "side side";
+  }
+
+  .wams-row-card--no-lead {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "main"
+      "side";
+  }
+
+  .wams-row-card__side {
+    justify-content: space-between;
+    padding-top: var(--lumo-space-xs);
+    border-top: 1px solid var(--lumo-contrast-5pct);
+  }
+
+  .wams-row-card__figure {
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wams-row-card--clickable {
+    transition: none;
+  }
+}

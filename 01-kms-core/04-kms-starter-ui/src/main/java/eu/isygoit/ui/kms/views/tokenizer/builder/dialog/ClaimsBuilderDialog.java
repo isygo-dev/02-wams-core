@@ -15,6 +15,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import org.springframework.util.StringUtils;
 
@@ -26,11 +27,12 @@ import java.util.Map;
 /**
  * Lets a user compose custom JWT claims as key/value rows.
  *
- * <p>Extends {@link BaseActionDialog} (not {@code NoActionDialog}) because it
- * has real action semantics — Apply commits the claims back to the caller via
- * {@link ClaimsCallback}, Cancel discards — so it shares the same Ok/Cancel +
- * error-span footer contract as every other action dialog in the app instead
- * of building its own ad-hoc button bar in the content area.
+ * <p>Extends {@link KmsActionDialog} (not {@code NoActionDialog}) because it
+ * has real action semantics: Apply commits the claims back to the caller via
+ * {@link ClaimsCallback}, Cancel discards. It therefore shares the same
+ * Ok/Cancel + error-span footer contract as every other action dialog.
+ * There is no DTO: the dialog edits the claims map of the token request as
+ * JSON text.
  */
 public class ClaimsBuilderDialog extends KmsActionDialog {
 
@@ -38,7 +40,7 @@ public class ClaimsBuilderDialog extends KmsActionDialog {
     private final String existingClaimsJson;
     private final ClaimsCallback callback;
 
-    private final VerticalLayout rowsContainer = new VerticalLayout();
+    private final VerticalLayout rowsContainer = DialogLayout.stack();
     private final List<ClaimsRow> rows = new ArrayList<>();
     private Span validationHint;
     private Span claimCounter;
@@ -49,10 +51,7 @@ public class ClaimsBuilderDialog extends KmsActionDialog {
         this.existingClaimsJson = existingClaimsJson;
         this.callback = callback;
 
-        addClassName("claims-builder-dialog");
-        setWidth("750px");
-        setMaxWidth("95%");
-        setResizable(true);
+        DialogLayout.size(this, DialogLayout.WIDTH_L);
         setDraggable(true);
         setOkButtonText(I18n.t("kms.claims.builder.apply.close"));
 
@@ -60,27 +59,14 @@ public class ClaimsBuilderDialog extends KmsActionDialog {
     }
 
     private void buildUI() {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.setSpacing(true);
-        mainLayout.setPadding(true);
-        mainLayout.setWidthFull();
+        VerticalLayout mainLayout = DialogLayout.stack();
 
         // Header
-        Span titleHint = new Span(I18n.t("kms.claims.builder.hint"));
-        titleHint.addClassName(LumoUtility.TextColor.SECONDARY);
-        titleHint.addClassName(LumoUtility.FontSize.SMALL);
-        mainLayout.add(titleHint);
-
-        // Row container
-        rowsContainer.setSpacing(true);
-        rowsContainer.setPadding(false);
-        rowsContainer.setWidthFull();
+        Span titleHint = DialogLayout.help(I18n.t("kms.claims.builder.hint"));
 
         // Claim counter
         claimCounter = new Span();
-        claimCounter.addClassName(LumoUtility.FontSize.XSMALL);
-        claimCounter.addClassName(LumoUtility.TextColor.TERTIARY);
-        claimCounter.addClassName("claim-counter");
+        claimCounter.addClassName(DialogLayout.CLASS_NOTE);
 
         // Validation hint
         validationHint = new Span();
@@ -99,12 +85,12 @@ public class ClaimsBuilderDialog extends KmsActionDialog {
 
         HorizontalLayout headerBar = new HorizontalLayout(claimCounter, addRowButton);
         headerBar.setWidthFull();
+        headerBar.setPadding(false);
         headerBar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         headerBar.setAlignItems(FlexComponent.Alignment.CENTER);
-        headerBar.addClassName("header-bar");
 
-        mainLayout.add(headerBar, rowsContainer, validationHint);
-        addContent(mainLayout);
+        mainLayout.add(titleHint, headerBar, rowsContainer, validationHint);
+        add(mainLayout);
     }
 
     private void loadExistingClaims() {
@@ -244,35 +230,33 @@ public class ClaimsBuilderDialog extends KmsActionDialog {
         private final TextArea valueArea;
         private final Span keyErrorLabel;
         private final Span valueErrorLabel;
-        private final Runnable onUpdate;
 
         public ClaimsRow(VerticalLayout container, List<ClaimsRow> allRows, String initialKey, String initialValue, Runnable onUpdate) {
-            this.onUpdate = onUpdate;
-
             layout = new HorizontalLayout();
             layout.setAlignItems(FlexComponent.Alignment.START);
-            layout.setSpacing(true);
+            layout.setSpacing(false);
+            layout.setPadding(false);
             layout.setWidthFull();
-            layout.addClassName("claim-row");
+            layout.addClassNames(DialogLayout.CLASS_CARD, DialogLayout.CLASS_ROW);
 
-            // Key field (30%)
+            // Key field: takes one share of the row
             keyField = new TextField();
             keyField.setPlaceholder(I18n.t("kms.claims.builder.claim.name.placeholder"));
+            keyField.setAriaLabel(I18n.t("kms.claims.builder.claim.name.placeholder"));
             keyField.setValue(initialKey);
             keyField.setWidthFull();
             keyField.addValueChangeListener(e -> onUpdate.run());
             keyField.setTooltipText(I18n.t("kms.claims.builder.claim.name.tooltip"));
 
-            // Value area (60%)
-            valueArea = new TextArea();
+            // Value area: takes three shares of the row
+            valueArea = DialogLayout.tall(new TextArea());
             valueArea.setPlaceholder(I18n.t("kms.claims.builder.claim.value.placeholder"));
+            valueArea.setAriaLabel(I18n.t("kms.claims.builder.claim.value.placeholder"));
             valueArea.setValue(initialValue);
-            valueArea.setHeight("60px");
-            valueArea.setWidthFull();
             valueArea.addValueChangeListener(e -> onUpdate.run());
             valueArea.setTooltipText(I18n.t("kms.claims.builder.claim.value.tooltip"));
 
-            // Remove button (10%)
+            // Remove button
             Button removeButton = new Button(new Icon(VaadinIcon.TRASH));
             removeButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_ERROR);
             removeButton.addClickListener(e -> {
@@ -281,6 +265,7 @@ public class ClaimsBuilderDialog extends KmsActionDialog {
                 onUpdate.run();
             });
             removeButton.setTooltipText(I18n.t("kms.claims.builder.remove.claim"));
+            removeButton.setAriaLabel(I18n.t("kms.claims.builder.remove.claim"));
 
             // Error labels
             keyErrorLabel = new Span();
@@ -290,7 +275,8 @@ public class ClaimsBuilderDialog extends KmsActionDialog {
             VerticalLayout keyWrapper = new VerticalLayout(keyField, keyErrorLabel);
             keyWrapper.setPadding(false);
             keyWrapper.setSpacing(false);
-            keyWrapper.setWidth("30%");
+            keyWrapper.setWidth(null);
+            keyWrapper.setMinWidth("10rem");
 
             valueErrorLabel = new Span();
             valueErrorLabel.addClassName(LumoUtility.FontSize.XSMALL);
@@ -299,9 +285,12 @@ public class ClaimsBuilderDialog extends KmsActionDialog {
             VerticalLayout valueWrapper = new VerticalLayout(valueArea, valueErrorLabel);
             valueWrapper.setPadding(false);
             valueWrapper.setSpacing(false);
-            valueWrapper.setWidth("60%");
+            valueWrapper.setWidth(null);
+            valueWrapper.setMinWidth("16rem");
 
             layout.add(keyWrapper, valueWrapper, removeButton);
+            layout.setFlexGrow(1, keyWrapper);
+            layout.setFlexGrow(3, valueWrapper);
         }
 
         public HorizontalLayout getLayout() {

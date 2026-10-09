@@ -1,16 +1,17 @@
 package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.TextArea;
 import eu.isygoit.dto.KmsDtos.UpdateKeyRotationRequest;
 import eu.isygoit.dto.KmsDtos.UpdateKeyRotationResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
-import eu.isygoit.ui.kms.views.common.KmsPinActionDialog;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,10 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
 
     // Enable case – rotation period field
     private IntegerField periodField;
+
+    // UpdateKeyRotationRequest.reason / applyImmediately
+    private TextArea reasonField;
+    private Checkbox applyImmediatelyCheckbox;
 
     public ToggleRotationDialog(KeyManagementView parentView,
                                 KmsApiService kmsApiService,
@@ -51,20 +56,20 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
         this.currentlyEnabled = currentlyEnabled;
         this.currentPeriod = currentPeriod;
 
+        addClassName("kms-dialog");
         setOkButtonText(currentlyEnabled ? I18n.t("kms.key.dialog.rotation.toggle.button.disable") : I18n.t("kms.key.dialog.rotation.toggle.button.enable"));
-        setWidth("450px");
-        addClassName("toggle-rotation-dialog");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
 
+        // Editable request fields go above the warning and PIN block
+        FormLayout form = new FormLayout();
+        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
         if (!currentlyEnabled) {
-            // For enable case, add the rotation period field before the PIN field
             buildEnableForm();
-            // Insert period field into the layout before the PIN field
-            VerticalLayout layout = (VerticalLayout) getChildren().findFirst().orElse(null);
-            if (layout != null && layout.getComponentCount() >= 2) {
-                // The PIN field is the last component; insert period field just before it
-                layout.addComponentAtIndex(layout.getComponentCount() - 1, createPeriodLayout());
-            }
+            form.add(periodField);
         }
+        buildRequestFields();
+        form.add(reasonField, applyImmediatelyCheckbox);
+        addComponentAsFirst(form);
     }
 
     @Override
@@ -84,6 +89,8 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
                 // Disable rotation
                 request = UpdateKeyRotationRequest.builder()
                         .enableRotation(false)
+                        .reason(reasonOrNull())
+                        .applyImmediately(applyImmediatelyOrNull())
                         .build();
             } else {
                 // Enable rotation with chosen period (validate period)
@@ -97,6 +104,8 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
                 request = UpdateKeyRotationRequest.builder()
                         .enableRotation(true)
                         .rotationPeriodInDays(period)
+                        .reason(reasonOrNull())
+                        .applyImmediately(applyImmediatelyOrNull())
                         .build();
             }
 
@@ -140,11 +149,21 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
         periodField.setRequiredIndicatorVisible(true);
     }
 
-    private FormLayout createPeriodLayout() {
-        FormLayout form = new FormLayout();
-        form.add(periodField);
-        form.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
-        form.addClassName("period-form");
-        return form;
+    private void buildRequestFields() {
+        reasonField = new TextArea(I18n.t("kms.key.dialog.rotation.toggle.field.reason"));
+        reasonField.setMaxLength(512);
+        reasonField.setWidthFull();
+        applyImmediatelyCheckbox = new Checkbox(I18n.t("kms.key.dialog.rotation.toggle.field.apply.immediately"));
+    }
+
+    /** Optional audit reason (null when blank). */
+    private String reasonOrNull() {
+        String reason = reasonField.getValue();
+        return reason == null || reason.isBlank() ? null : reason.trim();
+    }
+
+    /** Only sent when ticked; otherwise the server default (false) applies. */
+    private Boolean applyImmediatelyOrNull() {
+        return Boolean.TRUE.equals(applyImmediatelyCheckbox.getValue()) ? Boolean.TRUE : null;
     }
 }

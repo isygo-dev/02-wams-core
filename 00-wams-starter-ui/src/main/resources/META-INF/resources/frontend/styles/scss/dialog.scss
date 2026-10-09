@@ -134,48 +134,77 @@ vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sm
   color: var(--lumo-secondary-text-color);
 }
 
-/* Preserve baseline shared tab styles for consumers outside these modules. */
-.wams-dialog-tabs {
+/*
+ * Tabs: one design for every details and form dialog of every module.
+ * Classic underlined tabs (the selected marker comes from the Lumo theme);
+ * the tab label is the title of its panel, so a panel that holds a single
+ * section is shown frameless and without a duplicated heading.
+ */
+.wams-dialog-tabs,
+vaadin-dialog-overlay vaadin-tabsheet {
   width: 100%;
   --vaadin-tabs-background-color: transparent;
   --vaadin-tabs-border-color: var(--lumo-contrast-10pct);
 }
 
-.wams-dialog-tabs::part(content) {
-  padding: var(--lumo-space-m);
+.wams-dialog-tabs::part(content),
+vaadin-dialog-overlay vaadin-tabsheet::part(content) {
+  padding: var(--lumo-space-m) 0 0;
 }
 
-.wams-dialog-tabs vaadin-tab {
-  min-height: 2.65rem;
-  margin-inline-end: var(--lumo-space-xs);
-  border-radius: var(--lumo-border-radius-m);
+.wams-dialog-tabs vaadin-tab,
+vaadin-dialog-overlay vaadin-tabsheet vaadin-tab {
+  min-height: 2.5rem;
+  margin: 0;
+  padding-inline: var(--lumo-space-m);
+  border-radius: 0;
+  background: transparent;
   color: var(--lumo-secondary-text-color);
   font-size: var(--lumo-font-size-s);
   font-weight: 600;
-  transition: color 140ms ease, background-color 140ms ease;
+  transition: color 140ms ease;
 }
 
-.wams-dialog-tabs vaadin-tab:hover {
+.wams-dialog-tabs vaadin-tab:hover,
+vaadin-dialog-overlay vaadin-tabsheet vaadin-tab:hover {
   color: var(--lumo-primary-text-color);
-  background: var(--lumo-contrast-5pct);
+  background: transparent;
 }
 
-.wams-dialog-tabs vaadin-tab[aria-selected="true"] {
+.wams-dialog-tabs vaadin-tab[selected],
+.wams-dialog-tabs vaadin-tab[aria-selected="true"],
+vaadin-dialog-overlay vaadin-tabsheet vaadin-tab[selected],
+vaadin-dialog-overlay vaadin-tabsheet vaadin-tab[aria-selected="true"] {
   color: var(--lumo-primary-text-color);
-  background: var(--lumo-primary-color-10pct);
+  background: transparent;
 }
 
 .wams-dialog-tab-content {
   box-sizing: border-box;
   min-width: 0;
   gap: var(--lumo-space-m);
-  padding: var(--lumo-space-m);
+  padding: 0;
 }
 
 .wams-dialog-tab-content > * {
   min-width: 0;
 }
 
+/* A panel that is a single section: no frame, no heading repeating the tab label. */
+vaadin-tabsheet > .wams-dlg-section,
+.wams-dialog-tab-content > .wams-dlg-section:only-child,
+.wams-dialog-tab-content > .wams-dialog-section:only-child {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+vaadin-tabsheet > .wams-dlg-section > .wams-dlg-section__title,
+.wams-dialog-tab-content > .wams-dlg-section:only-child > .wams-dlg-section__title,
+.wams-dialog-tab-content > .wams-dialog-section:only-child > .wams-section-title {
+  display: none;
+}
 .wams-dialog-section {
   box-sizing: border-box;
   gap: var(--lumo-space-m);
@@ -242,43 +271,6 @@ vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sm
 .wams-dialog-content vaadin-text-area[invalid]::part(input-field),
 .wams-dialog-content vaadin-select[invalid]::part(input-field) {
   box-shadow: 0 0 0 2px var(--lumo-error-color-10pct);
-}
-
-vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sms-dialog, .cms-dialog) .wams-dialog-tabs {
-  width: 100%;
-  --vaadin-tabs-background-color: transparent;
-  --vaadin-tabs-border-color: var(--lumo-contrast-10pct);
-}
-
-vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sms-dialog, .cms-dialog) .wams-dialog-tabs::part(content) {
-  padding: var(--lumo-space-m);
-}
-
-vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sms-dialog, .cms-dialog) .wams-dialog-tabs vaadin-tab {
-  min-height: 2.65rem;
-  margin-inline-end: var(--lumo-space-xs);
-  border-radius: var(--lumo-border-radius-m);
-  color: var(--lumo-secondary-text-color);
-  font-size: var(--lumo-font-size-s);
-  font-weight: 600;
-  transition: color 140ms ease, background-color 140ms ease;
-}
-
-vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sms-dialog, .cms-dialog) .wams-dialog-tabs vaadin-tab:hover {
-  color: var(--lumo-primary-text-color);
-  background: var(--lumo-contrast-5pct);
-}
-
-vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sms-dialog, .cms-dialog) .wams-dialog-tabs vaadin-tab[aria-selected="true"] {
-  color: var(--lumo-primary-text-color);
-  background: var(--lumo-primary-color-10pct);
-}
-
-vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sms-dialog, .cms-dialog) .wams-dialog-tab-content {
-  box-sizing: border-box;
-  min-width: 0;
-  gap: var(--lumo-space-m);
-  padding: var(--lumo-space-m);
 }
 
 vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sms-dialog, .cms-dialog) .wams-dialog-section {

@@ -7,6 +7,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 
 public final class KmsConfirmationDialog extends Dialog {
 
@@ -21,8 +22,7 @@ public final class KmsConfirmationDialog extends Dialog {
         setModal(true);
         setCloseOnEsc(true);
         setCloseOnOutsideClick(false);
-        setWidth("500px");
-        setMaxWidth("90%");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
         addClassName("kms-dialog");
         addClassName("wams-dialog-responsive");
 

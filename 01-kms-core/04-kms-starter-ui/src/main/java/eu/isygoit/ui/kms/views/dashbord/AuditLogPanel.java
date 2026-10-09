@@ -5,7 +5,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -15,10 +14,12 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import eu.isygoit.dto.KmsDtos.AuditLogResponse;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.RowCard;
+import eu.isygoit.ui.common.component.RowCardList;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.remote.kms.KmsApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ public class AuditLogPanel extends VerticalLayout {
     private DatePicker fromDatePicker;
     private DatePicker toDatePicker;
     private Button loadButton;
-    private Grid<AuditLogResponse.LogEntry> grid;
+    private RowCardList<AuditLogResponse.LogEntry> list;
     private HorizontalLayout paginationBar;
     private Button prevButton;
     private Button nextButton;
@@ -98,23 +99,23 @@ public class AuditLogPanel extends VerticalLayout {
         filterBar.add(keyCombo, fromDatePicker, toDatePicker, loadButton);
         add(filterBar);
 
-        grid = new Grid<>();
-        grid.setWidthFull();
-        grid.setHeight("400px");
-        grid.setVisible(false);
-        grid.addClassName("audit-grid");
-        grid.addColumn(new ComponentRenderer<>(entry -> {
+        list = new RowCardList<>();
+        list.setWidthFull();
+        list.setVisible(false);
+        list.cardFactory(entry -> {
             LocalDateTime ts = entry.getTimestamp();
-            return new Span(ts != null ? DateHelper.formatToHumanReadable(ts) : "-");
-        })).setHeader(I18n.t("kms.audit.log.column.timestamp")).setSortable(true).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getAction).setHeader(I18n.t("kms.audit.log.column.action")).setSortable(true).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getKeyId).setHeader(I18n.t("kms.audit.log.column.key.id")).setSortable(true).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getPrincipal).setHeader(I18n.t("kms.audit.log.column.principal")).setSortable(true).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getIpAddress).setHeader(I18n.t("kms.audit.log.column.ip.address")).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getStatus).setHeader(I18n.t("kms.audit.log.column.status")).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getErrorMessage).setHeader(I18n.t("kms.audit.log.column.error.message")).setResizable(true);
-        grid.addColumn(AuditLogResponse.LogEntry::getExecutionTimeMs).setHeader(I18n.t("kms.audit.log.column.exec.time")).setResizable(true);
-        add(grid);
+            Long execTime = entry.getExecutionTimeMs();
+            return RowCard.create()
+                    .title(ts != null ? DateHelper.formatToHumanReadable(ts) : "-")
+                    .tag(KmsEnumTag.ofOrUnknown(entry.getAction(), null))
+                    .tag(KmsEnumTag.ofValue(entry.getStatus(), null))
+                    .fact(I18n.t("kms.audit.log.column.key.id"), entry.getKeyId())
+                    .fact(I18n.t("kms.audit.log.column.principal"), entry.getPrincipal())
+                    .fact(I18n.t("kms.audit.log.column.ip.address"), entry.getIpAddress())
+                    .fact(I18n.t("kms.audit.log.column.exec.time"), execTime != null ? String.valueOf(execTime) : null)
+                    .fact(I18n.t("kms.audit.log.column.error.message"), entry.getErrorMessage());
+        });
+        add(list);
 
         paginationBar = new HorizontalLayout();
         paginationBar.setWidthFull();
@@ -147,7 +148,7 @@ public class AuditLogPanel extends VerticalLayout {
 
         ui.access(() -> {
             loadButton.setEnabled(false);
-            grid.setVisible(false);
+            list.setVisible(false);
             paginationBar.setVisible(false);
             loadingBar.setVisible(true);
 
@@ -162,8 +163,8 @@ public class AuditLogPanel extends VerticalLayout {
 
                 allLogs = logs;
                 currentPage = 0;
-                updateGrid();
-                grid.setVisible(true);
+                updateList();
+                list.setVisible(true);
                 paginationBar.setVisible(!logs.isEmpty());
                 loadingBar.setVisible(false);
                 loadButton.setEnabled(true);
@@ -181,9 +182,9 @@ public class AuditLogPanel extends VerticalLayout {
         });
     }
 
-    private void updateGrid() {
+    private void updateList() {
         if (allLogs.isEmpty()) {
-            grid.setItems(new ArrayList<>());
+            list.setItems(new ArrayList<>());
             pageInfoSpan.setText(I18n.t("kms.audit.log.pagination.no.logs"));
             prevButton.setEnabled(false);
             nextButton.setEnabled(false);
@@ -191,7 +192,7 @@ public class AuditLogPanel extends VerticalLayout {
         }
         int start = currentPage * PAGE_SIZE;
         int end = Math.min(start + PAGE_SIZE, allLogs.size());
-        grid.setItems(allLogs.subList(start, end));
+        list.setItems(allLogs.subList(start, end));
         int totalPages = (int) Math.ceil((double) allLogs.size() / PAGE_SIZE);
         pageInfoSpan.setText(I18n.t("kms.audit.log.pagination.page", currentPage + 1, totalPages));
         prevButton.setEnabled(currentPage > 0);
@@ -203,7 +204,7 @@ public class AuditLogPanel extends VerticalLayout {
         int newPage = currentPage + delta;
         if (newPage >= 0 && newPage < totalPages) {
             currentPage = newPage;
-            updateGrid();
+            updateList();
         }
     }
-}
+}

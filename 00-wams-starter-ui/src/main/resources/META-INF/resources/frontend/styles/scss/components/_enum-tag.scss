@@ -1,0 +1,46 @@
+// Enum tags: every enum value is presented as a coloured tag, in every module
+// (see eu.isygoit.ui.common.component.EnumTags). Modules must not restyle them.
+
+.wams-enum-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.12rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 0.5625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.wams-enum-tag--success {
+  color: #1f845a;
+  background: rgba(31, 132, 90, 0.1);
+}
+
+.wams-enum-tag--warning {
+  color: #a54800;
+  background: rgba(165, 72, 0, 0.12);
+}
+
+.wams-enum-tag--danger {
+  color: #c9372c;
+  background: rgba(201, 55, 44, 0.1);
+}
+
+.wams-enum-tag--info {
+  color: #0055cc;
+  background: rgba(12, 102, 228, 0.1);
+}
+
+.wams-enum-tag--neutral {
+  color: #44546f;
+  background: #f7f8f9;
+}
+
+// Larger variant used when a tag stands in for a card title.
+.wams-enum-tag--title {
+  font-size: var(--lumo-font-size-m);
+}

@@ -12,7 +12,7 @@ import eu.isygoit.ui.common.layout.BaseMainLayout;
 
 import java.util.List;
 
-@CssImport("./styles/ims.css")
+@CssImport("./styles/ims.scss")
 public class ImsMainLayout extends BaseMainLayout {
 
     @Override

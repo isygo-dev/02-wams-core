@@ -1,20 +1,34 @@
 package eu.isygoit.ui.ims.views.roleinfo.dialog;
 
-import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.data.ApplicationDto;
 import eu.isygoit.dto.data.RoleInfoDto;
 import eu.isygoit.dto.data.RolePermissionDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RoleInfoService;
+import eu.isygoit.ui.common.component.RowCard;
+import eu.isygoit.ui.common.component.RowCardList;
+import eu.isygoit.ui.common.dialog.DetailHero;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
 import eu.isygoit.ui.ims.views.roleinfo.RoleManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Read-only view of a {@link RoleInfoDto}: every DTO field except {@code id}
+ * (never displayed) is shown, grouped in tabs (identity, applications,
+ * permissions, audit). {@code numberOfUsers} is computed and only shown here.
+ */
 public class RoleDetailsViewDialog extends ImsDetailsDialog {
 
     private final RoleManagementView parentView;
@@ -29,12 +43,9 @@ public class RoleDetailsViewDialog extends ImsDetailsDialog {
         this.roleService = roleService;
         this.roleId = roleId;
 
-        setWidth("900px");
-        setMaxWidth("95%");
+        applyWidth(DialogLayout.WIDTH_L);
         setModal(true);
         setDraggable(true);
-        setResizable(true);
-        addClassName("role-details-dialog");
 
         loadAndShowDetails();
     }
@@ -49,7 +60,7 @@ public class RoleDetailsViewDialog extends ImsDetailsDialog {
                 add(new Span(I18n.t("ims.role.details.not.found")));
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("ims.role.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("ims.role.details.load.error", RoleDialogSupport.extractErrorMessage(ex))));
         } catch (Exception e) {
             add(new Span(I18n.t("ims.role.details.load.error", e.getMessage())));
         } finally {
@@ -58,83 +69,79 @@ public class RoleDetailsViewDialog extends ImsDetailsDialog {
     }
 
     private void buildContent(RoleInfoDto role) {
-        // Identity — name/code/template code (text identifiers)
-        Div identityInfo = new Div();
-        identityInfo.addClassName("wams-card__detail-grid");
+        addIdentityTab(role);
 
-        addFieldToGrid(identityInfo, VaadinIcon.USER, I18n.t("ims.role.details.field.name"), role.getName());
-        addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.role.details.field.code"), role.getCode(), true);
-        addFieldToGrid(identityInfo, VaadinIcon.CLIPBOARD_TEXT, I18n.t("ims.role.details.field.template.code"), role.getTemplateCode(), true);
-
-        addTab(I18n.t("ims.role.details.section.identity"), createSection(I18n.t("ims.role.details.section.identity"), identityInfo));
-
-        // Classification & status — level/number of users
-        Div classificationInfo = new Div();
-        classificationInfo.addClassName("wams-card__detail-grid");
-
-        addFieldToGrid(classificationInfo, VaadinIcon.SORT, I18n.t("ims.role.details.field.level"), String.valueOf(role.getLevel()));
-        addFieldToGrid(classificationInfo, VaadinIcon.USERS, I18n.t("ims.role.details.field.users"), String.valueOf(role.getNumberOfUsers()));
-
-        addTab(I18n.t("ims.role.details.section.classification"), createSection(I18n.t("ims.role.details.section.classification"), classificationInfo));
-
-        // Contact / relations — tenant/description
-        Div contactInfo = new Div();
-        contactInfo.addClassName("wams-card__detail-grid");
-
-        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.role.details.field.tenant"), role.getTenant(), true);
-
-        addTab(I18n.t("ims.role.details.section.contact"), createSection(I18n.t("ims.role.details.section.contact"), contactInfo));
-
-        if (role.getDescription() != null && !role.getDescription().isBlank()) {
-            Div descGrid = new Div();
-            descGrid.addClassName("wams-card__detail-grid");
-            addFieldToGrid(descGrid, VaadinIcon.FILE_TEXT, I18n.t("ims.role.details.field.description"), role.getDescription(), false);
-            addTab(I18n.t("ims.dialog.tab.description"), descGrid);
-        }
-
-        // Audit — created/updated by & date
-        Div auditInfo = new Div();
-        auditInfo.addClassName("wams-card__detail-grid");
-
-        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("ims.role.details.field.created"), role.getCreateDate() != null ? DateHelper.formatToHumanReadable(role.getCreateDate()) : null);
-        addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("ims.role.details.field.created.by"), role.getCreatedBy());
-        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.role.details.field.updated"), role.getUpdateDate() != null ? DateHelper.formatToHumanReadable(role.getUpdateDate()) : null);
-        addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.role.details.field.updated.by"), role.getUpdatedBy());
-
-        addTab(I18n.t("ims.role.details.section.audit"), createSection(I18n.t("ims.role.details.section.audit"), auditInfo));
-
-        // Allowed Applications
         if (role.getAllowedTools() != null && !role.getAllowedTools().isEmpty()) {
-            Grid<ApplicationDto> appsGrid = new Grid<>();
-            appsGrid.addColumn(ApplicationDto::getName).setHeader(I18n.t("ims.role.details.apps.column.name"));
-            appsGrid.addColumn(ApplicationDto::getTitle).setHeader(I18n.t("ims.role.details.apps.column.title"));
-            appsGrid.addColumn(ApplicationDto::getCategory).setHeader(I18n.t("ims.role.details.apps.column.category"));
-            appsGrid.setItems(role.getAllowedTools());
-            appsGrid.setHeight("200px");
-            addTab(I18n.t("ims.role.details.section.apps"), createSection(I18n.t("ims.role.details.section.apps"), appsGrid));
+            addTab(I18n.t("ims.role.details.section.apps"),
+                    createSection(I18n.t("ims.role.details.section.apps"), buildAppsList(role.getAllowedTools())));
         }
-
-        // Permissions
         if (role.getRolePermission() != null && !role.getRolePermission().isEmpty()) {
-            Grid<RolePermissionDto> permsGrid = new Grid<>();
-            permsGrid.addColumn(RolePermissionDto::getServiceName).setHeader(I18n.t("ims.role.details.field.service"));
-            permsGrid.addColumn(RolePermissionDto::getObjectName).setHeader(I18n.t("ims.role.details.field.object"));
-            permsGrid.addComponentColumn(perm -> new Span(perm.getRead() ? I18n.t("ims.role.details.yes") : I18n.t("ims.role.details.no"))).setHeader(I18n.t("ims.role.details.field.read"));
-            permsGrid.addComponentColumn(perm -> new Span(perm.getWrite() ? I18n.t("ims.role.details.yes") : I18n.t("ims.role.details.no"))).setHeader(I18n.t("ims.role.details.field.write"));
-            permsGrid.addComponentColumn(perm -> new Span(perm.getDelete() ? I18n.t("ims.role.details.yes") : I18n.t("ims.role.details.no"))).setHeader(I18n.t("ims.role.details.field.delete"));
-            permsGrid.setItems(role.getRolePermission());
-            permsGrid.setHeight("300px");
-            addTab(I18n.t("ims.role.details.section.perms"), createSection(I18n.t("ims.role.details.section.perms"), permsGrid));
+            addTab(I18n.t("ims.role.details.section.perms"),
+                    createSection(I18n.t("ims.role.details.section.perms"), buildPermissionsList(role.getRolePermission())));
         }
 
+        addAuditTab(role.getCreatedBy(), formatDate(role.getCreateDate()),
+                role.getUpdatedBy(), formatDate(role.getUpdateDate()));
     }
 
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
-                return ex.contentUTF8();
-        } catch (Exception ignored) {
+    private void addIdentityTab(RoleInfoDto role) {
+        Div grid = createDetailGrid();
+        addFieldToGrid(grid, VaadinIcon.USER, I18n.t("ims.role.details.field.name"), dash(role.getName()));
+        addFieldToGrid(grid, VaadinIcon.CODE, I18n.t("ims.role.details.field.code"), dash(role.getCode()), true);
+        addFieldToGrid(grid, VaadinIcon.CLIPBOARD_TEXT, I18n.t("ims.role.details.field.template.code"),
+                dash(role.getTemplateCode()), true);
+        addFieldToGrid(grid, VaadinIcon.BUILDING, I18n.t("ims.role.details.field.tenant"),
+                dash(role.getTenant()), true);
+        addFieldToGrid(grid, VaadinIcon.SORT, I18n.t("ims.role.details.field.level"), dash(role.getLevel()));
+        addFieldToGrid(grid, VaadinIcon.USERS, I18n.t("ims.role.details.field.users"), dash(role.getNumberOfUsers()));
+        addFieldToGrid(grid, VaadinIcon.FILE_TEXT, I18n.t("ims.role.details.field.description"),
+                dash(role.getDescription()));
+
+        VerticalLayout identity = DialogLayout.stack();
+        identity.add(buildHero(role), createSection(I18n.t("ims.role.details.section.identity"), grid));
+        addTab(I18n.t("ims.role.details.section.identity"), identity);
+    }
+
+    private Component buildHero(RoleInfoDto role) {
+        List<Component> chips = new ArrayList<>();
+        if (role.getCode() != null && !role.getCode().isBlank()) {
+            Span codeChip = new Span(role.getCode());
+            codeChip.addClassName(DialogLayout.CLASS_CHIP);
+            chips.add(codeChip);
         }
-        return ex.getMessage();
+        Span levelChip = new Span(I18n.t("ims.role.details.field.level") + ": " + dash(role.getLevel()));
+        levelChip.addClassName(DialogLayout.CLASS_CHIP);
+        chips.add(levelChip);
+        return new DetailHero(null, dash(role.getName()), role.getDescription(), chips.toArray(Component[]::new));
+    }
+
+    private RowCardList<ApplicationDto> buildAppsList(List<ApplicationDto> apps) {
+        return new RowCardList<ApplicationDto>()
+                .emptyText("-")
+                .cardFactory(app -> RowCard.create()
+                        .title(app.getName())
+                        .fact(I18n.t("ims.role.details.apps.column.title"), app.getTitle())
+                        .fact(I18n.t("ims.role.details.apps.column.category"), app.getCategory()))
+                .items(apps);
+    }
+
+    private RowCardList<RolePermissionDto> buildPermissionsList(List<RolePermissionDto> permissions) {
+        return new RowCardList<RolePermissionDto>()
+                .emptyText("-")
+                .cardFactory(perm -> RowCard.create()
+                        .title(perm.getObjectName())
+                        .fact(I18n.t("ims.role.details.field.service"), perm.getServiceName())
+                        .fact(I18n.t("ims.role.details.field.read"), flag(perm.getRead()))
+                        .fact(I18n.t("ims.role.details.field.write"), flag(perm.getWrite()))
+                        .fact(I18n.t("ims.role.details.field.delete"), flag(perm.getDelete())))
+                .items(permissions);
+    }
+
+    private static String flag(Boolean value) {
+        return Boolean.TRUE.equals(value) ? I18n.t("ims.role.details.yes") : I18n.t("ims.role.details.no");
+    }
+
+    private static String formatDate(LocalDateTime date) {
+        return date == null ? null : DateHelper.formatToHumanReadable(date);
     }
 }

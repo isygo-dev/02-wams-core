@@ -1,10 +1,12 @@
 package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos.CreateKeyRequest;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.dto.KmsDtos.UpdateKeyDescriptionRequest;
 import eu.isygoit.dto.KmsDtos.UpdateKeyDescriptionResponse;
+
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
@@ -36,8 +38,17 @@ public class UpdateKeyDialog extends KeyDialogBase {
         this.currentTags = currentTags != null ? currentTags : new ArrayList<>();
         setOkButtonText(I18n.t("kms.key.dialog.update.button"));
         buildCommonForm();
-        add(createCommonFormLayout());
+        addSections(buildIdentitySection(buildKeyIdField()), buildRotationSection(), buildTagsSection());
         prefillData(currentAlias, currentDesc, currentRotationEnabled, currentRotationPeriodInDays);
+    }
+
+    /** Read-only business identifier of the key being edited. */
+    private TextField buildKeyIdField() {
+        TextField keyIdField = new TextField(I18n.t("kms.key.dialog.describe.field.key.id"));
+        keyIdField.setValue(keyId != null ? keyId : "");
+        keyIdField.setReadOnly(true);
+        keyIdField.setWidthFull();
+        return keyIdField;
     }
 
     private void prefillData(String currentAlias, String currentDesc,
@@ -45,10 +56,11 @@ public class UpdateKeyDialog extends KeyDialogBase {
         aliasField.setValue(currentAlias != null ? currentAlias : "");
         descriptionField.setValue(currentDesc != null ? currentDesc : "");
         rotationEnabledCheckbox.setValue(currentRotationEnabled != null ? currentRotationEnabled : false);
-        if (currentRotationEnabled && currentRotationPeriodInDays != null) {
+        boolean rotationEnabled = Boolean.TRUE.equals(currentRotationEnabled);
+        if (rotationEnabled && currentRotationPeriodInDays != null) {
             rotationPeriodField.setValue(currentRotationPeriodInDays);
         }
-        rotationPeriodField.setVisible(currentRotationEnabled);
+        rotationPeriodField.setVisible(rotationEnabled);
 
         for (ListResourceTagsResponse.Tag tag : currentTags) {
             addTagRow(tag.getTagKey(), tag.getTagValue());

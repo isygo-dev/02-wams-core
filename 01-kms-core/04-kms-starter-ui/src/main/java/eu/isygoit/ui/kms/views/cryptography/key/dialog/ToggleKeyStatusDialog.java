@@ -3,6 +3,7 @@ package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -35,7 +36,7 @@ public class ToggleKeyStatusDialog extends KmsActionDialog {
         } else {
             addThemeVariantsOkButton(ButtonVariant.LUMO_SUCCESS);
         }
-        setWidth("450px");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
         buildContent();
     }
 

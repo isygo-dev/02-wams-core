@@ -7,6 +7,7 @@ import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 
@@ -15,17 +16,15 @@ import eu.isygoit.ui.kms.views.common.KmsEnumTag;
  * {@link KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore}, for use when
  * the compact {@code StoreCard} isn't enough (i.e. "Details" action).
  */
-@CssImport("./styles/kms.css")
+@CssImport("./styles/kms.scss")
 public class CustomKeyStoreDetailsViewDialog extends KmsDetailsDialog {
 
     public CustomKeyStoreDetailsViewDialog(KmsDtos.DescribeCustomKeyStoreResponse.CustomKeyStore store) {
         super(I18n.t("kms.keystore.details.title"));
 
-        setWidth("700px");
-        setMaxWidth("95%");
+        applyWidth(DialogLayout.WIDTH_L);
         setModal(true);
         setDraggable(true);
-        setResizable(true);
         addClassName("custom-keystore-details-dialog");
 
         buildContent(store);
@@ -38,8 +37,6 @@ public class CustomKeyStoreDetailsViewDialog extends KmsDetailsDialog {
 
         // Identity
         Div identityGrid = createDetailGrid();
-        addFieldToGrid(identityGrid, VaadinIcon.KEY, I18n.t("kms.keystore.details.field.id"),
-                store.getCustomKeyStoreId() != null ? String.valueOf(store.getCustomKeyStoreId()) : null);
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.keystore.details.field.name"), store.getName());
         identityGrid.add(KmsEnumTag.detailField(VaadinIcon.COG, I18n.t("kms.keystore.details.field.type"),
                 KmsEnumTag.ofValue(store.getCustomKeyStoreType(), "kms.enum")));
@@ -83,7 +80,8 @@ public class CustomKeyStoreDetailsViewDialog extends KmsDetailsDialog {
 
         // Health & connectivity
         Div healthGrid = createDetailGrid();
-        addFieldToGrid(healthGrid, VaadinIcon.HEART, I18n.t("kms.keystore.details.field.health"), store.getHealthStatus());
+        healthGrid.add(KmsEnumTag.detailField(VaadinIcon.HEART, I18n.t("kms.keystore.details.field.health"),
+                KmsEnumTag.ofValue(store.getHealthStatus(), "kms.enum")));
         addFieldToGrid(healthGrid, VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("kms.keystore.details.field.error"), store.getConnectionError());
         addFieldToGrid(healthGrid, VaadinIcon.KEY, I18n.t("kms.keystore.details.field.max.keys"),
                 store.getMaxKeys() != null ? String.valueOf(store.getMaxKeys()) : null);

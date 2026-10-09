@@ -6,27 +6,24 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.MsgTemplateDto;
-import eu.isygoit.exception.TransferNotSupportedException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.ui.mms.views.msgtemplate.MsgTemplateManagementView;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
+import eu.isygoit.ui.common.dialog.DialogLayout;
+import eu.isygoit.ui.mms.views.common.MmsDialogSupport;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -58,10 +55,7 @@ public class EditTemplateContentDialog extends BaseActionDialog {
         this.templateFileService = templateFileService;
         this.template = template;
 
-        setWidth("800px");
-        setMaxWidth("95vw");
-        setHeight("600px");
-        setMaxHeight("90vh");
+        DialogLayout.size(this, DialogLayout.WIDTH_L);
 
         setOkButtonText(I18n.t("mms.msgtemplate.dialog.edit.content.save"));
         addThemeVariantsOkButton(ButtonVariant.LUMO_PRIMARY);
@@ -106,9 +100,7 @@ public class EditTemplateContentDialog extends BaseActionDialog {
         statusArea.addClassName("wams-dialog-status-area");
         statusArea.setWidthFull();
 
-        contentArea = new TextArea();
-        contentArea.setWidthFull();
-        contentArea.setHeight("350px");
+        contentArea = DialogLayout.tall(new TextArea());
         contentArea.setPlaceholder(I18n.t("mms.msgtemplate.dialog.edit.content.placeholder"));
         contentArea.addClassName("wams-dialog-content-editor");
         contentArea.addClassName(LumoUtility.Border.ALL);
@@ -144,8 +136,7 @@ public class EditTemplateContentDialog extends BaseActionDialog {
                 showError(I18n.t("mms.msgtemplate.dialog.edit.content.load.failed"));
             }
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
-                    ex.contentUTF8() : ex.getMessage();
+            String errorMsg = MmsDialogSupport.errorMessage(ex);
             showError(I18n.t("mms.msgtemplate.dialog.edit.content.load.error", errorMsg));
             log.error("Failed to load template content for {}", template.getId(), ex);
         } catch (Exception e) {
@@ -176,71 +167,13 @@ public class EditTemplateContentDialog extends BaseActionDialog {
             final String fileName = template.getOriginalFileName() != null ?
                     template.getOriginalFileName() : template.getFileName();
 
-            MultipartFile multipartFile = new MultipartFile() {
-                @Override
-                public String getName() {
-                    return "file";
-                }
+            MultipartFile multipartFile = MmsDialogSupport.multipartOf("file", fileName, contentBytes, "text/plain");
 
-                @Override
-                public String getOriginalFilename() {
-                    return fileName;
-                }
-
-                @Override
-                public String getContentType() {
-                    String contentType = "text/plain";
-                    if (fileName.endsWith(".html") || fileName.endsWith(".htm")) {
-                        contentType = "text/html";
-                    } else if (fileName.endsWith(".xml")) {
-                        contentType = "application/xml";
-                    } else if (fileName.endsWith(".json")) {
-                        contentType = "application/json";
-                    } else if (fileName.endsWith(".ftl") || fileName.endsWith(".vm")) {
-                        contentType = "text/plain";
-                    } else if (fileName.endsWith(".properties")) {
-                        contentType = "text/plain";
-                    }
-                    return contentType;
-                }
-
-                @Override
-                public boolean isEmpty() {
-                    return contentBytes.length == 0;
-                }
-
-                @Override
-                public long getSize() {
-                    return contentBytes.length;
-                }
-
-                @Override
-                public byte[] getBytes() {
-                    return contentBytes;
-                }
-
-                @Override
-                public InputStream getInputStream() {
-                    return new ByteArrayInputStream(contentBytes);
-                }
-
-                @Override
-                public void transferTo(java.io.File dest) throws IllegalStateException {
-                    throw new TransferNotSupportedException("transferTo not supported");
-                }
-            };
-
-            MsgTemplateDto updatedTemplate = MsgTemplateDto.builder()
-                    .id(template.getId())
-                    .code(template.getCode())
-                    .tenant(template.getTenant())
-                    .name(template.getName())
-                    .description(template.getDescription())
-                    .language(template.getLanguage())
-                    .build();
+            // Send the complete loaded DTO so that only the file content changes
+            // (defaultSender, senderConfigId, ... are preserved).
 
             ResponseEntity<MsgTemplateDto> response = templateFileService.updateWithFile(
-                    template.getId(), multipartFile, updatedTemplate);
+                    template.getId(), multipartFile, template);
 
             if (!response.getStatusCode().is2xxSuccessful()) {
                 append(I18n.t("mms.msgtemplate.dialog.edit.content.save.failed",
@@ -252,8 +185,7 @@ public class EditTemplateContentDialog extends BaseActionDialog {
             append(I18n.t("mms.msgtemplate.dialog.edit.content.save.success"));
             return true;
         } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ?
-                    ex.contentUTF8() : ex.getMessage();
+            String errorMsg = MmsDialogSupport.errorMessage(ex);
             append(I18n.t("mms.msgtemplate.dialog.edit.content.save.error", errorMsg));
             log.error("Failed to save template content for {}", template.getId(), ex);
             return false;
@@ -269,40 +201,7 @@ public class EditTemplateContentDialog extends BaseActionDialog {
     }
 
     private void downloadTemplate() {
-        if (template.getFileName() == null || template.getFileName().isEmpty()) {
-            return;
-        }
-        try {
-            ResponseEntity<Resource> response = templateFileService.downloadFile(template.getId(), 0L);
-            if (response.getBody() != null) {
-                Resource resource = response.getBody();
-                byte[] content = resource.getInputStream().readAllBytes();
-                String base64Content = java.util.Base64.getEncoder().encodeToString(content);
-                String fileName = template.getOriginalFileName() != null ?
-                        template.getOriginalFileName() : template.getFileName();
-
-                getUI().ifPresent(ui -> ui.getPage().executeJs(
-                        "const byteCharacters = atob($0);" +
-                                "const byteNumbers = new Array(byteCharacters.length);" +
-                                "for (let i = 0; i < byteCharacters.length; i++) {" +
-                                "    byteNumbers[i] = byteCharacters.charCodeAt(i);" +
-                                "}" +
-                                "const byteArray = new Uint8Array(byteNumbers);" +
-                                "const blob = new Blob([byteArray]);" +
-                                "const url = URL.createObjectURL(blob);" +
-                                "const a = document.createElement('a');" +
-                                "a.href = url;" +
-                                "a.download = $1;" +
-                                "a.click();" +
-                                "URL.revokeObjectURL(url);",
-                        base64Content, fileName
-                ));
-            }
-        } catch (Exception e) {
-            log.error("Failed to download template file for {}", template.getId(), e);
-            Notification.show(I18n.t("mms.msgtemplate.download.error", e.getMessage()), 5000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        }
+        MmsDialogSupport.downloadTemplateFile(this, templateFileService, template);
     }
 
     private void showStatus(String message, String type) {

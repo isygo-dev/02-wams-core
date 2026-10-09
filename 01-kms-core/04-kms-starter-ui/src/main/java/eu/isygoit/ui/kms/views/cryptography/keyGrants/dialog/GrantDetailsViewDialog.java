@@ -12,6 +12,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 
@@ -22,14 +23,12 @@ import eu.isygoit.ui.kms.views.common.KmsEnumTag;
  * <p>Sectioned the same way as {@code CustomKeyStoreDetailsViewDialog}/{@code NextCodeDetailsViewDialog}:
  * Identity, Constraints, Audit — with a {@code wams-card__detail-grid} field grid per section.
  */
-@CssImport("./styles/kms.css")
+@CssImport("./styles/kms.scss")
 public class GrantDetailsViewDialog extends KmsDetailsDialog {
 
     public GrantDetailsViewDialog(KmsDtos.ListGrantsResponse.Grant grant, ObjectMapper objectMapper) {
         super(I18n.t("kms.grant.details.title"));
-        setWidth("600px");
-        setMaxWidth("95%");
-        setResizable(true);
+        applyWidth(DialogLayout.WIDTH_M);
         setCloseOnEsc(true);
         setCloseOnOutsideClick(true);
         addClassName("grant-details-dialog");
@@ -37,20 +36,26 @@ public class GrantDetailsViewDialog extends KmsDetailsDialog {
         buildContent(grant, objectMapper);
     }
 
+    private static boolean hasDates(KmsDtos.ListGrantsResponse.Grant grant) {
+        return grant.getCreateDate() != null || grant.getUpdateDate() != null
+                || grant.getRevocationDate() != null || grant.getRetirementDate() != null;
+    }
+
     private void buildContent(KmsDtos.ListGrantsResponse.Grant grant, ObjectMapper objectMapper) {
         // Identity
         Div identityGrid = createDetailGrid();
         addFieldToGrid(identityGrid, VaadinIcon.KEY, I18n.t("kms.grant.details.field.grant.id"), grant.getGrantId(), true);
+        addFieldToGrid(identityGrid, VaadinIcon.KEY, I18n.t("kms.grant.details.field.key.id"), grant.getKeyId(), true);
         addFieldToGrid(identityGrid, VaadinIcon.USER, I18n.t("kms.grant.details.field.grantee"), grant.getGranteePrincipal(), true);
         addFieldToGrid(identityGrid, VaadinIcon.USER_STAR, I18n.t("kms.grant.details.field.retiring"), grant.getRetiringPrincipal(), true);
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.grant.details.field.name"), grant.getName());
         identityGrid.add(KmsEnumTag.detailField(VaadinIcon.FLAG,
                 I18n.t("kms.grant.details.field.status"),
                 KmsEnumTag.ofValue(grant.getStatus(), "kms.enum")));
-        addFieldToGrid(identityGrid, VaadinIcon.COG, I18n.t("kms.grant.details.field.operations"),
-                grant.getOperations() != null ? String.join(", ", grant.getOperations()) : null);
+        identityGrid.add(KmsEnumTag.detailField(VaadinIcon.COG, I18n.t("kms.grant.details.field.operations"),
+                KmsEnumTag.ofValues(grant.getOperations(), "kms.enum")));
         Component identitySection = createSection(I18n.t("kms.grant.details.section.identity"), identityGrid);
-        if (grant.getConstraints() == null && grant.getCreateDate() == null) {
+        if (grant.getConstraints() == null && !hasDates(grant)) {
             add(identitySection);
         } else {
             addTab(I18n.t("kms.grant.details.section.identity"), identitySection);
@@ -81,13 +86,18 @@ public class GrantDetailsViewDialog extends KmsDetailsDialog {
             addTab(I18n.t("kms.grant.details.section.constraints"), constraintsSection);
         }
 
-        // Audit
-        if (grant.getCreateDate() != null) {
-            Div auditGrid = createDetailGrid();
-            addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("kms.grant.details.field.creation.date"),
-                    DateHelper.formatToHumanReadable(grant.getCreateDate()));
-            addTab(I18n.t("kms.grant.details.section.audit"),
-                    createSection(I18n.t("kms.grant.details.section.audit"), auditGrid));
+        // Dates: lifecycle timestamps of the grant (empty values are skipped by the grid)
+        Div datesGrid = createDetailGrid();
+        addFieldToGrid(datesGrid, VaadinIcon.CALENDAR, I18n.t("kms.grant.details.field.creation.date"),
+                grant.getCreateDate() != null ? DateHelper.formatToHumanReadable(grant.getCreateDate()) : null);
+        addFieldToGrid(datesGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.grant.details.field.update.date"), grant.getUpdateDate());
+        addFieldToGrid(datesGrid, VaadinIcon.CALENDAR_CLOCK, I18n.t("kms.grant.details.field.revocation.date"),
+                grant.getRevocationDate() != null ? DateHelper.formatToHumanReadable(grant.getRevocationDate()) : null);
+        addFieldToGrid(datesGrid, VaadinIcon.CALENDAR_CLOCK, I18n.t("kms.grant.details.field.retirement.date"),
+                grant.getRetirementDate() != null ? DateHelper.formatToHumanReadable(grant.getRetirementDate()) : null);
+        if (datesGrid.getChildren().findAny().isPresent()) {
+            addTab(I18n.t("kms.grant.details.section.dates"),
+                    createSection(I18n.t("kms.grant.details.section.dates"), datesGrid));
         }
     }
 }

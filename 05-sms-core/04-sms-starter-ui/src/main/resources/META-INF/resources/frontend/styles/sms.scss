@@ -131,18 +131,6 @@
     background: var(--sms-color-surface-alt);
 }
 
-.sms-dialog-tabs,
-.wams-dialog-tabs {
-    width: 100%;
-    --vaadin-tabs-background-color: transparent;
-    --vaadin-tabs-border-color: var(--sms-color-border);
-}
-
-.sms-dialog-tabs::part(content),
-.wams-dialog-tabs::part(content) {
-    padding-block-start: var(--sms-space-4);
-}
-
 .sms-download-trigger {
     display: none;
 }

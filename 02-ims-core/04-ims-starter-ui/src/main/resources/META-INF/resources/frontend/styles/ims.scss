@@ -862,14 +862,3 @@
     background: var(--ims-color-surface-alt);
 }
 
-.ims-dialog-tabs,
-.wams-dialog-tabs {
-    width: 100%;
-    --vaadin-tabs-background-color: transparent;
-    --vaadin-tabs-border-color: var(--ims-color-border);
-}
-
-.ims-dialog-tabs::part(content),
-.wams-dialog-tabs::part(content) {
-    padding-block-start: var(--ims-space-4);
-}

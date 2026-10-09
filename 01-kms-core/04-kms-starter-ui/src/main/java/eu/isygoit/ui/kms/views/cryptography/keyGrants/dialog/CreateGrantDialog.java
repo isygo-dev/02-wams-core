@@ -3,12 +3,13 @@ package eu.isygoit.ui.kms.views.cryptography.keyGrants.dialog;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsActionDialog;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ public class CreateGrantDialog extends KmsActionDialog {
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
 
+    private TextField keyIdField;
     private TextField granteeField;
     private TextField retiringField;
     private CheckboxGroup<String> operationsGroup;
@@ -36,15 +38,18 @@ public class CreateGrantDialog extends KmsActionDialog {
         this.kmsApiService = kmsApiService;
         this.objectMapper = objectMapper;
         setOkButtonText(I18n.t("kms.grant.dialog.create.button"));
-        setWidth("500px");
+        DialogLayout.size(this, DialogLayout.WIDTH_M);
         buildForm();
     }
 
     private void buildForm() {
-        VerticalLayout content = new VerticalLayout();
-        content.setSpacing(true);
-        content.setPadding(true);
-        content.setWidthFull();
+        FormLayout form = DialogLayout.responsiveForm();
+
+        // Target key (CreateGrantRequest.keyId): read-only business identifier
+        keyIdField = new TextField(I18n.t("kms.grant.details.field.key.id"));
+        keyIdField.setValue(keyId != null ? keyId : "");
+        keyIdField.setReadOnly(true);
+        keyIdField.setWidthFull();
 
         granteeField = new TextField(I18n.t("kms.grant.dialog.field.grantee"));
         granteeField.setRequired(true);
@@ -74,16 +79,18 @@ public class CreateGrantDialog extends KmsActionDialog {
         operationsGroup.setRequired(true);
         operationsGroup.setWidthFull();
 
-        constraintsArea = new TextArea(I18n.t("kms.grant.dialog.field.constraints"));
+        constraintsArea = DialogLayout.tall(new TextArea(I18n.t("kms.grant.dialog.field.constraints")));
         constraintsArea.setPlaceholder(I18n.t("kms.grant.dialog.field.constraints.placeholder"));
-        constraintsArea.setHeight("100px");
 
         nameField = new TextField(I18n.t("kms.grant.dialog.field.name"));
         nameField.setPlaceholder(I18n.t("kms.grant.dialog.field.name.placeholder"));
         nameField.setWidthFull();
 
-        content.add(granteeField, retiringField, operationsGroup, constraintsArea, nameField);
-        add(content);
+        form.add(keyIdField, nameField, granteeField, retiringField, operationsGroup, constraintsArea);
+        form.setColspan(keyIdField, 2);
+        form.setColspan(operationsGroup, 2);
+        form.setColspan(constraintsArea, 2);
+        add(form);
     }
 
     @Override

@@ -1,15 +1,13 @@
 package eu.isygoit.ui.dms.views.linkedFile.dialog;
 
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.LinkedFileService;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.dms.views.common.DmsActionDialog;
+import eu.isygoit.ui.dms.views.common.DmsDialogSupport;
 import eu.isygoit.ui.dms.views.linkedFile.LinkedFileManagementView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +15,10 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.function.Consumer;
 
+/**
+ * Renames a linked file: the only editable {@link LinkedFileResponseDto} field
+ * is {@code originalFileName}; the code stays untouched (read-only).
+ */
 @Slf4j
 public class RenameLinkedFileDialog extends DmsActionDialog {
 
@@ -26,7 +28,6 @@ public class RenameLinkedFileDialog extends DmsActionDialog {
     private final Consumer<LinkedFileResponseDto> onSuccess;
 
     private TextField newNameField;
-    private Span currentNameDisplay;
 
     public RenameLinkedFileDialog(LinkedFileManagementView parentView,
                                   LinkedFileService linkedFileService,
@@ -39,58 +40,35 @@ public class RenameLinkedFileDialog extends DmsActionDialog {
         this.onSuccess = onSuccess;
 
         setOkButtonText(I18n.t("dms.linkedfile.dialog.rename.button"));
-        setWidth("450px");
-        setMaxWidth("95%");
+        DialogLayout.size(this, DialogLayout.WIDTH_S);
 
         buildContent();
     }
 
     private void buildContent() {
-        VerticalLayout layout = new VerticalLayout();
-        layout.setPadding(false);
-        layout.setSpacing(true);
+        String currentName = file.getOriginalFileName() != null ? file.getOriginalFileName() : "";
 
-        // Current name display
-        HorizontalLayout currentNameRow = new HorizontalLayout();
-        currentNameRow.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-        currentNameRow.setSpacing(true);
+        TextField currentNameField = new TextField(I18n.t("dms.linkedfile.dialog.rename.current"));
+        currentNameField.setValue(file.getOriginalFileName() != null ? file.getOriginalFileName() : file.getCode());
+        currentNameField.setReadOnly(true);
+        currentNameField.setWidthFull();
 
-        com.vaadin.flow.component.icon.Icon fileIcon = VaadinIcon.FILE_O.create();
-        fileIcon.setSize("16px");
-        fileIcon.addClassName("detail-field-icon");
-
-        Span currentLabel = new Span(I18n.t("dms.linkedfile.dialog.rename.current") + ":");
-        currentLabel.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        currentLabel.addClassName(LumoUtility.FontSize.SMALL);
-
-        currentNameDisplay = new Span(file.getOriginalFileName() != null ? file.getOriginalFileName() : file.getCode());
-        currentNameDisplay.addClassName(LumoUtility.FontSize.SMALL);
-        currentNameDisplay.addClassName("dms-secondary-text");
-
-        currentNameRow.add(fileIcon, currentLabel, currentNameDisplay);
-
-        // New name input
         newNameField = new TextField(I18n.t("dms.linkedfile.dialog.rename.field.name"));
         newNameField.setWidthFull();
-        newNameField.setValue(file.getOriginalFileName() != null ? file.getOriginalFileName() : "");
+        newNameField.setValue(currentName);
+        newNameField.setRequired(true);
         newNameField.setRequiredIndicatorVisible(true);
         newNameField.setPlaceholder(I18n.t("dms.linkedfile.dialog.rename.field.name.placeholder"));
         newNameField.addValueChangeListener(e -> {
             String newName = e.getValue() != null ? e.getValue().trim() : "";
-            String currentName = file.getOriginalFileName() != null ? file.getOriginalFileName() : "";
-            boolean hasChanged = !newName.equals(currentName) && !newName.isEmpty();
-            enableOkButton(hasChanged);
+            enableOkButton(!newName.equals(currentName) && !newName.isEmpty());
         });
 
-        // Info text
-        Span infoText = new Span(I18n.t("dms.linkedfile.dialog.rename.info"));
-        infoText.addClassName(LumoUtility.FontSize.XXSMALL);
-        infoText.addClassName("dms-secondary-text");
+        VerticalLayout stack = DialogLayout.stack();
+        stack.add(currentNameField, newNameField, DialogLayout.help(I18n.t("dms.linkedfile.dialog.rename.info")));
+        addContent(stack);
 
-        layout.add(currentNameRow, newNameField, infoText);
-        addContent(layout);
-
-        // Initially disable OK if name hasn't changed
+        // Nothing to save until the name differs from the current one.
         enableOkButton(false);
         newNameField.focus();
     }
@@ -121,8 +99,7 @@ public class RenameLinkedFileDialog extends DmsActionDialog {
             }
             return true;
         } catch (FeignException ex) {
-            String errorMsg = extractErrorMessage(ex);
-            append(I18n.t("dms.linkedfile.dialog.rename.error", errorMsg));
+            append(I18n.t("dms.linkedfile.dialog.rename.error", DmsDialogSupport.extractErrorMessage(ex)));
             log.error("Rename failed for file: {}", file.getCode(), ex);
         } catch (Exception e) {
             append(I18n.t("dms.linkedfile.dialog.rename.error", e.getMessage()));
@@ -131,15 +108,5 @@ public class RenameLinkedFileDialog extends DmsActionDialog {
             parentView.showLoading(false);
         }
         return false;
-    }
-
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) {
-                return ex.contentUTF8();
-            }
-        } catch (Exception ignored) {
-        }
-        return ex.getMessage() != null ? ex.getMessage() : "Unknown error";
     }
 }

@@ -2,7 +2,6 @@ package eu.isygoit.ui.kms.views.tokenizer.builder.dialog;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -12,6 +11,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.component.ClipboardCopyButton;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
 
 import java.time.Instant;
@@ -21,14 +21,17 @@ import java.util.Base64;
 
 /**
  * Read-only dialog showing the decoded Header/Payload/Signature of a JWT.
- * Structurally different from the field-grid "…DetailsViewDialog"s: content
- * is multi-line JSON rendered in read-only {@link TextArea}s inside titled
- * section-cards, rather than label/value fields.
+ * There is no DTO: the content is the decoded token. Structurally different
+ * from the field-grid "...DetailsViewDialog"s: content is multi-line JSON
+ * rendered in read-only {@link TextArea}s, one tab per JWT part.
  */
 public class JwtDetailsViewDialog extends KmsDetailsDialog {
 
     private static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'").withZone(ZoneId.of("UTC"));
+    private static final String HEADER_MIN_HEIGHT = "10rem";
+    private static final String PAYLOAD_MIN_HEIGHT = "20rem";
+
     private final ObjectMapper objectMapper;
     private final String jwtToken;
 
@@ -37,10 +40,7 @@ public class JwtDetailsViewDialog extends KmsDetailsDialog {
         this.objectMapper = objectMapper;
         this.jwtToken = jwtToken;
 
-        addClassName("decode-jwt-dialog");
-        setWidth("750px");
-        setMaxWidth("95%");
-        setResizable(true);
+        applyWidth(DialogLayout.WIDTH_L);
         setDraggable(true);
 
         buildUI();
@@ -50,7 +50,7 @@ public class JwtDetailsViewDialog extends KmsDetailsDialog {
         try {
             String[] parts = jwtToken.split("\\.");
             if (parts.length != 3) {
-                add(createErrorCard(I18n.t("kms.decode.jwt.invalid.format")));
+                add(createErrorMessage(I18n.t("kms.decode.jwt.invalid.format")));
                 return;
             }
 
@@ -64,69 +64,50 @@ public class JwtDetailsViewDialog extends KmsDetailsDialog {
             String prettyPayload = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(payloadNode);
             String displayPayload = transformPayloadWithInlineDates(prettyPayload, payloadNode);
 
-            // Header card
-            Card headerCard = createSectionCard(
+            addTab(I18n.t("kms.decode.jwt.header"), buildCodeSection(
                     I18n.t("kms.decode.jwt.header"),
                     prettyHeader,
-                    I18n.t("kms.decode.jwt.header.tooltip")
-            );
-            // Payload card
-            Card payloadCard = createSectionCard(
+                    I18n.t("kms.decode.jwt.header.tooltip"),
+                    HEADER_MIN_HEIGHT));
+            addTab(I18n.t("kms.decode.jwt.payload"), buildCodeSection(
                     I18n.t("kms.decode.jwt.payload"),
                     displayPayload,
-                    I18n.t("kms.decode.jwt.payload.tooltip")
-            );
-
-            addTab(I18n.t("kms.decode.jwt.header"), headerCard);
-            addTab(I18n.t("kms.decode.jwt.payload"), payloadCard);
+                    I18n.t("kms.decode.jwt.payload.tooltip"),
+                    PAYLOAD_MIN_HEIGHT));
 
             // Signature info
             if (parts[2] != null && !parts[2].isEmpty()) {
-                String signature = parts[2];
-                addTab(I18n.t("kms.decode.jwt.signature"), createSignatureRow(signature));
+                addTab(I18n.t("kms.decode.jwt.signature"), createSignatureRow(parts[2]));
             }
         } catch (Exception e) {
-            add(createErrorCard(I18n.t("kms.decode.jwt.decode.failed", e.getMessage())));
+            add(createErrorMessage(I18n.t("kms.decode.jwt.decode.failed", e.getMessage())));
         }
-
     }
 
-    private Card createSectionCard(String title, String content, String tooltip) {
-        Card card = new Card();
-        card.setWidthFull();
+    private VerticalLayout buildCodeSection(String title, String content, String tooltip, String minHeight) {
+        VerticalLayout section = DialogLayout.section(title, VaadinIcon.CODE);
 
-        // Title row with shared copy-to-clipboard button
-        Span titleSpan = new Span(title);
-        titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
-        titleSpan.addClassName(LumoUtility.FontSize.MEDIUM);
-        titleSpan.addClassName("wams-section-title");
-        titleSpan.setTitle(tooltip);
-
-        HorizontalLayout titleRow = new HorizontalLayout(titleSpan, new ClipboardCopyButton(content));
-        titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        titleRow.setSpacing(true);
-        titleRow.addClassName("section-title-row");
-
-        // Content area
-        boolean isHeaderSection = title.equals(I18n.t("kms.decode.jwt.header"));
-        TextArea textArea = new TextArea();
+        TextArea textArea = DialogLayout.tall(new TextArea());
         textArea.setValue(content);
         textArea.setReadOnly(true);
-        textArea.setWidthFull();
-        textArea.addClassName("code-textarea");
-        textArea.addClassName(isHeaderSection ? "code-textarea--header" : "code-textarea--payload");
+        textArea.setMinHeight(minHeight);
+        textArea.setAriaLabel(title);
+        textArea.setTooltipText(tooltip);
+        textArea.addClassName(LumoUtility.FontSize.XSMALL);
 
-        VerticalLayout cardContent = new VerticalLayout(titleRow, textArea);
-        cardContent.setSpacing(false);
-        cardContent.setPadding(false);
-        card.add(cardContent);
+        // Shared copy-to-clipboard button
+        HorizontalLayout actions = new HorizontalLayout(new ClipboardCopyButton(content));
+        actions.setWidthFull();
+        actions.setPadding(false);
+        actions.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 
-        return card;
+        section.add(textArea, actions);
+        return section;
     }
 
     private HorizontalLayout createSignatureRow(String signature) {
         Span sigInfo = new Span(I18n.t("kms.decode.jwt.signature", signature.substring(0, Math.min(20, signature.length()))));
-        sigInfo.addClassName("signature-info");
+        sigInfo.addClassNames(LumoUtility.FontSize.XSMALL, LumoUtility.TextColor.SECONDARY);
 
         HorizontalLayout row = new HorizontalLayout(sigInfo, new ClipboardCopyButton(signature));
         row.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -134,13 +115,10 @@ public class JwtDetailsViewDialog extends KmsDetailsDialog {
         return row;
     }
 
-    private Card createErrorCard(String message) {
-        Card card = new Card();
-        card.setWidthFull();
-        Span errorSpan = new Span(VaadinIcon.EXCLAMATION_CIRCLE.create() + " " + message);
-        errorSpan.addClassName("error-message");
-        card.add(errorSpan);
-        return card;
+    private Span createErrorMessage(String message) {
+        Span error = new Span(VaadinIcon.EXCLAMATION_CIRCLE.create(), new Span(" " + message));
+        error.addClassName(LumoUtility.TextColor.ERROR);
+        return error;
     }
 
     private String transformPayloadWithInlineDates(String prettyJson, JsonNode payloadNode) {

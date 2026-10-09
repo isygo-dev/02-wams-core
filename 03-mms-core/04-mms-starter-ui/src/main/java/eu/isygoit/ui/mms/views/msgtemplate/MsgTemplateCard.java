@@ -197,14 +197,14 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         String displayName = getTemplateDisplayName();
         if (template.getName() != null) {
             MmsEnumTag.update(titleSpan, template.getName(), "mms.msgtemplate.enum.name");
-            titleSpan.addClassName("mms-enum-tag--title");
+            titleSpan.addClassName("wams-enum-tag--title");
         } else {
             titleSpan.setText(displayName);
             titleSpan.getElement().setAttribute("title", displayName);
-            titleSpan.removeClassName("mms-enum-tag");
-            titleSpan.removeClassName("mms-enum-tag--title");
+            titleSpan.removeClassName("wams-enum-tag");
+            titleSpan.removeClassName("wams-enum-tag--title");
             for (String tone : List.of("success", "warning", "danger", "info", "neutral")) {
-                titleSpan.removeClassName("mms-enum-tag--" + tone);
+                titleSpan.removeClassName("wams-enum-tag--" + tone);
             }
         }
 
@@ -275,7 +275,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         titleSpan = buildTitleSpan(displayName, displayName);
         if (template.getName() != null) {
             MmsEnumTag.update(titleSpan, template.getName(), "mms.msgtemplate.enum.name");
-            titleSpan.addClassName("mms-enum-tag--title");
+            titleSpan.addClassName("wams-enum-tag--title");
         }
         left.add(titleSpan);
 

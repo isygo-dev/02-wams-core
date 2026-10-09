@@ -2,14 +2,11 @@ package eu.isygoit.ui.kms.views.cryptography.key.dialog;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -21,6 +18,7 @@ import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
 import feign.FeignException;
@@ -40,10 +38,10 @@ public class CreateKeyDialog extends KeyDialogBase {
     private ComboBox<IEnumKeyUsage.Types> keyUsageCombo;
     private ComboBox<IEnumKeySpec.Types> keySpecCombo;
     private ComboBox<IEnumKeyOrigin.Types> originCombo;
-    private com.vaadin.flow.component.checkbox.Checkbox multiRegionCheckbox;
+    private Checkbox multiRegionCheckbox;
     private TextField primaryRegionField;
     private TextField replicaRegionsField;
-    private com.vaadin.flow.component.checkbox.Checkbox bypassPolicyCheckbox;
+    private Checkbox bypassPolicyCheckbox;
     private ComboBox<IEnumKeyExpirationModel.Types> expirationModelCombo;
     private DatePicker validToPicker;
     private TextArea policyField;
@@ -57,7 +55,7 @@ public class CreateKeyDialog extends KeyDialogBase {
         setOkButtonText(I18n.t("kms.key.dialog.create.button"));
         buildCommonForm();
         buildCreateSpecificForm();
-        add(createFullFormLayout());
+        addFormSections();
         prefillData();
     }
 
@@ -84,7 +82,7 @@ public class CreateKeyDialog extends KeyDialogBase {
         originCombo.setValue(IEnumKeyOrigin.Types.WAMS_KMS);
         originCombo.setRequiredIndicatorVisible(true);
 
-        multiRegionCheckbox = new com.vaadin.flow.component.checkbox.Checkbox(I18n.t("kms.key.dialog.create.field.multi.region"));
+        multiRegionCheckbox = new Checkbox(I18n.t("kms.key.dialog.create.field.multi.region"));
         primaryRegionField = new TextField(I18n.t("kms.key.dialog.create.field.primary.region"));
         primaryRegionField.setPlaceholder(I18n.t("kms.key.dialog.create.field.primary.region.placeholder"));
         primaryRegionField.setValue("us-east-1");
@@ -102,7 +100,7 @@ public class CreateKeyDialog extends KeyDialogBase {
             }
         });
 
-        bypassPolicyCheckbox = new com.vaadin.flow.component.checkbox.Checkbox(I18n.t("kms.key.dialog.create.field.bypass.policy"));
+        bypassPolicyCheckbox = new Checkbox(I18n.t("kms.key.dialog.create.field.bypass.policy"));
 
         expirationModelCombo = new ComboBox<>(I18n.t("kms.key.dialog.create.field.expiration.model"));
         expirationModelCombo.setItems(IEnumKeyExpirationModel.Types.values());
@@ -138,10 +136,8 @@ public class CreateKeyDialog extends KeyDialogBase {
             }
         });
 
-        policyField = new TextArea(I18n.t("kms.key.dialog.create.field.policy"));
+        policyField = DialogLayout.tall(new TextArea(I18n.t("kms.key.dialog.create.field.policy")));
         policyField.setPlaceholder(I18n.t("kms.key.dialog.create.field.policy.placeholder"));
-        policyField.setWidthFull();
-        policyField.setHeight("150px");
     }
 
     private void updateKeySpecOptions(IEnumKeyUsage.Types usage) {
@@ -158,29 +154,32 @@ public class CreateKeyDialog extends KeyDialogBase {
         }
     }
 
-    private FormLayout createFullFormLayout() {
-        FormLayout fullForm = new FormLayout();
-        fullForm.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1));
-        fullForm.add(aliasField, descriptionField,
-                keyUsageCombo, keySpecCombo, originCombo,
-                multiRegionCheckbox, primaryRegionField, replicaRegionsField,
-                bypassPolicyCheckbox,
-                rotationEnabledCheckbox, rotationPeriodField,
-                expirationModelCombo, validToPicker,
-                policyField);
+    private void addFormSections() {
+        // Cryptography: usage, spec, origin and (conditional) external key material expiry
+        VerticalLayout cryptoSection = DialogLayout.section(
+                I18n.t("kms.key.dialog.describe.section.crypto"), VaadinIcon.LOCK);
+        FormLayout cryptoForm = DialogLayout.responsiveForm();
+        cryptoForm.add(keyUsageCombo, keySpecCombo, originCombo, expirationModelCombo, validToPicker);
+        cryptoSection.add(cryptoForm);
 
-        // Tags section
-        Button addTagButton = new Button(I18n.t("kms.key.dialog.create.field.add.tag"), new com.vaadin.flow.component.icon.Icon(VaadinIcon.PLUS));
-        addTagButton.addClickListener(e -> addTagRow(null, null));
-        HorizontalLayout tagsHeader = new HorizontalLayout(new Span(I18n.t("kms.key.dialog.create.field.add.tag")), addTagButton);
-        tagsHeader.setAlignItems(FlexComponent.Alignment.BASELINE);
-        tagsHeader.setSpacing(true);
-        VerticalLayout tagsSection = new VerticalLayout(tagsHeader, tagsContainer);
-        tagsSection.setPadding(false);
-        tagsSection.setSpacing(false);
-        fullForm.add(tagsSection);
+        // Multi-region
+        VerticalLayout regionSection = DialogLayout.section(
+                I18n.t("kms.key.dialog.create.section.region"), VaadinIcon.GLOBE);
+        FormLayout regionForm = DialogLayout.responsiveForm();
+        regionForm.add(multiRegionCheckbox, primaryRegionField, replicaRegionsField);
+        regionForm.setColspan(multiRegionCheckbox, 2);
+        regionSection.add(regionForm);
 
-        return fullForm;
+        // Policy
+        VerticalLayout policySection = DialogLayout.section(
+                I18n.t("kms.key.dialog.create.section.policy"), VaadinIcon.SHIELD);
+        FormLayout policyForm = DialogLayout.responsiveForm();
+        policyForm.add(bypassPolicyCheckbox, policyField);
+        policyForm.setColspan(policyField, 2);
+        policySection.add(policyForm);
+
+        addSections(buildIdentitySection(), cryptoSection, regionSection,
+                buildRotationSection(), policySection, buildTagsSection());
     }
 
     @Override

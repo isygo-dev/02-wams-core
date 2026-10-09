@@ -5,23 +5,22 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
 
 /**
  * Read-only dialog showing every field of a {@link NextCodeDto}, for use
  * when the compact {@code NextCodeCard} isn't enough (i.e. "Details" action).
  */
-@CssImport("./styles/kms.css")
+@CssImport("./styles/kms.scss")
 public class NextCodeDetailsViewDialog extends KmsDetailsDialog {
 
     public NextCodeDetailsViewDialog(NextCodeDto dto) {
         super(I18n.t("kms.nextcode.details.title"));
 
-        setWidth("650px");
-        setMaxWidth("95%");
+        applyWidth(DialogLayout.WIDTH_M);
         setModal(true);
         setDraggable(true);
-        setResizable(true);
         addClassName("next-code-details-dialog");
 
         buildContent(dto);
@@ -30,8 +29,6 @@ public class NextCodeDetailsViewDialog extends KmsDetailsDialog {
     private void buildContent(NextCodeDto dto) {
         // Identity
         Div identityGrid = createDetailGrid();
-        addFieldToGrid(identityGrid, VaadinIcon.HASH, I18n.t("kms.nextcode.details.field.id"),
-                dto.getId() != null ? String.valueOf(dto.getId()) : null);
         addFieldToGrid(identityGrid, VaadinIcon.BUILDING, I18n.t("kms.nextcode.details.field.tenant"), dto.getTenant());
         addFieldToGrid(identityGrid, VaadinIcon.FILE_TEXT, I18n.t("kms.nextcode.card.entity"), dto.getEntity());
         addFieldToGrid(identityGrid, VaadinIcon.TAG, I18n.t("kms.nextcode.card.attribute"), dto.getAttribute());

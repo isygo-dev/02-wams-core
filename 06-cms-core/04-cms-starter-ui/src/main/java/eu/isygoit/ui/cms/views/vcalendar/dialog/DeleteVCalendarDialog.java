@@ -1,63 +1,26 @@
 package eu.isygoit.ui.cms.views.vcalendar.dialog;
 
-import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
-import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.common.dialog.DeleteActionDialog;
 import eu.isygoit.ui.cms.views.vcalendar.VCalendarManagementView;
-import feign.FeignException;
 
-public class DeleteVCalendarDialog extends PinBaseActionDialog {
-
-    private final VCalendarManagementView parentView;
-    private final VCalendarService calendarService;
-    private final Long calendarId;
+public class DeleteVCalendarDialog extends DeleteActionDialog {
 
     public DeleteVCalendarDialog(VCalendarManagementView parentView,
                                  VCalendarService calendarService,
                                  Long calendarId,
                                  Runnable onSuccess) {
-        super(I18n.t("cms.calendar.dialog.delete.title"),
-                I18n.t("cms.calendar.dialog.delete.message"),
-                onSuccess);
-        addClassName("cms-dialog");
-        this.parentView = parentView;
-        this.calendarService = calendarService;
-        this.calendarId = calendarId;
-
-        setOkButtonText(I18n.t("cms.calendar.dialog.delete.button"));
-        addThemeVariantsOkButton(ButtonVariant.LUMO_ERROR);
-        setWidth("450px");
-    }
-
-    @Override
-    protected boolean onOk() {
-        if (!validatePin()) {
-            append(I18n.t("cms.calendar.dialog.delete.invalid.code"));
-            return false;
-        }
-
-        parentView.showLoading(true);
-        try {
-            calendarService.delete(calendarId);
-            append(I18n.t("cms.calendar.dialog.delete.success"));
-            return true;
-        } catch (FeignException ex) {
-            append(extractErrorMessage(ex));
-        } catch (Exception e) {
-            append(I18n.t("cms.calendar.dialog.delete.error", e.getMessage()));
-        } finally {
-            parentView.showLoading(false);
-        }
-        return false;
-    }
-
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
-                return ex.contentUTF8();
-        } catch (Exception ignored) {
-        }
-        return ex.getMessage();
+        super(new Texts(
+                        I18n.t("cms.calendar.dialog.delete.title"),
+                        I18n.t("cms.calendar.dialog.delete.message"),
+                        I18n.t("cms.calendar.dialog.delete.button"),
+                        I18n.t("cms.calendar.dialog.delete.invalid.code"),
+                        I18n.t("cms.calendar.dialog.delete.success"),
+                        detail -> I18n.t("cms.calendar.dialog.delete.error", detail)),
+                () -> calendarService.delete(calendarId),
+                onSuccess,
+                parentView::showLoading,
+                "cms-dialog");
     }
 }

@@ -7,13 +7,17 @@ import eu.isygoit.dto.data.AnnexDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AnnexService;
-import eu.isygoit.ui.common.dialog.DetailsViewDialog;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.ims.views.annex.AnnexManagementView;
+import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
+import eu.isygoit.ui.ims.views.common.ImsDialogSupport;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
-public class AnnexDetailsViewDialog extends DetailsViewDialog {
+import java.time.LocalDateTime;
+
+public class AnnexDetailsViewDialog extends ImsDetailsDialog {
 
     private final AnnexManagementView parentView;
     private final AnnexService annexService;
@@ -23,13 +27,11 @@ public class AnnexDetailsViewDialog extends DetailsViewDialog {
                                   AnnexService annexService,
                                   Long annexId) {
         super(I18n.t("ims.annex.details.title"));
-        addClassName("ims-dialog");
         this.parentView = parentView;
         this.annexService = annexService;
         this.annexId = annexId;
 
-        setWidth("700px");
-        setMaxWidth("95%");
+        applyWidth(DialogLayout.WIDTH_M);
         setModal(true);
         setDraggable(true);
         setResizable(true);
@@ -48,7 +50,7 @@ public class AnnexDetailsViewDialog extends DetailsViewDialog {
                 add(new Span(I18n.t("ims.annex.details.not.found")));
             }
         } catch (FeignException ex) {
-            add(new Span(I18n.t("ims.annex.details.load.error", extractErrorMessage(ex))));
+            add(new Span(I18n.t("ims.annex.details.load.error", ImsDialogSupport.extractErrorMessage(ex))));
         } catch (Exception e) {
             add(new Span(I18n.t("ims.annex.details.load.error", e.getMessage())));
         } finally {
@@ -57,53 +59,21 @@ public class AnnexDetailsViewDialog extends DetailsViewDialog {
     }
 
     private void buildContent(AnnexDto annex) {
-        // Identity — table code/value/reference/order (text identifiers)
-        Div identityInfo = new Div();
-        identityInfo.addClassName("wams-card__detail-grid");
-
+        Div identityInfo = createDetailGrid();
         addFieldToGrid(identityInfo, VaadinIcon.CODE, I18n.t("ims.annex.details.field.table.code"), annex.getTableCode(), true);
         addFieldToGrid(identityInfo, VaadinIcon.FONT, I18n.t("ims.annex.details.field.value"), annex.getValue(), true);
         addFieldToGrid(identityInfo, VaadinIcon.LINK, I18n.t("ims.annex.details.field.reference"), annex.getReference(), true);
         addFieldToGrid(identityInfo, VaadinIcon.SORT, I18n.t("ims.annex.details.field.order"), annex.getAnnexOrder() != null ? String.valueOf(annex.getAnnexOrder()) : null);
+        ImsEnumTag.addDetailField(identityInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.annex.details.field.language"), annex.getLanguage(), "ims.enum.language");
+        addFieldToGrid(identityInfo, VaadinIcon.BUILDING, I18n.t("ims.annex.details.field.tenant"), annex.getTenant(), true);
+        addFieldToGrid(identityInfo, VaadinIcon.FILE_TEXT, I18n.t("ims.annex.details.field.description"), annex.getDescription(), false);
+        addTab(I18n.t("ims.annex.details.section.identity"), createSection(I18n.t("ims.annex.details.section.identity"), identityInfo));
 
-        add(createSection(I18n.t("ims.annex.details.section.identity"), identityInfo));
-
-        // Classification & status — language
-        Div classificationInfo = new Div();
-        classificationInfo.addClassName("wams-card__detail-grid");
-
-        ImsEnumTag.addDetailField(classificationInfo, VaadinIcon.LOCATION_ARROW_CIRCLE, I18n.t("ims.annex.details.field.language"), annex.getLanguage(), "ims.enum.language");
-
-        add(createSection(I18n.t("ims.annex.details.section.classification"), classificationInfo));
-
-        // Contact / relations — tenant/description
-        Div contactInfo = new Div();
-        contactInfo.addClassName("wams-card__detail-grid");
-
-        addFieldToGrid(contactInfo, VaadinIcon.BUILDING, I18n.t("ims.annex.details.field.tenant"), annex.getTenant(), true);
-        addFieldToGrid(contactInfo, VaadinIcon.FILE_TEXT, I18n.t("ims.annex.details.field.description"), annex.getDescription(), false);
-
-        add(createSection(I18n.t("ims.annex.details.section.contact"), contactInfo));
-
-        // Audit — created/updated by & date
-        Div auditInfo = new Div();
-        auditInfo.addClassName("wams-card__detail-grid");
-
-        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR, I18n.t("ims.annex.details.field.created"), annex.getCreateDate() != null ? DateHelper.formatToHumanReadable(annex.getCreateDate()) : null);
-        addFieldToGrid(auditInfo, VaadinIcon.USER_CHECK, I18n.t("ims.annex.details.field.created.by"), annex.getCreatedBy());
-        addFieldToGrid(auditInfo, VaadinIcon.CALENDAR_O, I18n.t("ims.annex.details.field.updated"), annex.getUpdateDate() != null ? DateHelper.formatToHumanReadable(annex.getUpdateDate()) : null);
-        addFieldToGrid(auditInfo, VaadinIcon.EDIT, I18n.t("ims.annex.details.field.updated.by"), annex.getUpdatedBy());
-
-        add(createSection(I18n.t("ims.annex.details.section.audit"), auditInfo));
-
+        addAuditTab(annex.getCreatedBy(), formatDate(annex.getCreateDate()),
+                annex.getUpdatedBy(), formatDate(annex.getUpdateDate()));
     }
 
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank())
-                return ex.contentUTF8();
-        } catch (Exception ignored) {
-        }
-        return ex.getMessage();
+    private static String formatDate(LocalDateTime date) {
+        return date != null ? DateHelper.formatToHumanReadable(date) : null;
     }
 }

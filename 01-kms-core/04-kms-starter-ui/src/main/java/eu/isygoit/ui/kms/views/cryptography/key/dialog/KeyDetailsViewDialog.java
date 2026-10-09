@@ -11,6 +11,7 @@ import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.GetKeyPolicyResponse;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
@@ -56,9 +57,7 @@ public class KeyDetailsViewDialog extends KmsDetailsDialog {
         this.keyId = keyId;
         this.metadata = metadata;
 
-        setWidth("750px");
-        setMaxWidth("95%");
-        setResizable(true);
+        applyWidth(DialogLayout.WIDTH_L);
         setCloseOnEsc(true);
         setCloseOnOutsideClick(true);
         addClassName("describe-key-dialog");
@@ -112,8 +111,7 @@ public class KeyDetailsViewDialog extends KmsDetailsDialog {
                 if (prettyPolicy != null && !prettyPolicy.isBlank()) {
                     TextArea policyArea = new TextArea();
                     policyArea.setValue(prettyPolicy);
-                    policyArea.setWidthFull();
-                    policyArea.setHeight("300px");
+                    DialogLayout.tall(policyArea);
                     policyArea.setReadOnly(true);
                     policyArea.addClassName("policy-textarea");
                     addTab(I18n.t("kms.key.dialog.describe.field.policy"),
@@ -154,7 +152,8 @@ public class KeyDetailsViewDialog extends KmsDetailsDialog {
                 I18n.t("kms.key.dialog.describe.field.key.spec"), metadata.getKeySpec(), "kms.enum");
         KmsEnumTag.addDetailField(grid, VaadinIcon.COGS,
                 I18n.t("kms.key.dialog.describe.field.key.usage"), metadata.getKeyUsage(), "kms.enum");
-        addFieldToGrid(grid, VaadinIcon.COG_O, I18n.t("kms.key.dialog.describe.field.customer.master.key.spec"), metadata.getCustomerMasterKeySpec());
+        grid.add(KmsEnumTag.detailField(VaadinIcon.COG_O, I18n.t("kms.key.dialog.describe.field.customer.master.key.spec"),
+                KmsEnumTag.ofValue(metadata.getCustomerMasterKeySpec(), "kms.enum")));
         KmsEnumTag.addDetailField(grid, VaadinIcon.CLOUD,
                 I18n.t("kms.key.dialog.describe.field.origin"), metadata.getOrigin(), "kms.enum");
         KmsEnumTag.addDetailField(grid, VaadinIcon.HOURGLASS,
@@ -174,12 +173,10 @@ public class KeyDetailsViewDialog extends KmsDetailsDialog {
         addFieldToGrid(grid, VaadinIcon.CLOCK, I18n.t("kms.key.dialog.describe.field.rotation.period"),
                 metadata.getRotationPeriodInDays() != null ? metadata.getRotationPeriodInDays().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
         addFieldToGrid(grid, VaadinIcon.CUBE, I18n.t("kms.key.dialog.describe.field.current.version"), metadata.getCurrentVersion(), true);
-        addFieldToGrid(grid, VaadinIcon.LOCK, I18n.t("kms.key.dialog.describe.field.encryption.algorithms"),
-                (metadata.getEncryptionAlgorithmSpecs() != null && !metadata.getEncryptionAlgorithmSpecs().isEmpty())
-                        ? String.join(", ", metadata.getEncryptionAlgorithmSpecs()) : null);
-        addFieldToGrid(grid, VaadinIcon.SIGN_IN_ALT, I18n.t("kms.key.dialog.describe.field.signing.algorithms"),
-                (metadata.getSigningAlgorithms() != null && !metadata.getSigningAlgorithms().isEmpty())
-                        ? String.join(", ", metadata.getSigningAlgorithms()) : null);
+        grid.add(KmsEnumTag.detailField(VaadinIcon.LOCK, I18n.t("kms.key.dialog.describe.field.encryption.algorithms"),
+                KmsEnumTag.ofValues(metadata.getEncryptionAlgorithmSpecs(), "kms.enum")));
+        grid.add(KmsEnumTag.detailField(VaadinIcon.SIGN_IN_ALT, I18n.t("kms.key.dialog.describe.field.signing.algorithms"),
+                KmsEnumTag.ofValues(metadata.getSigningAlgorithms(), "kms.enum")));
 
         if (metadata.getMultiRegionConfiguration() != null) {
             try {

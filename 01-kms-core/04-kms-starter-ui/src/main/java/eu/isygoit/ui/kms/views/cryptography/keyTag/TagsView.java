@@ -3,7 +3,6 @@ package eu.isygoit.ui.kms.views.cryptography.keyTag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -14,8 +13,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
@@ -23,6 +20,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.component.RowCard;
+import eu.isygoit.ui.common.component.RowCardList;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.common.KmsConfirmationDialog;
@@ -47,7 +46,7 @@ public class TagsView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>();
-    private final Grid<KmsDtos.ListResourceTagsResponse.Tag> tagsGrid = new Grid<>();
+    private final RowCardList<KmsDtos.ListResourceTagsResponse.Tag> tagsList = new RowCardList<>();
     private final Button addTagButton = new Button(I18n.t("kms.tags.view.add.tag.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
@@ -55,7 +54,7 @@ public class TagsView extends ManagementVerticalView {
 
     private List<KeyOption> keyOptions = new ArrayList<>();
     private String selectedKeyId = null;
-    private ListDataProvider<KmsDtos.ListResourceTagsResponse.Tag> tagsDataProvider;
+    private List<KmsDtos.ListResourceTagsResponse.Tag> allTags;
 
     @Autowired
     public TagsView(KmsApiService kmsApiService) {
@@ -78,27 +77,14 @@ public class TagsView extends ManagementVerticalView {
         add(toolbar);
 
         // Tags grid
-        tagsGrid.setWidthFull();
-        tagsGrid.addColumn(KmsDtos.ListResourceTagsResponse.Tag::getTagKey)
-                .setHeader(I18n.t("kms.tags.view.grid.column.key"))
-                .setSortable(true)
-                .setResizable(true);
-        tagsGrid.addColumn(KmsDtos.ListResourceTagsResponse.Tag::getTagValue)
-                .setHeader(I18n.t("kms.tags.view.grid.column.value"))
-                .setSortable(true)
-                .setResizable(true);
-        tagsGrid.addComponentColumn(tag -> {
-            Button deleteBtn = new Button(new Icon(VaadinIcon.TRASH));
-            deleteBtn.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
-            deleteBtn.setTooltipText(I18n.t("kms.tags.view.remove.tag"));
-            deleteBtn.addClickListener(e -> confirmDeleteTag(tag));
-            return deleteBtn;
-        }).setHeader(I18n.t("kms.tags.view.grid.column.actions")).setWidth("80px").setFlexGrow(0);
-        tagsGrid.setVisible(false);
-        tagsGrid.setEmptyStateText(I18n.t("kms.tags.view.grid.empty"));
-        tagsGrid.addClassName("tags-grid");
-        add(tagsGrid);
-        setFlexGrow(1, tagsGrid);
+        tagsList.setWidthFull();
+        tagsList.cardFactory(tag -> RowCard.create()
+                .title(tag.getTagKey())
+                .fact(I18n.t("kms.tags.view.grid.column.value"), tag.getTagValue())
+                .dangerAction(VaadinIcon.TRASH, I18n.t("kms.tags.view.remove.tag"), () -> confirmDeleteTag(tag)));
+        tagsList.setVisible(false);
+        tagsList.emptyText(I18n.t("kms.tags.view.grid.empty"));
+        add(tagsList);
 
         // Loading indicator
         loadingBar.setIndeterminate(true);
@@ -176,23 +162,23 @@ public class TagsView extends ManagementVerticalView {
     }
 
     private void clearTagsGrid() {
-        tagsDataProvider = null;
-        tagsGrid.setItems(new ArrayList<>());
-        tagsGrid.setVisible(false);
+        allTags = null;
+        tagsList.setItems(new ArrayList<>());
+        tagsList.setVisible(false);
         searchField.clear();
         searchField.setEnabled(false);
     }
 
     private void filterTags() {
-        if (tagsDataProvider == null) return;
+        if (allTags == null) return;
         String filterText = searchField.getValue().trim().toLowerCase();
         if (filterText.isEmpty()) {
-            tagsDataProvider.clearFilters();
+            tagsList.setItems(allTags);
         } else {
-            tagsDataProvider.setFilter(tag ->
-                    tag.getTagKey().toLowerCase().contains(filterText) ||
-                            tag.getTagValue().toLowerCase().contains(filterText)
-            );
+            tagsList.setItems(allTags.stream()
+                    .filter(tag -> tag.getTagKey().toLowerCase().contains(filterText) ||
+                            tag.getTagValue().toLowerCase().contains(filterText))
+                    .collect(Collectors.toList()));
         }
     }
 
@@ -246,7 +232,7 @@ public class TagsView extends ManagementVerticalView {
             return;
         }
         showLoading(true);
-        tagsGrid.setVisible(false);
+        tagsList.setVisible(false);
         searchField.setEnabled(false);
         try {
             ResponseEntity<KmsDtos.ListResourceTagsResponse> response = kmsApiService.listResourceTags(selectedKeyId, 100, null);
@@ -254,22 +240,21 @@ public class TagsView extends ManagementVerticalView {
             List<KmsDtos.ListResourceTagsResponse.Tag> tags = (tagsResponse != null && tagsResponse.getTags() != null)
                     ? tagsResponse.getTags()
                     : new ArrayList<>();
-            tagsDataProvider = DataProvider.ofCollection(tags);
-            tagsGrid.setDataProvider(tagsDataProvider);
-            tagsGrid.setVisible(true);
+            allTags = tags;
+            tagsList.setVisible(true);
             searchField.setEnabled(true);
             filterTags();
         } catch (FeignException ex) {
             String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
             showError(I18n.t("kms.tags.view.load.tags.error", errorMsg));
             log.error("Failed to load tags for key {}: {}", selectedKeyId, errorMsg);
-            tagsGrid.setItems(new ArrayList<>());
-            tagsGrid.setVisible(true);
+            tagsList.setItems(new ArrayList<>());
+            tagsList.setVisible(true);
         } catch (Exception e) {
             showError(I18n.t("kms.tags.view.load.tags.error", e.getMessage()));
             log.error("Failed to load tags for key {}: {}", selectedKeyId, e.getMessage());
-            tagsGrid.setItems(new ArrayList<>());
-            tagsGrid.setVisible(true);
+            tagsList.setItems(new ArrayList<>());
+            tagsList.setVisible(true);
         } finally {
             showLoading(false);
         }
@@ -285,7 +270,7 @@ public class TagsView extends ManagementVerticalView {
         } else if (!show && selectedKeyId != null) {
             searchField.setEnabled(true);
         }
-        tagsGrid.setEnabled(!show);
+        tagsList.getElement().setEnabled(!show);
     }
 
     private void showError(String message) {
@@ -357,4 +342,4 @@ public class TagsView extends ManagementVerticalView {
             return displayName;
         }
     }
-}
+}
