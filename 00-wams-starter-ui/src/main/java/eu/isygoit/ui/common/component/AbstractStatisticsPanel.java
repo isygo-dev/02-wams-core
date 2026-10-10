@@ -15,11 +15,17 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import eu.isygoit.i18n.I18n;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 /**
  * Classe abstraite pour un panneau de statistiques.
  * Gère l'en-tête commun (titre, rafraîchissement, chargement) et délègue
  * la construction des sections et le chargement des données aux sous-classes.
+ *
+ * Toutes les dimensions (gap, padding, marges, largeurs) sont pilotées par
+ * les classes CSS déclarées dans common.scss :
+ *   .wams-stats-panel, .wams-stats-header, .wams-stats-actions,
+ *   .wams-stats-title, .wams-stats-refresh, .wams-stats-loader
  */
 @CssImport("./styles/scss/common.scss")
 public abstract class AbstractStatisticsPanel extends VerticalLayout {
@@ -37,23 +43,22 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
     }
 
     private void buildUI() {
-        setSpacing(true);
+        // Lumo theme flags — structural, no measurements. All sizing is in SCSS.
+        setSpacing(false);
         setPadding(false);
+        setMargin(false);
         setWidthFull();
         addClassName("wams-stats-panel");
 
         HorizontalLayout headerLayout = new HorizontalLayout();
         headerLayout.setWidthFull();
         headerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        headerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         headerLayout.addClassName("wams-stats-header");
-
-        H3 statsTitle = new H3(getTitleKey());
-        statsTitle.addClassName("wams-stats-title");
 
         HorizontalLayout actionsLayout = new HorizontalLayout();
         actionsLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        actionsLayout.setSpacing(true);
+        actionsLayout.setSpacing(false);
+        actionsLayout.addClassName("wams-stats-actions");
 
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.addClassName("wams-stats-refresh");
@@ -61,11 +66,20 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
 
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
-        loadingBar.setWidth("150px");
         loadingBar.addClassName("wams-stats-loader");
-
         actionsLayout.add(refreshButton, loadingBar);
-        headerLayout.add(statsTitle, actionsLayout);
+
+        if (StringUtils.hasText(getTitleKey())) {
+            headerLayout.addClassName("has-title");
+            H3 statsTitle = new H3(getTitleKey());
+            statsTitle.addClassName("wams-stats-title");
+            headerLayout.add(statsTitle, actionsLayout);
+        } else {
+            // No title: refresh sits at the far right, no dead space in the row.
+            headerLayout.addClassName("no-title");
+            headerLayout.add(actionsLayout);
+        }
+
         add(headerLayout);
     }
 

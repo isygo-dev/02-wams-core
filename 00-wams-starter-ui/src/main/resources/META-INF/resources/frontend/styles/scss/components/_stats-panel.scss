@@ -1,0 +1,92 @@
+/* ============================================================
+   Statistics panel — abstract shell + dashboard grid
+   Owns all spacing decisions for AbstractStatisticsPanel and
+   EdyraPilotStatisticsPanel. No inline styles in Java.
+   ============================================================ */
+
+/* ---------- Panel shell ---------- */
+.wams-stats-panel {
+  gap: 0.35rem;          /* header ↔ content */
+  padding: 0;
+  margin: 0;
+}
+
+/* ---------- Header row ---------- */
+.wams-stats-header {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  align-items: center;
+
+  &.has-title {
+    justify-content: space-between;
+  }
+
+  &.no-title {
+    justify-content: flex-end;   /* pin refresh to the right edge */
+  }
+}
+
+/* ---------- Title ---------- */
+.wams-stats-title {
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+}
+
+/* ---------- Actions cluster ---------- */
+.wams-stats-actions {
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* ---------- Loader ---------- */
+.wams-stats-loader {
+  width: 120px;
+}
+
+/* ---------- Dashboard root ---------- */
+.dashboard-root,
+.edyra-dashboard-statistics-panel {
+  padding: 0;
+  margin: 0;
+  gap: 0.35rem;
+}
+
+/* ---------- Dashboard grid ---------- */
+.edyra-dashboard-grid,
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+/* Span helpers (already referenced from Java) */
+.edyra-dashboard-span-12,
+.dashboard-span-12 { grid-column: span 12; }
+
+.edyra-dashboard-span-8,
+.dashboard-span-8  { grid-column: span 8; }
+
+.edyra-dashboard-span-4,
+.dashboard-span-4  { grid-column: span 4; }
+
+/* Collapse to single column on narrow screens */
+@media (max-width: 900px) {
+  .edyra-dashboard-grid,
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .edyra-dashboard-span-12,
+  .edyra-dashboard-span-8,
+  .edyra-dashboard-span-4,
+  .dashboard-span-12,
+  .dashboard-span-8,
+  .dashboard-span-4 {
+    grid-column: 1 / -1;
+  }
+}
