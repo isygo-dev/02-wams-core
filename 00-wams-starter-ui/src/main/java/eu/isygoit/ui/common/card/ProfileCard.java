@@ -1,5 +1,6 @@
 package eu.isygoit.ui.common.card;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -9,8 +10,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.StreamResource;
 import eu.isygoit.i18n.I18n;
 import org.springframework.util.StringUtils;
+
+import java.io.ByteArrayInputStream;
 
 /**
  * Common base for cards that display a profile-like DTO carrying:
@@ -18,10 +22,20 @@ import org.springframework.util.StringUtils;
  *   <li>an avatar / image</li>
  *   <li>a full display name and an optional subtitle (e.g. email)</li>
  *   <li>a status tag (rendered at the footer's left by {@link BaseStatusCard})</li>
- *   <li>a set of enum tags (rendered at the bottom of the body, just above
- *       the footer, via {@link BaseCard#buildEnumTags()}; the tags row wraps
- *       on narrow cards)</li>
+ *   <li>a set of enum tags (rendered at the bottom of the body via
+ *       {@link BaseCard#buildEnumTags()})</li>
  * </ul>
+ *
+ * <h3>Profile image</h3>
+ * The avatar is always rendered as an {@link Image}. Its source is resolved in
+ * this order:
+ * <ol>
+ *   <li>{@link #profileImagePath()} — used directly when non-blank;</li>
+ *   <li>otherwise {@link #profileImagePlaceholder()} is shown;</li>
+ *   <li>and if the subclass provides a non-null {@link #profileImageLoader()},
+ *       {@link #onCardAttach(AttachEvent)} invokes it asynchronously and calls
+ *       {@link #setProfileImageBytes(byte[])} once the bytes are available.</li>
+ * </ol>
  *
  * @param <V> parent view type
  * @param <S> service type
@@ -30,9 +44,26 @@ import org.springframework.util.StringUtils;
 public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusCard<V, S> {
 
     /**
+     * Default data-URI SVG placeholder (generic user silhouette) shown when
+     * no real image is available.
+     */
+    protected static final String DEFAULT_PROFILE_IMAGE_PLACEHOLDER =
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' " +
+                    "viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1' " +
+                    "stroke-linecap='round' stroke-linejoin='round'%3E" +
+                    "%3Ccircle cx='12' cy='8' r='4'%3E%3C/circle%3E" +
+                    "%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3C/svg%3E";
+
+    /**
      * The DTO being displayed. Subclasses can read it directly.
      */
     protected final D profile;
+
+    /**
+     * The avatar image element. Kept as a field so subclasses can update the
+     * source asynchronously via {@link #setProfileImageBytes(byte[])}.
+     */
+    protected Image profileAvatarImage;
 
     protected ProfileCard(V parentView, S objectService, D profile) {
         super(parentView, objectService);
@@ -56,7 +87,9 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     }
 
     /**
-     * Path/URL to the profile picture. May be {@code null}/{@code blank} → user icon.
+     * Path/URL to the profile picture. May be {@code null}/{@code blank}.
+     * <p>Cards that <em>download</em> the image (see
+     * {@link #profileImageLoader()}) typically return {@code null} here.
      */
     protected abstract String profileImagePath();
 
@@ -101,25 +134,94 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     }
 
     /**
-     * Round avatar. Uses {@link #profileImagePath()} when non-blank, else a user icon.
+     * Builds the round avatar as an {@link Image} so its source can be swapped
+     * asynchronously. Initial source is {@link #profileImagePath()} when
+     * non-blank, otherwise {@link #profileImagePlaceholder()}.
      */
     protected Component buildProfileAvatar() {
         Div wrap = new Div();
         wrap.addClassName("wams-profile-card__avatar-wrap");
 
+        profileAvatarImage = new Image();
+        profileAvatarImage.setWidth("100%");
+        profileAvatarImage.setHeight("100%");
+        profileAvatarImage.addClassName("wams-profile-card__avatar-img");
+
         String path = profileImagePath();
-        if (StringUtils.hasText(path)) {
-            Image img = new Image(path, "");
-            img.setWidth("100%");
-            img.setHeight("100%");
-            img.addClassName("wams-profile-card__avatar-img");
-            wrap.add(img);
-        } else {
-            Icon icon = VaadinIcon.USER.create();
-            icon.addClassName("wams-profile-card__avatar-icon");
-            wrap.add(icon);
-        }
+        profileAvatarImage.setSrc(StringUtils.hasText(path) ? path : profileImagePlaceholder());
+
+        wrap.add(profileAvatarImage);
         return wrap;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Async image loading — hooks for subclasses
+     * ══════════════════════════════════════════════════════════════ */
+
+    /**
+     * Placeholder shown when no real image is available yet. Defaults to a
+     * generic user silhouette. Subclasses may override.
+     */
+    protected String profileImagePlaceholder() {
+        return DEFAULT_PROFILE_IMAGE_PLACEHOLDER;
+    }
+
+    /**
+     * Hook for subclasses that want to <em>download</em> the profile image
+     * (rather than relying on a static path). Default returns {@code null}.
+     *
+     * <p>When non-null, {@link #onCardAttach(AttachEvent)} invokes the loader
+     * and pushes the result back through
+     * {@link #setProfileImageBytes(byte[])} (which must be called on the UI
+     * thread — the base implementation wraps it in {@code ui.access(...)}).
+     *
+     * @see #setProfileImageBytes(byte[])
+     */
+    protected ProfileImageLoader profileImageLoader() {
+        return null;
+    }
+
+    /**
+     * Replaces the avatar source with the given bytes. Passing {@code null}
+     * or an empty array resets the avatar to
+     * {@link #profileImagePlaceholder()}.
+     *
+     * <p>Must be invoked on the UI thread.
+     */
+    protected final void setProfileImageBytes(byte[] bytes) {
+        if (profileAvatarImage == null) {
+            return;
+        }
+        if (bytes != null && bytes.length > 0) {
+            StreamResource resource = new StreamResource(
+                    "profile-image-" + System.identityHashCode(profile),
+                    () -> new ByteArrayInputStream(bytes));
+            profileAvatarImage.setSrc(resource);
+        } else {
+            profileAvatarImage.setSrc(profileImagePlaceholder());
+        }
+    }
+
+    /**
+     * Default attach hook: triggers the {@link #profileImageLoader()} (if any)
+     * on the UI thread and updates the avatar once the bytes arrive.
+     *
+     * <p>Subclasses overriding this method <b>must</b> call
+     * {@code super.onCardAttach(event)}.
+     */
+    @Override
+    protected void onCardAttach(AttachEvent event) {
+        ProfileImageLoader loader = profileImageLoader();
+        if (loader == null) {
+            return;
+        }
+        getUI().ifPresent(ui -> ui.access(() -> {
+            try {
+                setProfileImageBytes(loader.load());
+            } catch (Exception e) {
+                setProfileImageBytes(null);
+            }
+        }));
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -175,12 +277,7 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     }
 
     /**
-     * Convenience wrapper for {@link BaseCard#buildEnumTags()}: collects the
-     * supplied tag spans into one {@link HorizontalLayout}.
-     *
-     * <p>The row <b>wraps</b> on narrow cards — tags spill onto the next line
-     * instead of overflowing horizontally. Returns {@code null} if there is
-     * nothing to display.
+     * Convenience wrapper for {@link BaseCard#buildEnumTags()}.
      */
     protected HorizontalLayout buildEnumTagsRow(Span... tags) {
         if (tags == null || tags.length == 0) {
@@ -205,13 +302,6 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     /**
      * Builds an enum chip with i18n lookup, falling back to the exact enum
      * constant name when no key is registered.
-     *
-     * <p>Key convention: {@code <keyPrefix>.<enum-name-lowercase>}.
-     *
-     * @param enumValue  the enum constant (nullable → returns null)
-     * @param keyPrefix  e.g. {@code "student.gender"}
-     * @param color      chip color
-     * @param tooltipKey optional i18n key for the tooltip (nullable)
      */
     protected Span buildEnumChip(Enum<?> enumValue, String keyPrefix, ChipColor color, String tooltipKey) {
         if (enumValue == null) {
@@ -225,5 +315,25 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         chip.getElement().setAttribute("title",
                 tooltip != null && !tooltip.equals(tooltipKey) ? tooltip : label);
         return chip;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Functional hook
+     * ══════════════════════════════════════════════════════════════ */
+
+    /**
+     * Strategy for fetching profile-image bytes asynchronously.
+     *
+     * <p>Invoked by {@link #onCardAttach(AttachEvent)} off the UI thread
+     * (inside {@code ui.access}), so implementations may perform blocking
+     * I/O (e.g. a Feign call).
+     */
+    @FunctionalInterface
+    public interface ProfileImageLoader {
+        /**
+         * @return raw image bytes, or {@code null}/empty to show the
+         * placeholder instead.
+         */
+        byte[] load() throws Exception;
     }
 }

@@ -1,43 +1,53 @@
 package eu.isygoit.ui.ims.views.tenant;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.TenantDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.ProfileCard;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.tenant.dialog.DeleteTenantDialog;
 import eu.isygoit.ui.ims.views.tenant.dialog.TenantDetailsViewDialog;
 import eu.isygoit.ui.ims.views.tenant.dialog.ToggleTenantStatusDialog;
-import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.List;
 
+/**
+ * Card view for a single {@link TenantDto}.
+ *
+ * <p>Layout (inherited from {@link ProfileCard}):
+ * <ul>
+ *   <li><b>Header</b> — downloaded avatar + (name over email).</li>
+ *   <li><b>Body</b>   — empty (email lives in the header subtitle).</li>
+ *   <li><b>Footer</b> — admin status tag (left) + Details / Edit / Toggle
+ *       status / Delete (right).</li>
+ * </ul>
+ *
+ * <p>The avatar uses a tenant-specific placeholder (building/columns glyph)
+ * rather than the default person silhouette.
+ */
 @Slf4j
-public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
+public class TenantCard extends ProfileCard<TenantManagementView, TenantService, TenantDto> {
 
-    private final TenantDto tenant;
+    /** Tenant-specific placeholder: a building / columns glyph. */
+    private static final String TENANT_IMAGE_PLACEHOLDER =
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' " +
+                    "viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1' " +
+                    "stroke-linecap='round' stroke-linejoin='round'%3E" +
+                    "%3Crect x='2' y='2' width='20' height='20' rx='2.18' ry='2.18'%3E%3C/rect%3E" +
+                    "%3Cpath d='M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5'%3E%3C/path%3E%3C/svg%3E";
+
     private final TenantImageService tenantImageService;
     private final Runnable onRefresh;
 
-    private Image tenantImage;
     private Span adminStatusChip;
     private Button toggleStatusBtn;
 
@@ -46,8 +56,7 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
                       TenantImageService tenantImageService,
                       TenantDto tenant,
                       Runnable onRefresh) {
-        super(parentView, tenantService);
-        this.tenant = tenant;
+        super(parentView, tenantService, tenant);
         this.tenantImageService = tenantImageService;
         this.onRefresh = onRefresh;
         initCard();
@@ -58,108 +67,108 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
         return "tenant-card";
     }
 
+    /* ══════════════════════════════════════════════════════════════
+     * Profile accessors
+     * ══════════════════════════════════════════════════════════════ */
+
+    /** No static path — the avatar is fetched via {@link #profileImageLoader()}. */
     @Override
-    protected Component buildTitle() {
-        VerticalLayout titleLayout = new VerticalLayout();
-        titleLayout.setPadding(false);
-        titleLayout.setSpacing(false);
-        titleLayout.setWidthFull();
-
-        // Row 1: avatar image only — action buttons live exclusively in the
-        // card's footer (built once by BaseCard#buildFooter()).
-        HorizontalLayout row1 = new HorizontalLayout();
-        row1.setWidthFull();
-        row1.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
-        row1.setAlignItems(FlexComponent.Alignment.CENTER);
-        row1.setSpacing(true);
-        row1.addClassName("card-row");
-
-        tenantImage = new Image();
-        tenantImage.setWidth("48px");
-        tenantImage.setHeight("48px");
-        tenantImage.addClassName("card-avatar");
-        tenantImage.setSrc(getSvgPlaceholder());
-
-        row1.add(tenantImage);
-
-        // Row 2: name + status chip
-        HorizontalLayout row2 = new HorizontalLayout();
-        row2.setAlignItems(FlexComponent.Alignment.CENTER);
-        row2.setSpacing(true);
-        row2.addClassName("card-row");
-        row2.addClassName("card-row--spaced");
-
-        Span titleSpan = buildTitleSpan(tenant.getName(), tenant.getEmail());
-        adminStatusChip = ImsEnumTag.ofOrUnknown(tenant.getAdminStatus(), null);
-        row2.add(titleSpan, adminStatusChip);
-
-        titleLayout.add(row1, row2);
-        return titleLayout;
+    protected String profileImagePath() {
+        return null;
     }
+
+    /** Keep the tenant-specific building glyph instead of the default user icon. */
+    @Override
+    protected String profileImagePlaceholder() {
+        return TENANT_IMAGE_PLACEHOLDER;
+    }
+
+    /** Downloads the tenant avatar through {@link TenantImageService}. */
+    @Override
+    protected ProfileImageLoader profileImageLoader() {
+        if (tenantImageService == null || profile == null || profile.getId() == null) {
+            return null;
+        }
+        return () -> {
+            ResponseEntity<Resource> response = tenantImageService.downloadImage(profile.getId());
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                return response.getBody().getContentAsByteArray();
+            }
+            return null;
+        };
+    }
+
+    @Override
+    protected String profileFullName() {
+        return profile.getName();
+    }
+
+    @Override
+    protected String profileSubtitle() {
+        return profile.getEmail();
+    }
+
+    /** Admin status → footer status tag. Field captured for in-place refresh. */
+    @Override
+    protected Span profileStatusTag() {
+        adminStatusChip = ImsEnumTag.ofOrUnknown(profile.getAdminStatus(), null);
+        return adminStatusChip;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Body — nothing extra (email lives in the header subtitle)
+     * ══════════════════════════════════════════════════════════════ */
+
+    @Override
+    protected void buildBodyRows() {
+        // intentionally empty
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Enum tags — none for tenants
+     * ══════════════════════════════════════════════════════════════ */
+
+    @Override
+    protected Component buildEnumTags() {
+        return null;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Actions
+     * ══════════════════════════════════════════════════════════════ */
 
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("ims.tenant.card.details.tooltip"),
-                () -> new TenantDetailsViewDialog(parentView, objectService, tenant.getId()).open());
+                () -> new TenantDetailsViewDialog(parentView, objectService, profile.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("ims.tenant.card.edit.tooltip"),
-                () -> parentView.openUpdateTenantDialog(tenant, () -> {
+                () -> parentView.openUpdateTenantDialog(profile, () -> {
                     if (onRefresh != null) onRefresh.run();
                 }));
 
         toggleStatusBtn = createToggleButton(
-                tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED,
+                profile.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED,
                 I18n.t("ims.tenant.card.enable.tooltip"),
                 I18n.t("ims.tenant.card.disable.tooltip"),
                 this::openToggleStatusDialog
         );
 
         Button deleteBtn = createDeleteButton(I18n.t("ims.tenant.card.delete.tooltip"),
-                () -> new DeleteTenantDialog(parentView, objectService, tenant.getId(), () -> {
+                () -> new DeleteTenantDialog(parentView, objectService, profile.getId(), () -> {
                     if (onRefresh != null) onRefresh.run();
                 }).open());
 
         return List.of(detailsBtn, editBtn, toggleStatusBtn, deleteBtn);
     }
 
-    @Override
-    protected void buildBodyRows() {
-        VerticalLayout body = new VerticalLayout();
-        body.setSpacing(false);
-        body.setPadding(false);
-        body.addClassName("card-row--spaced");
-
-        body.add(createIconRow(VaadinIcon.ENVELOPE, I18n.t("ims.tenant.card.email"), tenant.getEmail()));
-        add(body);
-    }
-
-    private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("meta-row");
-
-        com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
-        iconComponent.setSize("14px");
-        iconComponent.addClassName("meta-row-icon");
-
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        labelSpan.addClassName("meta-row-label");
-
-        Span valueSpan = new Span(value != null ? value : I18n.t("ims.tenant.card.value.empty"));
-        valueSpan.addClassName(LumoUtility.FontSize.XXSMALL);
-        valueSpan.addClassName("meta-row-value");
-
-        row.add(iconComponent, labelSpan, valueSpan);
-        row.expand(valueSpan);
-        return row;
-    }
+    /* ══════════════════════════════════════════════════════════════
+     * Toggle + refresh
+     * ══════════════════════════════════════════════════════════════ */
 
     private void openToggleStatusDialog() {
-        new ToggleTenantStatusDialog(parentView, objectService, tenant.getId(), tenant.getAdminStatus(), () -> {
+        new ToggleTenantStatusDialog(parentView, objectService, profile.getId(),
+                profile.getAdminStatus(), () -> {
             refreshTenantData();
             if (onRefresh != null) onRefresh.run();
         }).open();
@@ -167,9 +176,9 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
 
     private void refreshTenantData() {
         try {
-            ResponseEntity<TenantDto> response = objectService.findById(tenant.getId());
+            ResponseEntity<TenantDto> response = objectService.findById(profile.getId());
             if (response.getBody() != null) {
-                tenant.setAdminStatus(response.getBody().getAdminStatus());
+                profile.setAdminStatus(response.getBody().getAdminStatus());
                 updateStatusChip();
                 updateToggleButtonIcon();
             }
@@ -180,51 +189,17 @@ public class TenantCard extends BaseCard<TenantManagementView, TenantService> {
 
     private void updateStatusChip() {
         if (adminStatusChip != null) {
-            ImsEnumTag.update(adminStatusChip, tenant.getAdminStatus(), null);
+            ImsEnumTag.update(adminStatusChip, profile.getAdminStatus(), null);
         }
     }
 
     private void updateToggleButtonIcon() {
         if (toggleStatusBtn != null) {
-            boolean enabled = tenant.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED;
+            boolean enabled = profile.getAdminStatus() == IEnumEnabledBinaryStatus.Types.ENABLED;
             toggleStatusBtn.setIcon(enabled ? VaadinIcon.LOCK.create() : VaadinIcon.UNLOCK.create());
-            toggleStatusBtn.setTooltipText(enabled ? I18n.t("ims.tenant.card.disable.tooltip") : I18n.t("ims.tenant.card.enable.tooltip"));
+            toggleStatusBtn.setTooltipText(enabled
+                    ? I18n.t("ims.tenant.card.disable.tooltip")
+                    : I18n.t("ims.tenant.card.enable.tooltip"));
         }
-    }
-
-    @Override
-    protected void onCardAttach(AttachEvent event) {
-        updateStatusChip();
-        loadTenantImage();
-    }
-
-    private void loadTenantImage() {
-        getUI().ifPresent(ui -> ui.access(() -> {
-            try {
-                ResponseEntity<Resource> response = tenantImageService.downloadImage(tenant.getId());
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    byte[] imageBytes = response.getBody().getContentAsByteArray();
-                    if (imageBytes != null && imageBytes.length > 0) {
-                        StreamResource resource = new StreamResource("tenant_" + tenant.getId() + ".jpg",
-                                () -> new ByteArrayInputStream(imageBytes));
-                        tenantImage.setSrc(resource);
-                        return;
-                    }
-                }
-            } catch (FeignException ex) {
-                if (ex.status() == 404) {
-                    log.debug("No image found for tenant {}", tenant.getId());
-                } else {
-                    log.warn("Failed to load image for tenant {}: {}", tenant.getId(), ex.getMessage());
-                }
-            } catch (IOException e) {
-                log.error("Error reading image stream for tenant {}", tenant.getId(), e);
-            }
-            tenantImage.setSrc(getSvgPlaceholder());
-        }));
-    }
-
-    private String getSvgPlaceholder() {
-        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2' y='2' width='20' height='20' rx='2.18' ry='2.18'%3E%3C/rect%3E%3Cpath d='M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5'%3E%3C/path%3E%3C/svg%3E";
     }
 }
