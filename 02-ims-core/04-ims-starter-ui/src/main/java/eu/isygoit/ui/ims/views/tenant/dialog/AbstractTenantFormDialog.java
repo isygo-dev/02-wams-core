@@ -18,21 +18,22 @@ import eu.isygoit.remote.ims.TenantImageService;
 import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.dialog.ProfilePhotoSection;
-import eu.isygoit.ui.ims.views.common.ImsActionDialog;
+import eu.isygoit.ui.ims.views.common.AbstractImsFormDialog;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.tenant.TenantManagementView;
 import feign.FeignException;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 /**
  * Shared form of the tenant create/update dialogs: every editable {@link TenantDto}
- * field is declared here once, in three tabs (identity, contact, address). {@code id}
- * is never shown and {@code code} is always read-only (never sent). Subclasses only
- * decide how the DTO is persisted.
+ * field is declared here once, in three tabs (identity, contact, address).
+ * The profile photo is <b>downloaded</b> through {@link TenantImageService};
+ * see {@link #downloadProfileImage(Long)} and {@link #fillFrom(TenantDto)}.
  *
  * <p>Subclasses must call {@link #buildForm()} at the end of their constructor.
  */
-abstract class AbstractTenantFormDialog extends ImsActionDialog {
+abstract class AbstractTenantFormDialog extends AbstractImsFormDialog {
 
     final TenantManagementView parentView;
     final TenantService tenantService;
@@ -79,17 +80,26 @@ abstract class AbstractTenantFormDialog extends ImsActionDialog {
 
     /* Hooks */
 
-    /** I18n key of the "upload / change image" button. */
     abstract String photoButtonKey();
-
-    /** Whether a newly cropped image is mandatory to save. */
     abstract boolean imageRequired();
-
-    /** The DTO that receives the form values on save. */
     abstract TenantDto target();
-
-    /** Persists the DTO; returns the stored tenant id, or null after appending an error. */
     abstract Long persist(TenantDto dto);
+
+    @Override
+    protected byte[] downloadProfileImage(Long id) {
+        if (tenantImageService == null || id == null) return null;
+        try {
+            ResponseEntity<Resource> response = tenantImageService.downloadImage(id);
+            if (response != null
+                    && response.getStatusCode().is2xxSuccessful()
+                    && response.getBody() != null) {
+                return response.getBody().getContentAsByteArray();
+            }
+        } catch (Exception e) {
+            // Swallowed — the base class logs; caller sees the placeholder.
+        }
+        return null;
+    }
 
     /* Layout */
 
@@ -195,7 +205,6 @@ abstract class AbstractTenantFormDialog extends ImsActionDialog {
 
     /* DTO <-> form */
 
-    /** Fills every field from the DTO (update flow). */
     final void fillFrom(TenantDto dto) {
         codeField.setValue(nvl(dto.getCode()));
         nameField.setValue(nvl(dto.getName()));
@@ -219,9 +228,11 @@ abstract class AbstractTenantFormDialog extends ImsActionDialog {
             zipCodeField.setValue(nvl(addr.getZipCode()));
             additionalInfoField.setValue(nvl(addr.getAdditionalInfo()));
         }
+
+        // Download the profile photo through tenantImageService.
+        showExistingPhoto(photoSection, dto.getId());
     }
 
-    /** Copies every editable field into the DTO. {@code id} and {@code code} are left untouched. */
     private void applyTo(TenantDto dto) {
         dto.setName(nameField.getValue());
         dto.setIndustry(industryField.getValue());
@@ -238,7 +249,6 @@ abstract class AbstractTenantFormDialog extends ImsActionDialog {
         dto.setAddress(hasAddressData() ? buildAddress(dto.getAddress()) : null);
     }
 
-    /** Keeps the id and the other address attributes of an existing address (not editable here). */
     private AddressDto buildAddress(AddressDto existing) {
         AddressDto address = existing != null ? existing : AddressDto.builder().build();
         address.setCountry(countryField.getValue());
@@ -278,8 +288,6 @@ abstract class AbstractTenantFormDialog extends ImsActionDialog {
         }
         return true;
     }
-
-    /* Save */
 
     @Override
     protected final boolean onOk() {

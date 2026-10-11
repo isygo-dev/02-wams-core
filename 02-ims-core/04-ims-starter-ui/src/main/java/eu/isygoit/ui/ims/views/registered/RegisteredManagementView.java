@@ -1,22 +1,13 @@
 package eu.isygoit.ui.ims.views.registered;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.enums.IEnumAccountOrigin;
@@ -24,7 +15,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.remote.ims.RegisteredUserService;
 import eu.isygoit.remote.ims.TenantService;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.ims.layout.ImsMainLayout;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.registered.dialog.CreateAccountFromRegisteredDialog;
@@ -34,44 +25,24 @@ import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @VaadinSessionScope
 @Route(value = "ims/registered-users", layout = ImsMainLayout.class)
-@PageTitle("Registered User Management")
+//@PageTitle("Registered User Management")
 @PermitAll
-public class RegisteredManagementView extends ManagementVerticalView {
+public class RegisteredManagementView extends AbstractPaginatedView<RegisteredUserDto> {
 
     private final RegisteredUserService registeredUserService;
     private final AccountService accountService;
     private final TenantService tenantService;
 
-    private final Div cardsContainer = new Div();
-    private final Button createButton = new Button(I18n.t("ims.registered.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final TextField searchField = new TextField();
+    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
     private final ComboBox<IEnumAccountOrigin.Types> originFilter = new ComboBox<>();
 
-    private final ProgressBar loadingBar = new ProgressBar();
-    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
-    private final Span totalCountLabel = new Span();
-
-    private int currentPage = 0;
-    private int pageSize = 10;
-    private int totalPages = 0;
-    private long totalElements = 0;
-    private List<RegisteredUserDto> currentPageRegisteredUsers = new ArrayList<>();
-
-    private String currentSearch = "";
-    private IEnumAccountOrigin.Types currentOrigin = null;
+    private IEnumAccountOrigin.Types currentOrigin;
 
     @Autowired
     public RegisteredManagementView(RegisteredUserService registeredUserService,
@@ -80,237 +51,99 @@ public class RegisteredManagementView extends ManagementVerticalView {
         this.registeredUserService = registeredUserService;
         this.accountService = accountService;
         this.tenantService = tenantService;
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        addClassName("registered-management-view");
-
-        H2 header = new H2(I18n.t("ims.registered.view.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-        add(header);
-
-        HorizontalLayout toolbar = buildToolbar();
-        add(toolbar);
-
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("registered-cards-grid");
-        add(cardsContainer);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
-
-        initEventHandlers();
-
-        loadPage(0);
+        initPaginatedView();
     }
 
-    private void initEventHandlers() {
-        createButton.addClickListener(e -> openCreateRegisteredUserDialog());
-        createButton.setTooltipText(I18n.t("ims.registered.view.create.tooltip"));
-
-        refreshButton.addClickListener(e -> loadPage(0));
-        refreshButton.setTooltipText(I18n.t("ims.registered.view.refresh.tooltip"));
-
-        searchField.setPlaceholder(I18n.t("ims.registered.view.search.placeholder"));
-        searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.addValueChangeListener(e -> {
-            currentSearch = e.getValue();
-            loadPage(0);
-        });
-
-        originFilter.setItems(IEnumAccountOrigin.Types.values());
-        originFilter.setItemLabelGenerator(origin -> ImsEnumTag.label(origin, "ims.enum.origin"));
-        originFilter.setRenderer(ImsEnumTag.renderer("ims.enum.origin"));
-        originFilter.setPlaceholder(I18n.t("ims.registered.view.origin.placeholder"));
-        originFilter.addValueChangeListener(e -> {
-            currentOrigin = e.getValue();
-            loadPage(0);
-        });
-
-        pageSizeSelect.setItems(5, 10, 20, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                loadPage(0);
-            }
-        });
-
-        prevButton.addClickListener(e -> {
-            if (currentPage > 0) loadPage(currentPage - 1);
-        });
-        nextButton.addClickListener(e -> {
-            if (currentPage + 1 < totalPages) loadPage(currentPage + 1);
-        });
+    @Override
+    protected PaginatedResponseDto<RegisteredUserDto> fetchPage(int page, int size) {
+        var r = registeredUserService.findAll(page, size);
+        return r != null ? r.getBody() : null;
     }
 
-    private void loadPage(int page) {
-        showLoading(true);
-        try {
-            ResponseEntity<PaginatedResponseDto<RegisteredUserDto>> response =
-                    registeredUserService.findAll(page, pageSize);
-            PaginatedResponseDto<RegisteredUserDto> body = response.getBody();
-            if (body != null && body.getContent() != null) {
-                currentPageRegisteredUsers = body.getContent();
-                totalElements = body.getTotalElements();
-                totalPages = body.getTotalPages();
-                currentPage = body.getPageNumber();
-            } else {
-                currentPageRegisteredUsers = new ArrayList<>();
-                totalElements = 0;
-                totalPages = 0;
-            }
-            updatePaginationDisplay();
-            filterAndDisplayCards();
-        } catch (FeignException ex) {
-            String errorMsg = extractErrorMessage(ex);
-            Notification.show(I18n.t("ims.registered.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load registered users", ex);
-        } catch (Exception e) {
-            Notification.show(I18n.t("ims.registered.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load registered users", e);
-        } finally {
-            showLoading(false);
-        }
+    @Override
+    protected Component renderItem(RegisteredUserDto item) {
+        return new RegisteredCard(this, registeredUserService, accountService,
+                tenantService, item, this::loadPageZero);
     }
 
-    private void filterAndDisplayCards() {
-        List<RegisteredUserDto> filtered = currentPageRegisteredUsers.stream()
-                .filter(registeredUser -> {
-                    if (currentOrigin != null &&
-                            (registeredUser.getOrigin() == null || !registeredUser.getOrigin().equals(currentOrigin.name()))) {
-                        return false;
-                    }
-                    if (currentSearch != null && !currentSearch.isBlank()) {
-                        String searchLower = currentSearch.toLowerCase();
-                        return (registeredUser.getFirstName() != null && registeredUser.getFirstName().toLowerCase().contains(searchLower)) ||
-                                (registeredUser.getLastName() != null && registeredUser.getLastName().toLowerCase().contains(searchLower)) ||
-                                (registeredUser.getEmail() != null && registeredUser.getEmail().toLowerCase().contains(searchLower));
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
-
-        cardsContainer.removeAll();
-
-        if (filtered.isEmpty()) {
-            Div emptyState = new Div();
-            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-            emptyState.addClassName(LumoUtility.Padding.XLARGE);
-            Icon emptyIcon = VaadinIcon.CLIPBOARD_USER.create();
-            emptyIcon.setSize("48px");
-            emptyIcon.addClassName("empty-state-icon");
-            H4 emptyTitle = new H4(I18n.t("ims.registered.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("ims.registered.view.empty.description"));
-            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-            cardsContainer.add(emptyState);
-        } else {
-            for (RegisteredUserDto registeredUser : filtered) {
-                cardsContainer.add(new RegisteredCard(
-                        this,
-                        registeredUserService,
-                        accountService,
-                        tenantService,
-                        registeredUser,
-                        this::loadPageZero
-                ));
-            }
-        }
+    @Override
+    protected boolean matchesSearch(RegisteredUserDto u, String search) {
+        if (search == null || search.isBlank()) return true;
+        String s = search.toLowerCase();
+        return (u.getFirstName() != null && u.getFirstName().toLowerCase().contains(s))
+                || (u.getLastName()  != null && u.getLastName().toLowerCase().contains(s))
+                || (u.getEmail()     != null && u.getEmail().toLowerCase().contains(s));
     }
 
-    private void updatePaginationDisplay() {
-        pageInfoLabel.setText(I18n.t("ims.registered.view.page.info", currentPage + 1, totalPages));
-        totalCountLabel.setText(I18n.t("ims.registered.view.total.count", totalElements));
-        prevButton.setEnabled(currentPage > 0);
-        nextButton.setEnabled(currentPage + 1 < totalPages);
+    @Override
+    protected boolean matchesAdditionalFilters(RegisteredUserDto u) {
+        if (currentOrigin == null) return true;
+        return u.getOrigin() != null && u.getOrigin().equals(currentOrigin.name());
     }
 
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("registered-management-toolbar");
-
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(FlexComponent.Alignment.END);
-        searchField.setWidth("200px");
-        originFilter.setWidth("160px");
-        leftGroup.add(searchField, originFilter);
-
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setSpacing(true);
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        pageSizeSelect.setWidth("100px");
-        pageInfoLabel.addClassName("page-info-label");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
-
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        rightGroup.add(refreshButton, createButton);
-
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
-    }
-
-    private void openCreateRegisteredUserDialog() {
+    @Override
+    protected void openCreateDialog() {
         new CreateRegisteredUserDialog(this, registeredUserService, this::loadPageZero).open();
     }
 
-    public void openUpdateRegisteredUserDialog(RegisteredUserDto registeredUser, Runnable onSuccess) {
-        new UpdateRegisteredUserDialog(this, registeredUserService, registeredUser, onSuccess).open();
+    @Override
+    protected void onSearchChanged() { loadPageZero(); }
+
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"registered-management-view"};
     }
 
-    public void openCreateAccountFromRegisteredDialog(RegisteredUserDto registeredUser, Runnable onSuccess) {
-        new CreateAccountFromRegisteredDialog(
-                this,
-                registeredUserService,
-                registeredUser,
-                onSuccess
-        ).open();
+    @Override
+    protected List<Component> buildToolbarFilters() {
+        originFilter.setItems(IEnumAccountOrigin.Types.values());
+        originFilter.setItemLabelGenerator(o -> ImsEnumTag.label(o, "ims.enum.origin"));
+        originFilter.setRenderer(ImsEnumTag.renderer("ims.enum.origin"));
+        originFilter.setPlaceholder(I18n.t("ims.registered.view.origin.placeholder"));
+        originFilter.setWidth("160px");
+        originFilter.addValueChangeListener(e -> { currentOrigin = e.getValue(); loadPageZero(); });
+        return List.of(originFilter);
     }
 
-    public AccountService getAccountService() {
-        return accountService;
+    @Override
+    protected List<Component> buildToolbarActions() {
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.setTooltipText(I18n.t("ims.registered.view.refresh.tooltip"));
+        refreshButton.addClickListener(e -> loadPageZero());
+        return List.of(refreshButton);
     }
 
-    public TenantService getTenantService() {
-        return tenantService;
-    }
-
-    public void loadPageZero() {
-        loadPage(0);
-    }
-
-    public void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
-        refreshButton.setEnabled(!show);
-        createButton.setEnabled(!show);
-    }
-
-    private String extractErrorMessage(FeignException ex) {
-        try {
-            if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) {
-                return ex.contentUTF8();
-            }
-        } catch (Exception ignored) {
+    @Override
+    protected String extractErrorMessage(Exception e) {
+        if (e instanceof FeignException fex
+                && fex.contentUTF8() != null && !fex.contentUTF8().isBlank()) {
+            return fex.contentUTF8();
         }
-        return ex.getMessage();
+        return e.getMessage();
     }
+
+    @Override protected String getTitleKey()             { return "ims.registered.view.title"; }
+    @Override protected String getSubtitleKey()          { return "ims.registered.view.subtitle"; }
+    @Override protected String getCreateButtonKey()      { return "ims.registered.view.create.button"; }
+    @Override protected String getSearchPlaceholderKey() { return "ims.registered.view.search.placeholder"; }
+    @Override protected String getEmptyTitleKey()        { return "ims.registered.view.empty.title"; }
+    @Override protected String getEmptyDescriptionKey()  { return "ims.registered.view.empty.description"; }
+    @Override protected VaadinIcon getEmptyIcon()        { return VaadinIcon.CLIPBOARD_USER; }
+    @Override protected String getLoadErrorKey()         { return "ims.registered.view.load.error"; }
+
+    @Override
+    public String getPageTitle() { return I18n.t("ims.registered.view.title"); }
+
+    public void loadPageZero() { loadPage(0); }
+
+    public void openUpdateRegisteredUserDialog(RegisteredUserDto u, Runnable onSuccess) {
+        new UpdateRegisteredUserDialog(this, registeredUserService, u, onSuccess).open();
+    }
+
+    public void openCreateAccountFromRegisteredDialog(RegisteredUserDto u, Runnable onSuccess) {
+        new CreateAccountFromRegisteredDialog(this, registeredUserService, u, onSuccess).open();
+    }
+
+    public AccountService getAccountService() { return accountService; }
+    public TenantService   getTenantService() { return tenantService; }
 }

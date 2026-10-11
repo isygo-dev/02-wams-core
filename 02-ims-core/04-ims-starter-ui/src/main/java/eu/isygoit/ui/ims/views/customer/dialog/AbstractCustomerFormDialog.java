@@ -18,22 +18,23 @@ import eu.isygoit.remote.ims.CustomerImageService;
 import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.dialog.ProfilePhotoSection;
-import eu.isygoit.ui.ims.views.common.ImsActionDialog;
+import eu.isygoit.ui.ims.views.common.AbstractImsFormDialog;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
 import feign.FeignException;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 /**
  * Shared form of the customer create/update dialogs: every editable
  * {@link CustomerDto} field is declared here once, in three short tabs
- * (identity, contact, address). {@code id} is never shown; {@code accountCode}
- * is managed by the link-account dialog. Subclasses only decide how the DTO is
- * persisted.
+ * (identity, contact, address). The profile photo is <b>downloaded</b> through
+ * {@link CustomerImageService}; see {@link #downloadProfileImage(Long)} and
+ * {@link #fillFrom(CustomerDto)}.
  *
  * <p>Subclasses must call {@link #buildForm()} at the end of their constructor.
  */
-abstract class AbstractCustomerFormDialog extends ImsActionDialog {
+abstract class AbstractCustomerFormDialog extends AbstractImsFormDialog {
 
     final CustomerManagementView parentView;
     final CustomerService customerService;
@@ -76,17 +77,26 @@ abstract class AbstractCustomerFormDialog extends ImsActionDialog {
 
     /* Hooks */
 
-    /** I18n key of the "upload / change image" button. */
     abstract String photoButtonKey();
-
-    /** Whether a newly cropped image is mandatory to save. */
     abstract boolean imageRequired();
-
-    /** The DTO that receives the form values on save. */
     abstract CustomerDto target();
-
-    /** Persists the DTO; returns the stored customer id, or null after appending an error. */
     abstract Long persist(CustomerDto dto);
+
+    @Override
+    protected byte[] downloadProfileImage(Long id) {
+        if (customerImageService == null || id == null) return null;
+        try {
+            ResponseEntity<Resource> response = customerImageService.downloadImage(id);
+            if (response != null
+                    && response.getStatusCode().is2xxSuccessful()
+                    && response.getBody() != null) {
+                return response.getBody().getContentAsByteArray();
+            }
+        } catch (Exception e) {
+            // Swallowed — the base class logs; caller sees the placeholder.
+        }
+        return null;
+    }
 
     /* Layout */
 
@@ -176,7 +186,6 @@ abstract class AbstractCustomerFormDialog extends ImsActionDialog {
 
     /* DTO <-> form */
 
-    /** Fills every field from the DTO (update flow). */
     final void fillFrom(CustomerDto dto) {
         nameField.setValue(nvl(dto.getName()));
         descriptionField.setValue(nvl(dto.getDescription()));
@@ -196,9 +205,11 @@ abstract class AbstractCustomerFormDialog extends ImsActionDialog {
             zipCodeField.setValue(nvl(addr.getZipCode()));
             additionalInfoField.setValue(nvl(addr.getAdditionalInfo()));
         }
+
+        // Download the profile photo through customerImageService.
+        showExistingPhoto(photoSection, dto.getId());
     }
 
-    /** Copies every field into the DTO. {@code id} and {@code accountCode} are left untouched. */
     private void applyTo(CustomerDto dto) {
         dto.setName(nameField.getValue());
         dto.setEmail(emailField.getValue());
@@ -250,8 +261,6 @@ abstract class AbstractCustomerFormDialog extends ImsActionDialog {
         }
         return true;
     }
-
-    /* Save */
 
     @Override
     protected final boolean onOk() {

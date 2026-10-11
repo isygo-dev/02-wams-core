@@ -10,7 +10,7 @@ import jakarta.annotation.security.PermitAll;
 
 @VaadinSessionScope
 @Route(value = "profile", layout = ImsMainLayout.class)
-@PageTitle("Profile")
+//@PageTitle("Profile")
 @PermitAll
 public class ImsProfilePageView extends ProfilePageView {
 

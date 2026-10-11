@@ -8,13 +8,16 @@ import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
 import eu.isygoit.ui.ims.views.common.ImsDialogSupport;
 import feign.FeignException;
-import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 /**
  * Update dialog for {@link AccountDto}. The form itself lives in
  * {@link AbstractAccountFormDialog}; this class loads the account and only
  * updates it. The tenant is read-only.
+ *
+ * <p>The existing profile photo is downloaded by the abstract form when
+ * {@code fillFrom(...)} runs (via
+ * {@link AbstractAccountFormDialog#downloadProfileImage(Long)}).
  */
 public class UpdateAccountDialog extends AbstractAccountFormDialog {
 
@@ -58,9 +61,18 @@ public class UpdateAccountDialog extends AbstractAccountFormDialog {
 
     @Override
     Long persist(AccountDto dto) {
-        ResponseEntity<AccountDto> response = accountService.update(accountId, dto);
-        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            append(I18n.t("ims.account.dialog.update.failed", response.getStatusCodeValue()));
+        ResponseEntity<AccountDto> response;
+        try {
+            response = accountService.update(accountId, dto);
+        } catch (Exception e) {
+            append(I18n.t("ims.account.dialog.update.failed", "—"));
+            return null;
+        }
+        if (response == null
+                || !response.getStatusCode().is2xxSuccessful()
+                || response.getBody() == null) {
+            String reason = response == null ? "no response" : "HTTP " + response.getStatusCode();
+            append(I18n.t("ims.account.dialog.update.failed", reason));
             return null;
         }
         return accountId;
@@ -73,7 +85,6 @@ public class UpdateAccountDialog extends AbstractAccountFormDialog {
             if (response.getBody() != null) {
                 currentAccount = response.getBody();
                 fillFrom(currentAccount);
-                loadExistingImage();
             } else {
                 append(I18n.t("ims.account.dialog.update.not.found"));
                 close();
@@ -86,15 +97,6 @@ public class UpdateAccountDialog extends AbstractAccountFormDialog {
             close();
         } finally {
             parentView.showLoading(false);
-        }
-    }
-
-    private void loadExistingImage() {
-        try {
-            ResponseEntity<Resource> response = accountImageService.downloadImage(accountId);
-            photoSection.showExisting(ImsDialogSupport.toImageDataUri(response));
-        } catch (Exception ignored) {
-            // No existing image: keep the placeholder
         }
     }
 }

@@ -5,15 +5,15 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.CustomerImageService;
 import eu.isygoit.remote.ims.CustomerService;
 import eu.isygoit.ui.ims.views.customer.CustomerManagementView;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
 /**
  * Update dialog for {@link CustomerDto}. The form itself lives in
  * {@link AbstractCustomerFormDialog}; this class only loads and updates the customer.
+ *
+ * <p>The existing profile photo is downloaded by the abstract form when
+ * {@code fillFrom(...)} runs.
  */
-@Slf4j
 public class UpdateCustomerDialog extends AbstractCustomerFormDialog {
 
     private final CustomerDto customer;
@@ -30,7 +30,6 @@ public class UpdateCustomerDialog extends AbstractCustomerFormDialog {
 
         buildForm();
         fillFrom(customer);
-        loadExistingImage();
     }
 
     @Override
@@ -50,22 +49,18 @@ public class UpdateCustomerDialog extends AbstractCustomerFormDialog {
 
     @Override
     Long persist(CustomerDto dto) {
-        ResponseEntity<CustomerDto> response = customerService.update(dto.getId(), dto);
-        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            append(I18n.t("ims.customer.dialog.update.failed", response.getStatusCodeValue()));
+        ResponseEntity<CustomerDto> response;
+        try {
+            response = customerService.update(dto.getId(), dto);
+        } catch (Exception e) {
+            append(I18n.t("ims.customer.dialog.update.failed", "—"));
+            return null;
+        }
+        if (response == null || !response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            append(I18n.t("ims.customer.dialog.update.failed",
+                    response == null ? "no response" : response.getStatusCodeValue()));
             return null;
         }
         return dto.getId();
-    }
-
-    private void loadExistingImage() {
-        try {
-            ResponseEntity<Resource> response = customerImageService.downloadImage(customer.getId());
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                photoSection.showExisting(CustomerDialogSupport.toDataUri(response.getBody()));
-            }
-        } catch (Exception e) {
-            log.debug("No existing image for customer {}", customer.getId());
-        }
     }
 }

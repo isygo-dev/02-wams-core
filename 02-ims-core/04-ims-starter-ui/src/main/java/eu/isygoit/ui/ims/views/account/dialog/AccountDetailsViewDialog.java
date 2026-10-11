@@ -1,38 +1,59 @@
 package eu.isygoit.ui.ims.views.account.dialog;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.server.StreamResource;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.ConnectionTrackingDto;
 import eu.isygoit.dto.data.RoleInfoDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
+import eu.isygoit.ui.common.dialog.DetailHero;
 import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
 import eu.isygoit.ui.ims.views.common.ImsDetailsDialog;
 import eu.isygoit.ui.ims.views.common.ImsDialogSupport;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Read-only view of a {@link AccountDto}: every DTO field except {@code id}
+ * (never displayed) is shown, grouped in tabs. The hero on the identity tab
+ * shows the account avatar, which is <b>downloaded</b> through
+ * {@link AccountImageService} rather than read from a static path.
+ */
+@Slf4j
 public class AccountDetailsViewDialog extends ImsDetailsDialog {
 
     private final AccountManagementView parentView;
     private final AccountService accountService;
+    private final AccountImageService accountImageService;
     private final Long accountId;
 
-    public AccountDetailsViewDialog(AccountManagementView parentView, AccountService accountService, Long accountId) {
+    public AccountDetailsViewDialog(AccountManagementView parentView,
+                                    AccountService accountService,
+                                    AccountImageService accountImageService,
+                                    Long accountId) {
         super(I18n.t("ims.account.details.title"));
         this.parentView = parentView;
         this.accountService = accountService;
+        this.accountImageService = accountImageService;
         this.accountId = accountId;
 
         applyWidth(DialogLayout.WIDTH_L);
@@ -63,12 +84,16 @@ public class AccountDetailsViewDialog extends ImsDetailsDialog {
     }
 
     private void buildContent(AccountDto account) {
-        // Identity: name, email, code
+        // Identity: hero (avatar + name + email + chips) then the identity grid
         Div identityInfo = createDetailGrid();
         addFieldToGrid(identityInfo, VaadinIcon.USER, I18n.t("ims.account.details.field.full.name"), account.getFullName());
         addFieldToGrid(identityInfo, VaadinIcon.ENVELOPE, I18n.t("ims.account.details.field.email"), account.getEmail(), true);
         addFieldToGrid(identityInfo, VaadinIcon.HASH, I18n.t("ims.account.details.field.code"), account.getCode(), true);
-        addTab(I18n.t("ims.account.details.section.identity"), createSection(I18n.t("ims.account.details.section.identity"), identityInfo));
+
+        VerticalLayout identity = DialogLayout.stack();
+        identity.add(buildHero(account),
+                createSection(I18n.t("ims.account.details.section.identity"), identityInfo));
+        addTab(I18n.t("ims.account.details.section.identity"), identity);
 
         // Classification and status: type, role, status, flags, language
         Div classificationInfo = createDetailGrid();
@@ -153,6 +178,45 @@ public class AccountDetailsViewDialog extends ImsDetailsDialog {
 
         addAuditTab(account.getCreatedBy(), formatDate(account.getCreateDate()),
                 account.getUpdatedBy(), formatDate(account.getUpdateDate()));
+    }
+
+    /* ------------------------------------------------------------------
+     * Hero
+     * ------------------------------------------------------------------ */
+
+    private Component buildHero(AccountDto account) {
+        String displayName = account.getFullName() != null ? account.getFullName() : account.getEmail();
+
+        List<Component> chips = new ArrayList<>();
+        if (account.getAdminStatus() != null) {
+            chips.add(ImsEnumTag.of(account.getAdminStatus()));
+        }
+        if (account.getSystemStatus() != null) {
+            chips.add(ImsEnumTag.of(account.getSystemStatus()));
+        }
+
+        return new DetailHero(downloadAvatar(account.getId()), null, displayName, account.getEmail(),
+                chips.toArray(Component[]::new));
+    }
+
+    /** Downloads the account avatar; returns null on failure so the hero shows its placeholder. */
+    private StreamResource downloadAvatar(Long id) {
+        if (accountImageService == null || id == null) return null;
+        try {
+            ResponseEntity<Resource> response = accountImageService.downloadImage(id);
+            if (response != null
+                    && response.getStatusCode().is2xxSuccessful()
+                    && response.getBody() != null) {
+                byte[] bytes = response.getBody().getContentAsByteArray();
+                if (bytes != null && bytes.length > 0) {
+                    return new StreamResource("account_" + id + ".jpg",
+                            () -> new ByteArrayInputStream(bytes));
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to download avatar for account {}", id, e);
+        }
+        return null;
     }
 
     private static String formatDate(LocalDateTime date) {

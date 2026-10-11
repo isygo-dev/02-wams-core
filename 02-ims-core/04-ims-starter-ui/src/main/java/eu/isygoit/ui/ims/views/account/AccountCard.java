@@ -136,7 +136,7 @@ public class AccountCard extends ProfileCard<AccountManagementView, AccountServi
     @Override
     protected List<Button> buildActionButtons() {
         Button detailsBtn = createDetailsButton(I18n.t("ims.account.card.details.tooltip"),
-                () -> new AccountDetailsViewDialog(parentView, objectService, profile.getId()).open());
+                () -> new AccountDetailsViewDialog(parentView, objectService, accountImageService, profile.getId()).open());
 
         Button editBtn = createEditButton(I18n.t("ims.account.card.edit.tooltip"),
                 () -> parentView.openUpdateAccountDialog(profile.getId(), () -> {

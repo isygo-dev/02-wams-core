@@ -25,10 +25,12 @@ import eu.isygoit.remote.ims.TenantService;
 import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.dialog.ProfilePhotoSection;
 import eu.isygoit.ui.ims.views.account.AccountManagementView;
-import eu.isygoit.ui.ims.views.common.ImsActionDialog;
+import eu.isygoit.ui.ims.views.common.AbstractImsFormDialog;
 import eu.isygoit.ui.ims.views.common.ImsDialogSupport;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,9 +45,15 @@ import java.util.stream.Collectors;
  * values (full name, origin, authentication type, system status, ...) are only
  * shown in the details dialog. Subclasses only decide how the DTO is persisted.
  *
+ * <p>The profile photo is <b>downloaded</b> through {@link AccountImageService}
+ * (see {@link #downloadProfileImage(Long)}); the loading is triggered from
+ * {@link #fillFrom(AccountDto)} via
+ * {@link #showExistingPhoto(ProfilePhotoSection, Long)}.
+ *
  * <p>Subclasses must call {@link #buildForm()} at the end of their constructor.
  */
-abstract class AbstractAccountFormDialog extends ImsActionDialog {
+@Slf4j
+abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
 
     final AccountManagementView parentView;
     final AccountService accountService;
@@ -105,6 +113,26 @@ abstract class AbstractAccountFormDialog extends ImsActionDialog {
     /** True when a picture must be selected before saving. */
     abstract boolean imageRequired();
 
+    /* ------------------------------------------------------------------
+     * Photo download hook
+     * ------------------------------------------------------------------ */
+
+    @Override
+    protected byte[] downloadProfileImage(Long id) {
+        if (accountImageService == null || id == null) return null;
+        try {
+            ResponseEntity<Resource> response = accountImageService.downloadImage(id);
+            if (response != null
+                    && response.getStatusCode().is2xxSuccessful()
+                    && response.getBody() != null) {
+                return response.getBody().getContentAsByteArray();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to download avatar for account {}", id, e);
+        }
+        return null;
+    }
+
     final void buildForm() {
         DialogLayout.size(this, DialogLayout.WIDTH_L);
 
@@ -137,30 +165,24 @@ abstract class AbstractAccountFormDialog extends ImsActionDialog {
 
         codeField = new TextField(I18n.t("ims.account.dialog.field.code"));
         codeField.setReadOnly(true);
-        codeField.setWidthFull();
 
         emailField = new EmailField(I18n.t("ims.account.dialog.field.email"));
         emailField.setRequiredIndicatorVisible(true);
         emailField.setPlaceholder(I18n.t("ims.account.dialog.field.email.placeholder"));
-        emailField.setWidthFull();
 
         firstNameField = new TextField(I18n.t("ims.account.dialog.field.first.name"));
         firstNameField.setPlaceholder(I18n.t("ims.account.dialog.field.first.name.placeholder"));
-        firstNameField.setWidthFull();
 
         lastNameField = new TextField(I18n.t("ims.account.dialog.field.last.name"));
         lastNameField.setPlaceholder(I18n.t("ims.account.dialog.field.last.name.placeholder"));
-        lastNameField.setWidthFull();
 
         phoneNumberField = new TextField(I18n.t("ims.account.dialog.field.phone"));
         phoneNumberField.setPlaceholder(I18n.t("ims.account.dialog.field.phone.placeholder"));
-        phoneNumberField.setWidthFull();
 
         languageCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.language"));
         languageCombo.setItems(IEnumLanguage.Types.values());
         languageCombo.setItemLabelGenerator(language -> ImsEnumTag.label(language, "ims.enum.language"));
         languageCombo.setRenderer(ImsEnumTag.renderer("ims.enum.language"));
-        languageCombo.setWidthFull();
 
         form.add(codeField, emailField, firstNameField, lastNameField, phoneNumberField, languageCombo);
         section.add(form);
@@ -181,7 +203,6 @@ abstract class AbstractAccountFormDialog extends ImsActionDialog {
         });
         tenantCombo.setAllowCustomValue(false);
         tenantCombo.setReadOnly(isTenantReadOnly());
-        tenantCombo.setWidthFull();
 
         accountTypeCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.account.type"));
         accountTypeCombo.setRequiredIndicatorVisible(true);
@@ -192,17 +213,14 @@ abstract class AbstractAccountFormDialog extends ImsActionDialog {
         );
         accountTypeCombo.setAllowCustomValue(true);
         accountTypeCombo.setPlaceholder(I18n.t("ims.account.dialog.field.account.type.placeholder"));
-        accountTypeCombo.setWidthFull();
 
         functionRoleField = new TextField(I18n.t("ims.account.dialog.field.function.role"));
         functionRoleField.setPlaceholder(I18n.t("ims.account.dialog.field.function.role.placeholder"));
-        functionRoleField.setWidthFull();
 
         adminStatusCombo = new ComboBox<>(I18n.t("ims.account.dialog.field.admin.status"));
         adminStatusCombo.setItems(IEnumEnabledBinaryStatus.Types.values());
         adminStatusCombo.setItemLabelGenerator(status -> ImsEnumTag.label(status, null));
         adminStatusCombo.setRenderer(ImsEnumTag.renderer(null));
-        adminStatusCombo.setWidthFull();
 
         isAdminCheckbox = new Checkbox(I18n.t("ims.account.dialog.field.is.admin"));
 
@@ -217,25 +235,18 @@ abstract class AbstractAccountFormDialog extends ImsActionDialog {
         FormLayout addressForm = DialogLayout.responsiveForm();
 
         countryField = new TextField(I18n.t("ims.account.dialog.field.country"));
-        countryField.setWidthFull();
 
         streetField = new TextField(I18n.t("ims.account.dialog.field.street"));
-        streetField.setWidthFull();
 
         zipCodeField = new TextField(I18n.t("ims.account.dialog.field.zip.code"));
-        zipCodeField.setWidthFull();
 
         cityField = new TextField(I18n.t("ims.account.dialog.field.city"));
-        cityField.setWidthFull();
 
         stateField = new TextField(I18n.t("ims.account.dialog.field.state"));
-        stateField.setWidthFull();
 
         addressCountryField = new TextField(I18n.t("ims.account.dialog.field.address.country"));
-        addressCountryField.setWidthFull();
 
         additionalInfoField = new TextField(I18n.t("ims.account.dialog.field.additional.info"));
-        additionalInfoField.setWidthFull();
 
         addressForm.add(countryField, streetField, zipCodeField, cityField, stateField,
                 addressCountryField, additionalInfoField);
@@ -310,6 +321,10 @@ abstract class AbstractAccountFormDialog extends ImsActionDialog {
                 additionalInfoField.setValue(address.getAdditionalInfo() != null ? address.getAdditionalInfo() : "");
             }
         }
+
+        // Download the profile photo through accountImageService; no static
+        // fallback path exists on AccountDto.
+        showExistingPhoto(photoSection, dto.getId());
     }
 
     /** Copies the form values into the DTO ({@code id} and {@code code} are left untouched). */
@@ -380,6 +395,10 @@ abstract class AbstractAccountFormDialog extends ImsActionDialog {
         return true;
     }
 
+    /* ------------------------------------------------------------------
+     * Save
+     * ------------------------------------------------------------------ */
+
     @Override
     protected final boolean onOk() {
         if (!isValid()) {
@@ -390,29 +409,48 @@ abstract class AbstractAccountFormDialog extends ImsActionDialog {
         try {
             AccountDto dto = target();
             applyTo(dto);
+
             Long accountId = persist(dto);
             if (accountId == null) {
                 return false;
             }
 
-            MultipartFile image = photoSection.getSelectedFile();
-            if (image != null) {
-                ResponseEntity<AccountDto> uploadResponse = accountImageService.uploadImage(accountId, image);
-                if (!uploadResponse.getStatusCode().is2xxSuccessful()) {
-                    append(I18n.t(messagePrefix + ".image.failed", uploadResponse.getStatusCodeValue()));
-                    return false;
-                }
+            int failures = uploadAttachments(accountId);
+            if (failures == 0) {
+                append(I18n.t(messagePrefix + ".success"));
+            } else {
+                append(I18n.t(messagePrefix + ".success.with.warnings", failures));
             }
-
-            append(I18n.t(messagePrefix + ".success"));
             return true;
-        } catch (FeignException ex) {
-            append(ImsDialogSupport.extractErrorMessage(ex));
         } catch (Exception e) {
+            log.error("Error saving account", e);
             append(I18n.t(messagePrefix + ".failed", e.getMessage()));
+            return false;
         } finally {
             parentView.showLoading(false);
         }
-        return false;
+    }
+
+    /** Uploads the profile photo; returns the number of failures. */
+    private int uploadAttachments(Long accountId) {
+        int failures = 0;
+
+        MultipartFile image = photoSection.getSelectedFile();
+        if (image != null) {
+            try {
+                ResponseEntity<AccountDto> response =
+                        accountImageService.uploadImage(accountId, image);
+                if (response == null || !response.getStatusCode().is2xxSuccessful()) {
+                    failures++;
+                    append(I18n.t("ims.account.image.upload.error",
+                            response == null ? "no response" : "HTTP " + response.getStatusCode()));
+                }
+            } catch (Exception ex) {
+                failures++;
+                log.error("Image upload failed for account {}", accountId, ex);
+                append(I18n.t("ims.account.image.upload.error", ex.getMessage()));
+            }
+        }
+        return failures;
     }
 }

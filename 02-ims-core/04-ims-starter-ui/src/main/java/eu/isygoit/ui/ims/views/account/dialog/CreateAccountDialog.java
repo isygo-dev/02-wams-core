@@ -58,15 +58,21 @@ public class CreateAccountDialog extends AbstractAccountFormDialog {
 
     @Override
     Long persist(AccountDto dto) {
-        ResponseEntity<AccountDto> response = accountService.create(dto);
-        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            append(I18n.t("ims.account.dialog.create.failed", response.getStatusCodeValue()));
+        ResponseEntity<AccountDto> response;
+        try {
+            response = accountService.create(dto);
+        } catch (Exception e) {
+            append(I18n.t("ims.account.dialog.create.failed", "—"));
             return null;
         }
-        Long accountId = response.getBody().getId();
-        if (accountId == null) {
-            append(I18n.t("ims.account.dialog.create.no.id"));
+        if (response == null
+                || !response.getStatusCode().is2xxSuccessful()
+                || response.getBody() == null
+                || response.getBody().getId() == null) {
+            String reason = response == null ? "no response" : "HTTP " + response.getStatusCode();
+            append(I18n.t("ims.account.dialog.create.failed", reason));
+            return null;
         }
-        return accountId;
+        return response.getBody().getId();
     }
 }
