@@ -34,22 +34,37 @@ import java.util.function.Function;
  * Collapsible, chip-aware filter bar supporting two usage modes.
  *
  * <ul>
- *   <li><b>Metadata mode</b> — {@code new FilterBar(getAnnotatedCriteria())}
- *       builds one control per annotated field. The control type is
- *       inferred from the field's type name; enums are matched against a
- *       per-view registry of enum classes.
+ *   <li><b>Metadata mode</b> — constructed with the map from
+ *       {@code getAnnotatedCriteria()}. The control type per field is
+ *       inferred from the field's type name; enums are resolved through
+ *       either a per-field hint map or a simple-name registry.
  *       Apply emits a criteria string consumable by the backend
  *       {@code /filter} endpoint.</li>
- *   <li><b>Manual mode</b> — {@code new FilterBar()} followed by
+ *   <li><b>Manual mode</b> — fields added programmatically via
  *       {@code addTextFilter}, {@code addEnumFilter},
- *       {@code addDateRangeFilter}, etc. Each control notifies its own
- *       listener; Apply fires a refresh.</li>
+ *       {@code addDateRangeFilter}, etc.</li>
  * </ul>
  *
  * <p>Every active filter is mirrored as a removable chip in the bottom
- * strip. Clearing a chip clears the corresponding control, which in turn
- * removes the chip — the two stay in sync through the normal value-change
- * listeners.</p>
+ * strip. Clearing a chip clears the corresponding control; clearing the
+ * bar resets everything.</p>
+ *
+ * <p><b>Initial state:</b> the bar starts <em>collapsed</em> — only the
+ * header ({@code ⚙ Filtres (N)}) and the toggle pill are visible. Clicking
+ * the pill expands the body. When the body is collapsed but active chips
+ * exist, the pill and count badge are tinted in the primary colour to
+ * advertise that a filter is active.</p>
+ *
+ * <h3>Enum resolution priority in metadata mode</h3>
+ * <ol>
+ *   <li>{@link #FilterBar(Map, Collection, Map) field-level hints} —
+ *       matched by field name; reliable when two enums share the same
+ *       simple name (e.g. {@code IEnumStudentStatus.Types} and
+ *       {@code IEnumLanguage.Types}).</li>
+ *   <li>Simple-name registry — matched by {@code typeSimpleName}.</li>
+ *   <li>Type-name switch — String, numbers, Boolean, dates.</li>
+ *   <li>Fallback — {@code TextField}.</li>
+ * </ol>
  */
 @Slf4j
 public class FilterBar extends Div {
@@ -59,7 +74,12 @@ public class FilterBar extends Div {
     // ─── Metadata-mode state ───────────────────────────────────────
     private final Map<String, String> criteriaMetadata;
     private final Map<String, Component> fieldInputs = new LinkedHashMap<>();
+
+    /** simple-name → class; used when no per-field hint matches. */
     private final Map<String, Class<? extends Enum<?>>> enumRegistry = new LinkedHashMap<>();
+
+    /** field-name → class; takes priority over {@link #enumRegistry}. */
+    private final Map<String, Class<? extends Enum<?>>> fieldEnumHints = new LinkedHashMap<>();
 
     // ─── Manual-mode state ─────────────────────────────────────────
     private final List<Runnable> manualClearers = new ArrayList<>();
@@ -84,7 +104,8 @@ public class FilterBar extends Div {
     private Runnable onClear;
 
     // ─── Layout state ──────────────────────────────────────────────
-    private boolean collapsed = false;
+    /** The bar starts collapsed by default. */
+    private boolean collapsed = true;
 
     private record ChipEntry(String label, String value, Runnable onRemove) {}
 
@@ -93,32 +114,34 @@ public class FilterBar extends Div {
     // ══════════════════════════════════════════════════════════════
 
     public FilterBar() {
-        this(Map.of(), List.of());
+        this(Map.of(), List.of(), Map.of());
     }
 
     public FilterBar(Map<String, String> criteriaMetadata) {
-        this(criteriaMetadata, List.of());
+        this(criteriaMetadata, List.of(), Map.of());
     }
 
-    /**
-     * Full constructor with enum support.
-     * <p>
-     * Any metadata entry whose type name matches the simple name of one
-     * of {@code enumTypes} is rendered as a ComboBox instead of a text
-     * field — no per-field hints needed.
-     *
-     * @param criteriaMetadata the map from {@code getAnnotatedCriteria()}
-     * @param enumTypes        the enum classes the DTO can contain; may
-     *                         be empty, in which case the behaviour is
-     *                         identical to {@link #FilterBar(Map)}
-     */
     public FilterBar(Map<String, String> criteriaMetadata,
                      Collection<Class<? extends Enum<?>>> enumTypes) {
+        this(criteriaMetadata, enumTypes, Map.of());
+    }
+
+    public FilterBar(Map<String, String> criteriaMetadata,
+                     Collection<Class<? extends Enum<?>>> enumTypes,
+                     Map<String, Class<? extends Enum<?>>> fieldEnumHints) {
         this.criteriaMetadata = criteriaMetadata != null ? criteriaMetadata : Map.of();
+
         if (enumTypes != null) {
             for (Class<? extends Enum<?>> t : enumTypes) {
                 if (t != null && t.isEnum()) {
                     enumRegistry.put(t.getSimpleName(), t);
+                }
+            }
+        }
+        if (fieldEnumHints != null) {
+            for (var e : fieldEnumHints.entrySet()) {
+                if (e.getValue() != null && e.getValue().isEnum()) {
+                    this.fieldEnumHints.put(e.getKey(), e.getValue());
                 }
             }
         }
@@ -153,7 +176,7 @@ public class FilterBar extends Div {
             if (onChange != null) onChange.accept(v);
             trackChip(key, I18n.t(labelKey), v, field::clear);
         });
-        registerManualField(field, field::clear);
+        registerManualField(field::clear);
         return field;
     }
 
@@ -171,7 +194,7 @@ public class FilterBar extends Div {
             trackChip(key, I18n.t(labelKey),
                     v == null ? null : v.toString(), field::clear);
         });
-        registerManualField(field, field::clear);
+        registerManualField(field::clear);
         return field;
     }
 
@@ -189,7 +212,7 @@ public class FilterBar extends Div {
             trackChip(key, I18n.t(labelKey),
                     v == null ? null : v.toString(), field::clear);
         });
-        registerManualField(field, field::clear);
+        registerManualField(field::clear);
         return field;
     }
 
@@ -204,7 +227,7 @@ public class FilterBar extends Div {
             String chipValue = Boolean.TRUE.equals(v) ? "✓" : null;
             trackChip(key, I18n.t(labelKey), chipValue, () -> cb.setValue(false));
         });
-        registerManualField(cb, () -> cb.setValue(false));
+        registerManualField(() -> cb.setValue(false));
         return cb;
     }
 
@@ -224,7 +247,7 @@ public class FilterBar extends Div {
             trackChip(key, I18n.t(labelKey),
                     v == null ? null : v.format(DATE_FMT), picker::clear);
         });
-        registerManualField(picker, picker::clear);
+        registerManualField(picker::clear);
         return picker;
     }
 
@@ -239,7 +262,7 @@ public class FilterBar extends Div {
             String formatted = v == null ? null : v.toLocalDate().format(DATE_FMT);
             trackChip(key, I18n.t(labelKey), formatted, () -> picker.setValue(null));
         });
-        registerManualField(picker, () -> picker.setValue(null));
+        registerManualField(() -> picker.setValue(null));
         return picker;
     }
 
@@ -293,7 +316,7 @@ public class FilterBar extends Div {
             trackChip(key, I18n.t(labelKey),
                     v == null ? null : labeler.apply(v), combo::clear);
         });
-        registerManualField(combo, combo::clear);
+        registerManualField(combo::clear);
         return combo;
     }
 
@@ -330,7 +353,7 @@ public class FilterBar extends Div {
                     : (labeler != null ? labeler.apply(v) : String.valueOf(v));
             trackChip(key, I18n.t(labelKey), display, combo::clear);
         });
-        registerManualField(combo, combo::clear);
+        registerManualField(combo::clear);
         return combo;
     }
 
@@ -356,7 +379,7 @@ public class FilterBar extends Div {
             trackChip(key, I18n.t(labelKeyPrefix), display,
                     () -> combo.setValue(StatusFilter.ALL));
         });
-        registerManualField(combo, () -> combo.setValue(StatusFilter.ALL));
+        registerManualField(() -> combo.setValue(StatusFilter.ALL));
         return combo;
     }
 
@@ -387,7 +410,9 @@ public class FilterBar extends Div {
         // ── Collapse pill ──────────────────────────────────────────
         collapseButton.addClassName("filter-card__collapse");
         collapseButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        collapseButton.setIcon(VaadinIcon.CHEVRON_UP.create());
+        // Icon matches the initial `collapsed` flag; re-set at the end of build().
+        collapseButton.setIcon(
+                (collapsed ? VaadinIcon.CHEVRON_DOWN : VaadinIcon.CHEVRON_UP).create());
         collapseButton.getElement().setAttribute("aria-label",
                 I18n.t("common.filter.toggle"));
         collapseButton.addClickListener(e -> toggleCollapsed());
@@ -414,7 +439,7 @@ public class FilterBar extends Div {
             controls.add(input);
         }
 
-        // Apply / Clear
+        // Apply / Clear buttons
         applyButton.setText(I18n.t("common.filter.apply"));
         applyButton.setIcon(VaadinIcon.FILTER.create());
         applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -440,6 +465,13 @@ public class FilterBar extends Div {
         body.add(controls, chipsRow);
         add(body);
 
+        // ── Initial state ──────────────────────────────────────────
+        // The bar starts collapsed: only the header and the toggle pill
+        // are visible. The body, the CSS class, and the icon all reflect
+        // the `collapsed` flag.
+        body.setVisible(!collapsed);
+        getElement().getClassList().set("filter-card--collapsed", collapsed);
+
         chipsRow.setVisible(false);
         activeCount.setVisible(false);
         getElement().getClassList().set("filter-card--has-active", false);
@@ -459,7 +491,7 @@ public class FilterBar extends Div {
         controls.addComponentAtIndex(idx < 0 ? controls.getComponentCount() : idx, c);
     }
 
-    private void registerManualField(Component field, Runnable onClear) {
+    private void registerManualField(Runnable onClear) {
         if (onClear != null) manualClearers.add(onClear);
         setVisible(true);
     }
@@ -474,8 +506,11 @@ public class FilterBar extends Div {
         String t = type == null ? "String" : type;
         String key = "meta:" + name;
 
-        // ── Enum: match by simple name against the registry ────────
-        Class<? extends Enum<?>> enumType = enumRegistry.get(t);
+        // ── Enum resolution: field hint first, then simple-name registry.
+        Class<? extends Enum<?>> enumType = fieldEnumHints.get(name);
+        if (enumType == null) {
+            enumType = enumRegistry.get(t);
+        }
         if (enumType != null) {
             ComboBox combo = new ComboBox();
             combo.setLabel(label);
