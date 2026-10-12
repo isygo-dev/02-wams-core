@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +36,9 @@ import java.util.stream.Collectors;
  *   <li>Header + toolbar (search + create button)</li>
  *   <li>Loading bar and empty‑state block</li>
  *   <li>Server‑side pagination via {@link #fetchPage(int, int)}</li>
+ *   <li>Optional server‑side criteria filtering via
+ *       {@link #fetchFilteredPage(String, int, int)} and
+ *       {@link #fetchCriteriaMetadata()}</li>
  *   <li>Material‑UI‑style rounded {@link PaginationBar}</li>
  * </ul>
  *
@@ -57,6 +61,10 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     protected int pageSize = DEFAULT_PAGE_SIZE;
     protected int totalPages = 0;
     protected long totalElements = 0;
+
+    // ─── Criteria state ────────────────────────────────────────────
+    /** Currently active server‑side criteria string (blank = none). */
+    protected String currentCriteria = "";
 
     // ─── Data (current page only) ──────────────────────────────────
     protected List<T> currentItems = new ArrayList<>();
@@ -103,6 +111,46 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     protected String getLoadErrorKey() { return "common.load.error"; }
 
     // ══════════════════════════════════════════════════════════════
+    //  Criteria hooks — subclasses override when their backend
+    //  supports /filter and /filter/criteria
+    // ══════════════════════════════════════════════════════════════
+
+    /**
+     * Fetch a filtered page.
+     * <p>
+     * Return type is deliberately widened to {@code ? extends T} because the
+     * backend's {@code /filter} endpoint returns the <em>full</em> DTO
+     * ({@code PaginatedResponseDto<F>}), and {@code F extends M} but
+     * {@code PaginatedResponseDto} is invariant.
+     * <p>
+     * The default delegates to {@link #fetchPage(int, int)} so views without
+     * filtering keep working unchanged.
+     */
+    protected PaginatedResponseDto<? extends T> fetchFilteredPage(String criteria, int page, int size) {
+        return fetchPage(page, size);
+    }
+
+    /**
+     * Backend‑provided criteria metadata: {@code fieldName -> typeSimpleName}.
+     * Return an empty map if the backend does not expose this.
+     */
+    protected Map<String, String> fetchCriteriaMetadata() {
+        return Map.of();
+    }
+
+    /** Apply a criteria string and reload from page 0. */
+    public void applyCriteria(String criteria) {
+        this.currentCriteria = criteria == null ? "" : criteria;
+        loadPage(0);
+    }
+
+    /** Drop any active criteria and reload from page 0. */
+    public void clearCriteria() {
+        this.currentCriteria = "";
+        loadPage(0);
+    }
+
+    // ══════════════════════════════════════════════════════════════
     //  Template method — call from the subclass constructor
     // ══════════════════════════════════════════════════════════════
 
@@ -138,6 +186,11 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         panel.setWidthFull();
         panel.addClassName("admin-panel");
 
+        Component pre = buildPreToolbarContent();
+        if (pre != null) {
+            panel.add(pre);
+        }
+
         panel.add(buildToolbar());
 
         Component extra = buildAdditionalToolbar();
@@ -170,7 +223,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         searchField.setPrefixComponent(VaadinIcon.SEARCH.create());
         searchField.setClearButtonVisible(true);
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.addValueChangeListener(e -> applyLocalFilter());
+        searchField.addValueChangeListener(e -> onSearchChanged());
 
         createButton.setText(I18n.t(getCreateButtonKey()));
         createButton.setIcon(new Icon(VaadinIcon.PLUS_CIRCLE));
@@ -178,13 +231,35 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         createButton.addClickListener(e -> openCreateDialog());
 
-        HorizontalLayout toolbar = new HorizontalLayout(searchField, createButton);
+        HorizontalLayout toolbar = new HorizontalLayout();
         toolbar.setWidthFull();
         toolbar.setSpacing(false);
         toolbar.setPadding(false);
         toolbar.setAlignItems(FlexComponent.Alignment.END);
         toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         toolbar.addClassName("administration-toolbar");
+
+        // left block: search + optional filters/actions
+        HorizontalLayout left = new HorizontalLayout();
+        left.setSpacing(true);
+        left.setPadding(false);
+        left.setAlignItems(FlexComponent.Alignment.END);
+        left.add(searchField);
+        for (Component c : buildToolbarFilters()) {
+            left.add(c);
+        }
+
+        // right block: extra actions + create
+        HorizontalLayout right = new HorizontalLayout();
+        right.setSpacing(true);
+        right.setPadding(false);
+        right.setAlignItems(FlexComponent.Alignment.END);
+        for (Component c : buildToolbarActions()) {
+            right.add(c);
+        }
+        right.add(createButton);
+
+        toolbar.add(left, right);
         return toolbar;
     }
 
@@ -194,28 +269,36 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
 
     /**
      * Loads the given 0‑based page from the backend, refreshes the cards
-     * and updates the pagination bar.
+     * and updates the pagination bar. Honours {@link #currentCriteria}.
      */
     public void loadPage(int page) {
         showLoading(true);
         try {
-            PaginatedResponseDto<T> body = fetchPage(page, pageSize);
+            boolean filtered = currentCriteria != null && !currentCriteria.isBlank();
+            PaginatedResponseDto<? extends T> body = filtered
+                    ? fetchFilteredPage(currentCriteria, page, pageSize)
+                    : fetchPage(page, pageSize);
+
             if (body != null) {
-                currentItems = body.getContent() != null ? body.getContent() : new ArrayList<>();
-                totalPages = body.getTotalPages();
+                // Copy into a List<T> so we can use T-typed render/matches methods.
+                currentItems  = body.getContent() != null
+                        ? new ArrayList<>(body.getContent())
+                        : new ArrayList<>();
+                totalPages    = body.getTotalPages();
                 totalElements = body.getTotalElements();
-                currentPage = body.getPageNumber();
+                currentPage   = body.getPageNumber();
             } else {
-                currentItems = new ArrayList<>();
-                totalPages = 0;
+                currentItems  = new ArrayList<>();
+                totalPages    = 0;
                 totalElements = 0;
-                currentPage = 0;
+                currentPage   = 0;
             }
             applyLocalFilter();
             paginationBar.update(currentPage, totalPages);
+            onPageLoaded();
         } catch (Exception e) {
             log.error("Error loading page {} of {}", page, getClass().getSimpleName(), e);
-            Notification.show(I18n.t(getLoadErrorKey(), e.getMessage()),
+            Notification.show(I18n.t(getLoadErrorKey(), extractErrorMessage(e)),
                             6000, Notification.Position.BOTTOM_END)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         } finally {
@@ -244,6 +327,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         String search = searchField.getValue();
         List<T> filtered = currentItems.stream()
                 .filter(item -> matchesSearch(item, search))
+                .filter(this::matchesAdditionalFilters)
                 .collect(Collectors.toList());
         renderItems(filtered);
     }
@@ -370,7 +454,9 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         }
     }
 
-    // in AbstractPaginatedView
+    // ══════════════════════════════════════════════════════════════
+    //  Additional extension points
+    // ══════════════════════════════════════════════════════════════
 
     /** Hook for additional client‑side filters (e.g. an enum status filter). */
     protected boolean matchesAdditionalFilters(T item) { return true; }
@@ -383,8 +469,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
 
     /** Called at the end of every successful {@link #loadPage(int)}. */
     protected void onPageLoaded() { /* no‑op by default */ }
-
-    // ─── New extension points ──────────────────────────────────────────
 
     /** Extract a user-readable message from a thrown exception. */
     protected String extractErrorMessage(Exception e) {

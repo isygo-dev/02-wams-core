@@ -191,6 +191,30 @@
     // role of the card's section title, not of a control label.
   }
 
+  /* ── Active-filter count badge ─────────────────────────────── */
+  // Small primary-tinted pill rendered next to the title. Its text is
+  // the current number of active chips; it is hidden by FilterBar.java
+  // when the count is zero.
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.375rem;
+    margin-inline-start: 0.25rem;
+
+    border-radius: 999px;
+    background: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
   /* ── Body wrapper — hidden when collapsed ──────────────────── */
   &__body {
     display: flex;

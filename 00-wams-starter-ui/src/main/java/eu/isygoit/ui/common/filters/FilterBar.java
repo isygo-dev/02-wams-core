@@ -1,457 +1,680 @@
 package eu.isygoit.ui.common.filters;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.i18n.I18n;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
- * Jira-style filter bar rendered as a card.
- * <p>
- * Layout:
- * <pre>
- *   ┌─ card ──────────────────────────────────────────────────────┐
- *   │                          ( ⌃ )                              │  ← collapse handle, top-center
- *   │  ⚙ Filters                                                  │  ← header
- *   │  ─────────────────────────────────────────────────────────  │
- *   │  [ Group ▾ ]   [ Cycle ▾ ]   [ Status ▾ ]   [du / au]       │  ← controls
- *   │  ─────────────────────────────────────────────────────────  │
- *   │  ACTIVE   [Group: Primary ✕] [Status: Active ✕]   Clear all │  ← chips + link-style clear
- *   └─────────────────────────────────────────────────────────────┘
- * </pre>
- * The chips row hides itself entirely when no filter is set, so a card with
- * no active filters stays compact.
- * <p>
- * A panel only declares its filters; the bar takes care of chips, the
- * "clear all" link, collapsing, and batching the resulting refresh into
- * one call.
+ * Collapsible, chip-aware filter bar supporting two usage modes.
+ *
+ * <ul>
+ *   <li><b>Metadata mode</b> — {@code new FilterBar(getAnnotatedCriteria())}
+ *       builds one control per annotated field. Apply emits a criteria
+ *       string consumable by the backend {@code /filter} endpoint.</li>
+ *   <li><b>Manual mode</b> — {@code new FilterBar()} followed by
+ *       {@code addTextFilter}, {@code addEnumFilter}, {@code addDateRangeFilter},
+ *       etc. Each control notifies its own listener; Apply fires a refresh.</li>
+ * </ul>
+ *
+ * <p>Every active filter is mirrored as a removable chip in the bottom
+ * strip. Clearing a chip clears the corresponding control, which in turn
+ * removes the chip — the two stay in sync through the normal value-change
+ * listeners.</p>
  */
+@Slf4j
 public class FilterBar extends Div {
 
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ISO_LOCAL_DATE;
+
+    // ─── Metadata-mode state ───────────────────────────────────────
+    private final Map<String, String> criteriaMetadata;
+    private final Map<String, Component> fieldInputs = new LinkedHashMap<>();
+
+    // ─── Manual-mode state ─────────────────────────────────────────
+    private final List<Runnable> manualClearers = new ArrayList<>();
+
+    // ─── Chip tracking — key → chip ────────────────────────────────
+    private final Map<String, ChipEntry> chips = new LinkedHashMap<>();
+
+    // ─── UI nodes ──────────────────────────────────────────────────
+    private final Button collapseButton = new Button();
+    private final Div header = new Div();
+    private final Div body = new Div();
     private final Div controls = new Div();
     private final Div chipsRow = new Div();
     private final Div chipsList = new Div();
-    private final Div body = new Div();
-    private final Button collapseToggle;
-    private final Button clearAllButton;
-    private final List<FilterRegistration> registrations = new ArrayList<>();
+    private final Span activeCount = new Span();
+    private final Button applyButton = new Button();
+    private final Button clearButton = new Button();
+    private final Button clearAllLink = new Button();
 
-    private Runnable onRefresh = () -> {
-    };
-    private boolean suppressRefresh = false;
+    // ─── Callbacks ─────────────────────────────────────────────────
+    private Consumer<String> onApply;
+    private Runnable onClear;
+
+    // ─── Layout state ──────────────────────────────────────────────
     private boolean collapsed = false;
 
+    private record ChipEntry(String label, String value, Runnable onRemove) {}
+
+    // ══════════════════════════════════════════════════════════════
+    //  Constructors
+    // ══════════════════════════════════════════════════════════════
+
     public FilterBar() {
-        this(true);
+        this(Map.of());
     }
 
-    /**
-     * @param startCollapsed when {@code true}, the bar renders with its
-     *                       controls and chips already hidden
-     */
-    public FilterBar(boolean startCollapsed) {
-        addClassName("filter-card");
-
-        // ---- collapse handle (top-center, absolutely positioned) ----
-        collapseToggle = new Button();
-        collapseToggle.setIcon(VaadinIcon.CHEVRON_UP.create());
-        collapseToggle.addThemeVariants(
-                ButtonVariant.LUMO_TERTIARY_INLINE,
-                ButtonVariant.LUMO_SMALL);
-        collapseToggle.addClassName("filter-card__collapse");
-        collapseToggle.getElement().setAttribute("aria-expanded", "true");
-        collapseToggle.getElement().setAttribute("aria-label",
-                I18n.t("common.filter.collapse"));
-        collapseToggle.addClickListener(e -> toggleCollapsed());
-
-        // ---- header (icon + title, left-aligned) --------------------
-        Div header = new Div();
-        header.addClassName("filter-card__header");
-
-        Icon filterIcon = VaadinIcon.FILTER.create();
-        filterIcon.addClassName("filter-card__icon");
-
-        Span title = new Span(I18n.t("common.filter.title"));
-        title.addClassName("filter-card__title");
-
-        header.add(filterIcon, title);
-
-        // ---- body (controls + chips, hidden when collapsed) --------
-        controls.addClassName("filter-card__controls");
-
-        chipsRow.addClassName("filter-card__chips");
-        chipsRow.setVisible(false);
-
-        Span chipsLabel = new Span(I18n.t("common.filter.active"));
-        chipsLabel.addClassName("filter-card__chips-label");
-
-        chipsList.addClassName("filter-card__chips-list");
-
-        clearAllButton = new Button(I18n.t("common.filter.clear"));
-        clearAllButton.addThemeVariants(
-                ButtonVariant.LUMO_TERTIARY_INLINE,
-                ButtonVariant.LUMO_SMALL);
-        clearAllButton.addClassName("filter-card__clear");
-        clearAllButton.addClickListener(e -> clearAll());
-
-        chipsRow.add(chipsLabel, chipsList, clearAllButton);
-
-        body.addClassName("filter-card__body");
-        body.add(controls, chipsRow);
-
-        add(collapseToggle, header, body);
-
-        if (startCollapsed) {
-            setCollapsed(true);
-        }
+    public FilterBar(Map<String, String> criteriaMetadata) {
+        this.criteriaMetadata = criteriaMetadata != null ? criteriaMetadata : Map.of();
+        build();
     }
 
-    // ==============================================================
-    // Public API
-    // ==============================================================
+    // ══════════════════════════════════════════════════════════════
+    //  Public callbacks
+    // ══════════════════════════════════════════════════════════════
 
-    private static String translateStatus(String prefix, StatusFilter status) {
-        return switch (status) {
-            case ALL -> I18n.t(prefix + ".all");
-            case ACTIVE -> I18n.t(prefix + ".active");
-            case INACTIVE -> I18n.t(prefix + ".inactive");
-        };
-    }
+    public void setOnApply(Consumer<String> onApply) { this.onApply = onApply; }
+    public void setOnClear(Runnable onClear)         { this.onClear = onClear; }
 
-    /**
-     * Formats a {@code [from, to]} pair for a chip value. Handles open-ended
-     * ranges so a single selected bound still produces a readable label.
-     */
-    private static String formatDateRange(LocalDate from, LocalDate to) {
-        if (from != null && to != null) return from + " → " + to;
-        if (from != null) return "≥ " + from;
-        if (to != null) return "≤ " + to;
-        return "";
-    }
-
+    /** Alias: fires on Apply but ignores the criteria string. */
     public void setOnRefresh(Runnable onRefresh) {
-        this.onRefresh = onRefresh != null ? onRefresh : () -> {
-        };
+        setOnApply(criteria -> onRefresh.run());
     }
 
-    public boolean isCollapsed() {
-        return collapsed;
+    // ══════════════════════════════════════════════════════════════
+    //  Manual mode — text / number / boolean
+    // ══════════════════════════════════════════════════════════════
+
+    /** Free-text filter producing {@code field ~ 'value'} in criteria mode. */
+    public TextField addTextFilter(String labelKey, Consumer<String> onChange) {
+        TextField field = new TextField(I18n.t(labelKey));
+        field.setClearButtonVisible(true);
+        field.addClassName("filter-select");
+        field.setWidth("14em");
+
+        String key = "text:" + labelKey;
+        field.addValueChangeListener(e -> {
+            String v = e.getValue();
+            if (onChange != null) onChange.accept(v);
+            trackChip(key, I18n.t(labelKey), v, field::clear);
+        });
+        registerManualField(field, key, labelKey, field::clear);
+        return field;
     }
 
-    /**
-     * Collapses or expands the controls + chips block.
-     */
-    public void setCollapsed(boolean collapsed) {
-        this.collapsed = collapsed;
+    /** Integer filter with stepper buttons. */
+    public IntegerField addIntegerFilter(String labelKey, Consumer<Integer> onChange) {
+        IntegerField field = new IntegerField(I18n.t(labelKey));
+        field.setClearButtonVisible(true);
+        field.setStepButtonsVisible(true);
+        field.addClassName("filter-select");
+        field.setWidth("10em");
 
-        body.setVisible(!collapsed);
-
-        collapseToggle.setIcon((collapsed
-                ? VaadinIcon.CHEVRON_DOWN
-                : VaadinIcon.CHEVRON_UP).create());
-        collapseToggle.getElement().setAttribute("aria-expanded",
-                String.valueOf(!collapsed));
-        collapseToggle.getElement().setAttribute("aria-label",
-                I18n.t(collapsed ? "common.filter.expand" : "common.filter.collapse"));
-
-        setClassName("filter-card--collapsed", collapsed);
+        String key = "int:" + labelKey;
+        field.addValueChangeListener(e -> {
+            Integer v = e.getValue();
+            if (onChange != null) onChange.accept(v);
+            trackChip(key, I18n.t(labelKey), v == null ? null : v.toString(), field::clear);
+        });
+        registerManualField(field, key, labelKey, field::clear);
+        return field;
     }
 
-    public void toggleCollapsed() {
-        setCollapsed(!collapsed);
+    /** Decimal filter with stepper buttons. */
+    public NumberField addNumberFilter(String labelKey, Consumer<Double> onChange) {
+        NumberField field = new NumberField(I18n.t(labelKey));
+        field.setClearButtonVisible(true);
+        field.setStepButtonsVisible(true);
+        field.addClassName("filter-select");
+        field.setWidth("10em");
+
+        String key = "num:" + labelKey;
+        field.addValueChangeListener(e -> {
+            Double v = e.getValue();
+            if (onChange != null) onChange.accept(v);
+            trackChip(key, I18n.t(labelKey), v == null ? null : v.toString(), field::clear);
+        });
+        registerManualField(field, key, labelKey, field::clear);
+        return field;
     }
 
-    /**
-     * Adds an enum-backed filter using {@code enum.<CONSTANT>} translations,
-     * falling back to the exact enum constant name.
-     */
-    public <E extends Enum<E>> ComboBox<E> addEnumFilter(
-            String labelKey, E[] values, Consumer<E> onChange) {
-        return addEnumFilter(labelKey, values, I18n::enumLabel, onChange);
+    /** Boolean filter rendered as a Checkbox; chip shows ✓ when checked. */
+    public Checkbox addBooleanFilter(String labelKey, Consumer<Boolean> onChange) {
+        Checkbox cb = new Checkbox(I18n.t(labelKey));
+        cb.addClassName("filter-checkbox");
+
+        String key = "bool:" + labelKey;
+        cb.addValueChangeListener(e -> {
+            Boolean v = e.getValue();
+            if (onChange != null) onChange.accept(v);
+            String chipValue = Boolean.TRUE.equals(v) ? "✓" : null;
+            trackChip(key, I18n.t(labelKey), chipValue, () -> cb.setValue(false));
+        });
+        registerManualField(cb, key, labelKey, () -> cb.setValue(false));
+        return cb;
     }
 
-    /**
-     * Adds an enum-backed filter with a custom i18n label generator.
-     */
-    public <E extends Enum<E>> ComboBox<E> addEnumFilter(
-            String labelKey, E[] values,
-            ItemLabelGenerator<E> labelGenerator, Consumer<E> onChange) {
-        ComboBox<E> combo = new ComboBox<>(I18n.t(labelKey));
-        combo.setItems(values);
-        registerCombo(combo, I18n.t(labelKey), labelGenerator, onChange,
-                v -> v != null,
-                null);
-        return combo;
+    // ══════════════════════════════════════════════════════════════
+    //  Manual mode — dates
+    // ══════════════════════════════════════════════════════════════
+
+    /** Single-date filter. */
+    public DatePicker addDateFilter(String labelKey, Consumer<LocalDate> onChange) {
+        DatePicker picker = new DatePicker(I18n.t(labelKey));
+        picker.setClearButtonVisible(true);
+        picker.addClassName("filter-date");
+
+        String key = "date:" + labelKey;
+        picker.addValueChangeListener(e -> {
+            LocalDate v = e.getValue();
+            if (onChange != null) onChange.accept(v);
+            trackChip(key, I18n.t(labelKey), v == null ? null : v.format(DATE_FMT), picker::clear);
+        });
+        registerManualField(picker, key, labelKey, picker::clear);
+        return picker;
     }
 
-    /**
-     * Adds a nullable object filter (school year, level, free-text key, …).
-     * See the class Javadoc for the {@code Function<? super E, String>} choice.
-     */
-    public <E> ComboBox<E> addObjectFilter(
-            String labelKey, String allPlaceholderKey,
-            Function<? super E, String> labelGenerator, Consumer<E> onChange) {
-        ComboBox<E> combo = new ComboBox<>(I18n.t(labelKey));
-        combo.setPlaceholder(I18n.t(allPlaceholderKey));
-        ItemLabelGenerator<E> adapted = labelGenerator::apply;
-        registerCombo(combo, I18n.t(labelKey), adapted, onChange,
-                v -> v != null,
-                null);
-        return combo;
+    /** Date-and-time filter. */
+    public DateTimePicker addDateTimeFilter(String labelKey, Consumer<LocalDateTime> onChange) {
+        DateTimePicker picker = new DateTimePicker(I18n.t(labelKey));
+        picker.addClassName("filter-date");
+
+        String key = "dt:" + labelKey;
+        picker.addValueChangeListener(e -> {
+            LocalDateTime v = e.getValue();
+            if (onChange != null) onChange.accept(v);
+            String formatted = v == null ? null : v.toLocalDate().format(DATE_FMT);
+            trackChip(key, I18n.t(labelKey), formatted, () -> picker.setValue(null));
+        });
+        registerManualField(picker, key, labelKey, () -> picker.setValue(null));
+        return picker;
     }
 
-    /**
-     * Adds a {@link StatusFilter} whose labels come from {@code i18nPrefix.*}.
-     */
-    public ComboBox<StatusFilter> addStatusFilter(
-            String i18nPrefix, Consumer<StatusFilter> onChange) {
-        ComboBox<StatusFilter> combo = new ComboBox<>(I18n.t("common.filter.status"));
-        combo.setItems(StatusFilter.values());
-        combo.setValue(StatusFilter.ALL);
-        registerCombo(combo, I18n.t("common.filter.status"),
-                s -> translateStatus(i18nPrefix, s),
-                v -> onChange.accept(v != null ? v : StatusFilter.ALL),
-                v -> v != null && v != StatusFilter.ALL,
-                StatusFilter.ALL);
-        return combo;
-    }
-
-    /**
-     * Adds a date-range filter (two {@link DatePicker}s side by side).
-     * <p>
-     * The filter participates in the chip row and in "clear all", exactly
-     * like a combo-backed filter: whenever either picker is set, a chip is
-     * emitted with the label {@code labelKey} and a value of the form
-     * {@code "2025-01-01 → 2025-12-31"} (or {@code "≥ X"} / {@code "≤ Y"}
-     * for open-ended ranges).
-     *
-     * @param labelKey     i18n key shown on the chip (e.g. "Période")
-     * @param fromLabelKey i18n key for the "from" picker placeholder
-     * @param toLabelKey   i18n key for the "to" picker placeholder
-     * @param onChange     receives the pair whenever either bound
-     *                     changes; either argument may be {@code null}
-     * @return a handle to the two pickers, for programmatic enable / read /
-     * clear from the owning view
-     */
+    /** From/to range filter. */
     public DateRangeFilter addDateRangeFilter(
-            String labelKey,          // chip label
-            String fromLabelKey,      // label for the "from" picker
-            String toLabelKey,        // label for the "to" picker
+            String labelKey,
+            String fromKey,
+            String toKey,
             BiConsumer<LocalDate, LocalDate> onChange) {
 
-        DatePicker from = new DatePicker();
-        from.setLabel(I18n.t(fromLabelKey));
-        from.addClassName("filter-date");
+        DateRangeFilter filter = new DateRangeFilter(
+                null,
+                I18n.t(labelKey),
+                I18n.t(fromKey),
+                I18n.t(toKey));
 
-        DatePicker to = new DatePicker();
-        to.setLabel(I18n.t(toLabelKey));
-        to.addClassName("filter-date");
-
-        Div wrapper = new Div();
-        wrapper.addClassName("filter-date-range");
-        wrapper.add(from, to);
-
-        Runnable fire = () -> {
-            onChange.accept(from.getValue(), to.getValue());
-            rebuildChips();
-            if (!suppressRefresh) onRefresh.run();
-        };
-        from.addValueChangeListener(e -> fire.run());
-        to.addValueChangeListener(e -> fire.run());
-
-        registrations.add(new FilterRegistration() {
-            @Override
-            public boolean isActive() {
-                return from.getValue() != null || to.getValue() != null;
-            }
-
-            @Override
-            public void clear() {
-                from.clear();
-                to.clear();
-            }
-
-            @Override
-            public FilterChip toChip(Runnable onClearAll) {
-                String value = formatDateRange(from.getValue(), to.getValue());
-                return new FilterChip(I18n.t(labelKey), value, onClearAll);
-            }
+        String key = "range:" + labelKey;
+        filter.setOnChange(() -> {
+            LocalDate f = filter.getFromValue();
+            LocalDate t = filter.getToValue();
+            if (onChange != null) onChange.accept(f, t);
+            trackChip(key, I18n.t(labelKey), formatRange(f, t), filter::clear);
         });
 
-        controls.add(wrapper);
-
-        return new DateRangeFilter(from, to);
+        insertBefore(filter, applyButton);
+        manualClearers.add(filter::clear);
+        setVisible(true);
+        return filter;
     }
 
-    /**
-     * Registers an arbitrary custom control (e.g. a bespoke widget).
-     * Not part of the chip system — use {@link #addDateRangeFilter} for
-     * date ranges that should show up as chips.
-     */
-    public void addControl(Component c) {
-        controls.add(c);
-    }
+    // ══════════════════════════════════════════════════════════════
+    //  Manual mode — combo boxes
+    // ══════════════════════════════════════════════════════════════
 
-    // ==============================================================
-    // Internals
-    // ==============================================================
+    public <E extends Enum<E>> ComboBox<E> addEnumFilter(
+            String labelKey,
+            E[] values,
+            Function<E, String> labeler,
+            Consumer<E> onChange) {
 
-    /**
-     * Clears every filter in one shot and triggers a single refresh.
-     */
-    public void clearAll() {
-        suppressRefresh = true;
-        try {
-            for (FilterRegistration reg : registrations) {
-                reg.clear();
-            }
-            rebuildChips();
-        } finally {
-            suppressRefresh = false;
-        }
-        onRefresh.run();
-    }
-
-    private <T> void registerCombo(ComboBox<T> combo,
-                                   String label,
-                                   ItemLabelGenerator<T> generator,
-                                   Consumer<T> onChange,
-                                   Predicate<T> isActiveValue,
-                                   T clearedValue) {
-        combo.setItemLabelGenerator(generator);
-        combo.setClearButtonVisible(clearedValue == null);
+        ComboBox<E> combo = new ComboBox<>();
+        combo.setLabel(I18n.t(labelKey));
+        combo.setItems(values);
+        combo.setItemLabelGenerator(labeler::apply);
+        combo.setClearButtonVisible(true);
         combo.addClassName("filter-select");
 
-        registrations.add(new ComboFilterRegistration<>(
-                combo, label, generator, isActiveValue, clearedValue));
-
+        String key = "enum:" + labelKey;
         combo.addValueChangeListener(e -> {
-            onChange.accept(e.getValue());
-            rebuildChips();
-            if (!suppressRefresh) onRefresh.run();
+            E v = e.getValue();
+            if (onChange != null) onChange.accept(v);
+            trackChip(key, I18n.t(labelKey),
+                    v == null ? null : labeler.apply(v),
+                    combo::clear);
         });
-
-        controls.add(combo);
+        registerManualField(combo, key, labelKey, combo::clear);
+        return combo;
     }
 
-    private void rebuildChips() {
-        chipsList.removeAll();
+    public <E extends Enum<E>> ComboBox<E> addEnumFilter(
+            String labelKey,
+            E[] values,
+            Consumer<E> onChange) {
+        return addEnumFilter(
+                labelKey,
+                values,
+                e -> I18n.t(labelKey + "." + e.name().toLowerCase()),
+                onChange);
+    }
 
-        boolean any = false;
-        for (FilterRegistration reg : registrations) {
-            if (reg.isActive()) {
-                chipsList.add(reg.toChip(this::clearAll));
-                any = true;
+    public <E> ComboBox<E> addObjectFilter(
+            String labelKey,
+            String allOptionKey,
+            Function<E, String> labeler,
+            Consumer<E> onChange) {
+
+        ComboBox<E> combo = new ComboBox<>();
+        combo.setLabel(I18n.t(labelKey));
+        if (allOptionKey != null) combo.setPlaceholder(I18n.t(allOptionKey));
+        if (labeler != null) combo.setItemLabelGenerator(labeler::apply);
+        combo.setClearButtonVisible(true);
+        combo.addClassName("filter-select");
+
+        String key = "object:" + labelKey;
+        combo.addValueChangeListener(e -> {
+            E v = e.getValue();
+            if (onChange != null) onChange.accept(v);
+            String display = v == null
+                    ? null
+                    : (labeler != null ? labeler.apply(v) : String.valueOf(v));
+            trackChip(key, I18n.t(labelKey), display, combo::clear);
+        });
+        registerManualField(combo, key, labelKey, combo::clear);
+        return combo;
+    }
+
+    public ComboBox<StatusFilter> addStatusFilter(
+            String labelKeyPrefix,
+            Consumer<StatusFilter> onChange) {
+
+        ComboBox<StatusFilter> combo = new ComboBox<>();
+        combo.setLabel(I18n.t(labelKeyPrefix));
+        combo.setItems(StatusFilter.values());
+        combo.setItemLabelGenerator(s ->
+                I18n.t(labelKeyPrefix + "." + s.name().toLowerCase()));
+        combo.setValue(StatusFilter.ALL);
+        combo.setClearButtonVisible(false);
+        combo.addClassName("filter-select");
+
+        String key = "status:" + labelKeyPrefix;
+        combo.addValueChangeListener(e -> {
+            StatusFilter v = e.getValue() == null ? StatusFilter.ALL : e.getValue();
+            if (onChange != null) onChange.accept(v);
+            String display = v == StatusFilter.ALL ? null
+                    : I18n.t(labelKeyPrefix + "." + v.name().toLowerCase());
+            trackChip(key, I18n.t(labelKeyPrefix), display,
+                    () -> combo.setValue(StatusFilter.ALL));
+        });
+        registerManualField(combo, key, labelKeyPrefix,
+                () -> combo.setValue(StatusFilter.ALL));
+        return combo;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Manual mode — arbitrary control
+    // ══════════════════════════════════════════════════════════════
+
+    public Component addControl(Component control) {
+        return addControl(control, null);
+    }
+
+    public Component addControl(Component control, Runnable onClearAction) {
+        if (control == null) return null;
+        insertBefore(control, applyButton);
+        if (onClearAction != null) manualClearers.add(onClearAction);
+        setVisible(true);
+        return control;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Layout construction
+    // ══════════════════════════════════════════════════════════════
+
+    private void build() {
+        addClassName("filter-card");
+        setWidthFull();
+
+        // ── Collapse pill ──────────────────────────────────────────
+        collapseButton.addClassName("filter-card__collapse");
+        collapseButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        collapseButton.setIcon(VaadinIcon.CHEVRON_UP.create());
+        collapseButton.getElement().setAttribute("aria-label", I18n.t("common.filter.toggle"));
+        collapseButton.addClickListener(e -> toggleCollapsed());
+        add(collapseButton);
+
+        // ── Header ─────────────────────────────────────────────────
+        header.addClassName("filter-card__header");
+        Icon filterIcon = VaadinIcon.FILTER.create();
+        filterIcon.addClassName("filter-card__icon");
+        Span titleSpan = new Span(I18n.t("common.filter.title"));
+        titleSpan.addClassName("filter-card__title");
+        activeCount.addClassName("filter-card__count");
+        header.add(filterIcon, titleSpan, activeCount);
+        add(header);
+
+        // ── Body ───────────────────────────────────────────────────
+        body.addClassName("filter-card__body");
+
+        controls.addClassName("filter-card__controls");
+
+        // Metadata-driven inputs first
+        for (var entry : criteriaMetadata.entrySet()) {
+            Component input = createInput(entry.getKey(), entry.getValue());
+            fieldInputs.put(entry.getKey(), input);
+            controls.add(input);
+        }
+
+        // Apply / Clear buttons
+        applyButton.setText(I18n.t("common.filter.apply"));
+        applyButton.setIcon(VaadinIcon.FILTER.create());
+        applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        applyButton.addClickListener(e -> fireApply());
+
+        clearButton.setText(I18n.t("common.filter.clear"));
+        clearButton.setIcon(VaadinIcon.ERASER.create());
+        clearButton.addClickListener(e -> fireClear());
+
+        controls.add(applyButton, clearButton);
+
+        // Chips row
+        chipsRow.addClassName("filter-card__chips");
+        Span chipsLabel = new Span(I18n.t("common.filter.active"));
+        chipsLabel.addClassName("filter-card__chips-label");
+        chipsList.addClassName("filter-card__chips-list");
+        clearAllLink.addClassName("filter-card__clear");
+        clearAllLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        clearAllLink.setText(I18n.t("common.filter.clear.all"));
+        clearAllLink.addClickListener(e -> fireClear());
+        chipsRow.add(chipsLabel, chipsList, clearAllLink);
+
+        body.add(controls, chipsRow);
+        add(body);
+
+        // Initial state
+        chipsRow.setVisible(false);
+        activeCount.setVisible(false);
+        getElement().getClassList().set("filter-card--has-active", false);
+        setVisible(!fieldInputs.isEmpty());
+    }
+
+    private void toggleCollapsed() {
+        collapsed = !collapsed;
+        body.setVisible(!collapsed);
+        getElement().getClassList().set("filter-card--collapsed", collapsed);
+        collapseButton.setIcon(
+                (collapsed ? VaadinIcon.CHEVRON_DOWN : VaadinIcon.CHEVRON_UP).create());
+    }
+
+    private void insertBefore(Component c, Component anchor) {
+        int idx = controls.indexOf(anchor);
+        controls.addComponentAtIndex(idx < 0 ? controls.getComponentCount() : idx, c);
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Field registration — the missing helper
+    // ══════════════════════════════════════════════════════════════
+
+    /**
+     * Registers a manually-added field with the Clear pipeline and makes
+     * the bar visible.
+     * <p>
+     * {@code chipKey} and {@code labelKey} are accepted for symmetry with
+     * the {@code addXxx} call sites but are not needed at this point: chip
+     * creation is already handled by the per-field value-change listeners
+     * (which call {@link #trackChip}). Only the reset action is stored.
+     *
+     * @param field   the control being registered (currently unused, kept
+     *                for future extension — e.g. per-field visibility)
+     * @param chipKey the chip key used by the field's listener (unused)
+     * @param labelKey the i18n key used by the field (unused)
+     * @param onClear action executed when the Clear button fires
+     */
+    private void registerManualField(Component field,
+                                     String chipKey,
+                                     String labelKey,
+                                     Runnable onClear) {
+        if (onClear != null) {
+            manualClearers.add(onClear);
+        }
+        setVisible(true);
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Metadata-mode input factory
+    // ══════════════════════════════════════════════════════════════
+
+    private Component createInput(String name, String type) {
+        String label = resolveLabel(name);
+        String t = type == null ? "String" : type;
+        String key = "meta:" + name;
+
+        return switch (t) {
+            case "Integer", "int" -> {
+                IntegerField f = new IntegerField(label);
+                f.setClearButtonVisible(true);
+                f.setStepButtonsVisible(true);
+                f.addClassName("filter-select");
+                f.setWidth("10em");
+                f.addValueChangeListener(e ->
+                        trackChip(key, label,
+                                e.getValue() == null ? null : e.getValue().toString(),
+                                f::clear));
+                yield f;
             }
-        }
-        chipsRow.setVisible(any);
-
-        // Lets the SCSS hint "there are filters" while collapsed.
-        setClassName("filter-card--has-active", any);
+            case "Long", "long", "Double", "double", "Float", "float", "BigDecimal" -> {
+                NumberField f = new NumberField(label);
+                f.setClearButtonVisible(true);
+                f.setStepButtonsVisible(true);
+                f.addClassName("filter-select");
+                f.setWidth("10em");
+                f.addValueChangeListener(e ->
+                        trackChip(key, label,
+                                e.getValue() == null ? null : e.getValue().toString(),
+                                f::clear));
+                yield f;
+            }
+            case "Boolean", "boolean" -> {
+                ComboBox<Boolean> f = new ComboBox<>(label);
+                f.setItems(Boolean.TRUE, Boolean.FALSE);
+                f.setItemLabelGenerator(b -> Boolean.TRUE.equals(b) ? "✓" : "✗");
+                f.setClearButtonVisible(true);
+                f.addClassName("filter-select");
+                f.setWidth("8em");
+                f.addValueChangeListener(e ->
+                        trackChip(key, label,
+                                Boolean.TRUE.equals(e.getValue()) ? "✓" : null,
+                                f::clear));
+                yield f;
+            }
+            case "LocalDate", "Date", "java.sql.Date" -> {
+                DateRangeFilter drf = new DateRangeFilter(name, label);
+                drf.setOnChange(() ->
+                        trackChip(key, label,
+                                formatRange(drf.getFromValue(), drf.getToValue()),
+                                drf::clear));
+                yield drf;
+            }
+            case "LocalDateTime", "Instant", "OffsetDateTime" -> {
+                DateTimePicker f = new DateTimePicker(label);
+                f.addClassName("filter-date");
+                f.setWidth("15em");
+                f.addValueChangeListener(e ->
+                        trackChip(key, label,
+                                e.getValue() == null ? null
+                                        : e.getValue().toLocalDate().format(DATE_FMT),
+                                () -> f.setValue(null)));
+                yield f;
+            }
+            default -> {
+                TextField f = new TextField(label);
+                f.setClearButtonVisible(true);
+                f.addClassName("filter-select");
+                f.setWidth("14em");
+                f.addValueChangeListener(e ->
+                        trackChip(key, label, e.getValue(), f::clear));
+                yield f;
+            }
+        };
     }
 
-    // ==============================================================
-    // Nested types
-    // ==============================================================
-
-    /**
-     * Uniform contract for anything that can produce a chip and be cleared.
-     */
-    private interface FilterRegistration {
-        boolean isActive();
-
-        void clear();
-
-        FilterChip toChip(Runnable onClearAll);
+    private String resolveLabel(String name) {
+        String key = "filter.field." + name;
+        String translated = I18n.t(key);
+        return translated.equals(key) ? humanize(name) : translated;
     }
 
-    /**
-     * A {@link ComboBox}-backed filter.
-     */
-    private static final class ComboFilterRegistration<T> implements FilterRegistration {
-        final ComboBox<T> combo;
-        final String label;
-        final ItemLabelGenerator<T> labelGenerator;
-        final Predicate<T> isActiveValue;
-        final T clearedValue;
-
-        ComboFilterRegistration(ComboBox<T> combo,
-                                String label,
-                                ItemLabelGenerator<T> generator,
-                                Predicate<T> isActiveValue,
-                                T clearedValue) {
-            this.combo = combo;
-            this.label = label;
-            this.labelGenerator = generator;
-            this.isActiveValue = isActiveValue;
-            this.clearedValue = clearedValue;
-        }
-
-        @Override
-        public boolean isActive() {
-            return isActiveValue.test(combo.getValue());
-        }
-
-        @Override
-        public void clear() {
-            combo.setValue(clearedValue);
-        }
-
-        @Override
-        public FilterChip toChip(Runnable onClearAll) {
-            T v = combo.getValue();
-            String text = labelGenerator != null
-                    ? labelGenerator.apply(v)
-                    : String.valueOf(v);
-            return new FilterChip(label, text, onClearAll);
-        }
+    private String humanize(String name) {
+        if (name == null || name.isEmpty()) return "";
+        return Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 
-    /**
-     * Handle returned by {@link #addDateRangeFilter} — lets the owning view
-     * read, clear, or enable / disable the two pickers without exposing the
-     * internal {@link DatePicker} instances directly.
-     */
-    public static final class DateRangeFilter {
-        private final DatePicker from;
-        private final DatePicker to;
+    // ══════════════════════════════════════════════════════════════
+    //  Chips
+    // ══════════════════════════════════════════════════════════════
 
-        DateRangeFilter(DatePicker from, DatePicker to) {
-            this.from = from;
-            this.to = to;
+    private void trackChip(String key, String label, String value, Runnable onRemove) {
+        if (value == null || value.isBlank()) {
+            chips.remove(key);
+        } else {
+            chips.put(key, new ChipEntry(label, value, onRemove));
+        }
+        refreshChips();
+    }
+
+    private void refreshChips() {
+        chipsList.removeAll();
+        for (ChipEntry entry : chips.values()) {
+            chipsList.add(new FilterChip(entry.label(), entry.value(), () -> {
+                if (entry.onRemove() != null) entry.onRemove().run();
+            }));
+        }
+        boolean hasChips = !chips.isEmpty();
+        chipsRow.setVisible(hasChips);
+        activeCount.setText(String.valueOf(chips.size()));
+        activeCount.setVisible(hasChips);
+        getElement().getClassList().set("filter-card--has-active", hasChips);
+    }
+
+    private static String formatRange(LocalDate from, LocalDate to) {
+        if (from == null && to == null) return null;
+        if (from != null && to != null) return from.format(DATE_FMT) + " → " + to.format(DATE_FMT);
+        if (from != null) return "≥ " + from.format(DATE_FMT);
+        return "≤ " + to.format(DATE_FMT);
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Apply / Clear
+    // ══════════════════════════════════════════════════════════════
+
+    private void fireApply() {
+        if (onApply != null) onApply.accept(buildCriteriaString());
+    }
+
+    private void fireClear() {
+        fieldInputs.values().forEach(this::clearInput);
+        manualClearers.forEach(Runnable::run);
+        chips.clear();
+        refreshChips();
+        if (onClear != null) onClear.run();
+    }
+
+    private void clearInput(Component c) {
+        if (c instanceof DateRangeFilter drf)   drf.clear();
+        else if (c instanceof TextField tf)     tf.clear();
+        else if (c instanceof IntegerField f)   f.clear();
+        else if (c instanceof NumberField f)    f.clear();
+        else if (c instanceof DatePicker f)     f.clear();
+        else if (c instanceof DateTimePicker f) f.setValue(null);
+        else if (c instanceof ComboBox<?> f)    f.clear();
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Criteria string (metadata mode)
+    // ══════════════════════════════════════════════════════════════
+
+    private String buildCriteriaString() {
+        StringBuilder sb = new StringBuilder();
+
+        for (var entry : fieldInputs.entrySet()) {
+            Component comp = entry.getValue();
+            String clause;
+
+            if (comp instanceof DateRangeFilter drf) {
+                clause = drf.toCriteria();
+            } else {
+                Object raw = getInputValue(comp);
+                if (raw == null) continue;
+                String str = raw.toString().trim();
+                if (str.isEmpty()) continue;
+                clause = buildClause(entry.getKey(),
+                        criteriaMetadata.get(entry.getKey()), str);
+            }
+
+            if (clause == null || clause.isBlank()) continue;
+            if (sb.length() > 0) sb.append(" & ");
+            sb.append(clause);
+        }
+        return sb.toString();
+    }
+
+    private String buildClause(String field, String type, String raw) {
+        String op;
+        String value;
+
+        String[] prefixes = {">=", "<=", "!=", ">", "<"};
+        String matched = null;
+        for (String p : prefixes) {
+            if (raw.startsWith(p)) { matched = p; break; }
         }
 
-        public LocalDate getFromValue() {
-            return from.getValue();
+        if (matched != null) {
+            op = matched;
+            value = raw.substring(matched.length()).trim();
+        } else if ("String".equals(type)) {
+            op = "~";
+            value = raw;
+        } else {
+            op = "=";
+            value = raw;
         }
 
-        public LocalDate getToValue() {
-            return to.getValue();
-        }
+        if (value.isEmpty()) return null;
+        value = value.replace("'", "''");
+        return field + " " + op + " '" + value + "'";
+    }
 
-        public void clear() {
-            from.clear();
-            to.clear();
-        }
-
-        public void setEnabled(boolean enabled) {
-            from.setEnabled(enabled);
-            to.setEnabled(enabled);
-        }
+    private Object getInputValue(Component c) {
+        if (c instanceof TextField tf)          return tf.getValue();
+        if (c instanceof IntegerField f)        return f.getValue();
+        if (c instanceof NumberField f)         return f.getValue();
+        if (c instanceof DatePicker f)          return f.getValue();
+        if (c instanceof DateTimePicker f)      return f.getValue();
+        if (c instanceof ComboBox<?> f)         return f.getValue();
+        return null;
     }
 }
