@@ -61,10 +61,6 @@
   box-shadow: $shadow-sm;
 }
 
-// Narrow *content area* — not necessarily a narrow screen. This is the
-// case the old viewport breakpoints kept missing: a 1366px laptop with
-// the drawer open leaves the toolbar ~1100px, and a phone-width @media
-// query never fires for it.
 @container panel (max-width: #{$bp-panel-compact}) {
   .administration-toolbar {
     flex-direction: column;
@@ -187,14 +183,9 @@
     font-weight: 600;
     letter-spacing: 0.01em;
     color: var(--lumo-body-text-color);
-    // The header title is intentionally *not* uppercased — it plays the
-    // role of the card's section title, not of a control label.
   }
 
   /* ── Active-filter count badge ─────────────────────────────── */
-  // Small primary-tinted pill rendered next to the title. Its text is
-  // the current number of active chips; it is hidden by FilterBar.java
-  // when the count is zero.
   &__count {
     display: inline-flex;
     align-items: center;
@@ -304,22 +295,6 @@
 
 // ══════════════════════════════════════════════════════════════════
 // LABEL TYPOGRAPHY — one visual contract, two CSS mechanisms.
-//
-// Rule 1 — combos + search field
-//   Direct part selector. Font-size, tracking, casing, colour all
-//   overridable in one shot.
-//
-// Rule 2 — date pickers
-//   ::part(label) cannot reach the label from the host, so:
-//     • font-size via `--lumo-font-size-s` (custom property that
-//       cascades into the nested shadow root),
-//     • text-transform + letter-spacing via inheritance (the shadow
-//       tree does not set either),
-//     • font-weight left at Vaadin's default 500 for a combo label
-//       too, so the two families match without any override.
-//
-// Deliberately no `font-weight` in either rule — the default is what
-// keeps the two families visually identical.
 // ══════════════════════════════════════════════════════════════════
 
 .toolbar-search::part(label),
@@ -331,24 +306,13 @@
 }
 
 .filter-date {
-  /* Reaches the nested label font-size through the Lumo variable
-     the shadow tree reads. Custom properties cross every shadow
-     boundary unconditionally. */
   --lumo-font-size-s: 0.6875rem;
-
-  /* Reach the nested label text-transform + letter-spacing through
-     plain inheritance. The shadow tree does not set either, so the
-     inherited values win. */
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 // ══════════════════════════════════════════════════════════════════
 // LABEL → PILL SPACING
-//
-// Uniform across all three controls: same gap, same source. Applied
-// on the input-field part — a top-level part on every one of them —
-// so the value is guaranteed to reach every control identically.
 // ══════════════════════════════════════════════════════════════════
 
 .toolbar-search::part(input-field),
@@ -405,9 +369,6 @@
   margin: 0;
 
   &::part(input-field) {
-    /* Reset whatever the host-level --lumo-font-size-s override
-       might otherwise leak into the input itself, and reset
-       casing for the picked date. */
     font-size: 0.875rem;
     text-transform: none;
     letter-spacing: normal;
