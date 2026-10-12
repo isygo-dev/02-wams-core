@@ -3,7 +3,6 @@ package eu.isygoit.ui.common.filters;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
@@ -37,34 +36,14 @@ import java.util.function.Function;
  *   <li><b>Metadata mode</b> — constructed with the map from
  *       {@code getAnnotatedCriteria()}. The control type per field is
  *       inferred from the field's type name; enums are resolved through
- *       either a per-field hint map or a simple-name registry.
- *       Apply emits a criteria string consumable by the backend
- *       {@code /filter} endpoint.</li>
+ *       either a per-field hint map or a simple-name registry.</li>
  *   <li><b>Manual mode</b> — fields added programmatically via
- *       {@code addTextFilter}, {@code addEnumFilter},
- *       {@code addDateRangeFilter}, etc.</li>
+ *       {@code addTextFilter}, {@code addEnumFilter}, etc.</li>
  * </ul>
  *
- * <p>Every active filter is mirrored as a removable chip in the bottom
- * strip. Clearing a chip clears the corresponding control; clearing the
- * bar resets everything.</p>
- *
- * <p><b>Initial state:</b> the bar starts <em>collapsed</em> — only the
- * header ({@code ⚙ Filtres (N)}) and the toggle pill are visible. Clicking
- * the pill expands the body. When the body is collapsed but active chips
- * exist, the pill and count badge are tinted in the primary colour to
- * advertise that a filter is active.</p>
- *
- * <h3>Enum resolution priority in metadata mode</h3>
- * <ol>
- *   <li>{@link #FilterBar(Map, Collection, Map) field-level hints} —
- *       matched by field name; reliable when two enums share the same
- *       simple name (e.g. {@code IEnumStudentStatus.Types} and
- *       {@code IEnumLanguage.Types}).</li>
- *   <li>Simple-name registry — matched by {@code typeSimpleName}.</li>
- *   <li>Type-name switch — String, numbers, Boolean, dates.</li>
- *   <li>Fallback — {@code TextField}.</li>
- * </ol>
+ * <p>Boolean criteria render as a {@link ToggleSwitch} — a tri-state
+ * switch whose values are {@code null} (no filter), {@code true},
+ * and {@code false}.</p>
  */
 @Slf4j
 public class FilterBar extends Div {
@@ -75,16 +54,13 @@ public class FilterBar extends Div {
     private final Map<String, String> criteriaMetadata;
     private final Map<String, Component> fieldInputs = new LinkedHashMap<>();
 
-    /** simple-name → class; used when no per-field hint matches. */
     private final Map<String, Class<? extends Enum<?>>> enumRegistry = new LinkedHashMap<>();
-
-    /** field-name → class; takes priority over {@link #enumRegistry}. */
     private final Map<String, Class<? extends Enum<?>>> fieldEnumHints = new LinkedHashMap<>();
 
     // ─── Manual-mode state ─────────────────────────────────────────
     private final List<Runnable> manualClearers = new ArrayList<>();
 
-    // ─── Chip tracking — key → chip ────────────────────────────────
+    // ─── Chip tracking ─────────────────────────────────────────────
     private final Map<String, ChipEntry> chips = new LinkedHashMap<>();
 
     // ─── UI nodes ──────────────────────────────────────────────────
@@ -103,8 +79,6 @@ public class FilterBar extends Div {
     private Consumer<String> onApply;
     private Runnable onClear;
 
-    // ─── Layout state ──────────────────────────────────────────────
-    /** The bar starts collapsed by default. */
     private boolean collapsed = true;
 
     private record ChipEntry(String label, String value, Runnable onRemove) {}
@@ -133,9 +107,7 @@ public class FilterBar extends Div {
 
         if (enumTypes != null) {
             for (Class<? extends Enum<?>> t : enumTypes) {
-                if (t != null && t.isEnum()) {
-                    enumRegistry.put(t.getSimpleName(), t);
-                }
+                if (t != null && t.isEnum()) enumRegistry.put(t.getSimpleName(), t);
             }
         }
         if (fieldEnumHints != null) {
@@ -155,7 +127,6 @@ public class FilterBar extends Div {
     public void setOnApply(Consumer<String> onApply) { this.onApply = onApply; }
     public void setOnClear(Runnable onClear)         { this.onClear = onClear; }
 
-    /** Alias: fires on Apply but ignores the criteria string. */
     public void setOnRefresh(Runnable onRefresh) {
         setOnApply(criteria -> onRefresh.run());
     }
@@ -216,19 +187,21 @@ public class FilterBar extends Div {
         return field;
     }
 
-    public Checkbox addBooleanFilter(String labelKey, Consumer<Boolean> onChange) {
-        Checkbox cb = new Checkbox(I18n.t(labelKey));
-        cb.addClassName("filter-checkbox");
-
+    /**
+     * Boolean filter rendered as a {@link ToggleSwitch}.
+     * Cycles: unset → true → false → unset.
+     */
+    public ToggleSwitch addBooleanFilter(String labelKey, Consumer<Boolean> onChange) {
+        ToggleSwitch toggle = new ToggleSwitch(I18n.t(labelKey));
         String key = "bool:" + labelKey;
-        cb.addValueChangeListener(e -> {
-            Boolean v = e.getValue();
+
+        toggle.setOnChange(v -> {
             if (onChange != null) onChange.accept(v);
-            String chipValue = Boolean.TRUE.equals(v) ? "✓" : null;
-            trackChip(key, I18n.t(labelKey), chipValue, () -> cb.setValue(false));
+            String chipValue = v == null ? null : (Boolean.TRUE.equals(v) ? "✓" : "✗");
+            trackChip(key, I18n.t(labelKey), chipValue, toggle::clear);
         });
-        registerManualField(() -> cb.setValue(false));
-        return cb;
+        registerManualField(toggle::clear);
+        return toggle;
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -267,16 +240,11 @@ public class FilterBar extends Div {
     }
 
     public DateRangeFilter addDateRangeFilter(
-            String labelKey,
-            String fromKey,
-            String toKey,
+            String labelKey, String fromKey, String toKey,
             BiConsumer<LocalDate, LocalDate> onChange) {
 
         DateRangeFilter filter = new DateRangeFilter(
-                null,
-                I18n.t(labelKey),
-                I18n.t(fromKey),
-                I18n.t(toKey));
+                null, I18n.t(labelKey), I18n.t(fromKey), I18n.t(toKey));
 
         String key = "range:" + labelKey;
         filter.setOnChange(() -> {
@@ -297,10 +265,8 @@ public class FilterBar extends Div {
     // ══════════════════════════════════════════════════════════════
 
     public <E extends Enum<E>> ComboBox<E> addEnumFilter(
-            String labelKey,
-            E[] values,
-            Function<E, String> labeler,
-            Consumer<E> onChange) {
+            String labelKey, E[] values,
+            Function<E, String> labeler, Consumer<E> onChange) {
 
         ComboBox<E> combo = new ComboBox<>();
         combo.setLabel(I18n.t(labelKey));
@@ -321,21 +287,14 @@ public class FilterBar extends Div {
     }
 
     public <E extends Enum<E>> ComboBox<E> addEnumFilter(
-            String labelKey,
-            E[] values,
-            Consumer<E> onChange) {
-        return addEnumFilter(
-                labelKey,
-                values,
-                e -> I18n.t(labelKey + "." + e.name().toLowerCase()),
-                onChange);
+            String labelKey, E[] values, Consumer<E> onChange) {
+        return addEnumFilter(labelKey, values,
+                e -> I18n.t(labelKey + "." + e.name().toLowerCase()), onChange);
     }
 
     public <E> ComboBox<E> addObjectFilter(
-            String labelKey,
-            String allOptionKey,
-            Function<E, String> labeler,
-            Consumer<E> onChange) {
+            String labelKey, String allOptionKey,
+            Function<E, String> labeler, Consumer<E> onChange) {
 
         ComboBox<E> combo = new ComboBox<>();
         combo.setLabel(I18n.t(labelKey));
@@ -358,8 +317,7 @@ public class FilterBar extends Div {
     }
 
     public ComboBox<StatusFilter> addStatusFilter(
-            String labelKeyPrefix,
-            Consumer<StatusFilter> onChange) {
+            String labelKeyPrefix, Consumer<StatusFilter> onChange) {
 
         ComboBox<StatusFilter> combo = new ComboBox<>();
         combo.setLabel(I18n.t(labelKeyPrefix));
@@ -407,18 +365,14 @@ public class FilterBar extends Div {
         addClassName("filter-card");
         setWidthFull();
 
-        // ── Collapse pill ──────────────────────────────────────────
         collapseButton.addClassName("filter-card__collapse");
         collapseButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        // Icon matches the initial `collapsed` flag; re-set at the end of build().
         collapseButton.setIcon(
                 (collapsed ? VaadinIcon.CHEVRON_DOWN : VaadinIcon.CHEVRON_UP).create());
-        collapseButton.getElement().setAttribute("aria-label",
-                I18n.t("common.filter.toggle"));
+        collapseButton.getElement().setAttribute("aria-label", I18n.t("common.filter.toggle"));
         collapseButton.addClickListener(e -> toggleCollapsed());
         add(collapseButton);
 
-        // ── Header ─────────────────────────────────────────────────
         header.addClassName("filter-card__header");
         Icon filterIcon = VaadinIcon.FILTER.create();
         filterIcon.addClassName("filter-card__icon");
@@ -428,18 +382,15 @@ public class FilterBar extends Div {
         header.add(filterIcon, titleSpan, activeCount);
         add(header);
 
-        // ── Body ───────────────────────────────────────────────────
         body.addClassName("filter-card__body");
         controls.addClassName("filter-card__controls");
 
-        // Metadata-driven inputs
         for (var entry : criteriaMetadata.entrySet()) {
             Component input = createInput(entry.getKey(), entry.getValue());
             fieldInputs.put(entry.getKey(), input);
             controls.add(input);
         }
 
-        // Apply / Clear buttons
         applyButton.setText(I18n.t("common.filter.apply"));
         applyButton.setIcon(VaadinIcon.FILTER.create());
         applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -451,7 +402,6 @@ public class FilterBar extends Div {
 
         controls.add(applyButton, clearButton);
 
-        // Chips row
         chipsRow.addClassName("filter-card__chips");
         Span chipsLabel = new Span(I18n.t("common.filter.active"));
         chipsLabel.addClassName("filter-card__chips-label");
@@ -465,10 +415,6 @@ public class FilterBar extends Div {
         body.add(controls, chipsRow);
         add(body);
 
-        // ── Initial state ──────────────────────────────────────────
-        // The bar starts collapsed: only the header and the toggle pill
-        // are visible. The body, the CSS class, and the icon all reflect
-        // the `collapsed` flag.
         body.setVisible(!collapsed);
         getElement().getClassList().set("filter-card--collapsed", collapsed);
 
@@ -497,7 +443,7 @@ public class FilterBar extends Div {
     }
 
     // ══════════════════════════════════════════════════════════════
-    //  Metadata-mode input factory — dynamic dispatch by type name
+    //  Metadata-mode input factory
     // ══════════════════════════════════════════════════════════════
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -506,11 +452,8 @@ public class FilterBar extends Div {
         String t = type == null ? "String" : type;
         String key = "meta:" + name;
 
-        // ── Enum resolution: field hint first, then simple-name registry.
         Class<? extends Enum<?>> enumType = fieldEnumHints.get(name);
-        if (enumType == null) {
-            enumType = enumRegistry.get(t);
-        }
+        if (enumType == null) enumType = enumRegistry.get(t);
         if (enumType != null) {
             ComboBox combo = new ComboBox();
             combo.setLabel(label);
@@ -528,7 +471,6 @@ public class FilterBar extends Div {
             return combo;
         }
 
-        // ── Everything else: switch on the type name ───────────────
         return switch (t) {
             case "Integer", "int" -> {
                 IntegerField f = new IntegerField(label);
@@ -554,18 +496,15 @@ public class FilterBar extends Div {
                                 f::clear));
                 yield f;
             }
+            // ── Boolean → ToggleSwitch ────────────────────────────
             case "Boolean", "boolean" -> {
-                ComboBox<Boolean> f = new ComboBox<>(label);
-                f.setItems(Boolean.TRUE, Boolean.FALSE);
-                f.setItemLabelGenerator(b -> Boolean.TRUE.equals(b) ? "✓" : "✗");
-                f.setClearButtonVisible(true);
-                f.addClassName("filter-select");
-                f.setWidth("8em");
-                f.addValueChangeListener(e ->
-                        trackChip(key, label,
-                                Boolean.TRUE.equals(e.getValue()) ? "✓" : null,
-                                f::clear));
-                yield f;
+                ToggleSwitch ts = new ToggleSwitch(label);
+                ts.setOnChange(v -> {
+                    String chipValue = v == null ? null
+                            : (Boolean.TRUE.equals(v) ? "✓" : "✗");
+                    trackChip(key, label, chipValue, ts::clear);
+                });
+                yield ts;
             }
             case "LocalDate", "Date", "java.sql.Date" -> {
                 DateRangeFilter drf = new DateRangeFilter(name, label);
@@ -598,22 +537,11 @@ public class FilterBar extends Div {
         };
     }
 
-    /**
-     * Display label for one enum value.
-     * <ol>
-     *   <li>i18n key {@code filter.field.<field>.<value_lowercase>}</li>
-     *   <li>If the enum implements {@link IEnum}, its {@code meaning()}.</li>
-     *   <li>Otherwise {@link Enum#name()}.</li>
-     * </ol>
-     */
     private String labelForEnum(String fieldName, Enum<?> value) {
         String i18nKey = "filter.field." + fieldName + "." + value.name().toLowerCase();
         String translated = I18n.t(i18nKey);
         if (!translated.equals(i18nKey)) return translated;
-
-        if (value instanceof IEnum ienum) {
-            return ienum.meaning();
-        }
+        if (value instanceof IEnum ienum) return ienum.meaning();
         return value.name();
     }
 
@@ -680,7 +608,8 @@ public class FilterBar extends Div {
     }
 
     private void clearInput(Component c) {
-        if (c instanceof DateRangeFilter drf)   drf.clear();
+        if (c instanceof ToggleSwitch ts)       ts.clear();
+        else if (c instanceof DateRangeFilter drf)   drf.clear();
         else if (c instanceof TextField tf)     tf.clear();
         else if (c instanceof IntegerField f)   f.clear();
         else if (c instanceof NumberField f)    f.clear();
@@ -719,6 +648,14 @@ public class FilterBar extends Div {
     }
 
     private String buildClause(String field, String type, String raw) {
+        // ── Boolean: raw is "true" or "false" (from ToggleSwitch.getValue()) ──
+        if ("Boolean".equals(type) || "boolean".equals(type)) {
+            if ("true".equals(raw) || "false".equals(raw)) {
+                return field + " = '" + raw + "'";
+            }
+            return null;
+        }
+
         String op;
         String value;
 
@@ -745,6 +682,7 @@ public class FilterBar extends Div {
     }
 
     private Object getInputValue(Component c) {
+        if (c instanceof ToggleSwitch ts)       return ts.getValue();
         if (c instanceof TextField tf)          return tf.getValue();
         if (c instanceof IntegerField f)        return f.getValue();
         if (c instanceof NumberField f)         return f.getValue();
