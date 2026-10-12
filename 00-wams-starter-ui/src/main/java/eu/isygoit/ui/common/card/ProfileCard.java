@@ -10,7 +10,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.server.StreamResource;
 import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.i18n.I18n;
@@ -37,9 +36,13 @@ import java.io.ByteArrayInputStream;
  *   <li>and if the subclass provides a non-null {@link #profileImageLoader()},
  *       {@link #onCardAttach(AttachEvent)} dispatches it asynchronously via
  *       {@link ContextAwareAsync} and calls {@link #setProfileImageBytes(byte[])}
- *       once the bytes are available. While the download is in flight, an
- *       indeterminate {@link ProgressBar} is shown under the hero row.</li>
+ *       once the bytes are available.</li>
  * </ol>
+ *
+ * <p>While the download is in flight, a semi-transparent overlay with a
+ * rotating spinner is shown on top of the avatar (placeholder stays visible
+ * underneath). The overlay is removed as soon as the bytes arrive, or on
+ * failure.
  *
  * @param <V> parent view type
  * @param <S> service type
@@ -70,11 +73,11 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     protected Image profileAvatarImage;
 
     /**
-     * Indeterminate progress bar shown under the hero row while
-     * {@link #profileImageLoader()} is running. {@code null} until
-     * {@link #buildTitle()} has been invoked.
+     * Semi-transparent overlay with a spinner, stacked on top of
+     * {@link #profileAvatarImage} while {@link #profileImageLoader()} is
+     * running. {@code null} until {@link #buildProfileAvatar()} has run.
      */
-    protected ProgressBar imageLoadingBar;
+    protected Div profileAvatarOverlay;
 
     protected ProfileCard(V parentView, S objectService, D profile) {
         super(parentView, objectService);
@@ -120,7 +123,7 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     protected abstract Span profileStatusTag();
 
     /* ══════════════════════════════════════════════════════════════
-     * Default header — avatar + (full name over subtitle) + loading bar
+     * Default header — avatar + (full name over subtitle)
      * ══════════════════════════════════════════════════════════════ */
 
     @Override
@@ -128,25 +131,8 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         return profileStatusTag();
     }
 
-    /**
-     * Builds the hero row (avatar + name block) and appends an indeterminate
-     * {@link ProgressBar} underneath, which is shown while
-     * {@link #profileImageLoader()} is running (see
-     * {@link #onCardAttach(AttachEvent)}).
-     *
-     * <p>Subclasses overriding this method must invoke
-     * {@code super.buildTitle()} (or manually create
-     * {@link #imageLoadingBar}) so the async image-loading indicator remains
-     * functional.
-     */
     @Override
     protected Component buildTitle() {
-        VerticalLayout container = new VerticalLayout();
-        container.setPadding(false);
-        container.setSpacing(false);
-        container.setWidthFull();
-        container.addClassName("wams-profile-card__hero-container");
-
         HorizontalLayout hero = new HorizontalLayout();
         hero.setAlignItems(FlexComponent.Alignment.CENTER);
         hero.setSpacing(true);
@@ -158,22 +144,18 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
 
         hero.add(avatar, info);
         hero.expand(info);
-        container.add(hero);
-
-        imageLoadingBar = new ProgressBar();
-        imageLoadingBar.setIndeterminate(true);
-        imageLoadingBar.setWidthFull();
-        imageLoadingBar.setVisible(false);
-        imageLoadingBar.addClassName("wams-profile-card__image-loading-bar");
-        container.add(imageLoadingBar);
-
-        return container;
+        return hero;
     }
 
     /**
      * Builds the round avatar as an {@link Image} so its source can be swapped
      * asynchronously. Initial source is {@link #profileImagePath()} when
      * non-blank, otherwise {@link #profileImagePlaceholder()}.
+     *
+     * <p>An empty, hidden {@link Div overlay} containing a CSS-driven spinner
+     * is stacked on top of the image. {@link #onCardAttach(AttachEvent)} shows
+     * it while the async loader runs, and hides it as soon as the bytes arrive
+     * (or on failure). The placeholder remains visible underneath the overlay.
      */
     protected Component buildProfileAvatar() {
         Div wrap = new Div();
@@ -187,7 +169,15 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         String path = profileImagePath();
         profileAvatarImage.setSrc(StringUtils.hasText(path) ? path : profileImagePlaceholder());
 
-        wrap.add(profileAvatarImage);
+        profileAvatarOverlay = new Div();
+        profileAvatarOverlay.addClassName("wams-profile-card__avatar-overlay");
+        profileAvatarOverlay.setVisible(false);
+
+        Div spinner = new Div();
+        spinner.addClassName("wams-profile-card__avatar-spinner");
+        profileAvatarOverlay.add(spinner);
+
+        wrap.add(profileAvatarImage, profileAvatarOverlay);
         return wrap;
     }
 
@@ -214,9 +204,9 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
      * therefore perform blocking I/O (e.g. an authenticated Feign call)
      * safely off the UI thread.
      *
-     * <p>While the loader runs, {@link #imageLoadingBar} is shown; the returned
-     * bytes are then pushed back onto the UI thread and consumed by
-     * {@link #setProfileImageBytes(byte[])}.
+     * <p>While the loader runs, {@link #profileAvatarOverlay} is shown on top
+     * of the placeholder; the returned bytes are then pushed back onto the UI
+     * thread and consumed by {@link #setProfileImageBytes(byte[])}.
      *
      * @see #setProfileImageBytes(byte[])
      */
@@ -246,31 +236,31 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     }
 
     /**
-     * Toggles the {@link #imageLoadingBar} visibility. Safe to call before
-     * {@link #buildTitle()} has run (no-op in that case).
+     * Toggles the {@link #profileAvatarOverlay} visibility. Safe to call
+     * before {@link #buildProfileAvatar()} has run (no-op in that case).
      *
      * <p>Must be invoked on the UI thread.
      */
     protected final void setImageLoading(boolean loading) {
-        if (imageLoadingBar != null) {
-            imageLoadingBar.setVisible(loading);
+        if (profileAvatarOverlay != null) {
+            profileAvatarOverlay.setVisible(loading);
         }
     }
 
     /**
      * Default attach hook:
      * <ol>
-     *   <li>shows {@link #imageLoadingBar},</li>
+     *   <li>shows the {@link #profileAvatarOverlay} on top of the placeholder,</li>
      *   <li>dispatches {@link #profileImageLoader()} on the
      *       {@link ContextAwareAsync} executor (so the Spring Security context,
      *       request attributes and Vaadin session are propagated),</li>
      *   <li>pushes the resulting bytes back onto the UI thread via
-     *       {@code ui.access(...)} and hides the bar.</li>
+     *       {@code ui.access(...)} and removes the overlay.</li>
      * </ol>
      *
      * <p>If the loader is absent, throws, or returns no bytes, the avatar
-     * keeps/falls back to {@link #profileImagePlaceholder()} and the bar is
-     * hidden again.
+     * keeps/falls back to {@link #profileImagePlaceholder()} and the overlay
+     * is removed.
      *
      * <p>Subclasses overriding this method <b>must</b> call
      * {@code super.onCardAttach(event)}.
