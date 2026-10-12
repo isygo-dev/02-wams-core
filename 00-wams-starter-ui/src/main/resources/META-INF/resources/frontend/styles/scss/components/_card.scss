@@ -554,3 +554,20 @@
     justify-content: center;
   }
 }
+
+.wams-profile-card__hero-container {
+  width: 100%;
+}
+
+.wams-profile-card__image-loading-bar {
+  height: 3px;
+  width: 100%;
+  margin-top: 6px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+/* Match the accent used elsewhere on the card (adjust var to your theme) */
+.wams-profile-card__image-loading-bar::part(bar) {
+  background: var(--lumo-primary-color, #1a73e8);
+}
