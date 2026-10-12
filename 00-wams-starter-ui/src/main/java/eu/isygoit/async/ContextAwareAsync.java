@@ -24,7 +24,7 @@ public final class ContextAwareAsync {
 
     public static <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier) {
         Objects.requireNonNull(supplier, "supplier");
-        return CompletableFuture.supplyAsync(supplier, requireDefaultExecutor());
+        return CompletableFuture.supplyAsync(contextualize(supplier), requireDefaultExecutor());
     }
 
     public static <T> CompletableFuture<T> supplyAsync(Supplier<T> supplier, Executor executor) {
@@ -35,7 +35,7 @@ public final class ContextAwareAsync {
 
     public static CompletableFuture<Void> runAsync(Runnable task) {
         Objects.requireNonNull(task, "task");
-        return CompletableFuture.runAsync(task, requireDefaultExecutor());
+        return CompletableFuture.runAsync(contextualize(task), requireDefaultExecutor());
     }
 
     public static CompletableFuture<Void> runAsync(Runnable task, Executor executor) {

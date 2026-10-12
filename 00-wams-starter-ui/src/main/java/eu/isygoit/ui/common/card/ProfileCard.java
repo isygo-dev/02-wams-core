@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.StreamResource;
+import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.i18n.I18n;
 import org.springframework.util.StringUtils;
 
@@ -33,8 +34,9 @@ import java.io.ByteArrayInputStream;
  *   <li>{@link #profileImagePath()} — used directly when non-blank;</li>
  *   <li>otherwise {@link #profileImagePlaceholder()} is shown;</li>
  *   <li>and if the subclass provides a non-null {@link #profileImageLoader()},
- *       {@link #onCardAttach(AttachEvent)} invokes it asynchronously and calls
- *       {@link #setProfileImageBytes(byte[])} once the bytes are available.</li>
+ *       {@link #onCardAttach(AttachEvent)} dispatches it asynchronously via
+ *       {@link ContextAwareAsync} and calls {@link #setProfileImageBytes(byte[])}
+ *       once the bytes are available.</li>
  * </ol>
  *
  * @param <V> parent view type
@@ -170,10 +172,15 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
      * Hook for subclasses that want to <em>download</em> the profile image
      * (rather than relying on a static path). Default returns {@code null}.
      *
-     * <p>When non-null, {@link #onCardAttach(AttachEvent)} invokes the loader
-     * and pushes the result back through
-     * {@link #setProfileImageBytes(byte[])} (which must be called on the UI
-     * thread — the base implementation wraps it in {@code ui.access(...)}).
+     * <p>When non-null, {@link #onCardAttach(AttachEvent)} dispatches the
+     * loader through {@link ContextAwareAsync#supplyAsync(java.util.function.Supplier)},
+     * i.e. on a background executor that has the Spring Security context,
+     * request attributes and Vaadin session propagated. Implementations may
+     * therefore perform blocking I/O (e.g. an authenticated Feign call)
+     * safely off the UI thread.
+     *
+     * <p>The returned bytes are pushed back onto the UI thread and consumed by
+     * {@link #setProfileImageBytes(byte[])}.
      *
      * @see #setProfileImageBytes(byte[])
      */
@@ -203,8 +210,13 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     }
 
     /**
-     * Default attach hook: triggers the {@link #profileImageLoader()} (if any)
-     * on the UI thread and updates the avatar once the bytes arrive.
+     * Default attach hook: dispatches {@link #profileImageLoader()} on the
+     * {@link ContextAwareAsync} executor (so the Spring Security context,
+     * request attributes and Vaadin session are propagated), then pushes the
+     * resulting bytes back onto the UI thread via {@code ui.access(...)}.
+     *
+     * <p>If the loader is absent, throws, or returns no bytes, the avatar
+     * keeps/falls back to {@link #profileImagePlaceholder()}.
      *
      * <p>Subclasses overriding this method <b>must</b> call
      * {@code super.onCardAttach(event)}.
@@ -215,13 +227,18 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
         if (loader == null) {
             return;
         }
-        getUI().ifPresent(ui -> ui.access(() -> {
-            try {
-                setProfileImageBytes(loader.load());
-            } catch (Exception e) {
-                setProfileImageBytes(null);
-            }
-        }));
+        getUI().ifPresent(ui ->
+                ContextAwareAsync.supplyAsync(() -> {
+                            try {
+                                return loader.load();
+                            } catch (Exception e) {
+                                // Fall back to the placeholder on any failure.
+                                return null;
+                            }
+                        })
+                        .whenComplete((bytes, error) ->
+                                ui.access(() -> setProfileImageBytes(error == null ? bytes : null)))
+        );
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -324,9 +341,14 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     /**
      * Strategy for fetching profile-image bytes asynchronously.
      *
-     * <p>Invoked by {@link #onCardAttach(AttachEvent)} off the UI thread
-     * (inside {@code ui.access}), so implementations may perform blocking
-     * I/O (e.g. a Feign call).
+     * <p>Invoked by {@link #onCardAttach(AttachEvent)} through
+     * {@link ContextAwareAsync#supplyAsync(java.util.function.Supplier)}, i.e.
+     * on a background executor that has the Spring Security context, request
+     * attributes and Vaadin session propagated. Implementations may therefore
+     * perform blocking I/O (e.g. an authenticated Feign call) safely.
+     *
+     * <p>The returned bytes are pushed back to the UI on the UI thread and
+     * consumed by {@link #setProfileImageBytes(byte[])}.
      */
     @FunctionalInterface
     public interface ProfileImageLoader {
