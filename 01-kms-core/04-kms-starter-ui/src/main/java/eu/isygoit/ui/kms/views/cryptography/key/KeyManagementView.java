@@ -17,7 +17,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
@@ -40,7 +40,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Slf4j
-@UIScope
+@VaadinSessionScope
 @Route(value = "kms/keys", layout = KmsMainLayout.class)
 @PageTitle("Key Management")
 @PermitAll

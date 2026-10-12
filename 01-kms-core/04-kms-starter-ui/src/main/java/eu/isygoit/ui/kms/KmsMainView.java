@@ -11,7 +11,7 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RouteAlias(value = "kms/home", layout = KmsMainLayout.class)
-@UIScope
+@VaadinSessionScope
 @Route(value = "kms", layout = KmsMainLayout.class)
 @PageTitle("KMS Dashboard")
 public class KmsMainView extends ManagementVerticalView {

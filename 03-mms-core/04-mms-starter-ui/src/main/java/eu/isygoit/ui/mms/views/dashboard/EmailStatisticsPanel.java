@@ -8,13 +8,11 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import org.springframework.stereotype.Component;
 
 @Component
-@UIScope
 public class EmailStatisticsPanel extends VerticalLayout {
 
     public EmailStatisticsPanel() {

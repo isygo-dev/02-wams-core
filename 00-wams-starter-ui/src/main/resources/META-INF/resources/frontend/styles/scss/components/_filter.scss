@@ -758,3 +758,14 @@ $filter-control-h-sm  : 2.25rem;  // 36 px
     justify-content: space-between;
   }
 }
+
+.filter-date-range,
+.filter-number-range {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.filter-date,
+.filter-number {
+  width: 9rem;   // whatever the design uses
+}
