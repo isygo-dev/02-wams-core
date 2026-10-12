@@ -3,12 +3,10 @@ package eu.isygoit.ui.common.component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import eu.isygoit.i18n.I18n;
 
 import java.util.ArrayList;
@@ -18,8 +16,6 @@ import java.util.List;
 /**
  * Header quick-navigation search: filters {@link INavRegistry#getAll()} by its
  * (locale-resolved) label as the user types, and navigates on selection.
- * Rounded, compact styling lives in {@code wams-app-search}
- * (see {@code styles/scss/app-search.scss}).
  *
  * <p>Results are presented as a tree: a module header (full name, e.g.
  * "Identity Management" — see {@link INavRegistry#moduleLabelKey}) followed
@@ -29,12 +25,17 @@ import java.util.List;
  * {@link TargetItem} — with headers styled distinctly and never acted on.
  * Typing filters targets by label or module code; a header stays visible
  * whenever at least one of its module's targets still matches, so the tree
- * structure survives filtering.
+ * structure survives filtering.</p>
+ *
+ * <p>All sizing, spacing and visuals live in
+ * {@code styles/scss/_app-search.scss}. The class-name contract emitted here
+ * is: {@code wams-app-search}, {@code wams-app-search__item-row},
+ * {@code wams-app-search__item-icon}, {@code wams-app-search__group-header},
+ * and the per-module modifier {@code wams-module-<key>}.</p>
  */
-@CssImport("./styles/scss/app-search.scss")
 public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
 
-    private INavRegistry navRegistry;
+    private final INavRegistry navRegistry;
 
     public AppSearchBar(INavRegistry navRegistry) {
         this.navRegistry = navRegistry;
@@ -44,9 +45,10 @@ public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
         setItemLabelGenerator(this::labelOf);
         setItems(this::matches, buildTree());
 
-        setRenderer(new ComponentRenderer<>(item -> item instanceof ModuleHeader header
-                ? buildHeaderRow(header)
-                : buildTargetRow(((TargetItem) item).target())));
+        setRenderer(new com.vaadin.flow.data.renderer.ComponentRenderer<>(item ->
+                item instanceof ModuleHeader header
+                        ? buildHeaderRow(header)
+                        : buildTargetRow(((TargetItem) item).target())));
 
         setPrefixComponent(VaadinIcon.SEARCH.create());
 
@@ -84,28 +86,25 @@ public class AppSearchBar extends ComboBox<AppSearchBar.SearchItem> {
                 : I18n.t(((TargetItem) item).target().labelKey());
     }
 
-    private HorizontalLayout buildHeaderRow(ModuleHeader header) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setPadding(false);
-        row.setSpacing(false);
+    private Div buildHeaderRow(ModuleHeader header) {
+        Div row = new Div();
         row.addClassName("wams-app-search__group-header");
         row.addClassName("wams-module-" + header.moduleKey());
         row.add(new Span(I18n.t(this.navRegistry.moduleLabelKey(header.moduleKey()))));
         return row;
     }
 
-    private HorizontalLayout buildTargetRow(INavRegistry.NavTarget target) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setSpacing(true);
-        row.setPadding(false);
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
+    private Div buildTargetRow(INavRegistry.NavTarget target) {
+        Div row = new Div();
         row.addClassName("wams-app-search__item-row");
 
         Icon icon = target.icon().create();
-        icon.setSize("14px");
         icon.addClassName("wams-app-search__item-icon");
 
-        row.add(icon, new Span(I18n.t(target.labelKey())));
+        Span label = new Span(I18n.t(target.labelKey()));
+        label.addClassName("wams-app-search__item-label");
+
+        row.add(icon, label);
         return row;
     }
 

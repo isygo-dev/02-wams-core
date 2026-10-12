@@ -30,11 +30,16 @@
 @use "../abstracts/variables" as *;
 @use "../abstracts/mixins" as *;
 
-$toolbar-overlay-width: 260px; // filter combo-box dropdown width
-$toolbar-search-max: 420px; // a search box wider than this just looks empty
-$toolbar-left-basis: 520px; // below this the left cluster drops under the action
-$toolbar-filter-min: 170px; // narrowest a filter control stays usable at
-$toolbar-filter-max: 240px; // …and widest before it just looks stretched
+// ─── Tokens ──────────────────────────────────────────────────────
+$toolbar-overlay-width : 260px;  // filter combo-box dropdown width
+$toolbar-search-width  : 300px;  // fixed width of the toolbar search input
+$toolbar-left-basis    : 520px;  // below this the left cluster drops under the action
+$toolbar-filter-min    : 170px;  // narrowest a filter control stays usable at
+$toolbar-filter-max    : 240px;  // …and widest before it just looks stretched
+
+// ══════════════════════════════════════════════════════════════════
+// Root toolbar
+// ══════════════════════════════════════════════════════════════════
 
 .toolbar {
   display: flex;
@@ -54,9 +59,10 @@ $toolbar-filter-max: 240px; // …and widest before it just looks stretched
     flex-wrap: wrap;
   }
 
+  // Legacy wrapper slot — kept for panels that wrap the field themselves.
   &__search {
-    min-width: 220px;
-    flex: 1;
+    flex: 0 0 $toolbar-search-width;
+    min-width: 0;
   }
 
   @include mobile {
@@ -64,6 +70,7 @@ $toolbar-filter-max: 240px; // …and widest before it just looks stretched
     align-items: stretch;
 
     &__search {
+      flex: 1 1 100%;
       width: 100%;
       min-width: 0;
     }
@@ -96,15 +103,29 @@ $toolbar-filter-max: 240px; // …and widest before it just looks stretched
   margin-inline-start: auto; // pins to the end when wrapping
 }
 
-// ─── Search field ────────────────────────────────────────────────
-.toolbar-search {
-  flex: 1 1 100%; // own row inside the left cluster
-  max-width: $toolbar-search-max; // …but never wider than it needs to be
+// ══════════════════════════════════════════════════════════════════
+// SEARCH FIELD — new dedicated style, fixed 300px
+//
+//   .search-field     — canonical class for the toolbar search input
+//   .toolbar-search   — legacy alias, kept so existing panels keep
+//                       working without touching Java
+//
+// The search is a peer of the filter controls, not a full-row banner,
+// so it neither grows nor shrinks with the cluster — it holds its own
+// 300px and lets filters flow beside it.
+// ══════════════════════════════════════════════════════════════════
+
+.toolbar-search,
+.search-field {
+  flex: 0 0 $toolbar-search-width;
+  width: $toolbar-search-width;
+  max-width: $toolbar-search-width;
   min-width: 0;
 
   // Prefix search glyph, when the panel sets one.
   vaadin-icon {
     color: $color-text-soft;
+    transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   &:focus-within vaadin-icon {
@@ -121,7 +142,7 @@ $toolbar-filter-max: 240px; // …and widest before it just looks stretched
   white-space: nowrap;
 }
 
-// ─── Filter bar (built by BaseAdministrationPanel#buildFilterBar) ─
+// ─── Filter bar ──────────────────────────────────────────────────
 .panel__filters {
   display: flex;
   flex-wrap: wrap;
@@ -172,9 +193,8 @@ $toolbar-filter-max: 240px; // …and widest before it just looks stretched
 // else falls back to the viewport.
 
 // ≤ compact — the action button can no longer sit beside the filters.
-// The filters themselves are left alone: the bounded flex above still
-// packs three per row at this width, and the 240px cap is what keeps a
-// lone filter on the last row from stretching across the whole panel.
+// The fixed-width search releases to full row here so it does not sit
+// orphaned at 300px on a panel that has plenty of slack.
 @mixin toolbar-stacked {
   .toolbar-left,
   .toolbar-right {
@@ -190,7 +210,10 @@ $toolbar-filter-max: 240px; // …and widest before it just looks stretched
     }
   }
 
-  .toolbar-search {
+  .toolbar-search,
+  .search-field {
+    flex: 1 1 100%;
+    width: 100%;
     max-width: none;
   }
 

@@ -44,6 +44,12 @@ import java.util.function.Function;
  * <p>Boolean criteria render as a {@link ToggleSwitch} — a tri-state
  * switch whose values are {@code null} (no filter), {@code true},
  * and {@code false}.</p>
+ *
+ * <p><b>Layout:</b> the header hosts the title, the active-count badge,
+ * and the {@code Apply} / {@code Clear} actions on the right. The body
+ * hosts only the filter controls and the active-filter chips row. All
+ * sizing / layout / visuals live in {@code _filter.scss}; the only
+ * contract exposed to CSS is the class-name set emitted here.</p>
  */
 @Slf4j
 public class FilterBar extends Div {
@@ -66,6 +72,7 @@ public class FilterBar extends Div {
     // ─── UI nodes ──────────────────────────────────────────────────
     private final Button collapseButton = new Button();
     private final Div header = new Div();
+    private final Div headerActions = new Div();
     private final Div body = new Div();
     private final Div controls = new Div();
     private final Div chipsRow = new Div();
@@ -73,7 +80,6 @@ public class FilterBar extends Div {
     private final Span activeCount = new Span();
     private final Button applyButton = new Button();
     private final Button clearButton = new Button();
-    private final Button clearAllLink = new Button();
 
     // ─── Callbacks ─────────────────────────────────────────────────
     private Consumer<String> onApply;
@@ -139,7 +145,7 @@ public class FilterBar extends Div {
         TextField field = new TextField(I18n.t(labelKey));
         field.setClearButtonVisible(true);
         field.addClassName("filter-select");
-        field.setWidth("14em");
+        field.addClassName("filter-control");
 
         String key = "text:" + labelKey;
         field.addValueChangeListener(e -> {
@@ -156,7 +162,8 @@ public class FilterBar extends Div {
         field.setClearButtonVisible(true);
         field.setStepButtonsVisible(true);
         field.addClassName("filter-select");
-        field.setWidth("10em");
+        field.addClassName("filter-number");
+        field.addClassName("filter-control");
 
         String key = "int:" + labelKey;
         field.addValueChangeListener(e -> {
@@ -174,7 +181,8 @@ public class FilterBar extends Div {
         field.setClearButtonVisible(true);
         field.setStepButtonsVisible(true);
         field.addClassName("filter-select");
-        field.setWidth("10em");
+        field.addClassName("filter-number");
+        field.addClassName("filter-control");
 
         String key = "num:" + labelKey;
         field.addValueChangeListener(e -> {
@@ -212,6 +220,7 @@ public class FilterBar extends Div {
         DatePicker picker = new DatePicker(I18n.t(labelKey));
         picker.setClearButtonVisible(true);
         picker.addClassName("filter-date");
+        picker.addClassName("filter-control");
 
         String key = "date:" + labelKey;
         picker.addValueChangeListener(e -> {
@@ -227,6 +236,7 @@ public class FilterBar extends Div {
     public DateTimePicker addDateTimeFilter(String labelKey, Consumer<LocalDateTime> onChange) {
         DateTimePicker picker = new DateTimePicker(I18n.t(labelKey));
         picker.addClassName("filter-date");
+        picker.addClassName("filter-control");
 
         String key = "dt:" + labelKey;
         picker.addValueChangeListener(e -> {
@@ -254,7 +264,8 @@ public class FilterBar extends Div {
             trackChip(key, I18n.t(labelKey), formatRange(f, t), filter::clear);
         });
 
-        insertBefore(filter, applyButton);
+        // No more anchor button in `controls` — append directly.
+        controls.add(filter);
         manualClearers.add(filter::clear);
         setVisible(true);
         return filter;
@@ -274,6 +285,7 @@ public class FilterBar extends Div {
         combo.setItemLabelGenerator(labeler::apply);
         combo.setClearButtonVisible(true);
         combo.addClassName("filter-select");
+        combo.addClassName("filter-control");
 
         String key = "enum:" + labelKey;
         combo.addValueChangeListener(e -> {
@@ -302,6 +314,7 @@ public class FilterBar extends Div {
         if (labeler != null) combo.setItemLabelGenerator(labeler::apply);
         combo.setClearButtonVisible(true);
         combo.addClassName("filter-select");
+        combo.addClassName("filter-control");
 
         String key = "object:" + labelKey;
         combo.addValueChangeListener(e -> {
@@ -327,6 +340,7 @@ public class FilterBar extends Div {
         combo.setValue(StatusFilter.ALL);
         combo.setClearButtonVisible(false);
         combo.addClassName("filter-select");
+        combo.addClassName("filter-control");
 
         String key = "status:" + labelKeyPrefix;
         combo.addValueChangeListener(e -> {
@@ -351,7 +365,7 @@ public class FilterBar extends Div {
 
     public Component addControl(Component control, Runnable onClearAction) {
         if (control == null) return null;
-        insertBefore(control, applyButton);
+        controls.add(control);
         if (onClearAction != null) manualClearers.add(onClearAction);
         setVisible(true);
         return control;
@@ -363,8 +377,8 @@ public class FilterBar extends Div {
 
     private void build() {
         addClassName("filter-card");
-        setWidthFull();
 
+        // ── Collapse pill ──────────────────────────────────────────
         collapseButton.addClassName("filter-card__collapse");
         collapseButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
         collapseButton.setIcon(
@@ -373,48 +387,54 @@ public class FilterBar extends Div {
         collapseButton.addClickListener(e -> toggleCollapsed());
         add(collapseButton);
 
+        // ── Header: icon · title · count · [spacer] · actions ─────
         header.addClassName("filter-card__header");
+
         Icon filterIcon = VaadinIcon.FILTER.create();
         filterIcon.addClassName("filter-card__icon");
+
         Span titleSpan = new Span(I18n.t("common.filter.title"));
         titleSpan.addClassName("filter-card__title");
+
         activeCount.addClassName("filter-card__count");
-        header.add(filterIcon, titleSpan, activeCount);
+
+        applyButton.setText(I18n.t("common.filter.apply"));
+        applyButton.setIcon(VaadinIcon.FILTER.create());
+        applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        applyButton.addClassName("filter-card__apply");
+        applyButton.addClickListener(e -> fireApply());
+
+        clearButton.setText(I18n.t("common.filter.clear"));
+        clearButton.setIcon(VaadinIcon.ERASER.create());
+        clearButton.addClassName("filter-card__clear-btn");
+        clearButton.addClickListener(e -> fireClear());
+
+        headerActions.addClassName("filter-card__actions");
+        headerActions.add(applyButton, clearButton);
+
+        header.add(filterIcon, titleSpan, activeCount, headerActions);
         add(header);
 
+        // ── Body: controls + chips ────────────────────────────────
         body.addClassName("filter-card__body");
-        controls.addClassName("filter-card__controls");
 
+        controls.addClassName("filter-card__controls");
         for (var entry : criteriaMetadata.entrySet()) {
             Component input = createInput(entry.getKey(), entry.getValue());
             fieldInputs.put(entry.getKey(), input);
             controls.add(input);
         }
 
-        applyButton.setText(I18n.t("common.filter.apply"));
-        applyButton.setIcon(VaadinIcon.FILTER.create());
-        applyButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        applyButton.addClickListener(e -> fireApply());
-
-        clearButton.setText(I18n.t("common.filter.clear"));
-        clearButton.setIcon(VaadinIcon.ERASER.create());
-        clearButton.addClickListener(e -> fireClear());
-
-        controls.add(applyButton, clearButton);
-
         chipsRow.addClassName("filter-card__chips");
         Span chipsLabel = new Span(I18n.t("common.filter.active"));
         chipsLabel.addClassName("filter-card__chips-label");
         chipsList.addClassName("filter-card__chips-list");
-        clearAllLink.addClassName("filter-card__clear");
-        clearAllLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-        clearAllLink.setText(I18n.t("common.filter.clear.all"));
-        clearAllLink.addClickListener(e -> fireClear());
-        chipsRow.add(chipsLabel, chipsList, clearAllLink);
+        chipsRow.add(chipsLabel, chipsList);
 
         body.add(controls, chipsRow);
         add(body);
 
+        // ── Initial visibility / state ────────────────────────────
         body.setVisible(!collapsed);
         getElement().getClassList().set("filter-card--collapsed", collapsed);
 
@@ -430,11 +450,6 @@ public class FilterBar extends Div {
         getElement().getClassList().set("filter-card--collapsed", collapsed);
         collapseButton.setIcon(
                 (collapsed ? VaadinIcon.CHEVRON_DOWN : VaadinIcon.CHEVRON_UP).create());
-    }
-
-    private void insertBefore(Component c, Component anchor) {
-        int idx = controls.indexOf(anchor);
-        controls.addComponentAtIndex(idx < 0 ? controls.getComponentCount() : idx, c);
     }
 
     private void registerManualField(Runnable onClear) {
@@ -461,7 +476,7 @@ public class FilterBar extends Div {
             combo.setItemLabelGenerator(v -> labelForEnum(name, (Enum<?>) v));
             combo.setClearButtonVisible(true);
             combo.addClassName("filter-select");
-            combo.setWidth("12em");
+            combo.addClassName("filter-control");
             combo.addValueChangeListener(e -> {
                 Enum<?> v = (Enum<?>) e.getValue();
                 trackChip(key, label,
@@ -477,7 +492,8 @@ public class FilterBar extends Div {
                 f.setClearButtonVisible(true);
                 f.setStepButtonsVisible(true);
                 f.addClassName("filter-select");
-                f.setWidth("10em");
+                f.addClassName("filter-number");
+                f.addClassName("filter-control");
                 f.addValueChangeListener(e ->
                         trackChip(key, label,
                                 e.getValue() == null ? null : e.getValue().toString(),
@@ -489,7 +505,8 @@ public class FilterBar extends Div {
                 f.setClearButtonVisible(true);
                 f.setStepButtonsVisible(true);
                 f.addClassName("filter-select");
-                f.setWidth("10em");
+                f.addClassName("filter-number");
+                f.addClassName("filter-control");
                 f.addValueChangeListener(e ->
                         trackChip(key, label,
                                 e.getValue() == null ? null : e.getValue().toString(),
@@ -517,7 +534,7 @@ public class FilterBar extends Div {
             case "LocalDateTime", "Instant", "OffsetDateTime" -> {
                 DateTimePicker f = new DateTimePicker(label);
                 f.addClassName("filter-date");
-                f.setWidth("15em");
+                f.addClassName("filter-control");
                 f.addValueChangeListener(e ->
                         trackChip(key, label,
                                 e.getValue() == null ? null
@@ -529,7 +546,7 @@ public class FilterBar extends Div {
                 TextField f = new TextField(label);
                 f.setClearButtonVisible(true);
                 f.addClassName("filter-select");
-                f.setWidth("14em");
+                f.addClassName("filter-control");
                 f.addValueChangeListener(e ->
                         trackChip(key, label, e.getValue(), f::clear));
                 yield f;
@@ -608,14 +625,14 @@ public class FilterBar extends Div {
     }
 
     private void clearInput(Component c) {
-        if (c instanceof ToggleSwitch ts)       ts.clear();
+        if (c instanceof ToggleSwitch ts)            ts.clear();
         else if (c instanceof DateRangeFilter drf)   drf.clear();
-        else if (c instanceof TextField tf)     tf.clear();
-        else if (c instanceof IntegerField f)   f.clear();
-        else if (c instanceof NumberField f)    f.clear();
-        else if (c instanceof DatePicker f)     f.clear();
-        else if (c instanceof DateTimePicker f) f.setValue(null);
-        else if (c instanceof ComboBox<?> f)    f.clear();
+        else if (c instanceof TextField tf)          tf.clear();
+        else if (c instanceof IntegerField f)        f.clear();
+        else if (c instanceof NumberField f)         f.clear();
+        else if (c instanceof DatePicker f)          f.clear();
+        else if (c instanceof DateTimePicker f)      f.setValue(null);
+        else if (c instanceof ComboBox<?> f)         f.clear();
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -648,7 +665,6 @@ public class FilterBar extends Div {
     }
 
     private String buildClause(String field, String type, String raw) {
-        // ── Boolean: raw is "true" or "false" (from ToggleSwitch.getValue()) ──
         if ("Boolean".equals(type) || "boolean".equals(type)) {
             if ("true".equals(raw) || "false".equals(raw)) {
                 return field + " = '" + raw + "'";

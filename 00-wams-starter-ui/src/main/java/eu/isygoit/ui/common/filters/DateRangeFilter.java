@@ -20,8 +20,11 @@ import java.time.format.DateTimeFormatter;
  *       {@code null}.</li>
  * </ul>
  *
- * Dates are formatted ISO-8601 ({@code yyyy-MM-dd}), which is what
- * {@code CriteriaHelper} converts back to {@code LocalDate} / {@code Date}.
+ * Dates are formatted ISO-8601 ({@code yyyy-MM-dd}).
+ *
+ * <p>All styling is owned by {@code _filter.scss}; this class only
+ * publishes the class-name contract ({@code .filter-date-range} on the
+ * root, {@code .filter-date} on each picker).</p>
  */
 public class DateRangeFilter extends HorizontalLayout {
 
@@ -60,9 +63,7 @@ public class DateRangeFilter extends HorizontalLayout {
             throw new IllegalArgumentException("label must not be null");
         }
 
-        setSpacing(false);
-        setPadding(false);
-        setAlignItems(Alignment.END);
+        // No layout API calls — layout is owned by SCSS.
         addClassName("filter-date-range");
 
         from.setLabel(fromLabel);

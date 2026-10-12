@@ -203,7 +203,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     /**
      * Two independently-styleable groups rather than one flat row of 5
      * disparate-width children: a search "slot" (whose width is styled by
-     * {@code styles/scss/app-search.scss} at each breakpoint) and a fixed-size
+     * {@code styles/scss/_app-search.scss} at each breakpoint) and a fixed-size
      * "icon cluster" (notifications,
      * settings, language, profile — always kept together, never wrapped
      * internally). This gives {@code .wams-app-search} a stable container to
