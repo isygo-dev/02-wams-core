@@ -63,11 +63,11 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
     private void buildGrid() {
         gridContainer.removeAll();
 
-        // Header
+        // Header — translated weekday names via timetable.day.*
         Div headerRow = new Div();
         headerRow.addClassName("monthly-grid-header");
         for (DayOfWeek day : DayOfWeek.values()) {
-            Span dayLabel = new Span(I18n.enumLabel(day));
+            Span dayLabel = new Span(I18n.t("timetable.day." + day.name()));
             dayLabel.addClassName("monthly-grid-header-cell");
             headerRow.add(dayLabel);
         }

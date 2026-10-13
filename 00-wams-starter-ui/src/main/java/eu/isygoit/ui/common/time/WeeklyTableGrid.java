@@ -20,7 +20,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
 import java.util.*;
 import java.util.function.Function;
 
@@ -28,14 +27,13 @@ import java.util.function.Function;
 public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
     private static final String HEX_RE = "^#([A-Fa-f0-9]{6})$";
-    private static final DateTimeFormatter DAY_MONTH_FMT = DateTimeFormatter.ofPattern("dd MMM", Locale.FRENCH);
 
     private final WeeklyTableGridConfig<E> config;
     private final Div gridContainer = new Div();
     private final List<LocalTime> timeSlots = new ArrayList<>();
     private List<E> slots = Collections.emptyList();
     private boolean editable = true;
-    private LocalDate weekStartDate;                 // NEW
+    private LocalDate weekStartDate;
 
     public WeeklyTableGrid(WeeklyTableGridConfig<E> config) {
         this.config = config;
@@ -83,7 +81,7 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return String.format("#%02X%02X%02X", r, g, b);
     }
 
-    /** NEW — the Monday of the week being displayed, used to print dates in the header. */
+    /** The Monday of the week being displayed, used to print dates in the header. */
     public void setWeekStartDate(LocalDate weekStartDate) {
         this.weekStartDate = weekStartDate;
     }
@@ -172,6 +170,20 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return Math.max(1, (int) Math.round(durationMinutes / (double) config.getStepMinutes()));
     }
 
+    /** Builds a translated header label, e.g. "lun. 02 oct." / "Mon 02 Oct" / "الإثنين 02 أكت". */
+    private String buildHeaderLabel(DayOfWeek day, int dayIndex) {
+        String dayName = config.getDayLabelExtractor() != null
+                ? config.getDayLabelExtractor().apply(day)
+                : day.name();
+
+        if (weekStartDate == null) {
+            return dayName;
+        }
+        LocalDate cellDate = weekStartDate.plusDays(dayIndex);
+        String monthName = I18n.t("timetable.month." + cellDate.getMonth().name());
+        return dayName + " " + cellDate.getDayOfMonth() + " " + monthName;
+    }
+
     private void buildHeader(DayOfWeek today) {
         Div corner = new Div();
         corner.addClassName("timetable-grid-header");
@@ -182,17 +194,7 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         for (int dayIndex = 0; dayIndex < days.size(); dayIndex++) {
             DayOfWeek day = days.get(dayIndex);
 
-            // "lun." / "mar." / …
-            String dayName = day.getDisplayName(TextStyle.SHORT, Locale.FRENCH);
-
-            // "lun. 02 oct." when the week start is known
-            String label = dayName;
-            if (weekStartDate != null) {
-                LocalDate cellDate = weekStartDate.plusDays(dayIndex);
-                label = dayName + " " + cellDate.format(DAY_MONTH_FMT);
-            }
-
-            Span dayLabel = new Span(label);
+            Span dayLabel = new Span(buildHeaderLabel(day, dayIndex));
             dayLabel.addClassName("timetable-grid-header");
             dayLabel.addClassName("timetable-grid-header-day");
             dayLabel.addClassName(LumoUtility.TextAlignment.CENTER);
@@ -269,8 +271,7 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             content.add(buildActionsMenu(slot));
         }
 
-        String tooltipText = buildTooltipText(slot);
-        Tooltip.forComponent(content).setText(tooltipText);
+        Tooltip.forComponent(content).setText(buildTooltipText(slot));
 
         placeInGrid(content, rowIndex + 2, dayIndex + 2, span, 1);
 

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 /**
  * Daily timetable grid – one column for the day, time labels on the left.
  * Matches the weekly timetable in styling and behaviour.
+ * Header labels are i18n-driven via {@code timetable.day.*} and {@code timetable.month.*}.
  */
 @CssImport("./styles/scss/time-grid.scss")
 public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
@@ -89,6 +90,13 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return String.format("#%02X%02X%02X", r, g, b);
     }
 
+    /** Builds a translated header label, e.g. "lundi 02 octobre" / "Monday 02 October" / "الإثنين 02 أكتوبر". */
+    private String buildDayHeaderLabel() {
+        String dayName = I18n.t("timetable.day." + currentDate.getDayOfWeek().name());
+        String monthName = I18n.t("timetable.month." + currentDate.getMonth().name());
+        return dayName + " " + currentDate.getDayOfMonth() + " " + monthName;
+    }
+
     public void setDate(LocalDate date, List<E> events) {
         this.currentDate = date;
         this.events = (events != null) ? events : Collections.emptyList();
@@ -127,7 +135,7 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         placeInGrid(corner, 1, 1, 1, 1);
         gridContainer.add(corner);
 
-        Span dayLabel = new Span(currentDate.format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.FRENCH)));
+        Span dayLabel = new Span(buildDayHeaderLabel());
         dayLabel.addClassName("timetable-grid-header");
         dayLabel.addClassName("timetable-grid-header-day");
         dayLabel.addClassName("text-center");
