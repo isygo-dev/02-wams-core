@@ -23,7 +23,6 @@
     gap: var(--dashboard-gap);
     width: 100%;
     min-width: 0;
-    padding: var(--lumo-space-m) 0;
     box-sizing: border-box;
 }
 
