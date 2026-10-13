@@ -17,10 +17,10 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import eu.isygoit.dto.KmsDtos.AuditLogResponse;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.RowCard;
 import eu.isygoit.ui.common.component.RowCardList;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
-import eu.isygoit.remote.kms.KmsApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -207,4 +207,4 @@ public class AuditLogPanel extends VerticalLayout {
             updateList();
         }
     }
-}
+}

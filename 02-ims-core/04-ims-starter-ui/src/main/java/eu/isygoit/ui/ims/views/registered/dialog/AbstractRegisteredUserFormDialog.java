@@ -57,16 +57,26 @@ abstract class AbstractRegisteredUserFormDialog extends ImsActionDialog {
 
     /* Hooks */
 
-    /** Whether the e-mail can be edited (create only). */
+    private static String nvl(String value) {
+        return value == null ? "" : value;
+    }
+
+    /**
+     * Whether the e-mail can be edited (create only).
+     */
     abstract boolean emailEditable();
 
-    /** The DTO that receives the form values on save. */
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract RegisteredUserDto target();
 
-    /** Persists the DTO; returns false after appending an error. */
-    abstract boolean persist(RegisteredUserDto dto);
-
     /* Layout */
+
+    /**
+     * Persists the DTO; returns false after appending an error.
+     */
+    abstract boolean persist(RegisteredUserDto dto);
 
     final void buildForm() {
         DialogLayout.size(this, DialogLayout.WIDTH_M);
@@ -107,6 +117,8 @@ abstract class AbstractRegisteredUserFormDialog extends ImsActionDialog {
         return section;
     }
 
+    /* DTO <-> form */
+
     private VerticalLayout buildClassificationSection() {
         VerticalLayout section = DialogLayout.section(
                 I18n.t("ims.registered.details.section.classification"), VaadinIcon.SITEMAP);
@@ -138,9 +150,9 @@ abstract class AbstractRegisteredUserFormDialog extends ImsActionDialog {
         return section;
     }
 
-    /* DTO <-> form */
-
-    /** Fills every field from the DTO (initial values on create, loaded values on update). */
+    /**
+     * Fills every field from the DTO (initial values on create, loaded values on update).
+     */
     final void fillFrom(RegisteredUserDto dto) {
         firstNameField.setValue(nvl(dto.getFirstName()));
         lastNameField.setValue(nvl(dto.getLastName()));
@@ -160,7 +172,9 @@ abstract class AbstractRegisteredUserFormDialog extends ImsActionDialog {
         statusCombo.setValue(dto.getStatus());
     }
 
-    /** Copies every field into the DTO. {@code id} is left untouched. */
+    /**
+     * Copies every field into the DTO. {@code id} is left untouched.
+     */
     private void applyTo(RegisteredUserDto dto) {
         dto.setFirstName(firstNameField.getValue());
         dto.setLastName(lastNameField.getValue());
@@ -180,6 +194,8 @@ abstract class AbstractRegisteredUserFormDialog extends ImsActionDialog {
             dto.setStatus(statusCombo.getValue());
         }
     }
+
+    /* Save */
 
     private boolean isValid() {
         if (firstNameField.getValue().isBlank()) {
@@ -205,8 +221,6 @@ abstract class AbstractRegisteredUserFormDialog extends ImsActionDialog {
         return true;
     }
 
-    /* Save */
-
     @Override
     protected final boolean onOk() {
         if (!isValid()) {
@@ -231,9 +245,5 @@ abstract class AbstractRegisteredUserFormDialog extends ImsActionDialog {
             parentView.showLoading(false);
         }
         return false;
-    }
-
-    private static String nvl(String value) {
-        return value == null ? "" : value;
     }
 }

@@ -5,10 +5,10 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import eu.isygoit.enums.IEnumCharSet;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.remote.kms.RandomKeyService;
-import eu.isygoit.ui.kms.views.common.KmsEnumTag;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import org.springframework.http.ResponseEntity;
 
 public class RenewRandomKeyDialog extends PinBaseActionDialog {

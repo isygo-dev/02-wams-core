@@ -57,7 +57,9 @@ public class RowCard extends Div {
         return new RowCard();
     }
 
-    /** Leading visual (icon, avatar, status dot). */
+    /**
+     * Leading visual (icon, avatar, status dot).
+     */
     public RowCard lead(Component component) {
         if (lead.getParent().isEmpty()) {
             getElement().insertChild(0, lead.getElement());
@@ -88,7 +90,9 @@ public class RowCard extends Div {
         return this;
     }
 
-    /** A tag (usually an enum tag) shown in the wrapping meta row. */
+    /**
+     * A tag (usually an enum tag) shown in the wrapping meta row.
+     */
     public RowCard tag(Component tag) {
         if (tag != null) {
             addMeta(tag);
@@ -96,7 +100,9 @@ public class RowCard extends Div {
         return this;
     }
 
-    /** A small "label value" pair shown in the wrapping meta row; blank values are skipped. */
+    /**
+     * A small "label value" pair shown in the wrapping meta row; blank values are skipped.
+     */
     public RowCard fact(String label, String value) {
         if (value == null || value.isBlank()) {
             return this;
@@ -112,7 +118,9 @@ public class RowCard extends Div {
         return this;
     }
 
-    /** An emphasised figure (for example an amount) shown on the right, label above value. */
+    /**
+     * An emphasised figure (for example an amount) shown on the right, label above value.
+     */
     public RowCard figure(String label, String value) {
         Div figure = new Div();
         figure.addClassName("wams-row-card__figure");
@@ -129,7 +137,9 @@ public class RowCard extends Div {
         return this;
     }
 
-    /** Any control shown on the right (for example a checkbox). */
+    /**
+     * Any control shown on the right (for example a checkbox).
+     */
     public RowCard control(Component control) {
         if (control != null) {
             ensureSide();
@@ -140,12 +150,16 @@ public class RowCard extends Div {
         return this;
     }
 
-    /** Icon-only action. {@code label} is both the tooltip and the accessible name. */
+    /**
+     * Icon-only action. {@code label} is both the tooltip and the accessible name.
+     */
     public RowCard action(VaadinIcon icon, String label, Runnable handler) {
         return addAction(icon, label, handler, false);
     }
 
-    /** Destructive icon-only action (red). */
+    /**
+     * Destructive icon-only action (red).
+     */
     public RowCard dangerAction(VaadinIcon icon, String label, Runnable handler) {
         return addAction(icon, label, handler, true);
     }
@@ -169,7 +183,9 @@ public class RowCard extends Div {
         return this;
     }
 
-    /** Makes the whole card activatable (click, Enter or Space). */
+    /**
+     * Makes the whole card activatable (click, Enter or Space).
+     */
     public RowCard onClick(Runnable handler) {
         addClassName("wams-row-card--clickable");
         getElement().setAttribute("tabindex", "0");

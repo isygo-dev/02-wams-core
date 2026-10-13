@@ -77,10 +77,19 @@ abstract class AbstractCustomerFormDialog extends AbstractImsFormDialog {
 
     /* Hooks */
 
+    private static String nvl(String value) {
+        return value == null ? "" : value;
+    }
+
     abstract String photoButtonKey();
+
     abstract boolean imageRequired();
+
     abstract CustomerDto target();
+
     abstract Long persist(CustomerDto dto);
+
+    /* Layout */
 
     @Override
     protected byte[] downloadProfileImage(Long id) {
@@ -97,8 +106,6 @@ abstract class AbstractCustomerFormDialog extends AbstractImsFormDialog {
         }
         return null;
     }
-
-    /* Layout */
 
     final void buildForm() {
         DialogLayout.size(this, DialogLayout.WIDTH_L);
@@ -164,6 +171,8 @@ abstract class AbstractCustomerFormDialog extends AbstractImsFormDialog {
         return section;
     }
 
+    /* DTO <-> form */
+
     private Component buildAddressTab() {
         VerticalLayout section = DialogLayout.section(
                 I18n.t("ims.customer.details.section.address"), VaadinIcon.MAP_MARKER);
@@ -183,8 +192,6 @@ abstract class AbstractCustomerFormDialog extends AbstractImsFormDialog {
         section.add(form);
         return section;
     }
-
-    /* DTO <-> form */
 
     final void fillFrom(CustomerDto dto) {
         nameField.setValue(nvl(dto.getName()));
@@ -297,9 +304,5 @@ abstract class AbstractCustomerFormDialog extends AbstractImsFormDialog {
             parentView.showLoading(false);
         }
         return false;
-    }
-
-    private static String nvl(String value) {
-        return value == null ? "" : value;
     }
 }

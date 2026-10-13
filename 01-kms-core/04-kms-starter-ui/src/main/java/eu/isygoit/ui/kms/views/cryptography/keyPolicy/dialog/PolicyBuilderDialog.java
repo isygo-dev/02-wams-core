@@ -13,9 +13,9 @@ import eu.isygoit.dto.KmsDtos.KeyPolicy;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.component.RowCard;
 import eu.isygoit.ui.common.component.RowCardList;
-import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsActionDialog;
+import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,4 +136,4 @@ public class PolicyBuilderDialog extends KmsActionDialog {
         }
         return true;
     }
-}
+}

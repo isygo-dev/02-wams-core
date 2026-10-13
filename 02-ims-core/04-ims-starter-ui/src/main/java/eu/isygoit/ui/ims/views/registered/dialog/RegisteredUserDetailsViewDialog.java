@@ -46,6 +46,15 @@ public class RegisteredUserDetailsViewDialog extends ImsDetailsDialog {
         loadAndShowDetails();
     }
 
+    private static String fullName(RegisteredUserDto user) {
+        return ((user.getFirstName() != null ? user.getFirstName() : "") + " "
+                + (user.getLastName() != null ? user.getLastName() : "")).trim();
+    }
+
+    private static String formatDate(LocalDateTime date) {
+        return date == null ? null : DateHelper.formatToHumanReadable(date);
+    }
+
     private void loadAndShowDetails() {
         parentView.showLoading(true);
         try {
@@ -109,14 +118,5 @@ public class RegisteredUserDetailsViewDialog extends ImsDetailsDialog {
             chips.add(ImsEnumTag.of(user.getStatus(), "ims.registered.card.status"));
         }
         return new DetailHero(null, dash(fullName(user)), user.getEmail(), chips.toArray(Component[]::new));
-    }
-
-    private static String fullName(RegisteredUserDto user) {
-        return ((user.getFirstName() != null ? user.getFirstName() : "") + " "
-                + (user.getLastName() != null ? user.getLastName() : "")).trim();
-    }
-
-    private static String formatDate(LocalDateTime date) {
-        return date == null ? null : DateHelper.formatToHumanReadable(date);
     }
 }

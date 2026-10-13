@@ -47,10 +47,14 @@ abstract class AbstractVCalendarFormDialog extends BaseActionDialog {
         this.calendarService = calendarService;
     }
 
-    /** The DTO that receives the form values on save. */
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract VCalendarDto target();
 
-    /** Persists the DTO; returns false after appending an error message. */
+    /**
+     * Persists the DTO; returns false after appending an error message.
+     */
     abstract boolean persist(VCalendarDto dto);
 
     final void buildForm() {
@@ -108,7 +112,9 @@ abstract class AbstractVCalendarFormDialog extends BaseActionDialog {
         return section;
     }
 
-    /** Fills the form from an existing calendar. */
+    /**
+     * Fills the form from an existing calendar.
+     */
     final void fillFrom(VCalendarDto dto) {
         tenantField.setValue(dto.getTenant() != null ? dto.getTenant() : "");
         codeField.setValue(dto.getCode() != null ? dto.getCode() : "");
@@ -118,7 +124,9 @@ abstract class AbstractVCalendarFormDialog extends BaseActionDialog {
         descriptionArea.setValue(dto.getDescription() != null ? dto.getDescription() : "");
     }
 
-    /** Copies the form values into the DTO ({@code id} and {@code code} are left untouched). */
+    /**
+     * Copies the form values into the DTO ({@code id} and {@code code} are left untouched).
+     */
     private void applyTo(VCalendarDto dto) {
         dto.setTenant(tenantField.getValue().trim());
         dto.setName(nameField.getValue().trim());

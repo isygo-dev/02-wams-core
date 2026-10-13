@@ -80,10 +80,19 @@ abstract class AbstractTenantFormDialog extends AbstractImsFormDialog {
 
     /* Hooks */
 
+    private static String nvl(String value) {
+        return value == null ? "" : value;
+    }
+
     abstract String photoButtonKey();
+
     abstract boolean imageRequired();
+
     abstract TenantDto target();
+
     abstract Long persist(TenantDto dto);
+
+    /* Layout */
 
     @Override
     protected byte[] downloadProfileImage(Long id) {
@@ -100,8 +109,6 @@ abstract class AbstractTenantFormDialog extends AbstractImsFormDialog {
         }
         return null;
     }
-
-    /* Layout */
 
     final void buildForm() {
         DialogLayout.size(this, DialogLayout.WIDTH_L);
@@ -183,6 +190,8 @@ abstract class AbstractTenantFormDialog extends AbstractImsFormDialog {
         return section;
     }
 
+    /* DTO <-> form */
+
     private Component buildAddressTab() {
         VerticalLayout section = DialogLayout.section(
                 I18n.t("ims.tenant.details.section.address"), VaadinIcon.MAP_MARKER);
@@ -202,8 +211,6 @@ abstract class AbstractTenantFormDialog extends AbstractImsFormDialog {
         section.add(form);
         return section;
     }
-
-    /* DTO <-> form */
 
     final void fillFrom(TenantDto dto) {
         codeField.setValue(nvl(dto.getCode()));
@@ -324,9 +331,5 @@ abstract class AbstractTenantFormDialog extends AbstractImsFormDialog {
             parentView.showLoading(false);
         }
         return false;
-    }
-
-    private static String nvl(String value) {
-        return value == null ? "" : value;
     }
 }

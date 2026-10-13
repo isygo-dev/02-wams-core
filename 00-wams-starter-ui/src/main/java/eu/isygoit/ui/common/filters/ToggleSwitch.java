@@ -36,14 +36,14 @@ import java.util.function.Consumer;
  */
 public class ToggleSwitch extends Div {
 
-    /** {@code null} = unset (no filter). */
-    private Boolean value;
-
-    private Consumer<Boolean> onChange;
-
     private final Span labelSpan = new Span();
     private final Span track = new Span();
     private final Span thumb = new Span();
+    /**
+     * {@code null} = unset (no filter).
+     */
+    private Boolean value;
+    private Consumer<Boolean> onChange;
 
     public ToggleSwitch(String label) {
         addClassName("toggle-switch");
@@ -80,7 +80,9 @@ public class ToggleSwitch extends Div {
     //  Public API
     // ══════════════════════════════════════════════════════════════
 
-    public Boolean getValue() { return value; }
+    public Boolean getValue() {
+        return value;
+    }
 
     public void setValue(Boolean v) {
         if (Objects.equals(this.value, v)) return;
@@ -89,7 +91,9 @@ public class ToggleSwitch extends Div {
         if (onChange != null) onChange.accept(v);
     }
 
-    /** Resets to the "no filter" state without firing {@code onChange}. */
+    /**
+     * Resets to the "no filter" state without firing {@code onChange}.
+     */
     public void clear() {
         this.value = null;
         updateVisual();
@@ -104,9 +108,9 @@ public class ToggleSwitch extends Div {
     // ══════════════════════════════════════════════════════════════
 
     private void cycle() {
-        if (value == null)                    value = Boolean.TRUE;
-        else if (Boolean.TRUE.equals(value))  value = Boolean.FALSE;
-        else                                  value = null;
+        if (value == null) value = Boolean.TRUE;
+        else if (Boolean.TRUE.equals(value)) value = Boolean.FALSE;
+        else value = null;
 
         updateVisual();
         if (onChange != null) onChange.accept(value);
@@ -118,8 +122,8 @@ public class ToggleSwitch extends Div {
                 String.valueOf(Boolean.TRUE.equals(value)));
 
         // State modifier classes — all styling hangs off these in SCSS.
-        getElement().getClassList().set("toggle-switch--on",    Boolean.TRUE.equals(value));
-        getElement().getClassList().set("toggle-switch--off",   Boolean.FALSE.equals(value));
+        getElement().getClassList().set("toggle-switch--on", Boolean.TRUE.equals(value));
+        getElement().getClassList().set("toggle-switch--off", Boolean.FALSE.equals(value));
         getElement().getClassList().set("toggle-switch--unset", value == null);
     }
 }

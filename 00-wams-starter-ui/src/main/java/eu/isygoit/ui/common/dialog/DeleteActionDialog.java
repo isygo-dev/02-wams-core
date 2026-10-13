@@ -25,7 +25,9 @@ public class DeleteActionDialog extends PinConfirmActionDialog {
         this(texts, action, onSuccess, loading, moduleClass, true);
     }
 
-    /** Same as the main constructor, with control over the PIN ({@code false}: message only). */
+    /**
+     * Same as the main constructor, with control over the PIN ({@code false}: message only).
+     */
     public DeleteActionDialog(Texts texts,
                               Action action,
                               Runnable onSuccess,

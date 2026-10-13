@@ -8,8 +8,8 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
-import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.constants.AuthConstants;
+import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.auth.AuthServiceFacade.Failure;
@@ -80,8 +80,8 @@ public class PasswordLoginView extends BaseLoginView {
                         showError(I18n.t("auth.password.error.serviceError"), Failure.OFFLINE);
                     } else if (!result.succeeded()) {
                         showError(failureMessage(result.failure(),
-                                "auth.password.error.invalidCredentials",
-                                "auth.password.error.serviceError"), result.failure(),
+                                        "auth.password.error.invalidCredentials",
+                                        "auth.password.error.serviceError"), result.failure(),
                                 passwordField.getField());
                     } else {
                         completeLogin(ui, result.value().getAccessToken());

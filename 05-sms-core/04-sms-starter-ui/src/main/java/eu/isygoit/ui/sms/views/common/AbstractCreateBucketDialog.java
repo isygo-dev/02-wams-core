@@ -24,30 +24,17 @@ import java.util.function.Consumer;
  */
 public abstract class AbstractCreateBucketDialog extends SmsActionDialog {
 
-    /** Strictest bucket naming rule: 3-63 chars, lowercase letters, digits, dots, hyphens, alphanumeric ends. */
+    /**
+     * Strictest bucket naming rule: 3-63 chars, lowercase letters, digits, dots, hyphens, alphanumeric ends.
+     */
     public static final String BUCKET_NAME_PATTERN = "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$";
     private static final int NAME_MIN_LENGTH = 3;
     private static final int NAME_MAX_LENGTH = 63;
-
-    /** i18n keys used by one concrete dialog; {@code rules} may be {@code null}. */
-    public record Messages(String nameLabel,
-                           String placeholder,
-                           String helper,
-                           String rules,
-                           String required,
-                           String lengthError,
-                           String formatError,
-                           String success,
-                           String failed,
-                           String error) {
-    }
-
     private final ObjectStorageService objectStorageService;
     private final String tenant;
     private final Consumer<Boolean> loading;
     private final Messages messages;
     private TextField bucketNameField;
-
     protected AbstractCreateBucketDialog(String title,
                                          String okText,
                                          Runnable onSuccess,
@@ -66,6 +53,10 @@ public abstract class AbstractCreateBucketDialog extends SmsActionDialog {
 
         buildForm();
         setupValidation();
+    }
+
+    private static boolean isValidName(String name) {
+        return name != null && !name.isBlank() && name.matches(BUCKET_NAME_PATTERN);
     }
 
     private void buildForm() {
@@ -99,10 +90,6 @@ public abstract class AbstractCreateBucketDialog extends SmsActionDialog {
         enableOkButton(false);
     }
 
-    private static boolean isValidName(String name) {
-        return name != null && !name.isBlank() && name.matches(BUCKET_NAME_PATTERN);
-    }
-
     @Override
     protected boolean onOk() {
         String bucketName = bucketNameField.getValue();
@@ -132,5 +119,20 @@ public abstract class AbstractCreateBucketDialog extends SmsActionDialog {
             loading.accept(false);
         }
         return false;
+    }
+
+    /**
+     * i18n keys used by one concrete dialog; {@code rules} may be {@code null}.
+     */
+    public record Messages(String nameLabel,
+                           String placeholder,
+                           String helper,
+                           String rules,
+                           String required,
+                           String lengthError,
+                           String formatError,
+                           String success,
+                           String failed,
+                           String error) {
     }
 }

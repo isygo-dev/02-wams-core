@@ -4,7 +4,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -67,7 +66,9 @@ public class RoleManagementView extends AbstractPaginatedView<RoleInfoDto> {
     }
 
     @Override
-    protected void onSearchChanged() { loadPageZero(); }
+    protected void onSearchChanged() {
+        loadPageZero();
+    }
 
     @Override
     protected String[] getRootCssClasses() {
@@ -91,19 +92,54 @@ public class RoleManagementView extends AbstractPaginatedView<RoleInfoDto> {
         return e.getMessage();
     }
 
-    @Override protected String getTitleKey()             { return "ims.role.view.title"; }
-    @Override protected String getSubtitleKey()          { return "ims.role.view.subtitle"; }
-    @Override protected String getCreateButtonKey()      { return "ims.role.view.create.button"; }
-    @Override protected String getSearchPlaceholderKey() { return "ims.role.view.search.placeholder"; }
-    @Override protected String getEmptyTitleKey()        { return "ims.role.view.empty.title"; }
-    @Override protected String getEmptyDescriptionKey()  { return "ims.role.view.empty.description"; }
-    @Override protected VaadinIcon getEmptyIcon()        { return VaadinIcon.SHIELD; }
-    @Override protected String getLoadErrorKey()         { return "ims.role.view.load.error"; }
+    @Override
+    protected String getTitleKey() {
+        return "ims.role.view.title";
+    }
 
     @Override
-    public String getPageTitle() { return I18n.t("ims.role.view.title"); }
+    protected String getSubtitleKey() {
+        return "ims.role.view.subtitle";
+    }
 
-    public void loadPageZero() { loadPage(0); }
+    @Override
+    protected String getCreateButtonKey() {
+        return "ims.role.view.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "ims.role.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "ims.role.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "ims.role.view.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.SHIELD;
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "ims.role.view.load.error";
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("ims.role.view.title");
+    }
+
+    public void loadPageZero() {
+        loadPage(0);
+    }
 
     public void openUpdateRoleDialog(RoleInfoDto role, Runnable onSuccess) {
         new UpdateRoleDialog(this, roleService, applicationService, role, onSuccess).open();

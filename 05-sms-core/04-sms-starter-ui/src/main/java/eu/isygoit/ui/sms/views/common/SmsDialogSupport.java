@@ -14,7 +14,9 @@ public final class SmsDialogSupport {
     private SmsDialogSupport() {
     }
 
-    /** Server error body when available, otherwise the exception message. */
+    /**
+     * Server error body when available, otherwise the exception message.
+     */
     public static String extractErrorMessage(FeignException ex) {
         try {
             String body = ex.contentUTF8();
@@ -27,7 +29,9 @@ public final class SmsDialogSupport {
         return ex.getMessage() != null ? ex.getMessage() : I18n.t("common.notification.error");
     }
 
-    /** Human-readable date/time, or {@code null} when absent (shown as a dash by the details dialogs). */
+    /**
+     * Human-readable date/time, or {@code null} when absent (shown as a dash by the details dialogs).
+     */
     public static String formatDateTime(LocalDateTime dateTime) {
         return dateTime == null ? null : DateHelper.formatToHumanReadable(dateTime);
     }

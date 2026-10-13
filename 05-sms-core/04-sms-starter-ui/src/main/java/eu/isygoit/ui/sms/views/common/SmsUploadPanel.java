@@ -28,10 +28,14 @@ import java.util.stream.Stream;
  */
 public final class SmsUploadPanel extends VerticalLayout {
 
-    /** Maximum size of one uploaded object (100 MB). */
+    /**
+     * Maximum size of one uploaded object (100 MB).
+     */
     public static final int MAX_FILE_BYTES = 100 * 1024 * 1024;
 
-    /** Document types of the shared dialogs plus text, archive and data formats. */
+    /**
+     * Document types of the shared dialogs plus text, archive and data formats.
+     */
     public static final String[] ACCEPTED_MIME_TYPES = Stream.concat(
             Stream.of(DialogUploads.DOCUMENT_MIME_TYPES),
             Stream.of("text/plain", "application/zip", "application/json", "text/csv")).toArray(String[]::new);
@@ -103,7 +107,9 @@ public final class SmsUploadPanel extends VerticalLayout {
                 fileInfo, uploadStatus);
     }
 
-    /** Toggles the success/error state of the status line and its icon via CSS classes. */
+    /**
+     * Toggles the success/error state of the status line and its icon via CSS classes.
+     */
     private void setStatus(boolean success, String message) {
         uploadStatus.setText(message);
         uploadStatus.removeClassNames("wams-upload-status--success", "wams-upload-status--error");
@@ -112,12 +118,16 @@ public final class SmsUploadPanel extends VerticalLayout {
         uploadIcon.addClassName(success ? "wams-upload-icon--success" : "wams-upload-icon--error");
     }
 
-    /** The uploaded file as a multipart file, or {@code null} while none is ready. */
+    /**
+     * The uploaded file as a multipart file, or {@code null} while none is ready.
+     */
     public MultipartFile getUploadedFile() {
         return uploadedFile;
     }
 
-    /** Original name of the uploaded file, or {@code null} while none is ready. */
+    /**
+     * Original name of the uploaded file, or {@code null} while none is ready.
+     */
     public String getUploadedFileName() {
         return uploadedFileName;
     }

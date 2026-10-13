@@ -92,7 +92,9 @@ public abstract class KeyDialogBase extends KmsActionDialog {
         addTagRow(null, null);
     }
 
-    /** Stacks the given sections in the dialog body. */
+    /**
+     * Stacks the given sections in the dialog body.
+     */
     protected final void addSections(Component... sections) {
         VerticalLayout root = DialogLayout.stack();
         root.add(sections);
@@ -113,7 +115,9 @@ public abstract class KeyDialogBase extends KmsActionDialog {
         return section;
     }
 
-    /** Rotation section: enable checkbox and (conditional) period. */
+    /**
+     * Rotation section: enable checkbox and (conditional) period.
+     */
     protected final VerticalLayout buildRotationSection() {
         VerticalLayout section = DialogLayout.section(
                 I18n.t("kms.key.dialog.base.section.rotation"), VaadinIcon.REFRESH);
@@ -123,7 +127,9 @@ public abstract class KeyDialogBase extends KmsActionDialog {
         return section;
     }
 
-    /** Tags section: a single add button above the editable tag rows. */
+    /**
+     * Tags section: a single add button above the editable tag rows.
+     */
     protected final VerticalLayout buildTagsSection() {
         VerticalLayout section = DialogLayout.section(
                 I18n.t("kms.key.dialog.base.field.tags"), VaadinIcon.TAGS);

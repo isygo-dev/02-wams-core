@@ -5,7 +5,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -65,7 +64,7 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
     protected boolean matchesSearch(ApplicationDto a, String search) {
         if (search == null || search.isBlank()) return true;
         String s = search.toLowerCase();
-        return (a.getName()  != null && a.getName().toLowerCase().contains(s))
+        return (a.getName() != null && a.getName().toLowerCase().contains(s))
                 || (a.getTitle() != null && a.getTitle().toLowerCase().contains(s));
     }
 
@@ -81,7 +80,9 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
     }
 
     @Override
-    protected void onSearchChanged() { loadPageZero(); }
+    protected void onSearchChanged() {
+        loadPageZero();
+    }
 
     @Override
     protected String[] getRootCssClasses() {
@@ -95,7 +96,10 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
         statusFilter.setRenderer(ImsEnumTag.renderer(null));
         statusFilter.setPlaceholder(I18n.t("ims.app.view.status.placeholder"));
         statusFilter.setWidth("160px");
-        statusFilter.addValueChangeListener(e -> { currentAdminStatus = e.getValue(); loadPageZero(); });
+        statusFilter.addValueChangeListener(e -> {
+            currentAdminStatus = e.getValue();
+            loadPageZero();
+        });
         return List.of(statusFilter);
     }
 
@@ -116,19 +120,54 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
         return e.getMessage();
     }
 
-    @Override protected String getTitleKey()             { return "ims.app.view.title"; }
-    @Override protected String getSubtitleKey()          { return "ims.app.view.subtitle"; }
-    @Override protected String getCreateButtonKey()      { return "ims.app.view.create.button"; }
-    @Override protected String getSearchPlaceholderKey() { return "ims.app.view.search.placeholder"; }
-    @Override protected String getEmptyTitleKey()        { return "ims.app.view.empty.title"; }
-    @Override protected String getEmptyDescriptionKey()  { return "ims.app.view.empty.description"; }
-    @Override protected VaadinIcon getEmptyIcon()        { return VaadinIcon.ASTERISK; }
-    @Override protected String getLoadErrorKey()         { return "ims.app.view.load.error"; }
+    @Override
+    protected String getTitleKey() {
+        return "ims.app.view.title";
+    }
 
     @Override
-    public String getPageTitle() { return I18n.t("ims.app.view.title"); }
+    protected String getSubtitleKey() {
+        return "ims.app.view.subtitle";
+    }
 
-    public void loadPageZero() { loadPage(0); }
+    @Override
+    protected String getCreateButtonKey() {
+        return "ims.app.view.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "ims.app.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "ims.app.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "ims.app.view.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.ASTERISK;
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "ims.app.view.load.error";
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("ims.app.view.title");
+    }
+
+    public void loadPageZero() {
+        loadPage(0);
+    }
 
     public void openUpdateApplicationDialog(ApplicationDto app, Runnable onSuccess) {
         new UpdateApplicationDialog(this, applicationService, applicationImageService,

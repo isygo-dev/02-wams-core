@@ -43,10 +43,14 @@ abstract class AbstractParameterFormDialog extends ImsActionDialog {
         this.parameterService = parameterService;
     }
 
-    /** The DTO that receives the form values on save. */
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract AppParameterDto target();
 
-    /** Persists the DTO; returns false after appending an error message. */
+    /**
+     * Persists the DTO; returns false after appending an error message.
+     */
     abstract boolean persist(AppParameterDto dto);
 
     final void buildForm() {
@@ -82,7 +86,9 @@ abstract class AbstractParameterFormDialog extends ImsActionDialog {
         add(root);
     }
 
-    /** Fills the form from an existing parameter. */
+    /**
+     * Fills the form from an existing parameter.
+     */
     final void fillFrom(AppParameterDto dto) {
         nameField.setValue(dto.getName() != null ? dto.getName() : "");
         valueField.setValue(dto.getValue() != null ? dto.getValue() : "");
@@ -90,7 +96,9 @@ abstract class AbstractParameterFormDialog extends ImsActionDialog {
         descriptionArea.setValue(dto.getDescription() != null ? dto.getDescription() : "");
     }
 
-    /** Copies the form values into the DTO ({@code id} is left untouched). */
+    /**
+     * Copies the form values into the DTO ({@code id} is left untouched).
+     */
     private void applyTo(AppParameterDto dto) {
         dto.setName(nameField.getValue());
         dto.setValue(valueField.getValue());

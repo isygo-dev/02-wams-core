@@ -29,7 +29,9 @@ public final class MmsDialogSupport {
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
-    /** Browser-side download of a base64 payload ($0) under a given file name ($1). */
+    /**
+     * Browser-side download of a base64 payload ($0) under a given file name ($1).
+     */
     private static final String DOWNLOAD_SCRIPT =
             "const byteCharacters = atob($0);" +
                     "const byteNumbers = new Array(byteCharacters.length);" +
@@ -48,12 +50,16 @@ public final class MmsDialogSupport {
     private MmsDialogSupport() {
     }
 
-    /** Remote error body for client/server errors (400/500), otherwise the exception message. */
+    /**
+     * Remote error body for client/server errors (400/500), otherwise the exception message.
+     */
     public static String errorMessage(FeignException ex) {
         return (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
     }
 
-    /** Simple e-mail validation; an empty value is valid (optional field). */
+    /**
+     * Simple e-mail validation; an empty value is valid (optional field).
+     */
     public static boolean isValidEmail(String email) {
         if (email == null || email.isBlank()) {
             return true;
@@ -61,7 +67,9 @@ public final class MmsDialogSupport {
         return EMAIL_PATTERN.matcher(email).matches();
     }
 
-    /** Content type deduced from the file extension of a template file. */
+    /**
+     * Content type deduced from the file extension of a template file.
+     */
     public static String contentTypeOf(String fileName, String defaultType) {
         String name = fileName == null ? "" : fileName.toLowerCase(Locale.ROOT);
         if (name.endsWith(".html") || name.endsWith(".htm")) {
@@ -134,13 +142,17 @@ public final class MmsDialogSupport {
         };
     }
 
-    /** Sends bytes to the browser as a file download. */
+    /**
+     * Sends bytes to the browser as a file download.
+     */
     public static void downloadBytes(Component owner, byte[] content, String fileName) {
         String base64Content = Base64.getEncoder().encodeToString(content);
         owner.getUI().ifPresent(ui -> ui.getPage().executeJs(DOWNLOAD_SCRIPT, base64Content, fileName));
     }
 
-    /** Downloads the stored file of a template; shows an error notification on failure. */
+    /**
+     * Downloads the stored file of a template; shows an error notification on failure.
+     */
     public static void downloadTemplateFile(Component owner,
                                             MsgTemplateFileService templateFileService,
                                             MsgTemplateDto template) {

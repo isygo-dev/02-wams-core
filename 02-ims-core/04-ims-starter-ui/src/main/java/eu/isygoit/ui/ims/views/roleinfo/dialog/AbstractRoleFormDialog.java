@@ -34,13 +34,7 @@ import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -71,14 +65,13 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
 
     /* allowed applications */
     RowCardList<ApplicationDto> applicationsGrid;
-    private TextField appsSearchField;
-    private Span appsCountLabel;
     List<ApplicationDto> allApplications = new ArrayList<>();
     Set<Long> allowedApplicationIds = new HashSet<>();
-
     /* permissions */
     RowCardList<RolePermissionDto> permissionsTree;
     List<RolePermissionDto> permissions = new ArrayList<>();
+    private TextField appsSearchField;
+    private Span appsCountLabel;
     private TextField permSearchField;
 
     AbstractRoleFormDialog(String title,
@@ -96,19 +89,45 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
 
     /* Hooks */
 
-    /** Whether permissions can be added and removed (create) or only toggled (update). */
+    private static Checkbox permissionBox(Boolean value, String labelKey, Consumer<Boolean> setter) {
+        Checkbox chk = new Checkbox(I18n.t(labelKey), Boolean.TRUE.equals(value));
+        chk.addValueChangeListener(e -> setter.accept(e.getValue()));
+        return chk;
+    }
+
+    /**
+     * Permissions regrouped by service, in first-appearance order of each service.
+     */
+    private static List<RolePermissionDto> groupedByService(List<RolePermissionDto> source) {
+        return source.stream()
+                .collect(Collectors.groupingBy(RolePermissionDto::getServiceName,
+                        LinkedHashMap::new, Collectors.toList()))
+                .values().stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Whether permissions can be added and removed (create) or only toggled (update).
+     */
     abstract boolean permissionsEditable();
 
-    /** The permissions sent to the server on save. */
+    /**
+     * The permissions sent to the server on save.
+     */
     abstract List<RolePermissionDto> permissionsToSend();
 
-    /** The DTO that receives the form values on save. */
+    /* Layout */
+
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract RoleInfoDto target();
 
-    /** Persists the DTO; returns false after appending an error. */
+    /**
+     * Persists the DTO; returns false after appending an error.
+     */
     abstract boolean persist(RoleInfoDto dto);
-
-    /* Layout */
 
     final void buildForm() {
         DialogLayout.size(this, DialogLayout.WIDTH_L);
@@ -154,6 +173,8 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
         return section;
     }
 
+    /* Applications grid (all apps with checkboxes) */
+
     private Component buildApplicationsTab() {
         Button refreshAppsBtn = new Button(I18n.t("ims.role.dialog.apps.refresh"), VaadinIcon.REFRESH.create());
         refreshAppsBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
@@ -195,8 +216,6 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
         return tab;
     }
 
-    /* Applications grid (all apps with checkboxes) */
-
     private void buildApplicationsGrid() {
         applicationsGrid = new RowCardList<ApplicationDto>()
                 .emptyText("-")
@@ -227,6 +246,8 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
         appsCountLabel.addClassName(DialogLayout.CLASS_HELP);
     }
 
+    /* Permissions TreeGrid (grouped by service) */
+
     private void filterApplicationsGrid() {
         String term = appsSearchField.getValue() == null ? "" : appsSearchField.getValue().toLowerCase();
         List<ApplicationDto> filtered = allApplications.stream()
@@ -244,18 +265,16 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
         appsSearchField.clear();
     }
 
-    /* Permissions TreeGrid (grouped by service) */
-
     private void buildPermissionsGrid() {
         permissionsTree = new RowCardList<RolePermissionDto>()
                 .emptyText("-")
                 .cardFactory(perm -> {
                     RowCard card = RowCard.create()
-                        .title(perm.getObjectName())
-                        .fact(I18n.t("ims.role.dialog.perms.column.service"), perm.getServiceName())
-                        .control(permissionBox(perm.getRead(), "ims.role.dialog.perms.column.read", perm::setRead))
-                        .control(permissionBox(perm.getWrite(), "ims.role.dialog.perms.column.write", perm::setWrite))
-                        .control(permissionBox(perm.getDelete(), "ims.role.dialog.perms.column.delete", perm::setDelete));
+                            .title(perm.getObjectName())
+                            .fact(I18n.t("ims.role.dialog.perms.column.service"), perm.getServiceName())
+                            .control(permissionBox(perm.getRead(), "ims.role.dialog.perms.column.read", perm::setRead))
+                            .control(permissionBox(perm.getWrite(), "ims.role.dialog.perms.column.write", perm::setWrite))
+                            .control(permissionBox(perm.getDelete(), "ims.role.dialog.perms.column.delete", perm::setDelete));
                     if (permissionsEditable()) {
                         card.action(VaadinIcon.TRASH, I18n.t("ims.role.dialog.perms.remove"), () -> {
                             permissions.remove(perm);
@@ -273,12 +292,6 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
         permSearchField.setClearButtonVisible(true);
         permSearchField.setValueChangeMode(ValueChangeMode.LAZY);
         permSearchField.addValueChangeListener(e -> filterPermissionsTree());
-    }
-
-    private static Checkbox permissionBox(Boolean value, String labelKey, Consumer<Boolean> setter) {
-        Checkbox chk = new Checkbox(I18n.t(labelKey), Boolean.TRUE.equals(value));
-        chk.addValueChangeListener(e -> setter.accept(e.getValue()));
-        return chk;
     }
 
     final void refreshPermissionsTree() {
@@ -308,19 +321,11 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
         permissionsTree.setItems(filtered);
     }
 
-    /** Permissions regrouped by service, in first-appearance order of each service. */
-    private static List<RolePermissionDto> groupedByService(List<RolePermissionDto> source) {
-        return source.stream()
-                .collect(Collectors.groupingBy(RolePermissionDto::getServiceName,
-                        LinkedHashMap::new, Collectors.toList()))
-                .values().stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-    }
-
     /* Applications loading */
 
-    /** Reloads every application and rebinds the grid; the checked ids are kept. */
+    /**
+     * Reloads every application and rebinds the grid; the checked ids are kept.
+     */
     final void loadApplications() {
         allApplications = fetchAllApplications();
         if (allApplications.isEmpty()) {
@@ -386,7 +391,9 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
 
     /* DTO <-> form */
 
-    /** Fills the basic fields from the DTO (update flow). */
+    /**
+     * Fills the basic fields from the DTO (update flow).
+     */
     final void fillBasicFrom(RoleInfoDto dto) {
         codeField.setValue(dto.getCode() != null ? dto.getCode() : "");
         nameField.setValue(dto.getName() != null ? dto.getName() : "");
@@ -396,7 +403,9 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
         descriptionField.setValue(dto.getDescription() != null ? dto.getDescription() : "");
     }
 
-    /** Copies the editable values into the DTO. {@code id} and {@code code} are left untouched. */
+    /**
+     * Copies the editable values into the DTO. {@code id} and {@code code} are left untouched.
+     */
     private void applyTo(RoleInfoDto dto) {
         dto.setName(nameField.getValue());
         dto.setLevel(levelField.getValue());

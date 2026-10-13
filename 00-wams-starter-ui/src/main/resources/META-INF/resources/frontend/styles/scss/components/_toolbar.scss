@@ -31,11 +31,11 @@
 @use "../abstracts/mixins" as *;
 
 // ─── Tokens ──────────────────────────────────────────────────────
-$toolbar-overlay-width : 260px;  // filter combo-box dropdown width
-$toolbar-search-width  : 300px;  // fixed width of the toolbar search input
-$toolbar-left-basis    : 520px;  // below this the left cluster drops under the action
-$toolbar-filter-min    : 170px;  // narrowest a filter control stays usable at
-$toolbar-filter-max    : 240px;  // …and widest before it just looks stretched
+$toolbar-overlay-width: 260px; // filter combo-box dropdown width
+$toolbar-search-width: 300px; // fixed width of the toolbar search input
+$toolbar-left-basis: 520px; // below this the left cluster drops under the action
+$toolbar-filter-min: 170px; // narrowest a filter control stays usable at
+$toolbar-filter-max: 240px; // …and widest before it just looks stretched
 
 // ══════════════════════════════════════════════════════════════════
 // Root toolbar

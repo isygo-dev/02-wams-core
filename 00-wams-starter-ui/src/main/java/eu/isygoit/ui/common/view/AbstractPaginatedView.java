@@ -3,11 +3,7 @@ package eu.isygoit.ui.common.view;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.H4;
-import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -63,7 +59,9 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     protected long totalElements = 0;
 
     // ─── Criteria state ────────────────────────────────────────────
-    /** Currently active server‑side criteria string (blank = none). */
+    /**
+     * Currently active server‑side criteria string (blank = none).
+     */
     protected String currentCriteria = "";
 
     // ─── Data (current page only) ──────────────────────────────────
@@ -73,42 +71,66 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     //  Abstract contract — subclasses must implement
     // ══════════════════════════════════════════════════════════════
 
-    /** Fetch one page from the backend. Return {@code null} for an empty page. */
+    /**
+     * Fetch one page from the backend. Return {@code null} for an empty page.
+     */
     protected abstract PaginatedResponseDto<T> fetchPage(int page, int size);
 
-    /** Build the visual component for a single item (card, row, …). */
+    /**
+     * Build the visual component for a single item (card, row, …).
+     */
     protected abstract Component renderItem(T item);
 
-    /** Client‑side match over the current page only. */
+    /**
+     * Client‑side match over the current page only.
+     */
     protected abstract boolean matchesSearch(T item, String search);
 
-    /** Open the create dialog. Remember to call {@link #refresh()} on success. */
+    /**
+     * Open the create dialog. Remember to call {@link #refresh()} on success.
+     */
     protected abstract void openCreateDialog();
 
     // i18n keys — one method per label so each view defines its own bundle keys
     protected abstract String getTitleKey();
+
     protected abstract String getSubtitleKey();
+
     protected abstract String getCreateButtonKey();
+
     protected abstract String getSearchPlaceholderKey();
+
     protected abstract String getEmptyTitleKey();
+
     protected abstract String getEmptyDescriptionKey();
+
     protected abstract VaadinIcon getEmptyIcon();
 
     // ══════════════════════════════════════════════════════════════
     //  Optional hooks — subclasses may override
     // ══════════════════════════════════════════════════════════════
 
-    /** Extra root CSS class names (e.g. {@code "student-view"}). */
-    protected String[] getRootCssClasses() { return new String[0]; }
+    /**
+     * Extra root CSS class names (e.g. {@code "student-view"}).
+     */
+    protected String[] getRootCssClasses() {
+        return new String[0];
+    }
 
     /**
      * Extra component placed between the toolbar and the loading bar
      * (for example a {@code FilterBar}). {@code null} means "none".
      */
-    protected Component buildAdditionalToolbar() { return null; }
+    protected Component buildAdditionalToolbar() {
+        return null;
+    }
 
-    /** i18n key used when the backend call fails. */
-    protected String getLoadErrorKey() { return "common.load.error"; }
+    /**
+     * i18n key used when the backend call fails.
+     */
+    protected String getLoadErrorKey() {
+        return "common.load.error";
+    }
 
     // ══════════════════════════════════════════════════════════════
     //  Criteria hooks — subclasses override when their backend
@@ -138,13 +160,17 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         return Map.of();
     }
 
-    /** Apply a criteria string and reload from page 0. */
+    /**
+     * Apply a criteria string and reload from page 0.
+     */
     public void applyCriteria(String criteria) {
         this.currentCriteria = criteria == null ? "" : criteria;
         loadPage(0);
     }
 
-    /** Drop any active criteria and reload from page 0. */
+    /**
+     * Drop any active criteria and reload from page 0.
+     */
     public void clearCriteria() {
         this.currentCriteria = "";
         loadPage(0);
@@ -215,7 +241,9 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         loadPage(0);
     }
 
-    /** Toolbar: search field + create button. Override to customise. */
+    /**
+     * Toolbar: search field + create button. Override to customise.
+     */
     protected HorizontalLayout buildToolbar() {
         searchField.addClassName("toolbar-search");
         searchField.setLabel(I18n.t("common.filter.search"));
@@ -281,17 +309,17 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
 
             if (body != null) {
                 // Copy into a List<T> so we can use T-typed render/matches methods.
-                currentItems  = body.getContent() != null
+                currentItems = body.getContent() != null
                         ? new ArrayList<>(body.getContent())
                         : new ArrayList<>();
-                totalPages    = body.getTotalPages();
+                totalPages = body.getTotalPages();
                 totalElements = body.getTotalElements();
-                currentPage   = body.getPageNumber();
+                currentPage = body.getPageNumber();
             } else {
-                currentItems  = new ArrayList<>();
-                totalPages    = 0;
+                currentItems = new ArrayList<>();
+                totalPages = 0;
                 totalElements = 0;
-                currentPage   = 0;
+                currentPage = 0;
             }
             applyLocalFilter();
             paginationBar.update(currentPage, totalPages);
@@ -306,7 +334,9 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         }
     }
 
-    /** Reload the current page — call this after a create / update / delete. */
+    /**
+     * Reload the current page — call this after a create / update / delete.
+     */
     public void refresh() {
         loadPage(currentPage);
     }
@@ -322,7 +352,9 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     //  Filtering & rendering
     // ══════════════════════════════════════════════════════════════
 
-    /** Re‑apply the local search filter to the current page. */
+    /**
+     * Re‑apply the local search filter to the current page.
+     */
     protected void applyLocalFilter() {
         String search = searchField.getValue();
         List<T> filtered = currentItems.stream()
@@ -363,6 +395,59 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     // ══════════════════════════════════════════════════════════════
     //  Material‑UI‑style rounded pagination bar
     // ══════════════════════════════════════════════════════════════
+
+    /**
+     * Hook for additional client‑side filters (e.g. an enum status filter).
+     */
+    protected boolean matchesAdditionalFilters(T item) {
+        return true;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Additional extension points
+    // ══════════════════════════════════════════════════════════════
+
+    /**
+     * Extra component placed at the very top of the panel, before the toolbar.
+     * Use this for KPI/statistics rows. {@code null} means "none".
+     */
+    protected Component buildPreToolbarContent() {
+        return null;
+    }
+
+    /**
+     * Called at the end of every successful {@link #loadPage(int)}.
+     */
+    protected void onPageLoaded() { /* no‑op by default */ }
+
+    /**
+     * Extract a user-readable message from a thrown exception.
+     */
+    protected String extractErrorMessage(Exception e) {
+        return e.getMessage();
+    }
+
+    /**
+     * Extra components inserted in the toolbar, right after the search field.
+     */
+    protected List<Component> buildToolbarFilters() {
+        return List.of();
+    }
+
+    /**
+     * Extra components inserted in the toolbar, just before the create button.
+     */
+    protected List<Component> buildToolbarActions() {
+        return List.of();
+    }
+
+    /**
+     * Called when the search field value changes.
+     * Default: re-filter the current page in place.
+     */
+    protected void onSearchChanged() {
+        applyLocalFilter();
+    }
 
     protected class PaginationBar extends HorizontalLayout {
 
@@ -452,40 +537,5 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
             }
             return result;
         }
-    }
-
-    // ══════════════════════════════════════════════════════════════
-    //  Additional extension points
-    // ══════════════════════════════════════════════════════════════
-
-    /** Hook for additional client‑side filters (e.g. an enum status filter). */
-    protected boolean matchesAdditionalFilters(T item) { return true; }
-
-    /**
-     * Extra component placed at the very top of the panel, before the toolbar.
-     * Use this for KPI/statistics rows. {@code null} means "none".
-     */
-    protected Component buildPreToolbarContent() { return null; }
-
-    /** Called at the end of every successful {@link #loadPage(int)}. */
-    protected void onPageLoaded() { /* no‑op by default */ }
-
-    /** Extract a user-readable message from a thrown exception. */
-    protected String extractErrorMessage(Exception e) {
-        return e.getMessage();
-    }
-
-    /** Extra components inserted in the toolbar, right after the search field. */
-    protected List<Component> buildToolbarFilters() { return List.of(); }
-
-    /** Extra components inserted in the toolbar, just before the create button. */
-    protected List<Component> buildToolbarActions() { return List.of(); }
-
-    /**
-     * Called when the search field value changes.
-     * Default: re-filter the current page in place.
-     */
-    protected void onSearchChanged() {
-        applyLocalFilter();
     }
 }

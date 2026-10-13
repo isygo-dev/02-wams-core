@@ -65,6 +65,22 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
         enableOkButton(false);
     }
 
+    /**
+     * i18n key of the path validation error, or {@code null} when the path is valid or empty.
+     */
+    private static String pathErrorKey(String path) {
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
+        if (path.startsWith("/") || path.endsWith("/")) {
+            return "dms.linkedfile.dialog.field.path.error.invalid.format";
+        }
+        if (!path.matches(PATH_PATTERN)) {
+            return "dms.linkedfile.dialog.field.path.error.invalid.characters";
+        }
+        return null;
+    }
+
     private void buildForm() {
         uploadPanel = new DmsUploadPanel(this::enableOkButton);
 
@@ -105,7 +121,9 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
         addContent(stack);
     }
 
-    /** Helper text under the path: tells which value is used when the path is left empty. */
+    /**
+     * Helper text under the path: tells which value is used when the path is left empty.
+     */
     private void refreshPathHelper() {
         String path = pathField.getValue();
         String category = categoryComboBox.getValue();
@@ -114,20 +132,6 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
         } else {
             pathField.setHelperText(I18n.t("dms.linkedfile.dialog.field.path.helper"));
         }
-    }
-
-    /** i18n key of the path validation error, or {@code null} when the path is valid or empty. */
-    private static String pathErrorKey(String path) {
-        if (path == null || path.isEmpty()) {
-            return null;
-        }
-        if (path.startsWith("/") || path.endsWith("/")) {
-            return "dms.linkedfile.dialog.field.path.error.invalid.format";
-        }
-        if (!path.matches(PATH_PATTERN)) {
-            return "dms.linkedfile.dialog.field.path.error.invalid.characters";
-        }
-        return null;
     }
 
     private void loadCategories() {

@@ -5,7 +5,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -58,7 +57,7 @@ public class ParameterManagementView extends AbstractPaginatedView<AppParameterD
     protected boolean matchesSearch(AppParameterDto p, String search) {
         if (search == null || search.isBlank()) return true;
         String s = search.toLowerCase();
-        return (p.getName()  != null && p.getName().toLowerCase().contains(s))
+        return (p.getName() != null && p.getName().toLowerCase().contains(s))
                 || (p.getValue() != null && p.getValue().toLowerCase().contains(s));
     }
 
@@ -74,7 +73,9 @@ public class ParameterManagementView extends AbstractPaginatedView<AppParameterD
     }
 
     @Override
-    protected void onSearchChanged() { loadPageZero(); }
+    protected void onSearchChanged() {
+        loadPageZero();
+    }
 
     @Override
     protected String[] getRootCssClasses() {
@@ -86,7 +87,10 @@ public class ParameterManagementView extends AbstractPaginatedView<AppParameterD
         tenantFilter.setPlaceholder(I18n.t("ims.parameter.view.tenant.placeholder"));
         tenantFilter.setClearButtonVisible(true);
         tenantFilter.setWidth("150px");
-        tenantFilter.addValueChangeListener(e -> { currentTenant = e.getValue(); loadPageZero(); });
+        tenantFilter.addValueChangeListener(e -> {
+            currentTenant = e.getValue();
+            loadPageZero();
+        });
         return List.of(tenantFilter);
     }
 
@@ -107,19 +111,54 @@ public class ParameterManagementView extends AbstractPaginatedView<AppParameterD
         return e.getMessage();
     }
 
-    @Override protected String getTitleKey()             { return "ims.parameter.view.title"; }
-    @Override protected String getSubtitleKey()          { return "ims.parameter.view.subtitle"; }
-    @Override protected String getCreateButtonKey()      { return "ims.parameter.view.create.button"; }
-    @Override protected String getSearchPlaceholderKey() { return "ims.parameter.view.search.placeholder"; }
-    @Override protected String getEmptyTitleKey()        { return "ims.parameter.view.empty.title"; }
-    @Override protected String getEmptyDescriptionKey()  { return "ims.parameter.view.empty.description"; }
-    @Override protected VaadinIcon getEmptyIcon()        { return VaadinIcon.COG; }
-    @Override protected String getLoadErrorKey()         { return "ims.parameter.view.load.error"; }
+    @Override
+    protected String getTitleKey() {
+        return "ims.parameter.view.title";
+    }
 
     @Override
-    public String getPageTitle() { return I18n.t("ims.parameter.view.title"); }
+    protected String getSubtitleKey() {
+        return "ims.parameter.view.subtitle";
+    }
 
-    public void loadPageZero() { loadPage(0); }
+    @Override
+    protected String getCreateButtonKey() {
+        return "ims.parameter.view.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "ims.parameter.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "ims.parameter.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "ims.parameter.view.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.COG;
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "ims.parameter.view.load.error";
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("ims.parameter.view.title");
+    }
+
+    public void loadPageZero() {
+        loadPage(0);
+    }
 
     public void openUpdateParameterDialog(AppParameterDto p, Runnable onSuccess) {
         new UpdateParameterDialog(this, parameterService, p, onSuccess).open();

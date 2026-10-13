@@ -89,7 +89,9 @@ public class SubscribeNextCodeConfigDialog extends KmsActionDialog {
         return form;
     }
 
-    /** Read-only code computed from the format fields; never sent (the server assigns it). */
+    /**
+     * Read-only code computed from the format fields; never sent (the server assigns it).
+     */
     private void updateCodePreview() {
         NextCodeDto preview = NextCodeDto.builder()
                 .prefix(prefixField.getValue())

@@ -61,10 +61,14 @@ abstract class AbstractDigestConfigFormDialog extends KmsActionDialog {
         this.errorKey = errorKey;
     }
 
-    /** The DTO that receives the form values on save. */
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract DigestConfigDto target();
 
-    /** Sends the DTO to the service. */
+    /**
+     * Sends the DTO to the service.
+     */
     abstract ResponseEntity<DigestConfigDto> send(DigestConfigDto dto);
 
     final void buildForm() {
@@ -181,7 +185,9 @@ abstract class AbstractDigestConfigFormDialog extends KmsActionDialog {
         return section;
     }
 
-    /** Fills the form from an existing configuration. */
+    /**
+     * Fills the form from an existing configuration.
+     */
     final void fillFrom(DigestConfigDto dto) {
         SecretsDialogSupport.setText(codeField, dto.getCode());
         SecretsDialogSupport.setText(tenantField, dto.getTenant());

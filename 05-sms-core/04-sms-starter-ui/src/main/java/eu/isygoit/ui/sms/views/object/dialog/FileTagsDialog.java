@@ -29,9 +29,8 @@ public class FileTagsDialog extends SmsActionDialog {
     private final String tenant;
     private final String bucketName;
     private final ObjectStorageManagementView.FileItem file;
-
-    private VerticalLayout tagsContainer;
     private final List<TextField> tagFields = new ArrayList<>();
+    private VerticalLayout tagsContainer;
 
     public FileTagsDialog(ObjectStorageManagementView parentView, ObjectStorageService objectStorageService,
                           String tenant, String bucketName, ObjectStorageManagementView.FileItem file, Runnable onSuccess) {

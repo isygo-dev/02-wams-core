@@ -25,6 +25,10 @@ public class DigestConfigDetailsViewDialog extends KmsDetailsDialog {
         buildContent();
     }
 
+    private static String asText(Integer value) {
+        return value != null ? String.valueOf(value) : null;
+    }
+
     private void buildContent() {
         Div identityGrid = createDetailGrid();
         // Config code is the identifier used to reference this config elsewhere - worth copying.
@@ -66,10 +70,6 @@ public class DigestConfigDetailsViewDialog extends KmsDetailsDialog {
                 createSection(I18n.t("kms.digest.details.section.advanced"), advancedGrid));
 
         addAuditTab(dto.getCreatedBy(), dto.getCreateDate(), dto.getUpdatedBy(), dto.getUpdateDate());
-    }
-
-    private static String asText(Integer value) {
-        return value != null ? String.valueOf(value) : null;
     }
 
     private String booleanToText(Boolean value) {

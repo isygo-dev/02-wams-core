@@ -6,7 +6,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -78,7 +77,9 @@ public class AnnexManagementView extends AbstractPaginatedView<AnnexDto> {
     }
 
     @Override
-    protected void onSearchChanged() { loadPageZero(); }
+    protected void onSearchChanged() {
+        loadPageZero();
+    }
 
     @Override
     protected String[] getRootCssClasses() {
@@ -90,14 +91,20 @@ public class AnnexManagementView extends AbstractPaginatedView<AnnexDto> {
         tableCodeFilter.setPlaceholder(I18n.t("ims.annex.view.table.code.placeholder"));
         tableCodeFilter.setClearButtonVisible(true);
         tableCodeFilter.setWidth("150px");
-        tableCodeFilter.addValueChangeListener(e -> { currentTableCode = e.getValue(); loadPageZero(); });
+        tableCodeFilter.addValueChangeListener(e -> {
+            currentTableCode = e.getValue();
+            loadPageZero();
+        });
 
         languageFilter.setItems(IEnumLanguage.Types.values());
         languageFilter.setItemLabelGenerator(l -> ImsEnumTag.label(l, "ims.enum.language"));
         languageFilter.setRenderer(ImsEnumTag.renderer("ims.enum.language"));
         languageFilter.setPlaceholder(I18n.t("ims.annex.view.language.placeholder"));
         languageFilter.setWidth("150px");
-        languageFilter.addValueChangeListener(e -> { currentLanguage = e.getValue(); loadPageZero(); });
+        languageFilter.addValueChangeListener(e -> {
+            currentLanguage = e.getValue();
+            loadPageZero();
+        });
 
         return List.of(tableCodeFilter, languageFilter);
     }
@@ -119,19 +126,54 @@ public class AnnexManagementView extends AbstractPaginatedView<AnnexDto> {
         return e.getMessage();
     }
 
-    @Override protected String getTitleKey()             { return "ims.annex.view.title"; }
-    @Override protected String getSubtitleKey()          { return "ims.annex.view.subtitle"; }
-    @Override protected String getCreateButtonKey()      { return "ims.annex.view.create.button"; }
-    @Override protected String getSearchPlaceholderKey() { return "ims.annex.view.search.placeholder"; }
-    @Override protected String getEmptyTitleKey()        { return "ims.annex.view.empty.title"; }
-    @Override protected String getEmptyDescriptionKey()  { return "ims.annex.view.empty.description"; }
-    @Override protected VaadinIcon getEmptyIcon()        { return VaadinIcon.FILE_CODE; }
-    @Override protected String getLoadErrorKey()         { return "ims.annex.view.load.error"; }
+    @Override
+    protected String getTitleKey() {
+        return "ims.annex.view.title";
+    }
 
     @Override
-    public String getPageTitle() { return I18n.t("ims.annex.view.title"); }
+    protected String getSubtitleKey() {
+        return "ims.annex.view.subtitle";
+    }
 
-    public void loadPageZero() { loadPage(0); }
+    @Override
+    protected String getCreateButtonKey() {
+        return "ims.annex.view.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "ims.annex.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "ims.annex.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "ims.annex.view.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.FILE_CODE;
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "ims.annex.view.load.error";
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("ims.annex.view.title");
+    }
+
+    public void loadPageZero() {
+        loadPage(0);
+    }
 
     public void openUpdateAnnexDialog(AnnexDto annex, Runnable onSuccess) {
         new UpdateAnnexDialog(this, annexService, annex, onSuccess).open();

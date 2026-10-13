@@ -13,9 +13,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.common.component.ClipboardCopyButton;
+import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.kms.views.common.KmsDetailsDialog;
 import eu.isygoit.ui.kms.views.cryptography.random.RandomKeyView;
 

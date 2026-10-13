@@ -37,7 +37,9 @@ import java.util.List;
 @Slf4j
 public class TenantCard extends ProfileCard<TenantManagementView, TenantService, TenantDto> {
 
-    /** Tenant-specific placeholder: a building / columns glyph. */
+    /**
+     * Tenant-specific placeholder: a building / columns glyph.
+     */
     private static final String TENANT_IMAGE_PLACEHOLDER =
             "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' " +
                     "viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='1' " +
@@ -71,19 +73,25 @@ public class TenantCard extends ProfileCard<TenantManagementView, TenantService,
      * Profile accessors
      * ══════════════════════════════════════════════════════════════ */
 
-    /** No static path — the avatar is fetched via {@link #profileImageLoader()}. */
+    /**
+     * No static path — the avatar is fetched via {@link #profileImageLoader()}.
+     */
     @Override
     protected String profileImagePath() {
         return null;
     }
 
-    /** Keep the tenant-specific building glyph instead of the default user icon. */
+    /**
+     * Keep the tenant-specific building glyph instead of the default user icon.
+     */
     @Override
     protected String profileImagePlaceholder() {
         return TENANT_IMAGE_PLACEHOLDER;
     }
 
-    /** Downloads the tenant avatar through {@link TenantImageService}. */
+    /**
+     * Downloads the tenant avatar through {@link TenantImageService}.
+     */
     @Override
     protected ProfileImageLoader profileImageLoader() {
         if (tenantImageService == null || profile == null || profile.getId() == null) {
@@ -108,7 +116,9 @@ public class TenantCard extends ProfileCard<TenantManagementView, TenantService,
         return profile.getEmail();
     }
 
-    /** Admin status → footer status tag. Field captured for in-place refresh. */
+    /**
+     * Admin status → footer status tag. Field captured for in-place refresh.
+     */
     @Override
     protected Span profileStatusTag() {
         adminStatusChip = ImsEnumTag.ofOrUnknown(profile.getAdminStatus(), null);

@@ -20,7 +20,9 @@ public final class SecretsDialogSupport {
     private SecretsDialogSupport() {
     }
 
-    /** Full-width read-only text field (used for the server-assigned {@code code} and {@code tenant}). */
+    /**
+     * Full-width read-only text field (used for the server-assigned {@code code} and {@code tenant}).
+     */
     public static TextField readOnlyField(String label) {
         TextField field = new TextField(label);
         field.setReadOnly(true);
@@ -28,17 +30,23 @@ public final class SecretsDialogSupport {
         return field;
     }
 
-    /** Null-safe text binding. */
+    /**
+     * Null-safe text binding.
+     */
     public static void setText(TextField field, String value) {
         field.setValue(value != null ? value : "");
     }
 
-    /** Null-safe checkbox binding (null means unchecked). */
+    /**
+     * Null-safe checkbox binding (null means unchecked).
+     */
     public static void setFlag(Checkbox checkbox, Boolean value) {
         checkbox.setValue(Boolean.TRUE.equals(value));
     }
 
-    /** Message shown for a Feign failure: the server body for 400/500, the exception message otherwise. */
+    /**
+     * Message shown for a Feign failure: the server body for 400/500, the exception message otherwise.
+     */
     public static String feignMessage(FeignException ex) {
         return (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
     }

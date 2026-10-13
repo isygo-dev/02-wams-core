@@ -48,9 +48,8 @@ auth-layout {
   min-height: 100vh;
   min-height: 100dvh;
   padding: clamp(0.75rem, 3vw, 2.5rem);
-  background:
-    radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08), transparent 58%),
-    v.$auth-color-page;
+  background: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08), transparent 58%),
+  v.$auth-color-page;
   color: v.$auth-color-ink;
 }
 
@@ -68,9 +67,8 @@ html[theme~="dark"] auth-layout {
   --lumo-primary-text-color: #a5b4fc;
   --lumo-error-text-color: #fca5a5;
 
-  background:
-    radial-gradient(ellipse at top, rgba(129, 140, 248, 0.18), transparent 58%),
-    #0b1120;
+  background: radial-gradient(ellipse at top, rgba(129, 140, 248, 0.18), transparent 58%),
+  #0b1120;
   color: #f1f5f9;
 }
 

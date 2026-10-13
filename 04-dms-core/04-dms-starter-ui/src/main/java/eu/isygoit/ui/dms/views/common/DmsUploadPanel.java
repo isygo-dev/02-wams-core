@@ -30,10 +30,14 @@ import java.util.stream.Stream;
 @Slf4j
 public final class DmsUploadPanel extends VerticalLayout {
 
-    /** Maximum size of one uploaded file (50 MB). */
+    /**
+     * Maximum size of one uploaded file (50 MB).
+     */
     public static final int MAX_FILE_BYTES = 50 * 1024 * 1024;
 
-    /** Document types of the shared dialogs plus plain text and zip archives. */
+    /**
+     * Document types of the shared dialogs plus plain text and zip archives.
+     */
     public static final String[] ACCEPTED_MIME_TYPES = Stream.concat(
             Stream.of(DialogUploads.DOCUMENT_MIME_TYPES),
             Stream.of("text/plain", "application/zip")).toArray(String[]::new);
@@ -117,12 +121,16 @@ public final class DmsUploadPanel extends VerticalLayout {
         uploadIcon.addClassName(success ? "dms-upload-icon--success" : "dms-upload-icon--error");
     }
 
-    /** The uploaded file as a multipart file, or {@code null} while none is ready. */
+    /**
+     * The uploaded file as a multipart file, or {@code null} while none is ready.
+     */
     public MultipartFile getUploadedFile() {
         return uploadedFile;
     }
 
-    /** Original name of the uploaded file, or {@code null} while none is ready. */
+    /**
+     * Original name of the uploaded file, or {@code null} while none is ready.
+     */
     public String getUploadedFileName() {
         return uploadedFileName;
     }

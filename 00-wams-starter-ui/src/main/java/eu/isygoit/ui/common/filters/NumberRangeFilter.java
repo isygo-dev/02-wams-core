@@ -18,7 +18,7 @@ import java.math.BigDecimal;
  *       {@link #setOnChange(Runnable)} and {@link #toCriteria()} returns
  *       {@code null}.</li>
  * </ul>
- *
+ * <p>
  * Numeric bounds are emitted without quotes, in {@code BW (lo, hi)}
  * form for a closed interval, or as {@code >=} / {@code <=} for a
  * half-open one. When both bounds are set they are always emitted as
@@ -31,16 +31,22 @@ import java.math.BigDecimal;
  */
 public class NumberRangeFilter extends HorizontalLayout {
 
-    /** {@code null} in manual mode. */
+    /**
+     * {@code null} in manual mode.
+     */
     private final String fieldName;
 
     private final NumberField from = new NumberField();
-    private final NumberField to   = new NumberField();
+    private final NumberField to = new NumberField();
 
-    /** Listener invoked on either field's value change. */
+    /**
+     * Listener invoked on either field's value change.
+     */
     private Runnable onChange;
 
-    /** Metadata-mode constructor: sub-labels derive from the group label. */
+    /**
+     * Metadata-mode constructor: sub-labels derive from the group label.
+     */
     public NumberRangeFilter(String fieldName, String label) {
         this(fieldName,
                 label,
@@ -83,17 +89,34 @@ public class NumberRangeFilter extends HorizontalLayout {
     //  Manual-mode API
     // ══════════════════════════════════════════════════════════════
 
-    public void setOnChange(Runnable onChange) { this.onChange = onChange; }
+    /**
+     * Formats a numeric bound without a trailing {@code .0} for integral
+     * values, and without scientific notation for large/small magnitudes.
+     */
+    private static String format(double v) {
+        if (!Double.isFinite(v)) {
+            throw new IllegalArgumentException("Non-finite numeric bound: " + v);
+        }
+        if (v == Math.floor(v) && Math.abs(v) < 1e15) {
+            return Long.toString((long) v);
+        }
+        return BigDecimal.valueOf(v).stripTrailingZeros().toPlainString();
+    }
 
-    public Double getFromValue() { return from.getValue(); }
-    public Double getToValue()   { return to.getValue(); }
+    public void setOnChange(Runnable onChange) {
+        this.onChange = onChange;
+    }
 
-    public boolean isEmpty() { return from.isEmpty() && to.isEmpty(); }
+    public Double getFromValue() {
+        return from.getValue();
+    }
 
-    /** Clears both fields. Does <em>not</em> fire {@code onChange}. */
-    public void clear() {
-        from.clear();
-        to.clear();
+    public Double getToValue() {
+        return to.getValue();
+    }
+
+    public boolean isEmpty() {
+        return from.isEmpty() && to.isEmpty();
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -101,8 +124,16 @@ public class NumberRangeFilter extends HorizontalLayout {
     // ══════════════════════════════════════════════════════════════
 
     /**
+     * Clears both fields. Does <em>not</em> fire {@code onChange}.
+     */
+    public void clear() {
+        from.clear();
+        to.clear();
+    }
+
+    /**
      * @return the criteria clause for this range, or {@code null} when
-     *         in manual mode or no bound is set.
+     * in manual mode or no bound is set.
      */
     public String toCriteria() {
         if (fieldName == null) return null;
@@ -121,7 +152,9 @@ public class NumberRangeFilter extends HorizontalLayout {
         return fieldName + " <= " + format(t);
     }
 
-    /** True when both bounds are set and {@code from > to}. */
+    /**
+     * True when both bounds are set and {@code from > to}.
+     */
     public boolean hasInvalidRange() {
         Double f = from.getValue();
         Double t = to.getValue();
@@ -133,19 +166,5 @@ public class NumberRangeFilter extends HorizontalLayout {
         from.setInvalid(bad);
         to.setInvalid(bad);
         if (onChange != null) onChange.run();
-    }
-
-    /**
-     * Formats a numeric bound without a trailing {@code .0} for integral
-     * values, and without scientific notation for large/small magnitudes.
-     */
-    private static String format(double v) {
-        if (!Double.isFinite(v)) {
-            throw new IllegalArgumentException("Non-finite numeric bound: " + v);
-        }
-        if (v == Math.floor(v) && Math.abs(v) < 1e15) {
-            return Long.toString((long) v);
-        }
-        return BigDecimal.valueOf(v).stripTrailingZeros().toPlainString();
     }
 }

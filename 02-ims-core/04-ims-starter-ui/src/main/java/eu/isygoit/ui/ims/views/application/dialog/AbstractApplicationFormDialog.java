@@ -62,19 +62,29 @@ abstract class AbstractApplicationFormDialog extends ImsActionDialog {
         this.applicationImageService = applicationImageService;
     }
 
-    /** The DTO that receives the form values on save. */
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract ApplicationDto target();
 
-    /** Persists the DTO; returns the application id, or null after appending an error message. */
+    /**
+     * Persists the DTO; returns the application id, or null after appending an error message.
+     */
     abstract Long persist(ApplicationDto dto);
 
-    /** i18n key of the photo upload button. */
+    /**
+     * i18n key of the photo upload button.
+     */
     abstract String uploadLabelKey();
 
-    /** True when a picture must be selected before saving. */
+    /**
+     * True when a picture must be selected before saving.
+     */
     abstract boolean imageRequired();
 
-    /** True when the tenant cannot be changed (update). */
+    /**
+     * True when the tenant cannot be changed (update).
+     */
     abstract boolean isTenantReadOnly();
 
     final void buildForm() {
@@ -160,7 +170,9 @@ abstract class AbstractApplicationFormDialog extends ImsActionDialog {
         return section;
     }
 
-    /** Fills the form from an existing application. */
+    /**
+     * Fills the form from an existing application.
+     */
     final void fillFrom(ApplicationDto dto) {
         nameField.setValue(dto.getName() != null ? dto.getName() : "");
         titleField.setValue(dto.getTitle() != null ? dto.getTitle() : "");
@@ -173,7 +185,9 @@ abstract class AbstractApplicationFormDialog extends ImsActionDialog {
         adminStatusCombo.setValue(dto.getAdminStatus());
     }
 
-    /** Copies the form values into the DTO ({@code id}, {@code code} and {@code token} are left untouched). */
+    /**
+     * Copies the form values into the DTO ({@code id}, {@code code} and {@code token} are left untouched).
+     */
     private void applyTo(ApplicationDto dto) {
         if (!tenantField.isReadOnly()) {
             dto.setTenant(tenantField.getValue().isBlank() ? null : tenantField.getValue());

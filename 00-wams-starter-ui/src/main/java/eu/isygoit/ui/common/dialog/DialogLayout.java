@@ -16,16 +16,26 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
  */
 public final class DialogLayout {
 
-    /** Compact dialogs: a handful of fields, no grouping. */
+    /**
+     * Compact dialogs: a handful of fields, no grouping.
+     */
     public static final String WIDTH_S = "30rem";
-    /** Standard dialogs: one logical group, up to ~8 fields. */
+    /**
+     * Standard dialogs: one logical group, up to ~8 fields.
+     */
     public static final String WIDTH_M = "40rem";
-    /** Wide dialogs: several logical groups (tabbed). */
+    /**
+     * Wide dialogs: several logical groups (tabbed).
+     */
     public static final String WIDTH_L = "56rem";
-    /** Keeps every dialog inside the viewport on small screens. */
+    /**
+     * Keeps every dialog inside the viewport on small screens.
+     */
     public static final String MAX_WIDTH = "95%";
 
-    /** Viewport width from which forms switch from one to two columns. */
+    /**
+     * Viewport width from which forms switch from one to two columns.
+     */
     public static final String TWO_COLUMNS_FROM = "37.5rem";
 
     public static final String CLASS_STACK = "wams-dlg-stack";
@@ -55,14 +65,18 @@ public final class DialogLayout {
     private DialogLayout() {
     }
 
-    /** Applies the shared width scale and keeps the dialog usable on small screens. */
+    /**
+     * Applies the shared width scale and keeps the dialog usable on small screens.
+     */
     public static void size(Dialog dialog, String width) {
         dialog.setWidth(width);
         dialog.setMaxWidth(MAX_WIDTH);
         dialog.setResizable(true);
     }
 
-    /** One column on mobile, two columns from {@link #TWO_COLUMNS_FROM}. */
+    /**
+     * One column on mobile, two columns from {@link #TWO_COLUMNS_FROM}.
+     */
     public static FormLayout responsiveForm() {
         FormLayout form = new FormLayout();
         form.setResponsiveSteps(
@@ -71,7 +85,9 @@ public final class DialogLayout {
         return form;
     }
 
-    /** Vertical stack with the shared dialog rhythm. */
+    /**
+     * Vertical stack with the shared dialog rhythm.
+     */
     public static VerticalLayout stack() {
         VerticalLayout stack = new VerticalLayout();
         stack.setPadding(false);
@@ -81,7 +97,9 @@ public final class DialogLayout {
         return stack;
     }
 
-    /** Titled section card (icon + title); the caller adds the content. */
+    /**
+     * Titled section card (icon + title); the caller adds the content.
+     */
     public static VerticalLayout section(String title, VaadinIcon icon) {
         VerticalLayout section = new VerticalLayout();
         section.setPadding(false);
@@ -98,14 +116,18 @@ public final class DialogLayout {
         return section;
     }
 
-    /** Small secondary text shown under a section title or field group. */
+    /**
+     * Small secondary text shown under a section title or field group.
+     */
     public static Span help(String text) {
         Span help = new Span(text);
         help.addClassName(CLASS_HELP);
         return help;
     }
 
-    /** Full-width multi-line field with the shared minimum height. */
+    /**
+     * Full-width multi-line field with the shared minimum height.
+     */
     public static <T extends Component & HasSize> T tall(T field) {
         field.setWidthFull();
         field.addClassName(CLASS_TEXTAREA);

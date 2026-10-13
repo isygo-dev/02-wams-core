@@ -51,10 +51,14 @@ abstract class AbstractStorageConfigFormDialog extends SmsActionDialog {
         this.service = service;
     }
 
-    /** The DTO that receives the form values on save. */
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract StorageConfigDto target();
 
-    /** Persists the DTO and returns the service response. */
+    /**
+     * Persists the DTO and returns the service response.
+     */
     abstract ResponseEntity<StorageConfigDto> persist(StorageConfigDto dto);
 
     final void buildForm() {
@@ -100,7 +104,9 @@ abstract class AbstractStorageConfigFormDialog extends SmsActionDialog {
         addContent(form);
     }
 
-    /** Fills the form from an existing configuration; the password is never loaded. */
+    /**
+     * Fills the form from an existing configuration; the password is never loaded.
+     */
     final void fillFrom(StorageConfigDto dto) {
         tenantField.setValue(dto.getTenant() != null ? dto.getTenant() : "");
         typeCombo.setValue(dto.getType());

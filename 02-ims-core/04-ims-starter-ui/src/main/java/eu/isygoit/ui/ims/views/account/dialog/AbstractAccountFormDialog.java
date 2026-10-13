@@ -101,21 +101,37 @@ abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
         this.tenantService = tenantService;
     }
 
-    /** The DTO that receives the form values on save. */
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private static String blankToNull(String value) {
+        return isBlank(value) ? null : value;
+    }
+
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract AccountDto target();
 
-    /** Persists the DTO; returns the account id, or null after appending an error message. */
+    /**
+     * Persists the DTO; returns the account id, or null after appending an error message.
+     */
     abstract Long persist(AccountDto dto);
-
-    /** i18n key of the photo upload button. */
-    abstract String uploadLabelKey();
-
-    /** True when a picture must be selected before saving. */
-    abstract boolean imageRequired();
 
     /* ------------------------------------------------------------------
      * Photo download hook
      * ------------------------------------------------------------------ */
+
+    /**
+     * i18n key of the photo upload button.
+     */
+    abstract String uploadLabelKey();
+
+    /**
+     * True when a picture must be selected before saving.
+     */
+    abstract boolean imageRequired();
 
     @Override
     protected byte[] downloadProfileImage(Long id) {
@@ -264,10 +280,14 @@ abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
         return tab;
     }
 
-    /** True when the tenant cannot be changed (update). */
+    /**
+     * True when the tenant cannot be changed (update).
+     */
     abstract boolean isTenantReadOnly();
 
-    /** Loads the tenant choices. */
+    /**
+     * Loads the tenant choices.
+     */
     private void loadTenants() {
         parentView.showLoading(true);
         try {
@@ -292,7 +312,9 @@ abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
                 .orElse(null);
     }
 
-    /** Fills the form from an existing account. */
+    /**
+     * Fills the form from an existing account.
+     */
     final void fillFrom(AccountDto dto) {
         tenantCombo.setValue(dto.getTenant());
         accountTypeCombo.setValue(dto.getAccountType());
@@ -327,7 +349,9 @@ abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
         showExistingPhoto(photoSection, dto.getId());
     }
 
-    /** Copies the form values into the DTO ({@code id} and {@code code} are left untouched). */
+    /**
+     * Copies the form values into the DTO ({@code id} and {@code code} are left untouched).
+     */
     private void applyTo(AccountDto dto) {
         dto.setTenant(tenantCombo.getValue());
         dto.setAccountType(accountTypeCombo.getValue());
@@ -365,14 +389,6 @@ abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
             details.setAddress(address);
         }
         dto.setAccountDetails(details);
-    }
-
-    private static boolean isBlank(String value) {
-        return value == null || value.isBlank();
-    }
-
-    private static String blankToNull(String value) {
-        return isBlank(value) ? null : value;
     }
 
     private boolean isValid() {
@@ -431,7 +447,9 @@ abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
         }
     }
 
-    /** Uploads the profile photo; returns the number of failures. */
+    /**
+     * Uploads the profile photo; returns the number of failures.
+     */
     private int uploadAttachments(Long accountId) {
         int failures = 0;
 

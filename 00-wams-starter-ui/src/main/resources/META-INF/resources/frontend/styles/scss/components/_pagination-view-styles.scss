@@ -3,26 +3,26 @@
 // ─────────────────────────────────────────────────────────────
 
 // ── Variables ────────────────────────────────────────────────
-$pagination-btn-size:      40px;
-$pagination-radius:        50%;          // circular (MUI "rounded")
-$pagination-gap:           8px;
-$pagination-padding-y:     16px;
+$pagination-btn-size: 40px;
+$pagination-radius: 50%; // circular (MUI "rounded")
+$pagination-gap: 8px;
+$pagination-padding-y: 16px;
 
-$pagination-bg:            #fff;
-$pagination-bg-hover:      #f5f5f5;
-$pagination-bg-active:     #1976d2;
-$pagination-bg-active-hv:  #1565c0;
+$pagination-bg: #fff;
+$pagination-bg-hover: #f5f5f5;
+$pagination-bg-active: #1976d2;
+$pagination-bg-active-hv: #1565c0;
 
-$pagination-border:        #e0e0e0;
-$pagination-border-hover:  #bdbdbd;
+$pagination-border: #e0e0e0;
+$pagination-border-hover: #bdbdbd;
 $pagination-border-active: #1976d2;
 
-$pagination-text:          #424242;
-$pagination-text-active:   #fff;
-$pagination-text-muted:    #757575;
+$pagination-text: #424242;
+$pagination-text-active: #fff;
+$pagination-text-muted: #757575;
 
-$pagination-font-weight:   500;
-$pagination-transition:    background 0.15s ease,
+$pagination-font-weight: 500;
+$pagination-transition: background 0.15s ease,
 border-color 0.15s ease,
 color 0.15s ease;
 

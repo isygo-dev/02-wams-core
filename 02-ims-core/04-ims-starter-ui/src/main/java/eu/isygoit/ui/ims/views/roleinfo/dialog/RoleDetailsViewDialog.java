@@ -50,6 +50,14 @@ public class RoleDetailsViewDialog extends ImsDetailsDialog {
         loadAndShowDetails();
     }
 
+    private static String flag(Boolean value) {
+        return Boolean.TRUE.equals(value) ? I18n.t("ims.role.details.yes") : I18n.t("ims.role.details.no");
+    }
+
+    private static String formatDate(LocalDateTime date) {
+        return date == null ? null : DateHelper.formatToHumanReadable(date);
+    }
+
     private void loadAndShowDetails() {
         parentView.showLoading(true);
         try {
@@ -135,13 +143,5 @@ public class RoleDetailsViewDialog extends ImsDetailsDialog {
                         .fact(I18n.t("ims.role.details.field.write"), flag(perm.getWrite()))
                         .fact(I18n.t("ims.role.details.field.delete"), flag(perm.getDelete())))
                 .items(permissions);
-    }
-
-    private static String flag(Boolean value) {
-        return Boolean.TRUE.equals(value) ? I18n.t("ims.role.details.yes") : I18n.t("ims.role.details.no");
-    }
-
-    private static String formatDate(LocalDateTime date) {
-        return date == null ? null : DateHelper.formatToHumanReadable(date);
     }
 }

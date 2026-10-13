@@ -56,21 +56,35 @@ abstract class AbstractSenderConfigFormDialog extends BaseSenderConfigDialog {
         this.messagePrefix = messagePrefix;
     }
 
-    /** Whether the tenant can be typed (create) or is immutable (update). */
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    /**
+     * Whether the tenant can be typed (create) or is immutable (update).
+     */
     abstract boolean tenantEditable();
 
-    /** Whether the password must be provided (create) or an empty value keeps the current one (update). */
+    /**
+     * Whether the password must be provided (create) or an empty value keeps the current one (update).
+     */
     abstract boolean passwordRequired();
 
-    /** Current stored password, kept when the password field is left empty (update only). */
+    /**
+     * Current stored password, kept when the password field is left empty (update only).
+     */
     String existingPassword() {
         return null;
     }
 
-    /** A DTO carrying the identity of the configuration ({@code id}, {@code code}, {@code tenant}). */
+    /**
+     * A DTO carrying the identity of the configuration ({@code id}, {@code code}, {@code tenant}).
+     */
     abstract SenderConfigDto newDto();
 
-    /** Persists the DTO. */
+    /**
+     * Persists the DTO.
+     */
     abstract ResponseEntity<SenderConfigDto> persist(SenderConfigDto dto);
 
     private String key(String suffix) {
@@ -179,7 +193,9 @@ abstract class AbstractSenderConfigFormDialog extends BaseSenderConfigDialog {
         return form;
     }
 
-    /** Copies the form values into the DTO ({@code id}, {@code code} and {@code tenant} are left untouched). */
+    /**
+     * Copies the form values into the DTO ({@code id}, {@code code} and {@code tenant} are left untouched).
+     */
     private void applyTo(SenderConfigDto dto) {
         String defaultSender = defaultSenderField.getValue();
         dto.setName(nameField.getValue().trim());
@@ -196,10 +212,6 @@ abstract class AbstractSenderConfigFormDialog extends BaseSenderConfigDialog {
         dto.setSmtpStarttlsRequired(smtpStarttlsRequiredCheckbox.getValue());
         dto.setDebug(debugCheckbox.getValue());
         dto.setDefaultSender(defaultSender != null && !defaultSender.isBlank() ? defaultSender.trim() : null);
-    }
-
-    private static boolean isBlank(String value) {
-        return value == null || value.isBlank();
     }
 
     private boolean isValid() {

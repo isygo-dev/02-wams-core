@@ -43,6 +43,10 @@ public class CustomerDetailsViewDialog extends ImsDetailsDialog {
         loadAndShowDetails();
     }
 
+    private static String formatDate(java.time.LocalDateTime date) {
+        return date == null ? null : DateHelper.formatToHumanReadable(date);
+    }
+
     private void loadAndShowDetails() {
         parentView.showLoading(true);
         try {
@@ -122,9 +126,5 @@ public class CustomerDetailsViewDialog extends ImsDetailsDialog {
                 ? new Component[0]
                 : new Component[]{ImsEnumTag.of(customer.getAdminStatus())};
         return new DetailHero(null, dash(customer.getName()), customer.getEmail(), chips);
-    }
-
-    private static String formatDate(java.time.LocalDateTime date) {
-        return date == null ? null : DateHelper.formatToHumanReadable(date);
     }
 }

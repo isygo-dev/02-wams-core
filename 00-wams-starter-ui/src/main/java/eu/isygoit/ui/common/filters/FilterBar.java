@@ -20,11 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -87,15 +83,13 @@ public class FilterBar extends Div {
 
     private boolean collapsed = true;
 
-    private record ChipEntry(String label, String value, Runnable onRemove) {}
+    public FilterBar() {
+        this(Map.of(), List.of(), Map.of());
+    }
 
     // ══════════════════════════════════════════════════════════════
     //  Constructors
     // ══════════════════════════════════════════════════════════════
-
-    public FilterBar() {
-        this(Map.of(), List.of(), Map.of());
-    }
 
     public FilterBar(Map<String, String> criteriaMetadata) {
         this(criteriaMetadata, List.of(), Map.of());
@@ -126,12 +120,25 @@ public class FilterBar extends Div {
         build();
     }
 
+    private static String formatRange(LocalDate from, LocalDate to) {
+        if (from == null && to == null) return null;
+        if (from != null && to != null)
+            return from.format(DATE_FMT) + " → " + to.format(DATE_FMT);
+        if (from != null) return "≥ " + from.format(DATE_FMT);
+        return "≤ " + to.format(DATE_FMT);
+    }
+
     // ══════════════════════════════════════════════════════════════
     //  Public callbacks
     // ══════════════════════════════════════════════════════════════
 
-    public void setOnApply(Consumer<String> onApply) { this.onApply = onApply; }
-    public void setOnClear(Runnable onClear)         { this.onClear = onClear; }
+    public void setOnApply(Consumer<String> onApply) {
+        this.onApply = onApply;
+    }
+
+    public void setOnClear(Runnable onClear) {
+        this.onClear = onClear;
+    }
 
     public void setOnRefresh(Runnable onRefresh) {
         setOnApply(criteria -> onRefresh.run());
@@ -600,21 +607,13 @@ public class FilterBar extends Div {
         getElement().getClassList().set("filter-card--has-active", hasChips);
     }
 
-    private static String formatRange(LocalDate from, LocalDate to) {
-        if (from == null && to == null) return null;
-        if (from != null && to != null)
-            return from.format(DATE_FMT) + " → " + to.format(DATE_FMT);
-        if (from != null) return "≥ " + from.format(DATE_FMT);
-        return "≤ " + to.format(DATE_FMT);
+    private void fireApply() {
+        if (onApply != null) onApply.accept(buildCriteriaString());
     }
 
     // ══════════════════════════════════════════════════════════════
     //  Apply / Clear
     // ══════════════════════════════════════════════════════════════
-
-    private void fireApply() {
-        if (onApply != null) onApply.accept(buildCriteriaString());
-    }
 
     private void fireClear() {
         fieldInputs.values().forEach(this::clearInput);
@@ -625,19 +624,15 @@ public class FilterBar extends Div {
     }
 
     private void clearInput(Component c) {
-        if (c instanceof ToggleSwitch ts)            ts.clear();
-        else if (c instanceof DateRangeFilter drf)   drf.clear();
-        else if (c instanceof TextField tf)          tf.clear();
-        else if (c instanceof IntegerField f)        f.clear();
-        else if (c instanceof NumberField f)         f.clear();
-        else if (c instanceof DatePicker f)          f.clear();
-        else if (c instanceof DateTimePicker f)      f.setValue(null);
-        else if (c instanceof ComboBox<?> f)         f.clear();
+        if (c instanceof ToggleSwitch ts) ts.clear();
+        else if (c instanceof DateRangeFilter drf) drf.clear();
+        else if (c instanceof TextField tf) tf.clear();
+        else if (c instanceof IntegerField f) f.clear();
+        else if (c instanceof NumberField f) f.clear();
+        else if (c instanceof DatePicker f) f.clear();
+        else if (c instanceof DateTimePicker f) f.setValue(null);
+        else if (c instanceof ComboBox<?> f) f.clear();
     }
-
-    // ══════════════════════════════════════════════════════════════
-    //  Criteria string (metadata mode)
-    // ══════════════════════════════════════════════════════════════
 
     private String buildCriteriaString() {
         StringBuilder sb = new StringBuilder();
@@ -664,6 +659,10 @@ public class FilterBar extends Div {
         return sb.toString();
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  Criteria string (metadata mode)
+    // ══════════════════════════════════════════════════════════════
+
     private String buildClause(String field, String type, String raw) {
         if ("Boolean".equals(type) || "boolean".equals(type)) {
             if ("true".equals(raw) || "false".equals(raw)) {
@@ -678,7 +677,10 @@ public class FilterBar extends Div {
         String[] prefixes = {">=", "<=", "!=", ">", "<"};
         String matched = null;
         for (String p : prefixes) {
-            if (raw.startsWith(p)) { matched = p; break; }
+            if (raw.startsWith(p)) {
+                matched = p;
+                break;
+            }
         }
 
         if (matched != null) {
@@ -698,13 +700,16 @@ public class FilterBar extends Div {
     }
 
     private Object getInputValue(Component c) {
-        if (c instanceof ToggleSwitch ts)       return ts.getValue();
-        if (c instanceof TextField tf)          return tf.getValue();
-        if (c instanceof IntegerField f)        return f.getValue();
-        if (c instanceof NumberField f)         return f.getValue();
-        if (c instanceof DatePicker f)          return f.getValue();
-        if (c instanceof DateTimePicker f)      return f.getValue();
-        if (c instanceof ComboBox<?> f)         return f.getValue();
+        if (c instanceof ToggleSwitch ts) return ts.getValue();
+        if (c instanceof TextField tf) return tf.getValue();
+        if (c instanceof IntegerField f) return f.getValue();
+        if (c instanceof NumberField f) return f.getValue();
+        if (c instanceof DatePicker f) return f.getValue();
+        if (c instanceof DateTimePicker f) return f.getValue();
+        if (c instanceof ComboBox<?> f) return f.getValue();
         return null;
+    }
+
+    private record ChipEntry(String label, String value, Runnable onRemove) {
     }
 }

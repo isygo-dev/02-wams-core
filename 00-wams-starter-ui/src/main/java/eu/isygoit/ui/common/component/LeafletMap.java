@@ -67,6 +67,23 @@ public class LeafletMap extends Div {
     }
 
     /**
+     * Returns the marker image as a {@code data:} URI read from the classpath, or the plain
+     * resource URL when the file cannot be read.
+     */
+    private static String imageUrl(String fileName) {
+        String resource = "/META-INF/resources" + MARKER_IMAGES_PATH + fileName;
+        try (java.io.InputStream in = LeafletMap.class.getResourceAsStream(resource)) {
+            if (in != null) {
+                return "data:image/png;base64,"
+                        + java.util.Base64.getEncoder().encodeToString(in.readAllBytes());
+            }
+        } catch (java.io.IOException ignored) {
+            // fall back to the URL below
+        }
+        return MARKER_IMAGES_PATH + fileName;
+    }
+
+    /**
      * Changes the map center while preserving the current zoom.
      */
     public void setCenter(double latitude, double longitude) {
@@ -119,23 +136,6 @@ public class LeafletMap extends Div {
                 .withShadowSize(new LPoint(registry, 41, 41))
                 .withShadowAnchor(new LPoint(registry, 12, 41));
         return new LIcon(registry, options);
-    }
-
-    /**
-     * Returns the marker image as a {@code data:} URI read from the classpath, or the plain
-     * resource URL when the file cannot be read.
-     */
-    private static String imageUrl(String fileName) {
-        String resource = "/META-INF/resources" + MARKER_IMAGES_PATH + fileName;
-        try (java.io.InputStream in = LeafletMap.class.getResourceAsStream(resource)) {
-            if (in != null) {
-                return "data:image/png;base64,"
-                        + java.util.Base64.getEncoder().encodeToString(in.readAllBytes());
-            }
-        } catch (java.io.IOException ignored) {
-            // fall back to the URL below
-        }
-        return MARKER_IMAGES_PATH + fileName;
     }
 
     private void validateCoordinates(double latitude, double longitude) {

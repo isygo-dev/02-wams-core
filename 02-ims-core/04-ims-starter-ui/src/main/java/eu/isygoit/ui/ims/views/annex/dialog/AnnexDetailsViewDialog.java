@@ -40,6 +40,10 @@ public class AnnexDetailsViewDialog extends ImsDetailsDialog {
         loadAndShowDetails();
     }
 
+    private static String formatDate(LocalDateTime date) {
+        return date != null ? DateHelper.formatToHumanReadable(date) : null;
+    }
+
     private void loadAndShowDetails() {
         parentView.showLoading(true);
         try {
@@ -71,9 +75,5 @@ public class AnnexDetailsViewDialog extends ImsDetailsDialog {
 
         addAuditTab(annex.getCreatedBy(), formatDate(annex.getCreateDate()),
                 annex.getUpdatedBy(), formatDate(annex.getUpdateDate()));
-    }
-
-    private static String formatDate(LocalDateTime date) {
-        return date != null ? DateHelper.formatToHumanReadable(date) : null;
     }
 }

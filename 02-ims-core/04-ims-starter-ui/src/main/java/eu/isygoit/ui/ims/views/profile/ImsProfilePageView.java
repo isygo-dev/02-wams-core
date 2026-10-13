@@ -1,6 +1,5 @@
 package eu.isygoit.ui.ims.views.profile;
 
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import eu.isygoit.remote.ims.ProfileService;

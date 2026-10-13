@@ -5,7 +5,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -69,7 +68,7 @@ public class CustomerManagementView extends AbstractPaginatedView<CustomerDto> {
     protected boolean matchesSearch(CustomerDto c, String search) {
         if (search == null || search.isBlank()) return true;
         String s = search.toLowerCase();
-        return (c.getName()  != null && c.getName().toLowerCase().contains(s))
+        return (c.getName() != null && c.getName().toLowerCase().contains(s))
                 || (c.getEmail() != null && c.getEmail().toLowerCase().contains(s));
     }
 
@@ -85,7 +84,9 @@ public class CustomerManagementView extends AbstractPaginatedView<CustomerDto> {
     }
 
     @Override
-    protected void onSearchChanged() { loadPageZero(); }
+    protected void onSearchChanged() {
+        loadPageZero();
+    }
 
     @Override
     protected String[] getRootCssClasses() {
@@ -99,7 +100,10 @@ public class CustomerManagementView extends AbstractPaginatedView<CustomerDto> {
         statusFilter.setRenderer(ImsEnumTag.renderer(null));
         statusFilter.setPlaceholder(I18n.t("ims.customer.view.status.placeholder"));
         statusFilter.setWidth("160px");
-        statusFilter.addValueChangeListener(e -> { currentAdminStatus = e.getValue(); loadPageZero(); });
+        statusFilter.addValueChangeListener(e -> {
+            currentAdminStatus = e.getValue();
+            loadPageZero();
+        });
         return List.of(statusFilter);
     }
 
@@ -120,19 +124,54 @@ public class CustomerManagementView extends AbstractPaginatedView<CustomerDto> {
         return e.getMessage();
     }
 
-    @Override protected String getTitleKey()             { return "ims.customer.view.title"; }
-    @Override protected String getSubtitleKey()          { return "ims.customer.view.subtitle"; }
-    @Override protected String getCreateButtonKey()      { return "ims.customer.view.create.button"; }
-    @Override protected String getSearchPlaceholderKey() { return "ims.customer.view.search.placeholder"; }
-    @Override protected String getEmptyTitleKey()        { return "ims.customer.view.empty.title"; }
-    @Override protected String getEmptyDescriptionKey()  { return "ims.customer.view.empty.description"; }
-    @Override protected VaadinIcon getEmptyIcon()        { return VaadinIcon.USER_HEART; }
-    @Override protected String getLoadErrorKey()         { return "ims.customer.view.load.error"; }
+    @Override
+    protected String getTitleKey() {
+        return "ims.customer.view.title";
+    }
 
     @Override
-    public String getPageTitle() { return I18n.t("ims.customer.view.title"); }
+    protected String getSubtitleKey() {
+        return "ims.customer.view.subtitle";
+    }
 
-    public void loadPageZero() { loadPage(0); }
+    @Override
+    protected String getCreateButtonKey() {
+        return "ims.customer.view.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "ims.customer.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "ims.customer.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "ims.customer.view.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.USER_HEART;
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "ims.customer.view.load.error";
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("ims.customer.view.title");
+    }
+
+    public void loadPageZero() {
+        loadPage(0);
+    }
 
     public void openUpdateCustomerDialog(CustomerDto c, Runnable onSuccess) {
         new UpdateCustomerDialog(this, customerService, customerImageService, c, onSuccess).open();

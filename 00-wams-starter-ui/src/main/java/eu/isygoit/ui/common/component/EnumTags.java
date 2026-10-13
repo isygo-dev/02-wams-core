@@ -26,7 +26,9 @@ import java.util.function.Function;
  */
 public class EnumTags {
 
-    /** Tone (success / warning / danger / info) of every known enum constant; neutral otherwise. */
+    /**
+     * Tone (success / warning / danger / info) of every known enum constant; neutral otherwise.
+     */
     private static final Map<String, String> TONES = Map.ofEntries(
             Map.entry("CANCELLED", "danger"),
             Map.entry("CRITICAL", "danger"),
@@ -102,6 +104,15 @@ public class EnumTags {
 
     /* ---- tags ---- */
 
+    private static String tone(String enumValue) {
+        return enumValue == null ? "neutral" : TONES.getOrDefault(enumValue.toUpperCase(Locale.ROOT), "neutral");
+    }
+
+    private static String humanize(String value) {
+        String label = value.replace('_', ' ').toLowerCase(Locale.ROOT);
+        return Character.toUpperCase(label.charAt(0)) + label.substring(1);
+    }
+
     public Span of(Enum<?> value) {
         return of(value, null);
     }
@@ -131,10 +142,14 @@ public class EnumTags {
         return tag;
     }
 
-    /** Refreshes an existing tag in place (text and tone). */
+    /**
+     * Refreshes an existing tag in place (text and tone).
+     */
     public void update(Span tag, Enum<?> value, String translationPrefix) {
         refresh(tag, label(value, translationPrefix), value == null ? null : value.name());
     }
+
+    /* ---- labels ---- */
 
     public void update(Span tag, String value, String translationPrefix) {
         refresh(tag, label(value, translationPrefix), value);
@@ -150,8 +165,6 @@ public class EnumTags {
         }
         tag.addClassName("wams-enum-tag--" + tone(enumValue));
     }
-
-    /* ---- labels ---- */
 
     public String label(Enum<?> value, String translationPrefix) {
         return value == null ? unknownLabel() : label(value.name(), translationPrefix);
@@ -184,15 +197,6 @@ public class EnumTags {
         return unknownLabelKey == null ? "—" : I18n.t(unknownLabelKey);
     }
 
-    private static String tone(String enumValue) {
-        return enumValue == null ? "neutral" : TONES.getOrDefault(enumValue.toUpperCase(Locale.ROOT), "neutral");
-    }
-
-    private static String humanize(String value) {
-        String label = value.replace('_', ' ').toLowerCase(Locale.ROOT);
-        return Character.toUpperCase(label.charAt(0)) + label.substring(1);
-    }
-
     /* ---- renderers (grid columns, combo items) ---- */
 
     public <E extends Enum<E>> ComponentRenderer<Span, E> renderer(String translationPrefix) {
@@ -220,7 +224,9 @@ public class EnumTags {
 
     /* ---- read-only detail fields ---- */
 
-    /** Detail-grid field with the same structure as the shared read-only fields, holding any component (a tag). */
+    /**
+     * Detail-grid field with the same structure as the shared read-only fields, holding any component (a tag).
+     */
     public Component detailField(VaadinIcon icon, String label, Component value) {
         if (value == null) {
             return new Span();
@@ -252,7 +258,9 @@ public class EnumTags {
         return value == null ? null : detailField(icon, label, of(value, translationPrefix));
     }
 
-    /** Adds an enum detail field to the grid; a missing value is shown as an "unknown" tag. */
+    /**
+     * Adds an enum detail field to the grid; a missing value is shown as an "unknown" tag.
+     */
     public void addDetailField(Div container, VaadinIcon icon, String label, Enum<?> value, String translationPrefix) {
         container.add(detailField(icon, label, ofOrUnknown(value, translationPrefix)));
     }

@@ -55,10 +55,14 @@ abstract class AbstractPEBConfigFormDialog extends KmsActionDialog {
         this.errorKey = errorKey;
     }
 
-    /** The DTO that receives the form values on save. */
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract PEBConfigDto target();
 
-    /** Sends the DTO to the service. */
+    /**
+     * Sends the DTO to the service.
+     */
     abstract ResponseEntity<PEBConfigDto> send(PEBConfigDto dto);
 
     final void buildForm() {
@@ -145,7 +149,9 @@ abstract class AbstractPEBConfigFormDialog extends KmsActionDialog {
         return section;
     }
 
-    /** Fills the form from an existing configuration. */
+    /**
+     * Fills the form from an existing configuration.
+     */
     final void fillFrom(PEBConfigDto dto) {
         SecretsDialogSupport.setText(codeField, dto.getCode());
         SecretsDialogSupport.setText(tenantField, dto.getTenant());

@@ -24,10 +24,9 @@ public abstract class BaseLoginView extends Div implements BeforeEnterObserver, 
             org.slf4j.LoggerFactory.getLogger(BaseLoginView.class);
 
     protected final AuthErrorBanner errorBanner = new AuthErrorBanner();
-    protected String redirectTarget;
-
     private final String pageTitleKey;
     private final AuthLayout authLayout = new AuthLayout();
+    protected String redirectTarget;
 
     protected BaseLoginView(String pageTitleKey) {
         this.pageTitleKey = pageTitleKey;

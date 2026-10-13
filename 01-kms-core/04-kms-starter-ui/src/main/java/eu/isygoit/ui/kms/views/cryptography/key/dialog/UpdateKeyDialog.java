@@ -6,7 +6,6 @@ import eu.isygoit.dto.KmsDtos.CreateKeyRequest;
 import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.dto.KmsDtos.UpdateKeyDescriptionRequest;
 import eu.isygoit.dto.KmsDtos.UpdateKeyDescriptionResponse;
-
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.kms.views.cryptography.key.KeyManagementView;
@@ -42,7 +41,9 @@ public class UpdateKeyDialog extends KeyDialogBase {
         prefillData(currentAlias, currentDesc, currentRotationEnabled, currentRotationPeriodInDays);
     }
 
-    /** Read-only business identifier of the key being edited. */
+    /**
+     * Read-only business identifier of the key being edited.
+     */
     private TextField buildKeyIdField() {
         TextField keyIdField = new TextField(I18n.t("kms.key.dialog.describe.field.key.id"));
         keyIdField.setValue(keyId != null ? keyId : "");

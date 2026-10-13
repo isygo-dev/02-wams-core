@@ -65,6 +65,10 @@ public class AccountDetailsViewDialog extends ImsDetailsDialog {
         loadAndShowDetails();
     }
 
+    private static String formatDate(LocalDateTime date) {
+        return date != null ? DateHelper.formatToHumanReadable(date) : null;
+    }
+
     private void loadAndShowDetails() {
         parentView.showLoading(true);
         try {
@@ -82,6 +86,10 @@ public class AccountDetailsViewDialog extends ImsDetailsDialog {
             parentView.showLoading(false);
         }
     }
+
+    /* ------------------------------------------------------------------
+     * Hero
+     * ------------------------------------------------------------------ */
 
     private void buildContent(AccountDto account) {
         // Identity: hero (avatar + name + email + chips) then the identity grid
@@ -180,10 +188,6 @@ public class AccountDetailsViewDialog extends ImsDetailsDialog {
                 account.getUpdatedBy(), formatDate(account.getUpdateDate()));
     }
 
-    /* ------------------------------------------------------------------
-     * Hero
-     * ------------------------------------------------------------------ */
-
     private Component buildHero(AccountDto account) {
         String displayName = account.getFullName() != null ? account.getFullName() : account.getEmail();
 
@@ -199,7 +203,9 @@ public class AccountDetailsViewDialog extends ImsDetailsDialog {
                 chips.toArray(Component[]::new));
     }
 
-    /** Downloads the account avatar; returns null on failure so the hero shows its placeholder. */
+    /**
+     * Downloads the account avatar; returns null on failure so the hero shows its placeholder.
+     */
     private StreamResource downloadAvatar(Long id) {
         if (accountImageService == null || id == null) return null;
         try {
@@ -217,9 +223,5 @@ public class AccountDetailsViewDialog extends ImsDetailsDialog {
             log.warn("Failed to download avatar for account {}", id, e);
         }
         return null;
-    }
-
-    private static String formatDate(LocalDateTime date) {
-        return date != null ? DateHelper.formatToHumanReadable(date) : null;
     }
 }

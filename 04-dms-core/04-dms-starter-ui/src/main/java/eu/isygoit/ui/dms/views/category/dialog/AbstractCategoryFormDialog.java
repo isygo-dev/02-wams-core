@@ -41,10 +41,14 @@ abstract class AbstractCategoryFormDialog extends DmsActionDialog {
         this.service = service;
     }
 
-    /** The DTO that receives the form values on save. */
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract CategoryDto target();
 
-    /** Persists the DTO and returns the service response. */
+    /**
+     * Persists the DTO and returns the service response.
+     */
     abstract ResponseEntity<CategoryDto> persist(CategoryDto dto);
 
     final void buildForm() {
@@ -66,7 +70,9 @@ abstract class AbstractCategoryFormDialog extends DmsActionDialog {
         addContent(form);
     }
 
-    /** Fills the form from an existing category. */
+    /**
+     * Fills the form from an existing category.
+     */
     final void fillFrom(CategoryDto dto) {
         nameField.setValue(dto.getName() != null ? dto.getName() : "");
         descriptionField.setValue(dto.getDescription() != null ? dto.getDescription() : "");

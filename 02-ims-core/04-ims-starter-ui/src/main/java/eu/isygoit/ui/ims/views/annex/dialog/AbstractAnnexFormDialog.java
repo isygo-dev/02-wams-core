@@ -50,13 +50,19 @@ abstract class AbstractAnnexFormDialog extends ImsActionDialog {
         this.annexService = annexService;
     }
 
-    /** The DTO that receives the form values on save. */
+    /**
+     * The DTO that receives the form values on save.
+     */
     abstract AnnexDto target();
 
-    /** Persists the DTO; returns false after appending an error message. */
+    /**
+     * Persists the DTO; returns false after appending an error message.
+     */
     abstract boolean persist(AnnexDto dto);
 
-    /** True when the tenant cannot be changed (update). */
+    /**
+     * True when the tenant cannot be changed (update).
+     */
     abstract boolean isTenantReadOnly();
 
     final void buildForm() {
@@ -119,7 +125,9 @@ abstract class AbstractAnnexFormDialog extends ImsActionDialog {
         return section;
     }
 
-    /** Fills the form from an existing annex. */
+    /**
+     * Fills the form from an existing annex.
+     */
     final void fillFrom(AnnexDto dto) {
         tenantField.setValue(dto.getTenant() != null ? dto.getTenant() : "");
         tableCodeField.setValue(dto.getTableCode() != null ? dto.getTableCode() : "");
@@ -130,7 +138,9 @@ abstract class AbstractAnnexFormDialog extends ImsActionDialog {
         descriptionArea.setValue(dto.getDescription() != null ? dto.getDescription() : "");
     }
 
-    /** Copies the form values into the DTO ({@code id} is left untouched). */
+    /**
+     * Copies the form values into the DTO ({@code id} is left untouched).
+     */
     private void applyTo(AnnexDto dto) {
         if (!tenantField.isReadOnly()) {
             dto.setTenant(tenantField.getValue().isBlank() ? null : tenantField.getValue());

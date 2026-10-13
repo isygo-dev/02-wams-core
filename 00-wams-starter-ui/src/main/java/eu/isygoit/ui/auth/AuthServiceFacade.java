@@ -32,6 +32,30 @@ public class AuthServiceFacade {
         this.authExecutor = authExecutor;
     }
 
+    private static boolean isSuccessful(ResponseEntity<?> response) {
+        return response.getStatusCode().is2xxSuccessful();
+    }
+
+    private static Failure mapFailure(ResponseEntity<?> response, Failure fallback) {
+        int status = response.getStatusCode().value();
+        if (status == 429) {
+            return Failure.RATE_LIMITED;
+        }
+        if (status == 423) {
+            return Failure.LOCKED;
+        }
+        if (status == 410) {
+            return Failure.EXPIRED;
+        }
+        if (status == 503) {
+            return Failure.OFFLINE;
+        }
+        if (status == 401 || status == 403) {
+            return fallback == Failure.INVALID_TOKEN ? Failure.INVALID_TOKEN : Failure.INVALID_CREDENTIALS;
+        }
+        return fallback;
+    }
+
     public CompletableFuture<Result<UserContext>> resolveAuthContext(AuthenticationContextRequest request) {
         return submit(() -> authService.resolveAuthContext(request), response -> {
             if (isSuccessful(response) && response.getBody() != null) {
@@ -103,30 +127,6 @@ public class AuthServiceFacade {
         } catch (RejectedExecutionException exception) {
             return CompletableFuture.failedFuture(exception);
         }
-    }
-
-    private static boolean isSuccessful(ResponseEntity<?> response) {
-        return response.getStatusCode().is2xxSuccessful();
-    }
-
-    private static Failure mapFailure(ResponseEntity<?> response, Failure fallback) {
-        int status = response.getStatusCode().value();
-        if (status == 429) {
-            return Failure.RATE_LIMITED;
-        }
-        if (status == 423) {
-            return Failure.LOCKED;
-        }
-        if (status == 410) {
-            return Failure.EXPIRED;
-        }
-        if (status == 503) {
-            return Failure.OFFLINE;
-        }
-        if (status == 401 || status == 403) {
-            return fallback == Failure.INVALID_TOKEN ? Failure.INVALID_TOKEN : Failure.INVALID_CREDENTIALS;
-        }
-        return fallback;
     }
 
     public enum Failure {

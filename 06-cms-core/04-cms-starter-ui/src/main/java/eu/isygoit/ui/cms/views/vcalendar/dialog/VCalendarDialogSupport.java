@@ -7,13 +7,17 @@ import feign.FeignException;
  */
 final class VCalendarDialogSupport {
 
-    /** Shared style hook added by every cms dialog. */
+    /**
+     * Shared style hook added by every cms dialog.
+     */
     static final String CLASS_CMS_DIALOG = "cms-dialog";
 
     private VCalendarDialogSupport() {
     }
 
-    /** Returns the remote error body when available, otherwise the exception message. */
+    /**
+     * Returns the remote error body when available, otherwise the exception message.
+     */
     static String extractErrorMessage(FeignException ex) {
         try {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) {

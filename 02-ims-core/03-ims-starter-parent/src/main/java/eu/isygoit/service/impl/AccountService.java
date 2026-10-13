@@ -58,10 +58,9 @@ import java.util.stream.Collectors;
 public class AccountService extends ImageTenantService<Long, Account, AccountRepository>
         implements IAccountService {
 
-    private final AppProperties appProperties;
     private static final SecureRandom QR_CHALLENGE_RANDOM = new SecureRandom();
     private static final long QR_CHALLENGE_TTL_MILLIS = 120_000L;
-
+    private final AppProperties appProperties;
     @Autowired
     private KmsPasswordService kmsPasswordService;
     @Autowired
@@ -93,6 +92,10 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
      */
     public AccountService(AppProperties appProperties, RegisteredUserRepository registredNewAccountRepository) {
         this.appProperties = appProperties;
+    }
+
+    private static boolean hasExpired(QrLoginChallenge challenge) {
+        return !challenge.getExpiresAt().after(new Date());
     }
 
     @Override
@@ -131,7 +134,6 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         repository().updateAccountAdminStatus(newStatus, id);
         return repository().findById(id).orElse(null);
     }
-
 
     @Override
     public Account updateAccountIsAdmin(Long id, boolean newStatus) {
@@ -367,10 +369,6 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                 .password(tokenResponse.getBody().getToken())
                 .authType(IEnumAuth.Types.QRC)
                 .build());
-    }
-
-    private static boolean hasExpired(QrLoginChallenge challenge) {
-        return !challenge.getExpiresAt().after(new Date());
     }
 
     @Override

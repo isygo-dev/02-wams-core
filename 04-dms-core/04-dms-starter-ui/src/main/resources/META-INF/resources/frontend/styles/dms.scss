@@ -6,98 +6,98 @@
 
 /* Pilot/IMS/SMS-aligned design tokens and Vaadin theme values. */
 :root {
-    --dms-color-primary: #0c66e4;
-    --dms-color-primary-soft: rgba(12, 102, 228, 0.1);
-    --dms-color-success: #1f845a;
-    --dms-color-success-soft: rgba(31, 132, 90, 0.1);
-    --dms-color-warning: #a54800;
-    --dms-color-warning-soft: rgba(165, 72, 0, 0.12);
-    --dms-color-danger: #c9372c;
-    --dms-color-danger-soft: rgba(201, 55, 44, 0.1);
-    --dms-color-info: #0055cc;
-    --dms-color-text: #172b4d;
-    --dms-color-text-muted: #44546f;
-    --dms-color-text-soft: #626f86;
-    --dms-color-surface: #ffffff;
-    --dms-color-surface-alt: #f7f8f9;
-    --dms-color-border: rgba(9, 30, 66, 0.14);
-    --dms-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --dms-font-size-xxs: 0.625rem;
-    --dms-font-size-xs: 0.75rem;
-    --dms-font-size-sm: 0.875rem;
-    --dms-font-size-md: 1rem;
-    --dms-font-size-lg: 1.125rem;
-    --dms-font-size-xl: 1.5rem;
-    --dms-font-weight-semibold: 600;
-    --dms-font-weight-medium: 500;
-    --dms-line-height-normal: 1.5;
-    --dms-space-1: 0.25rem;
-    --dms-space-2: 0.5rem;
-    --dms-space-2-5: 0.625rem;
-    --dms-space-3: 0.75rem;
-    --dms-space-4: 1rem;
-    --dms-space-6: 1.5rem;
-    --dms-space-8: 2rem;
-    --dms-space-meta-indent: 1.75rem;
-    --dms-space-icon-offset: 0.125rem;
-    --dms-space-tag-x: 0.55rem;
-    --dms-space-tag-y: 0.12rem;
-    --dms-detail-label-width: 5rem;
-    --dms-radius-sm: 3px;
-    --dms-radius-md: 6px;
-    --dms-radius-lg: 9px;
-    --dms-radius-xl: 12px;
-    --dms-shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
-    --dms-shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
+  --dms-color-primary: #0c66e4;
+  --dms-color-primary-soft: rgba(12, 102, 228, 0.1);
+  --dms-color-success: #1f845a;
+  --dms-color-success-soft: rgba(31, 132, 90, 0.1);
+  --dms-color-warning: #a54800;
+  --dms-color-warning-soft: rgba(165, 72, 0, 0.12);
+  --dms-color-danger: #c9372c;
+  --dms-color-danger-soft: rgba(201, 55, 44, 0.1);
+  --dms-color-info: #0055cc;
+  --dms-color-text: #172b4d;
+  --dms-color-text-muted: #44546f;
+  --dms-color-text-soft: #626f86;
+  --dms-color-surface: #ffffff;
+  --dms-color-surface-alt: #f7f8f9;
+  --dms-color-border: rgba(9, 30, 66, 0.14);
+  --dms-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --dms-font-size-xxs: 0.625rem;
+  --dms-font-size-xs: 0.75rem;
+  --dms-font-size-sm: 0.875rem;
+  --dms-font-size-md: 1rem;
+  --dms-font-size-lg: 1.125rem;
+  --dms-font-size-xl: 1.5rem;
+  --dms-font-weight-semibold: 600;
+  --dms-font-weight-medium: 500;
+  --dms-line-height-normal: 1.5;
+  --dms-space-1: 0.25rem;
+  --dms-space-2: 0.5rem;
+  --dms-space-2-5: 0.625rem;
+  --dms-space-3: 0.75rem;
+  --dms-space-4: 1rem;
+  --dms-space-6: 1.5rem;
+  --dms-space-8: 2rem;
+  --dms-space-meta-indent: 1.75rem;
+  --dms-space-icon-offset: 0.125rem;
+  --dms-space-tag-x: 0.55rem;
+  --dms-space-tag-y: 0.12rem;
+  --dms-detail-label-width: 5rem;
+  --dms-radius-sm: 3px;
+  --dms-radius-md: 6px;
+  --dms-radius-lg: 9px;
+  --dms-radius-xl: 12px;
+  --dms-shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
+  --dms-shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
 
-    --lumo-primary-color: var(--dms-color-primary);
-    --lumo-primary-text-color: var(--dms-color-primary);
-    --lumo-primary-color-10pct: var(--dms-color-primary-soft);
-    --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
-    --lumo-success-color: var(--dms-color-success);
-    --lumo-success-text-color: var(--dms-color-success);
-    --lumo-success-color-10pct: var(--dms-color-success-soft);
-    --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
-    --lumo-warning-color: var(--dms-color-warning);
-    --lumo-warning-text-color: var(--dms-color-warning);
-    --lumo-warning-color-10pct: var(--dms-color-warning-soft);
-    --lumo-warning-color-50pct: rgba(165, 72, 0, 0.5);
-    --lumo-error-color: var(--dms-color-danger);
-    --lumo-error-text-color: var(--dms-color-danger);
-    --lumo-error-color-10pct: var(--dms-color-danger-soft);
-    --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
-    --lumo-body-text-color: var(--dms-color-text);
-    --lumo-secondary-text-color: var(--dms-color-text-muted);
-    --lumo-tertiary-text-color: var(--dms-color-text-soft);
-    --lumo-base-color: var(--dms-color-surface);
-    --lumo-contrast-5pct: rgba(9, 30, 66, 0.04);
-    --lumo-contrast-10pct: rgba(9, 30, 66, 0.08);
-    --lumo-contrast-20pct: var(--dms-color-border);
-    --lumo-font-family: var(--dms-font-family);
-    --lumo-font-size-xxs: var(--dms-font-size-xxs);
-    --lumo-font-size-xs: var(--dms-font-size-xs);
-    --lumo-font-size-s: var(--dms-font-size-sm);
-    --lumo-font-size-m: var(--dms-font-size-md);
-    --lumo-font-size-l: var(--dms-font-size-lg);
-    --lumo-font-size-xl: var(--dms-font-size-xl);
-    --lumo-space-xs: var(--dms-space-1);
-    --lumo-space-s: var(--dms-space-2);
-    --lumo-space-m: var(--dms-space-4);
-    --lumo-space-l: var(--dms-space-6);
-    --lumo-space-xl: var(--dms-space-8);
-    --lumo-border-radius-s: var(--dms-radius-sm);
-    --lumo-border-radius-m: var(--dms-radius-md);
-    --lumo-border-radius: var(--dms-radius-lg);
-    --lumo-border-radius-l: var(--dms-radius-lg);
-    --lumo-box-shadow-xs: var(--dms-shadow-sm);
-    --lumo-box-shadow-s: var(--dms-shadow-sm);
-    --lumo-box-shadow-m: var(--dms-shadow-md);
+  --lumo-primary-color: var(--dms-color-primary);
+  --lumo-primary-text-color: var(--dms-color-primary);
+  --lumo-primary-color-10pct: var(--dms-color-primary-soft);
+  --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
+  --lumo-success-color: var(--dms-color-success);
+  --lumo-success-text-color: var(--dms-color-success);
+  --lumo-success-color-10pct: var(--dms-color-success-soft);
+  --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
+  --lumo-warning-color: var(--dms-color-warning);
+  --lumo-warning-text-color: var(--dms-color-warning);
+  --lumo-warning-color-10pct: var(--dms-color-warning-soft);
+  --lumo-warning-color-50pct: rgba(165, 72, 0, 0.5);
+  --lumo-error-color: var(--dms-color-danger);
+  --lumo-error-text-color: var(--dms-color-danger);
+  --lumo-error-color-10pct: var(--dms-color-danger-soft);
+  --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
+  --lumo-body-text-color: var(--dms-color-text);
+  --lumo-secondary-text-color: var(--dms-color-text-muted);
+  --lumo-tertiary-text-color: var(--dms-color-text-soft);
+  --lumo-base-color: var(--dms-color-surface);
+  --lumo-contrast-5pct: rgba(9, 30, 66, 0.04);
+  --lumo-contrast-10pct: rgba(9, 30, 66, 0.08);
+  --lumo-contrast-20pct: var(--dms-color-border);
+  --lumo-font-family: var(--dms-font-family);
+  --lumo-font-size-xxs: var(--dms-font-size-xxs);
+  --lumo-font-size-xs: var(--dms-font-size-xs);
+  --lumo-font-size-s: var(--dms-font-size-sm);
+  --lumo-font-size-m: var(--dms-font-size-md);
+  --lumo-font-size-l: var(--dms-font-size-lg);
+  --lumo-font-size-xl: var(--dms-font-size-xl);
+  --lumo-space-xs: var(--dms-space-1);
+  --lumo-space-s: var(--dms-space-2);
+  --lumo-space-m: var(--dms-space-4);
+  --lumo-space-l: var(--dms-space-6);
+  --lumo-space-xl: var(--dms-space-8);
+  --lumo-border-radius-s: var(--dms-radius-sm);
+  --lumo-border-radius-m: var(--dms-radius-md);
+  --lumo-border-radius: var(--dms-radius-lg);
+  --lumo-border-radius-l: var(--dms-radius-lg);
+  --lumo-box-shadow-xs: var(--dms-shadow-sm);
+  --lumo-box-shadow-s: var(--dms-shadow-sm);
+  --lumo-box-shadow-m: var(--dms-shadow-md);
 }
 
 /* ── Dashboard (DmsMainView) ──────────────────────────────────────────────── */
 
 .dms-dashboard .wams-dashboard-header {
-    margin-bottom: var(--lumo-space-s);
+  margin-bottom: var(--lumo-space-s);
 }
 
 /* Stat cards now use the shared eu.isygoit.ui.common.component.StatCard /
@@ -105,186 +105,186 @@
    this module's own .stat-card/.stats-row/.wams-mini-stats-grid overrides. */
 
 .dms-dashboard .wams-recent-activity-panel {
-    margin-top: var(--lumo-space-m);
+  margin-top: var(--lumo-space-m);
 }
 
 .dms-dashboard .wams-recent-activity-content {
-    padding: var(--lumo-space-m);
-    background: var(--lumo-base-color);
-    border-radius: var(--lumo-border-radius-m);
+  padding: var(--lumo-space-m);
+  background: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius-m);
 }
 
 /* ── Category management view ─────────────────────────────────────────────── */
 
 .category-management-view {
-    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-    min-height: 100vh;
-    animation: dms-fade-in 0.5s ease-out;
+  background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+  min-height: 100vh;
+  animation: dms-fade-in 0.5s ease-out;
 }
 
 @keyframes dms-fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .category-management-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--lumo-space-s);
-    width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  width: 100%;
 }
 
 .category-management-toolbar .wams-page-info-label {
-    margin: 0 var(--dms-space-2);
+  margin: 0 var(--dms-space-2);
 }
 
 .category-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: var(--lumo-space-m);
-    padding: var(--lumo-space-s);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
 }
 
 @media (max-width: 768px) {
-    .category-management-toolbar {
-        flex-direction: column;
-        align-items: stretch;
-    }
+  .category-management-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    .category-management-toolbar > * {
-        width: 100% !important;
-        justify-content: center;
-    }
+  .category-management-toolbar > * {
+    width: 100% !important;
+    justify-content: center;
+  }
 
-    /* DOM order is filters (leftGroup) → pagination (centerGroup) →
-       refresh/create (rightGroup), which otherwise stacks Create at the very
-       bottom, below pagination and filters, once the toolbar goes to a
-       column. Reorder so pagination + actions stay anchored near the top and
-       right-aligned; only the filters drop to the bottom. */
-    .category-management-toolbar > :nth-child(2),
-    .category-management-toolbar > :nth-child(3) {
-        justify-content: flex-end;
-    }
+  /* DOM order is filters (leftGroup) → pagination (centerGroup) →
+     refresh/create (rightGroup), which otherwise stacks Create at the very
+     bottom, below pagination and filters, once the toolbar goes to a
+     column. Reorder so pagination + actions stay anchored near the top and
+     right-aligned; only the filters drop to the bottom. */
+  .category-management-toolbar > :nth-child(2),
+  .category-management-toolbar > :nth-child(3) {
+    justify-content: flex-end;
+  }
 
-    .category-management-toolbar > :nth-child(3) {
-        order: -2;
-    }
+  .category-management-toolbar > :nth-child(3) {
+    order: -2;
+  }
 
-    .category-management-toolbar > :nth-child(2) {
-        order: -1;
-    }
+  .category-management-toolbar > :nth-child(2) {
+    order: -1;
+  }
 
-    .category-management-toolbar > :nth-child(1),
-    .category-management-toolbar > :nth-child(2),
-    .category-management-toolbar > :nth-child(3) {
-        flex-wrap: wrap;
-        row-gap: var(--dms-space-1);
-    }
+  .category-management-toolbar > :nth-child(1),
+  .category-management-toolbar > :nth-child(2),
+  .category-management-toolbar > :nth-child(3) {
+    flex-wrap: wrap;
+    row-gap: var(--dms-space-1);
+  }
 
-    .category-management-toolbar > :nth-child(1) vaadin-text-field,
-    .category-management-toolbar > :nth-child(1) vaadin-combo-box {
-        width: 100% !important;
-    }
+  .category-management-toolbar > :nth-child(1) vaadin-text-field,
+  .category-management-toolbar > :nth-child(1) vaadin-combo-box {
+    width: 100% !important;
+  }
 
-    .category-management-toolbar > :nth-child(2) vaadin-combo-box {
-        width: 90px !important;
-    }
+  .category-management-toolbar > :nth-child(2) vaadin-combo-box {
+    width: 90px !important;
+  }
 
-    .category-cards-grid {
-        grid-template-columns: 1fr;
-    }
+  .category-cards-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
-    /* totalCountLabel has no dedicated CSS class here — target it
-       structurally: centerGroup.add(prevButton, pageInfoLabel, nextButton,
-       totalCountLabel, pageSizeSelect) makes it the group's 4th child. */
-    .category-management-toolbar > :nth-child(2) > :nth-child(4) {
-        display: none;
-    }
+  /* totalCountLabel has no dedicated CSS class here — target it
+     structurally: centerGroup.add(prevButton, pageInfoLabel, nextButton,
+     totalCountLabel, pageSizeSelect) makes it the group's 4th child. */
+  .category-management-toolbar > :nth-child(2) > :nth-child(4) {
+    display: none;
+  }
 
-    /* Lumo sizes button icons via width/height:1.5em (--lumo-icon-size-m),
-       which collapses to 0 along with the button's own font-size unless
-       restored — see key-management-toolbar in kms.css for the full story. */
-    .category-management-toolbar > :nth-child(3) vaadin-button {
-        font-size: 0;
-    }
+  /* Lumo sizes button icons via width/height:1.5em (--lumo-icon-size-m),
+     which collapses to 0 along with the button's own font-size unless
+     restored — see key-management-toolbar in kms.css for the full story. */
+  .category-management-toolbar > :nth-child(3) vaadin-button {
+    font-size: 0;
+  }
 
-    .category-management-toolbar > :nth-child(3) vaadin-button vaadin-icon {
-        font-size: var(--lumo-font-size-m);
-    }
+  .category-management-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+    font-size: var(--lumo-font-size-m);
+  }
 }
 
 .category-management-view .wams-empty-state-icon {
-    color: var(--lumo-secondary-text-color);
+  color: var(--lumo-secondary-text-color);
 }
 
 /* ── Category card ─────────────────────────────────────────────────────────── */
 
 .category-card {
-    padding: var(--lumo-space-s) var(--lumo-space-m);
+  padding: var(--lumo-space-s) var(--lumo-space-m);
 }
 
 .category-card .wams-title-row {
-    flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
 .category-card .meta-row {
-    border-bottom: 1px solid var(--lumo-contrast-10pct);
-    padding-bottom: var(--lumo-space-xs);
-    margin-bottom: var(--lumo-space-xs);
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-bottom: var(--lumo-space-xs);
 }
 
 .category-card .meta-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
+  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .category-card .wams-body-rows {
-    margin-top: var(--lumo-space-s);
+  margin-top: var(--lumo-space-s);
 }
 
 .category-card .meta-row-icon {
-    color: var(--lumo-secondary-text-color);
+  color: var(--lumo-secondary-text-color);
 }
 
 .category-card .meta-row-label {
-    min-width: var(--dms-detail-label-width);
+  min-width: var(--dms-detail-label-width);
 }
 
 .category-card .meta-row-value {
-    word-break: break-all;
-    flex: 1;
+  word-break: break-all;
+  flex: 1;
 }
 
 .category-card .meta-row-value--wrap {
-    word-break: break-word;
-    white-space: pre-wrap;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .category-card .meta-row-icon--align-start {
-    margin-top: var(--dms-space-icon-offset);
+  margin-top: var(--dms-space-icon-offset);
 }
 
 @media (max-width: 640px) {
-    .category-card .meta-row {
-        flex-wrap: wrap;
-    }
+  .category-card .meta-row {
+    flex-wrap: wrap;
+  }
 
-    .category-card .meta-row > :not(:first-child) {
-        margin-left: var(--dms-space-meta-indent);
-    }
+  .category-card .meta-row > :not(:first-child) {
+    margin-left: var(--dms-space-meta-indent);
+  }
 
-    .category-card .wams-card__button-bar {
-        width: 100%;
-        justify-content: flex-start;
-    }
+  .category-card .wams-card__button-bar {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 
 /* ── Category details dialog ──────────────────────────────────────────────── */
@@ -292,19 +292,19 @@
    grids; only field-level tweaks specific to this dialog live here. */
 
 .category-details-dialog .detail-field-icon {
-    color: var(--lumo-primary-color);
+  color: var(--lumo-primary-color);
 }
 
 .category-details-dialog .detail-field-value {
-    flex: 1;
+  flex: 1;
 }
 
 .dms-category-description {
-    display: block;
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow: visible;
-    text-overflow: unset;
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: visible;
+  text-overflow: unset;
 }
 
 /* .wams-section-title's underline is now a single shared rule in card.css. */
@@ -312,240 +312,240 @@
 /* ── Linked file management view ──────────────────────────────────────────── */
 
 .linked-file-management-view {
-    background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-    min-height: 100vh;
-    animation: dms-fade-in 0.5s ease-out;
+  background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
+  min-height: 100vh;
+  animation: dms-fade-in 0.5s ease-out;
 }
 
 .linked-file-management-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--lumo-space-s);
-    width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  width: 100%;
 }
 
 .linked-file-management-toolbar .wams-page-info-label {
-    margin: 0 var(--dms-space-2);
+  margin: 0 var(--dms-space-2);
 }
 
 .linked-file-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: var(--lumo-space-m);
-    padding: var(--lumo-space-s);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
 }
 
 @media (max-width: 768px) {
-    .linked-file-management-toolbar {
-        flex-direction: column;
-        align-items: stretch;
-    }
+  .linked-file-management-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    .linked-file-management-toolbar > * {
-        width: 100% !important;
-        justify-content: center;
-    }
+  .linked-file-management-toolbar > * {
+    width: 100% !important;
+    justify-content: center;
+  }
 
-    /* DOM order is filters (leftGroup) → pagination (centerGroup) →
-       refresh/upload (rightGroup), which otherwise stacks Upload at the very
-       bottom, below pagination and filters, once the toolbar goes to a
-       column — see the identical note in .category-management-toolbar. */
-    .linked-file-management-toolbar > :nth-child(2),
-    .linked-file-management-toolbar > :nth-child(3) {
-        justify-content: flex-end;
-    }
+  /* DOM order is filters (leftGroup) → pagination (centerGroup) →
+     refresh/upload (rightGroup), which otherwise stacks Upload at the very
+     bottom, below pagination and filters, once the toolbar goes to a
+     column — see the identical note in .category-management-toolbar. */
+  .linked-file-management-toolbar > :nth-child(2),
+  .linked-file-management-toolbar > :nth-child(3) {
+    justify-content: flex-end;
+  }
 
-    .linked-file-management-toolbar > :nth-child(3) {
-        order: -2;
-    }
+  .linked-file-management-toolbar > :nth-child(3) {
+    order: -2;
+  }
 
-    .linked-file-management-toolbar > :nth-child(2) {
-        order: -1;
-    }
+  .linked-file-management-toolbar > :nth-child(2) {
+    order: -1;
+  }
 
-    .linked-file-management-toolbar > :nth-child(1),
-    .linked-file-management-toolbar > :nth-child(2),
-    .linked-file-management-toolbar > :nth-child(3) {
-        flex-wrap: wrap;
-        row-gap: var(--dms-space-1);
-    }
+  .linked-file-management-toolbar > :nth-child(1),
+  .linked-file-management-toolbar > :nth-child(2),
+  .linked-file-management-toolbar > :nth-child(3) {
+    flex-wrap: wrap;
+    row-gap: var(--dms-space-1);
+  }
 
-    .linked-file-management-toolbar > :nth-child(1) vaadin-text-field,
-    .linked-file-management-toolbar > :nth-child(1) vaadin-combo-box {
-        width: 100% !important;
-    }
+  .linked-file-management-toolbar > :nth-child(1) vaadin-text-field,
+  .linked-file-management-toolbar > :nth-child(1) vaadin-combo-box {
+    width: 100% !important;
+  }
 
-    .linked-file-management-toolbar > :nth-child(2) vaadin-combo-box {
-        width: 90px !important;
-    }
+  .linked-file-management-toolbar > :nth-child(2) vaadin-combo-box {
+    width: 90px !important;
+  }
 
-    .linked-file-cards-grid {
-        grid-template-columns: 1fr;
-    }
+  .linked-file-cards-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
-    /* totalCountLabel has no dedicated CSS class here — target it
-       structurally: centerGroup.add(prevButton, pageInfoLabel, nextButton,
-       totalCountLabel, pageSizeSelect) makes it the group's 4th child. */
-    .linked-file-management-toolbar > :nth-child(2) > :nth-child(4) {
-        display: none;
-    }
+  /* totalCountLabel has no dedicated CSS class here — target it
+     structurally: centerGroup.add(prevButton, pageInfoLabel, nextButton,
+     totalCountLabel, pageSizeSelect) makes it the group's 4th child. */
+  .linked-file-management-toolbar > :nth-child(2) > :nth-child(4) {
+    display: none;
+  }
 
-    .linked-file-management-toolbar > :nth-child(3) vaadin-button {
-        font-size: 0;
-    }
+  .linked-file-management-toolbar > :nth-child(3) vaadin-button {
+    font-size: 0;
+  }
 
-    .linked-file-management-toolbar > :nth-child(3) vaadin-button vaadin-icon {
-        font-size: var(--lumo-font-size-m);
-    }
+  .linked-file-management-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+    font-size: var(--lumo-font-size-m);
+  }
 }
 
 .linked-file-management-view .wams-empty-state-icon {
-    color: var(--lumo-secondary-text-color);
+  color: var(--lumo-secondary-text-color);
 }
 
 /* ── Linked file card ─────────────────────────────────────────────────────── */
 
 .linked-file-card {
-    padding: var(--lumo-space-s) var(--lumo-space-m);
+  padding: var(--lumo-space-s) var(--lumo-space-m);
 }
 
 .linked-file-card .wams-title-row {
-    flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
 .linked-file-card .file-type-icon {
-    color: var(--lumo-primary-color);
+  color: var(--lumo-primary-color);
 }
 
 .linked-file-card .meta-row {
-    border-bottom: 1px solid var(--lumo-contrast-10pct);
-    padding-bottom: var(--lumo-space-xs);
-    margin-bottom: var(--lumo-space-xs);
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-bottom: var(--lumo-space-xs);
 }
 
 .linked-file-card .meta-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
+  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .linked-file-card .wams-body-rows {
-    margin-top: var(--lumo-space-s);
+  margin-top: var(--lumo-space-s);
 }
 
 .linked-file-card .meta-row-icon {
-    color: var(--lumo-secondary-text-color);
+  color: var(--lumo-secondary-text-color);
 }
 
 .linked-file-card .meta-row-label {
-    min-width: var(--dms-detail-label-width);
+  min-width: var(--dms-detail-label-width);
 }
 
 .linked-file-card .meta-row-value {
-    word-break: break-all;
-    flex: 1;
+  word-break: break-all;
+  flex: 1;
 }
 
 @media (max-width: 640px) {
-    .linked-file-card .meta-row {
-        flex-wrap: wrap;
-    }
+  .linked-file-card .meta-row {
+    flex-wrap: wrap;
+  }
 
-    .linked-file-card .meta-row > :not(:first-child) {
-        margin-left: var(--dms-space-meta-indent);
-    }
+  .linked-file-card .meta-row > :not(:first-child) {
+    margin-left: var(--dms-space-meta-indent);
+  }
 }
 
 /* Tag/category chips — shared between the card and the details dialog. */
 
 .wams-tag-chip,
 .wams-category-chip {
-    background: var(--lumo-contrast-10pct);
-    border-radius: var(--lumo-border-radius-s);
-    padding: var(--dms-space-tag-y) var(--dms-space-tag-x);
-    color: var(--lumo-secondary-text-color);
+  background: var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-s);
+  padding: var(--dms-space-tag-y) var(--dms-space-tag-x);
+  color: var(--lumo-secondary-text-color);
 }
 
 .wams-tag-chip {
-    background: var(--lumo-primary-color-10pct);
-    color: var(--lumo-primary-text-color);
+  background: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
 }
 
 /* ── Linked file details dialog ──────────────────────────────────────────── */
 
 .file-details-dialog .detail-field-icon {
-    color: var(--lumo-primary-color);
+  color: var(--lumo-primary-color);
 }
 
 .file-details-dialog .detail-field-value {
-    flex: 1;
+  flex: 1;
 }
 
 .dms-chip-container {
-    flex-wrap: wrap;
-    gap: var(--dms-space-1);
+  flex-wrap: wrap;
+  gap: var(--dms-space-1);
 }
 
 .dms-download-trigger {
-    display: none;
+  display: none;
 }
 
 .dms-secondary-text {
-    color: var(--lumo-secondary-text-color);
+  color: var(--lumo-secondary-text-color);
 }
 
 .dms-delete-warning-icon,
 .dms-upload-icon--error {
-    color: var(--dms-color-danger);
+  color: var(--dms-color-danger);
 }
 
 .dms-delete-warning-text {
-    color: var(--dms-color-danger);
-    font-weight: var(--dms-font-weight-medium);
-    font-size: var(--dms-font-size-sm);
+  color: var(--dms-color-danger);
+  font-weight: var(--dms-font-weight-medium);
+  font-size: var(--dms-font-size-sm);
 }
 
 /* ── Upload dialog ────────────────────────────────────────────────────────── */
 
 .wams-upload-component,
 .dms-upload-component {
-    width: 100%;
+  width: 100%;
 }
 
 .wams-upload-file-info {
-    align-items: center;
+  align-items: center;
 }
 
 .wams-upload-file-name,
 .wams-upload-file-size {
-    font-size: var(--lumo-font-size-s);
-    color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-s);
+  color: var(--lumo-secondary-text-color);
 }
 
 .wams-upload-status {
-    font-size: var(--lumo-font-size-s);
-    font-weight: 500;
+  font-size: var(--lumo-font-size-s);
+  font-weight: 500;
 }
 
 .dms-upload-status {
-    font-size: var(--dms-font-size-sm);
-    font-weight: 500;
+  font-size: var(--dms-font-size-sm);
+  font-weight: 500;
 }
 
 .dms-upload-status--success,
 .dms-upload-icon--success {
-    color: var(--dms-color-success);
+  color: var(--dms-color-success);
 }
 
 .dms-upload-status--error {
-    color: var(--dms-color-danger);
+  color: var(--dms-color-danger);
 }
 
 .dms-upload-icon {
-    color: var(--dms-color-primary);
+  color: var(--dms-color-primary);
 }
 
 .dms-upload-instruction {
-    color: var(--dms-color-text-muted);
+  color: var(--dms-color-text-muted);
 }

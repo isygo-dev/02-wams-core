@@ -1,16 +1,6 @@
 package eu.isygoit.ui.common.profile;
 
-import com.storedobject.chart.Axis;
-import com.storedobject.chart.BarChart;
-import com.storedobject.chart.CategoryData;
-import com.storedobject.chart.Color;
-import com.storedobject.chart.Data;
-import com.storedobject.chart.DataType;
-import com.storedobject.chart.RectangularCoordinate;
-import com.storedobject.chart.SOChart;
-import com.storedobject.chart.Tooltip;
-import com.storedobject.chart.XAxis;
-import com.storedobject.chart.YAxis;
+import com.storedobject.chart.*;
 import eu.isygoit.dto.data.ConnectionTrackingDto;
 import eu.isygoit.i18n.I18n;
 

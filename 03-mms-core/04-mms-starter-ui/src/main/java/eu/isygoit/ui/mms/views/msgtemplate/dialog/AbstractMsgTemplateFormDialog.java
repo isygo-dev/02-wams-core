@@ -59,21 +59,31 @@ abstract class AbstractMsgTemplateFormDialog extends BaseMsgTemplateDialog {
         this.messagePrefix = messagePrefix;
     }
 
-    /** Name of the file currently attached to the template, or null. */
+    /**
+     * Name of the file currently attached to the template, or null.
+     */
     abstract String currentFileName();
 
-    /** Optional hint displayed above the upload widget, or null. */
+    /**
+     * Optional hint displayed above the upload widget, or null.
+     */
     String uploadHint() {
         return null;
     }
 
-    /** Whether a template file must be uploaded before saving. */
+    /**
+     * Whether a template file must be uploaded before saving.
+     */
     abstract boolean fileRequired();
 
-    /** A DTO carrying the identity of the template ({@code id}, {@code code}, {@code tenant}). */
+    /**
+     * A DTO carrying the identity of the template ({@code id}, {@code code}, {@code tenant}).
+     */
     abstract MsgTemplateDto newDto();
 
-    /** Persists the DTO, with the uploaded file when there is one. */
+    /**
+     * Persists the DTO, with the uploaded file when there is one.
+     */
     abstract ResponseEntity<MsgTemplateDto> persist(MsgTemplateDto dto, MultipartFile file);
 
     private String key(String suffix) {
@@ -156,7 +166,9 @@ abstract class AbstractMsgTemplateFormDialog extends BaseMsgTemplateDialog {
         return section;
     }
 
-    /** Copies the form values into the DTO ({@code id}, {@code code} and the file fields are left untouched). */
+    /**
+     * Copies the form values into the DTO ({@code id}, {@code code} and the file fields are left untouched).
+     */
     private void applyTo(MsgTemplateDto dto) {
         String defaultSender = defaultSenderField.getValue();
         dto.setName(nameCombo.getValue().name());

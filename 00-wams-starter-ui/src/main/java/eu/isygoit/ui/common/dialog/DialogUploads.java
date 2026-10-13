@@ -5,10 +5,14 @@ package eu.isygoit.ui.common.dialog;
  */
 public final class DialogUploads {
 
-    /** Maximum size of one uploaded document (20 MB). */
+    /**
+     * Maximum size of one uploaded document (20 MB).
+     */
     public static final int MAX_FILE_BYTES = 20 * 1024 * 1024;
 
-    /** Documents and images accepted as attachments. */
+    /**
+     * Documents and images accepted as attachments.
+     */
     public static final String[] DOCUMENT_MIME_TYPES = {
             "application/pdf",
             "image/*",

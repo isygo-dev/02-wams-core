@@ -156,13 +156,17 @@ public class ToggleRotationDialog extends PinBaseActionDialog {
         applyImmediatelyCheckbox = new Checkbox(I18n.t("kms.key.dialog.rotation.toggle.field.apply.immediately"));
     }
 
-    /** Optional audit reason (null when blank). */
+    /**
+     * Optional audit reason (null when blank).
+     */
     private String reasonOrNull() {
         String reason = reasonField.getValue();
         return reason == null || reason.isBlank() ? null : reason.trim();
     }
 
-    /** Only sent when ticked; otherwise the server default (false) applies. */
+    /**
+     * Only sent when ticked; otherwise the server default (false) applies.
+     */
     private Boolean applyImmediatelyOrNull() {
         return Boolean.TRUE.equals(applyImmediatelyCheckbox.getValue()) ? Boolean.TRUE : null;
     }

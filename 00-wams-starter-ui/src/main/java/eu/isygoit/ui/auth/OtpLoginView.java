@@ -9,9 +9,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
+import eu.isygoit.constants.AuthConstants;
 import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
-import eu.isygoit.constants.AuthConstants;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.auth.AuthServiceFacade.Failure;
@@ -133,7 +133,7 @@ public class OtpLoginView extends BaseLoginView {
                         showError(I18n.t("auth.common.error.authenticationError"), Failure.OFFLINE);
                     } else if (!result.succeeded()) {
                         showError(failureMessage(result.failure(), "auth.otp.error.invalidOtp",
-                                "auth.common.error.authenticationError"), result.failure(),
+                                        "auth.common.error.authenticationError"), result.failure(),
                                 otpInput);
                     } else {
                         completeLogin(ui, result.value().getAccessToken());

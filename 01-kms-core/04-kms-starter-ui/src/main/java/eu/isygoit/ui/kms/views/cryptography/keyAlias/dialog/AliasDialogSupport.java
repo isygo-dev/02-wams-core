@@ -24,7 +24,9 @@ final class AliasDialogSupport {
     private AliasDialogSupport() {
     }
 
-    /** Loads the ids of the first 100 keys; shows an error notification on failure. */
+    /**
+     * Loads the ids of the first 100 keys; shows an error notification on failure.
+     */
     static List<String> fetchKeyIds(KmsApiService kmsApiService) {
         List<String> keyIds = new ArrayList<>();
         try {
@@ -42,7 +44,9 @@ final class AliasDialogSupport {
         return keyIds;
     }
 
-    /** Required target-key combo whose labels read "alias (keyId)" when the key has an alias. */
+    /**
+     * Required target-key combo whose labels read "alias (keyId)" when the key has an alias.
+     */
     static ComboBox<String> createTargetKeyCombo(KmsApiService kmsApiService, List<String> keyIds) {
         ComboBox<String> combo = new ComboBox<>(I18n.t("kms.alias.dialog.field.target.key"));
         combo.setRequiredIndicatorVisible(true);

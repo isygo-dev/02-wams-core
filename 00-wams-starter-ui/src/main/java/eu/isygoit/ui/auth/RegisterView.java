@@ -82,6 +82,18 @@ public class RegisterView extends BaseLoginView {
                 form, errorBanner, registerButton, loginLink, new AuthFooter());
     }
 
+    private static void setAutocomplete(com.vaadin.flow.component.Component field, String value) {
+        field.getElement().setAttribute("autocomplete", value);
+    }
+
+    private static void setRequired(TextField field) {
+        field.setRequiredIndicatorVisible(true);
+    }
+
+    private static void setRequired(EmailField field) {
+        field.setRequiredIndicatorVisible(true);
+    }
+
     private void configureBinder() {
         binder.forField(firstNameField)
                 .asRequired(I18n.t("auth.register.validation.firstName.required"))
@@ -109,18 +121,6 @@ public class RegisterView extends BaseLoginView {
                 .bind(RegisteredUserDto::getOrganisation, RegisteredUserDto::setOrganisation);
         binder.forField(roleField)
                 .bind(RegisteredUserDto::getFunctionRole, RegisteredUserDto::setFunctionRole);
-    }
-
-    private static void setAutocomplete(com.vaadin.flow.component.Component field, String value) {
-        field.getElement().setAttribute("autocomplete", value);
-    }
-
-    private static void setRequired(TextField field) {
-        field.setRequiredIndicatorVisible(true);
-    }
-
-    private static void setRequired(EmailField field) {
-        field.setRequiredIndicatorVisible(true);
     }
 
     private void handleRegistration() {

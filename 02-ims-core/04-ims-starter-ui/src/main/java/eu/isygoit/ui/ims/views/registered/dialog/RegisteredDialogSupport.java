@@ -10,7 +10,9 @@ final class RegisteredDialogSupport {
     private RegisteredDialogSupport() {
     }
 
-    /** Server error body when available, otherwise the exception message. */
+    /**
+     * Server error body when available, otherwise the exception message.
+     */
     static String extractErrorMessage(FeignException ex) {
         try {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) {

@@ -31,6 +31,23 @@ public abstract class AbstractImsFormDialog extends ImsActionDialog {
         super(title, onSuccess);
     }
 
+    private static String toImageDataUri(byte[] bytes) {
+        return "data:" + detectImageMime(bytes) + ";base64,"
+                + Base64.getEncoder().encodeToString(bytes);
+    }
+
+    /**
+     * Best-effort sniff of the image MIME type; defaults to JPEG.
+     */
+    private static String detectImageMime(byte[] b) {
+        if (b.length >= 4) {
+            if ((b[0] & 0xFF) == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G') return "image/png";
+            if ((b[0] & 0xFF) == 0xFF && (b[1] & 0xFF) == 0xD8 && (b[2] & 0xFF) == 0xFF) return "image/jpeg";
+            if (b[0] == 'G' && b[1] == 'I' && b[2] == 'F' && b[3] == '8') return "image/gif";
+        }
+        return "image/jpeg";
+    }
+
     /**
      * Hook for subclasses that want to <em>download</em> the profile image
      * rather than rely on a static path. Default returns {@code null}.
@@ -76,20 +93,5 @@ public abstract class AbstractImsFormDialog extends ImsActionDialog {
             }
         }
         return fallbackPath;
-    }
-
-    private static String toImageDataUri(byte[] bytes) {
-        return "data:" + detectImageMime(bytes) + ";base64,"
-                + Base64.getEncoder().encodeToString(bytes);
-    }
-
-    /** Best-effort sniff of the image MIME type; defaults to JPEG. */
-    private static String detectImageMime(byte[] b) {
-        if (b.length >= 4) {
-            if ((b[0] & 0xFF) == 0x89 && b[1] == 'P' && b[2] == 'N' && b[3] == 'G') return "image/png";
-            if ((b[0] & 0xFF) == 0xFF && (b[1] & 0xFF) == 0xD8 && (b[2] & 0xFF) == 0xFF) return "image/jpeg";
-            if (b[0] == 'G' && b[1] == 'I' && b[2] == 'F' && b[3] == '8') return "image/gif";
-        }
-        return "image/jpeg";
     }
 }

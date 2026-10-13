@@ -20,7 +20,9 @@ public final class ImsDialogSupport {
     private ImsDialogSupport() {
     }
 
-    /** Returns the UTF-8 body of a Feign error when present, otherwise the exception message. */
+    /**
+     * Returns the UTF-8 body of a Feign error when present, otherwise the exception message.
+     */
     public static String extractErrorMessage(FeignException ex) {
         try {
             String content = ex.contentUTF8();
@@ -33,7 +35,9 @@ public final class ImsDialogSupport {
         return ex.getMessage();
     }
 
-    /** Reads the whole resource into memory. */
+    /**
+     * Reads the whole resource into memory.
+     */
     public static byte[] toByteArray(Resource resource) throws IOException {
         try (InputStream in = resource.getInputStream();
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {

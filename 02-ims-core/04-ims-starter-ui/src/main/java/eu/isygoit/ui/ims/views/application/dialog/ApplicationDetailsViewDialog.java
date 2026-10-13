@@ -40,6 +40,10 @@ public class ApplicationDetailsViewDialog extends ImsDetailsDialog {
         loadAndShowDetails();
     }
 
+    private static String formatDate(LocalDateTime date) {
+        return date != null ? DateHelper.formatToHumanReadable(date) : null;
+    }
+
     private void loadAndShowDetails() {
         parentView.showLoading(true);
         try {
@@ -78,9 +82,5 @@ public class ApplicationDetailsViewDialog extends ImsDetailsDialog {
 
         addAuditTab(app.getCreatedBy(), formatDate(app.getCreateDate()),
                 app.getUpdatedBy(), formatDate(app.getUpdateDate()));
-    }
-
-    private static String formatDate(LocalDateTime date) {
-        return date != null ? DateHelper.formatToHumanReadable(date) : null;
     }
 }

@@ -560,7 +560,7 @@
 .wams-profile-card__avatar-wrap {
   position: relative;
   display: inline-block;
-  overflow: hidden;          /* keeps overlay + spinner clipped to the round shape */
+  overflow: hidden; /* keeps overlay + spinner clipped to the round shape */
   border-radius: 50%;
 }
 
@@ -581,7 +581,7 @@
   justify-content: center;
   background: rgba(0, 0, 0, 0.45);
   border-radius: 50%;
-  pointer-events: none;       /* doesn't steal clicks from the card */
+  pointer-events: none; /* doesn't steal clicks from the card */
   transition: opacity .15s ease-in-out;
   z-index: 1;
 }
@@ -597,5 +597,7 @@
 }
 
 @keyframes wams-profile-card-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

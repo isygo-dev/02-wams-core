@@ -2,8 +2,8 @@ package eu.isygoit.ui.cms.views.vcalendar.dialog;
 
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
-import eu.isygoit.ui.common.dialog.DeleteActionDialog;
 import eu.isygoit.ui.cms.views.vcalendar.VCalendarManagementView;
+import eu.isygoit.ui.common.dialog.DeleteActionDialog;
 
 public class DeleteVCalendarDialog extends DeleteActionDialog {
 

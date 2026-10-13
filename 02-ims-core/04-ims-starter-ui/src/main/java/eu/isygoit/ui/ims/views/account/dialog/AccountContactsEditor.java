@@ -41,16 +41,9 @@ class AccountContactsEditor extends VerticalLayout {
         add(rows, addButton);
     }
 
-    /** Replaces the edited list with the given contacts. */
-    void setContacts(List<ContactDto> contacts) {
-        rows.removeAll();
-        items.clear();
-        if (contacts != null) {
-            contacts.forEach(this::addRow);
-        }
-    }
-
-    /** Current contacts; rows without a value are ignored. */
+    /**
+     * Current contacts; rows without a value are ignored.
+     */
     List<ContactDto> getContacts() {
         List<ContactDto> result = new ArrayList<>();
         for (Row row : items) {
@@ -64,6 +57,17 @@ class AccountContactsEditor extends VerticalLayout {
             result.add(dto);
         }
         return result;
+    }
+
+    /**
+     * Replaces the edited list with the given contacts.
+     */
+    void setContacts(List<ContactDto> contacts) {
+        rows.removeAll();
+        items.clear();
+        if (contacts != null) {
+            contacts.forEach(this::addRow);
+        }
     }
 
     private void addRow(ContactDto source) {

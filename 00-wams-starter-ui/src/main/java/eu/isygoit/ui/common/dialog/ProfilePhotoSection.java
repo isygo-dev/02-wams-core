@@ -68,19 +68,25 @@ public class ProfilePhotoSection extends HorizontalLayout {
         expand(info);
     }
 
-    /** Shows an already stored picture (URL or data URI); blank values are ignored. */
+    /**
+     * Shows an already stored picture (URL or data URI); blank values are ignored.
+     */
     public void showExisting(String src) {
         if (src != null && !src.isBlank()) {
             display(src);
         }
     }
 
-    /** The newly cropped picture waiting to be uploaded, or {@code null}. */
+    /**
+     * The newly cropped picture waiting to be uploaded, or {@code null}.
+     */
     public MultipartFile getSelectedFile() {
         return selectedFile;
     }
 
-    /** Drops the pending picture and goes back to the placeholder. */
+    /**
+     * Drops the pending picture and goes back to the placeholder.
+     */
     public void clear() {
         selectedFile = null;
         thumbnail.setVisible(false);

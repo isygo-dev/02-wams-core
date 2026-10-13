@@ -5,7 +5,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -63,7 +62,7 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
     protected boolean matchesSearch(TenantDto t, String search) {
         if (search == null || search.isBlank()) return true;
         String s = search.toLowerCase();
-        return (t.getName()  != null && t.getName().toLowerCase().contains(s))
+        return (t.getName() != null && t.getName().toLowerCase().contains(s))
                 || (t.getEmail() != null && t.getEmail().toLowerCase().contains(s));
     }
 
@@ -78,7 +77,9 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
     }
 
     @Override
-    protected void onSearchChanged() { loadPageZero(); }
+    protected void onSearchChanged() {
+        loadPageZero();
+    }
 
     @Override
     protected String[] getRootCssClasses() {
@@ -92,7 +93,10 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
         statusFilter.setRenderer(ImsEnumTag.renderer(null));
         statusFilter.setPlaceholder(I18n.t("ims.tenant.view.status.placeholder"));
         statusFilter.setWidth("160px");
-        statusFilter.addValueChangeListener(e -> { currentAdminStatus = e.getValue(); loadPageZero(); });
+        statusFilter.addValueChangeListener(e -> {
+            currentAdminStatus = e.getValue();
+            loadPageZero();
+        });
         return List.of(statusFilter);
     }
 
@@ -113,19 +117,54 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
         return e.getMessage();
     }
 
-    @Override protected String getTitleKey()             { return "ims.tenant.view.title"; }
-    @Override protected String getSubtitleKey()          { return "ims.tenant.view.subtitle"; }
-    @Override protected String getCreateButtonKey()      { return "ims.tenant.view.create.button"; }
-    @Override protected String getSearchPlaceholderKey() { return "ims.tenant.view.search.placeholder"; }
-    @Override protected String getEmptyTitleKey()        { return "ims.tenant.view.empty.title"; }
-    @Override protected String getEmptyDescriptionKey()  { return "ims.tenant.view.empty.description"; }
-    @Override protected VaadinIcon getEmptyIcon()        { return VaadinIcon.BUILDING; }
-    @Override protected String getLoadErrorKey()         { return "ims.tenant.view.load.error"; }
+    @Override
+    protected String getTitleKey() {
+        return "ims.tenant.view.title";
+    }
 
     @Override
-    public String getPageTitle() { return I18n.t("ims.tenant.view.title"); }
+    protected String getSubtitleKey() {
+        return "ims.tenant.view.subtitle";
+    }
 
-    public void loadPageZero() { loadPage(0); }
+    @Override
+    protected String getCreateButtonKey() {
+        return "ims.tenant.view.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "ims.tenant.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "ims.tenant.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "ims.tenant.view.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.BUILDING;
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "ims.tenant.view.load.error";
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("ims.tenant.view.title");
+    }
+
+    public void loadPageZero() {
+        loadPage(0);
+    }
 
     public void openUpdateTenantDialog(TenantDto tenant, Runnable onSuccess) {
         new UpdateTenantDialog(this, tenantService, tenantImageService, tenant, onSuccess).open();

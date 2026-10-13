@@ -504,7 +504,9 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
 
     // ---------- Form <-> DTO ----------
 
-    /** Fills the read-only identity fields ({@code code}, {@code tenant}) from a loaded DTO. */
+    /**
+     * Fills the read-only identity fields ({@code code}, {@code tenant}) from a loaded DTO.
+     */
     protected final void bindIdentity(TokenConfigDto dto) {
         SecretsDialogSupport.setText(codeField, dto.getCode());
         SecretsDialogSupport.setText(tenantField, dto.getTenant());
@@ -699,7 +701,9 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
         }
     }
 
-    /** Audience editor: a text input and removable chips; the audience list is kept as a model. */
+    /**
+     * Audience editor: a text input and removable chips; the audience list is kept as a model.
+     */
     protected static class AudienceInput extends VerticalLayout {
         private final List<String> audiences = new ArrayList<>();
         private final TextField inputField;

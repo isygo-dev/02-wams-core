@@ -25,14 +25,18 @@ public class RowCardList<T> extends Div {
         getElement().setAttribute("role", "list");
     }
 
-    /** How one item is drawn. */
+    /**
+     * How one item is drawn.
+     */
     public RowCardList<T> cardFactory(Function<T, RowCard> factory) {
         this.cardFactory = factory;
         render();
         return this;
     }
 
-    /** Message shown when there is no item. */
+    /**
+     * Message shown when there is no item.
+     */
     public RowCardList<T> emptyText(String text) {
         this.emptyText = text == null || text.isBlank() ? "-" : text;
         render();
@@ -44,17 +48,19 @@ public class RowCardList<T> extends Div {
         return this;
     }
 
+    /**
+     * A copy of the current items.
+     */
+    public List<T> getItems() {
+        return new ArrayList<>(items);
+    }
+
     public void setItems(Collection<? extends T> newItems) {
         items.clear();
         if (newItems != null) {
             items.addAll(newItems);
         }
         render();
-    }
-
-    /** A copy of the current items. */
-    public List<T> getItems() {
-        return new ArrayList<>(items);
     }
 
     private void render() {

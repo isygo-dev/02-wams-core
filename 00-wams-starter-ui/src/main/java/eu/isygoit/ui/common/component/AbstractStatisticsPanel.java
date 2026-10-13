@@ -21,11 +21,11 @@ import org.springframework.util.StringUtils;
  * Classe abstraite pour un panneau de statistiques.
  * Gère l'en-tête commun (titre, rafraîchissement, chargement) et délègue
  * la construction des sections et le chargement des données aux sous-classes.
- *
+ * <p>
  * Toutes les dimensions (gap, padding, marges, largeurs) sont pilotées par
  * les classes CSS déclarées dans common.scss :
- *   .wams-stats-panel, .wams-stats-header, .wams-stats-actions,
- *   .wams-stats-title, .wams-stats-refresh, .wams-stats-loader
+ * .wams-stats-panel, .wams-stats-header, .wams-stats-actions,
+ * .wams-stats-title, .wams-stats-refresh, .wams-stats-loader
  */
 @CssImport("./styles/scss/common.scss")
 public abstract class AbstractStatisticsPanel extends VerticalLayout {

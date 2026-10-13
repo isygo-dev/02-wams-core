@@ -81,6 +81,12 @@ public class CreateAccountFromRegisteredDialog extends ImsActionDialog {
         addContent(buildLayout());
     }
 
+    private static Span chip(String text) {
+        Span chip = new Span(text);
+        chip.addClassName(DialogLayout.CLASS_CHIP);
+        return chip;
+    }
+
     private void buildForm() {
         // Tenant information
         tenantIndustryField = new TextField(I18n.t("ims.tenant.dialog.field.industry"));
@@ -162,12 +168,6 @@ public class CreateAccountFromRegisteredDialog extends ImsActionDialog {
             chips.add(chip(registeredUser.getPhoneNumber()));
         }
         return new DetailHero(null, fullName, registeredUser.getEmail(), chips.toArray(Component[]::new));
-    }
-
-    private static Span chip(String text) {
-        Span chip = new Span(text);
-        chip.addClassName(DialogLayout.CLASS_CHIP);
-        return chip;
     }
 
     private Component buildTenantTab() {

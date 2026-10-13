@@ -20,34 +20,9 @@ import java.util.function.Function;
 @Slf4j
 public class PinConfirmActionDialog extends PinBaseActionDialog {
 
-    /** The remote call; may return a {@link ResponseEntity}, whose non-2xx status is then treated as a failure. */
-    @FunctionalInterface
-    public interface Action {
-        Object run() throws Exception;
-    }
-
-    /**
-     * Localised texts of one action.
-     *
-     * @param title       dialog title
-     * @param message     warning message (already formatted with the entity name)
-     * @param button      label of the action button
-     * @param invalidCode message shown when the PIN does not match
-     * @param success     message shown after success
-     * @param error       builds the failure message from the technical detail
-     */
-    public record Texts(String title,
-                        String message,
-                        String button,
-                        String invalidCode,
-                        String success,
-                        Function<String, String> error) {
-    }
-
     private final Texts texts;
     private final Action action;
     private final Consumer<Boolean> loading;
-
     /**
      * @param texts       localised texts
      * @param action      the remote call
@@ -76,7 +51,21 @@ public class PinConfirmActionDialog extends PinBaseActionDialog {
         DialogLayout.size(this, DialogLayout.WIDTH_S);
     }
 
-    /** Adds a secondary note (for example an irreversibility reminder) under the warning message. */
+    private static String feignMessage(FeignException ex) {
+        try {
+            String body = ex.contentUTF8();
+            if (body != null && !body.isBlank()) {
+                return body;
+            }
+        } catch (Exception ignored) {
+            // fall back to the exception message
+        }
+        return ex.getMessage();
+    }
+
+    /**
+     * Adds a secondary note (for example an irreversibility reminder) under the warning message.
+     */
     protected final void addNote(String note) {
         addContent(DialogLayout.help(note));
     }
@@ -116,15 +105,29 @@ public class PinConfirmActionDialog extends PinBaseActionDialog {
         }
     }
 
-    private static String feignMessage(FeignException ex) {
-        try {
-            String body = ex.contentUTF8();
-            if (body != null && !body.isBlank()) {
-                return body;
-            }
-        } catch (Exception ignored) {
-            // fall back to the exception message
-        }
-        return ex.getMessage();
+    /**
+     * The remote call; may return a {@link ResponseEntity}, whose non-2xx status is then treated as a failure.
+     */
+    @FunctionalInterface
+    public interface Action {
+        Object run() throws Exception;
+    }
+
+    /**
+     * Localised texts of one action.
+     *
+     * @param title       dialog title
+     * @param message     warning message (already formatted with the entity name)
+     * @param button      label of the action button
+     * @param invalidCode message shown when the PIN does not match
+     * @param success     message shown after success
+     * @param error       builds the failure message from the technical detail
+     */
+    public record Texts(String title,
+                        String message,
+                        String button,
+                        String invalidCode,
+                        String success,
+                        Function<String, String> error) {
     }
 }

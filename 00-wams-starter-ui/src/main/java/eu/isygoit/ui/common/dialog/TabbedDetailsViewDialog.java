@@ -20,7 +20,9 @@ public abstract class TabbedDetailsViewDialog extends DetailsViewDialog {
     private final String detailsTabLabel;
     private final String sectionTabLabel;
 
-    /** Uses the shared localized labels for tab content added without an explicit label. */
+    /**
+     * Uses the shared localized labels for tab content added without an explicit label.
+     */
     protected TabbedDetailsViewDialog(String title) {
         this(title, I18n.t("common.dialog.tab.details"), I18n.t("common.dialog.tab.section"));
     }
@@ -29,6 +31,20 @@ public abstract class TabbedDetailsViewDialog extends DetailsViewDialog {
         super(title);
         this.detailsTabLabel = detailsTabLabel;
         this.sectionTabLabel = sectionTabLabel;
+    }
+
+    /**
+     * Value shown for an empty text field.
+     */
+    protected static String dash(String value) {
+        return value == null || value.isBlank() ? "-" : value;
+    }
+
+    /**
+     * Value shown for an empty object field.
+     */
+    protected static String dash(Object value) {
+        return value == null ? "-" : value.toString();
     }
 
     @Override
@@ -74,22 +90,16 @@ public abstract class TabbedDetailsViewDialog extends DetailsViewDialog {
         tabs.add(tabLabel, page);
     }
 
-    /** Applies the shared width scale (see {@link DialogLayout}) to the dialog. */
+    /**
+     * Applies the shared width scale (see {@link DialogLayout}) to the dialog.
+     */
     protected final void applyWidth(String width) {
         DialogLayout.size(this, width);
     }
 
-    /** Value shown for an empty text field. */
-    protected static String dash(String value) {
-        return value == null || value.isBlank() ? "-" : value;
-    }
-
-    /** Value shown for an empty object field. */
-    protected static String dash(Object value) {
-        return value == null ? "-" : value.toString();
-    }
-
-    /** Audit tab: who created / updated the record, and when. */
+    /**
+     * Audit tab: who created / updated the record, and when.
+     */
     protected final void addAuditTab(String createdBy, Object createDate, String updatedBy, Object updateDate) {
         Div grid = createDetailGrid();
         addFieldToGrid(grid, VaadinIcon.USER, I18n.t("common.audit.createdBy"), dash(createdBy));
@@ -100,7 +110,9 @@ public abstract class TabbedDetailsViewDialog extends DetailsViewDialog {
                 createSection(I18n.t("common.details.section.audit"), grid));
     }
 
-    /** File metadata tab for entities carrying a primary file (FileEntityDto). */
+    /**
+     * File metadata tab for entities carrying a primary file (FileEntityDto).
+     */
     protected final void addFileMetadataTab(String fileName, String originalFileName, String path,
                                             String extension, String type, String category) {
         Div grid = createDetailGrid();

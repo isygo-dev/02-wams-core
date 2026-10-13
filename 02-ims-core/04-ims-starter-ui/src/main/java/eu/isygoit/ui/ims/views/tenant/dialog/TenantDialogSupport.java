@@ -15,7 +15,9 @@ final class TenantDialogSupport {
     private TenantDialogSupport() {
     }
 
-    /** Server error body when available, otherwise the exception message. */
+    /**
+     * Server error body when available, otherwise the exception message.
+     */
     static String extractErrorMessage(FeignException ex) {
         try {
             if (ex.contentUTF8() != null && !ex.contentUTF8().isBlank()) {
@@ -27,7 +29,9 @@ final class TenantDialogSupport {
         return ex.getMessage();
     }
 
-    /** Encodes a downloaded image as a data URI usable as an image source. */
+    /**
+     * Encodes a downloaded image as a data URI usable as an image source.
+     */
     static String toDataUri(Resource resource) throws IOException {
         byte[] bytes = resource.getContentAsByteArray();
         return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(bytes);

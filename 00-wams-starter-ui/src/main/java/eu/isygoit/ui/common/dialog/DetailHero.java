@@ -37,13 +37,19 @@ public class DetailHero extends HorizontalLayout {
                     "%3Ccircle cx='12' cy='8' r='4'%3E%3C/circle%3E" +
                     "%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3C/svg%3E";
 
-    /** The avatar image element — kept as a field so its src can be swapped. */
+    /**
+     * The avatar image element — kept as a field so its src can be swapped.
+     */
     private final Image avatarImage;
 
-    /** The name span — kept so {@link #setFullName(String)} can update it. */
+    /**
+     * The name span — kept so {@link #setFullName(String)} can update it.
+     */
     private final Span nameSpan;
 
-    /** The subtitle span — kept so {@link #setSubtitle(String)} can update it. */
+    /**
+     * The subtitle span — kept so {@link #setSubtitle(String)} can update it.
+     */
     private final Span subtitleSpan;
 
     /* ══════════════════════════════════════════════════════════════
@@ -131,6 +137,10 @@ public class DetailHero extends HorizontalLayout {
      * Public API — swap content after construction
      * ══════════════════════════════════════════════════════════════ */
 
+    private static String safe(String value) {
+        return (value == null || value.isBlank()) ? "-" : value;
+    }
+
     /**
      * Replaces the avatar source with the given resource. Passing {@code null}
      * resets it to the built-in placeholder.
@@ -162,18 +172,14 @@ public class DetailHero extends HorizontalLayout {
         nameSpan.setText(safe(fullName));
     }
 
+    /* ══════════════════════════════════════════════════════════════
+     * Helpers
+     * ══════════════════════════════════════════════════════════════ */
+
     /**
      * Updates the secondary line. Passing {@code null}/blank clears it.
      */
     public void setSubtitle(String subtitle) {
         subtitleSpan.setText(subtitle == null ? "" : subtitle);
-    }
-
-    /* ══════════════════════════════════════════════════════════════
-     * Helpers
-     * ══════════════════════════════════════════════════════════════ */
-
-    private static String safe(String value) {
-        return (value == null || value.isBlank()) ? "-" : value;
     }
 }

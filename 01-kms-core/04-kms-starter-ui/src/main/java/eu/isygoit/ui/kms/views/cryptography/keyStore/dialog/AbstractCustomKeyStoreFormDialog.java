@@ -32,7 +32,9 @@ abstract class AbstractCustomKeyStoreFormDialog extends KmsActionDialog {
     final CustomKeyStoresView parentView;
     final KmsApiService kmsApiService;
 
-    /** i18n prefix of the field labels (create and update dialogs use different wording). */
+    /**
+     * i18n prefix of the field labels (create and update dialogs use different wording).
+     */
     private final String fieldKeyPrefix;
 
     TextField nameField;
@@ -65,10 +67,14 @@ abstract class AbstractCustomKeyStoreFormDialog extends KmsActionDialog {
         this.fieldKeyPrefix = fieldKeyPrefix;
     }
 
-    /** Components shown in the identity section after the name field (e.g. the type selector). */
+    /**
+     * Components shown in the identity section after the name field (e.g. the type selector).
+     */
     abstract Component[] additionalIdentityFields();
 
-    /** Sets placeholders, helper texts, initial values and listeners once the fields exist. */
+    /**
+     * Sets placeholders, helper texts, initial values and listeners once the fields exist.
+     */
     abstract void decorateFields();
 
     final void buildForm() {
@@ -84,7 +90,9 @@ abstract class AbstractCustomKeyStoreFormDialog extends KmsActionDialog {
         add(root);
     }
 
-    /** Shows the CloudHSM or the XKS section (the other one is hidden). */
+    /**
+     * Shows the CloudHSM or the XKS section (the other one is hidden).
+     */
     final void showTypeSections(boolean cloudHsm) {
         cloudHsmSection.setVisible(cloudHsm);
         xksSection.setVisible(!cloudHsm);
@@ -171,7 +179,9 @@ abstract class AbstractCustomKeyStoreFormDialog extends KmsActionDialog {
         return section;
     }
 
-    /** Parses a flat {@code {"key":"value", ...}} text into a map (null when empty). */
+    /**
+     * Parses a flat {@code {"key":"value", ...}} text into a map (null when empty).
+     */
     final Map<String, String> parseJsonToMap(String json) {
         if (!StringUtils.hasText(json)) return null;
         if ("null".equalsIgnoreCase(json.trim())) return null;

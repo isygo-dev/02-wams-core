@@ -15,6 +15,22 @@ public class AuthErrorBanner extends Component {
         setVisible(false);
     }
 
+    private static String stateName(Failure failure) {
+        if (failure == null) {
+            return "server-error";
+        }
+        return switch (failure) {
+            case INVALID_CREDENTIALS -> "form-error";
+            case INVALID_TOKEN -> "invalid-token";
+            case SERVICE_ERROR -> "server-error";
+            case OFFLINE -> "offline";
+            case RATE_LIMITED -> "rate-limited";
+            case LOCKED -> "locked";
+            case EXPIRED -> "expired";
+            case REGISTRATION_REJECTED -> "server-error";
+        };
+    }
+
     public void showError(String message, Failure failure) {
         getElement().setText(message);
         getElement().setAttribute("role", "alert");
@@ -43,21 +59,5 @@ public class AuthErrorBanner extends Component {
         removeClassName("has-error");
         removeClassName("is-success");
         setVisible(false);
-    }
-
-    private static String stateName(Failure failure) {
-        if (failure == null) {
-            return "server-error";
-        }
-        return switch (failure) {
-            case INVALID_CREDENTIALS -> "form-error";
-            case INVALID_TOKEN -> "invalid-token";
-            case SERVICE_ERROR -> "server-error";
-            case OFFLINE -> "offline";
-            case RATE_LIMITED -> "rate-limited";
-            case LOCKED -> "locked";
-            case EXPIRED -> "expired";
-            case REGISTRATION_REJECTED -> "server-error";
-        };
     }
 }

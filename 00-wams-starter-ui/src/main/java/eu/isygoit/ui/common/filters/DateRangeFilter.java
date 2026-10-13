@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter;
  *       {@link #setOnChange(Runnable)} and {@link #toCriteria()} returns
  *       {@code null}.</li>
  * </ul>
- *
+ * <p>
  * Dates are formatted ISO-8601 ({@code yyyy-MM-dd}).
  *
  * <p>All styling is owned by {@code _filter.scss}; this class only
@@ -30,16 +30,22 @@ public class DateRangeFilter extends HorizontalLayout {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ISO_LOCAL_DATE;
 
-    /** {@code null} in manual mode. */
+    /**
+     * {@code null} in manual mode.
+     */
     private final String fieldName;
 
     private final DatePicker from = new DatePicker();
-    private final DatePicker to   = new DatePicker();
+    private final DatePicker to = new DatePicker();
 
-    /** Listener invoked on either picker's value change. */
+    /**
+     * Listener invoked on either picker's value change.
+     */
     private Runnable onChange;
 
-    /** Metadata-mode constructor: sub-labels derive from the group label. */
+    /**
+     * Metadata-mode constructor: sub-labels derive from the group label.
+     */
     public DateRangeFilter(String fieldName, String label) {
         this(fieldName,
                 label,
@@ -83,14 +89,25 @@ public class DateRangeFilter extends HorizontalLayout {
     //  Manual-mode API
     // ══════════════════════════════════════════════════════════════
 
-    public void setOnChange(Runnable onChange) { this.onChange = onChange; }
+    public void setOnChange(Runnable onChange) {
+        this.onChange = onChange;
+    }
 
-    public LocalDate getFromValue() { return from.getValue(); }
-    public LocalDate getToValue()   { return to.getValue(); }
+    public LocalDate getFromValue() {
+        return from.getValue();
+    }
 
-    public boolean isEmpty() { return from.isEmpty() && to.isEmpty(); }
+    public LocalDate getToValue() {
+        return to.getValue();
+    }
 
-    /** Clears both pickers. Does <em>not</em> fire {@code onChange}. */
+    public boolean isEmpty() {
+        return from.isEmpty() && to.isEmpty();
+    }
+
+    /**
+     * Clears both pickers. Does <em>not</em> fire {@code onChange}.
+     */
     public void clear() {
         from.clear();
         to.clear();
@@ -102,7 +119,7 @@ public class DateRangeFilter extends HorizontalLayout {
 
     /**
      * @return the criteria clause for this range, or {@code null} when
-     *         in manual mode or no bound is set.
+     * in manual mode or no bound is set.
      */
     public String toCriteria() {
         if (fieldName == null) return null;

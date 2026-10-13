@@ -48,6 +48,16 @@ public class TenantDetailsViewDialog extends ImsDetailsDialog {
         loadAndShowDetails();
     }
 
+    private static boolean hasAnySocialLink(TenantDto tenant) {
+        return (tenant.getLnk_facebook() != null && !tenant.getLnk_facebook().isBlank())
+                || (tenant.getLnk_linkedin() != null && !tenant.getLnk_linkedin().isBlank())
+                || (tenant.getLnk_xing() != null && !tenant.getLnk_xing().isBlank());
+    }
+
+    private static String formatDate(LocalDateTime date) {
+        return date == null ? null : DateHelper.formatToHumanReadable(date);
+    }
+
     private void loadAndShowDetails() {
         parentView.showLoading(true);
         try {
@@ -140,15 +150,5 @@ public class TenantDetailsViewDialog extends ImsDetailsDialog {
             chips.add(ImsEnumTag.of(tenant.getAdminStatus()));
         }
         return new DetailHero(null, dash(tenant.getName()), tenant.getEmail(), chips.toArray(Component[]::new));
-    }
-
-    private static boolean hasAnySocialLink(TenantDto tenant) {
-        return (tenant.getLnk_facebook() != null && !tenant.getLnk_facebook().isBlank())
-                || (tenant.getLnk_linkedin() != null && !tenant.getLnk_linkedin().isBlank())
-                || (tenant.getLnk_xing() != null && !tenant.getLnk_xing().isBlank());
-    }
-
-    private static String formatDate(LocalDateTime date) {
-        return date == null ? null : DateHelper.formatToHumanReadable(date);
     }
 }

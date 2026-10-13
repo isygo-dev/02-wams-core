@@ -4,9 +4,9 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.data.VCalendarDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
+import eu.isygoit.ui.cms.views.vcalendar.VCalendarManagementView;
 import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.dialog.PinBaseActionDialog;
-import eu.isygoit.ui.cms.views.vcalendar.VCalendarManagementView;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
