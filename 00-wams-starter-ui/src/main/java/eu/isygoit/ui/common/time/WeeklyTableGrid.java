@@ -27,11 +27,15 @@ import java.util.function.Function;
 @CssImport("./styles/scss/time-grid.scss")
 public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
+    private static final String HEX_RE = "^#([A-Fa-f0-9]{6})$";
+    private static final DateTimeFormatter DAY_MONTH_FMT = DateTimeFormatter.ofPattern("dd MMM", Locale.FRENCH);
+
     private final WeeklyTableGridConfig<E> config;
     private final Div gridContainer = new Div();
     private final List<LocalTime> timeSlots = new ArrayList<>();
     private List<E> slots = Collections.emptyList();
     private boolean editable = true;
+    private LocalDate weekStartDate;                 // NEW
 
     public WeeklyTableGrid(WeeklyTableGridConfig<E> config) {
         this.config = config;
@@ -64,6 +68,24 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         } catch (Exception ex) {
             return fallback;
         }
+    }
+
+    /** Blend a hex colour toward white. amount 0 = unchanged, 1 = pure white. */
+    private static String lighten(String hex, double amount) {
+        if (hex == null || !hex.matches(HEX_RE)) return null;
+        double k = Math.max(0.0, Math.min(1.0, amount));
+        int r = Integer.parseInt(hex.substring(1, 3), 16);
+        int g = Integer.parseInt(hex.substring(3, 5), 16);
+        int b = Integer.parseInt(hex.substring(5, 7), 16);
+        r = (int) Math.round(r + (255 - r) * k);
+        g = (int) Math.round(g + (255 - g) * k);
+        b = (int) Math.round(b + (255 - b) * k);
+        return String.format("#%02X%02X%02X", r, g, b);
+    }
+
+    /** NEW — the Monday of the week being displayed, used to print dates in the header. */
+    public void setWeekStartDate(LocalDate weekStartDate) {
+        this.weekStartDate = weekStartDate;
     }
 
     public void setItems(List<E> slots, boolean editable) {
@@ -159,7 +181,18 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         List<DayOfWeek> days = config.getDaysOfWeek();
         for (int dayIndex = 0; dayIndex < days.size(); dayIndex++) {
             DayOfWeek day = days.get(dayIndex);
-            Span dayLabel = new Span(day.getDisplayName(TextStyle.SHORT, Locale.FRENCH));
+
+            // "lun." / "mar." / …
+            String dayName = day.getDisplayName(TextStyle.SHORT, Locale.FRENCH);
+
+            // "lun. 02 oct." when the week start is known
+            String label = dayName;
+            if (weekStartDate != null) {
+                LocalDate cellDate = weekStartDate.plusDays(dayIndex);
+                label = dayName + " " + cellDate.format(DAY_MONTH_FMT);
+            }
+
+            Span dayLabel = new Span(label);
             dayLabel.addClassName("timetable-grid-header");
             dayLabel.addClassName("timetable-grid-header-day");
             dayLabel.addClassName(LumoUtility.TextAlignment.CENTER);
@@ -215,12 +248,20 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             content.addClassName("timetable-grid-cell--multi-hour");
         }
 
-        Object key = config.getCategoryKeyExtractor().apply(slot);
-        List<String[]> palette = config.getPalette();
-        int idx = key != null ? Math.floorMod(key.hashCode(), palette.size()) : 0;
-        String[] colors = palette.get(idx);
-        content.getStyle().set("--slot-bg", colors[0]);
-        content.getStyle().set("--slot-accent", colors[1]);
+        // ---- Colour: prefer the event's own colour, fall back to category palette ----
+        String explicit = safeApply(config.getColorExtractor(), slot, null);
+        if (explicit != null && explicit.matches(HEX_RE)) {
+            content.getStyle().set("--slot-accent", explicit);
+            String bg = lighten(explicit, 0.85);
+            content.getStyle().set("--slot-bg", bg != null ? bg : explicit);
+        } else {
+            Object key = config.getCategoryKeyExtractor().apply(slot);
+            List<String[]> palette = config.getPalette();
+            int idx = key != null ? Math.floorMod(key.hashCode(), palette.size()) : 0;
+            String[] colors = palette.get(idx);
+            content.getStyle().set("--slot-bg", colors[0]);
+            content.getStyle().set("--slot-accent", colors[1]);
+        }
 
         config.getSlotContentPopulator().accept(content, slot);
 
@@ -262,24 +303,16 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return menuBar;
     }
 
-    /**
-     * Builds a tooltip from the configured extractors.
-     * Every extractor access is null-safe so a config that forgot to set an
-     * optional extractor will not throw NPE here.
-     */
     private String buildTooltipText(E evt) {
         StringBuilder sb = new StringBuilder();
 
-        // Title
         sb.append(safeApply(config.getTitleExtractor(), evt, ""));
 
-        // Description
         String desc = safeApply(config.getDescriptionExtractor(), evt, null);
         if (desc != null && !desc.isBlank()) {
             sb.append("\n").append(desc);
         }
 
-        // Date (if date extractor is provided)
         if (config.getDateExtractor() != null) {
             LocalDate date = config.getDateExtractor().apply(evt);
             if (date != null) {
@@ -287,18 +320,15 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             }
         }
 
-        // Time range
         LocalTime start = safeApply(config.getStartTimeExtractor(), evt, LocalTime.MIDNIGHT);
         LocalTime end = safeApply(config.getEndTimeExtractor(), evt, LocalTime.MIDNIGHT);
         sb.append("\n").append(start).append(" – ").append(end);
 
-        // Owner
         String owner = safeApply(config.getOwnerExtractor(), evt, null);
         if (owner != null && !owner.isBlank()) {
             sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
         }
 
-        // Location
         String location = safeApply(config.getLocationExtractor(), evt, null);
         if (location != null && !location.isBlank()) {
             sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);

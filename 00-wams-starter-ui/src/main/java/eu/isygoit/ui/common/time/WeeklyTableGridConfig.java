@@ -29,6 +29,7 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
     private Function<E, Object> categoryKeyExtractor;
     private Function<E, String> ownerExtractor;
     private Function<E, LocalDate> dateExtractor;
+    private Function<E, String> colorExtractor;          // NEW
 
     // ---- Handlers ----
     private Predicate<E> isEditable;
@@ -103,6 +104,12 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
 
     public WeeklyTableGridConfig<E> withDateExtractor(Function<E, LocalDate> extractor) {
         this.dateExtractor = extractor;
+        return this;
+    }
+
+    /** NEW — per-event colour (hex string, may be null/blank). */
+    public WeeklyTableGridConfig<E> withColorExtractor(Function<E, String> extractor) {
+        this.colorExtractor = extractor;
         return this;
     }
 
@@ -193,6 +200,7 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
         if (descriptionExtractor == null) descriptionExtractor = e -> "";
         if (ownerExtractor == null) ownerExtractor = e -> "";
         if (dateExtractor == null) dateExtractor = e -> null;
+        if (colorExtractor == null) colorExtractor = e -> null;   // NEW
 
         if (isEditable == null) isEditable = s -> true;
         if (onEventClick == null) onEventClick = s -> {
@@ -268,6 +276,11 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
 
     public Function<E, LocalDate> getDateExtractor() {
         return dateExtractor;
+    }
+
+    /** NEW — per-event colour extractor, never null after {@code build()}. */
+    public Function<E, String> getColorExtractor() {
+        return colorExtractor;
     }
 
     public Predicate<E> getIsEditable() {
