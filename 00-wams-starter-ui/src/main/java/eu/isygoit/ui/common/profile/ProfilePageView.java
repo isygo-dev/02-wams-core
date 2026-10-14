@@ -19,6 +19,7 @@ import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.AccountStatDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.dialog.ImageCropperDialog;
+import eu.isygoit.ui.common.layout.BaseMainLayout;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -199,6 +200,8 @@ public class ProfilePageView extends ManagementVerticalView {
             ResponseEntity<AccountDto> response = profileService.uploadAvatar(imageFile);
             if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
                 currentAccount = response.getBody();
+                // The sidebar and header avatars cache the image for the session: drop it so they pick up the new one.
+                BaseMainLayout.invalidateAvatarCache(currentAccount.getId());
                 loadProfileImage(header.getAvatar());
                 Notification.show(I18n.t("profile.avatar.updated"), 3000, Notification.Position.BOTTOM_END);
             } else {

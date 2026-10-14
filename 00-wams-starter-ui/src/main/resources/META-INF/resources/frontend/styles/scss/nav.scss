@@ -2,8 +2,11 @@
  * Styling for eu.isygoit.ui.common.component.CollapsibleNavSection, used by
  * every <Module>MainLayout to group sidebar navigation under a clickable,
  * collapsible header. All visual behavior lives here — the Java class only
- * assembles DOM structure and toggles the --expanded modifier class.
+ * assembles DOM structure and toggles the --expanded / --rail modifier classes.
  * Imported directly by the component via @CssImport.
+ *
+ * Direction-neutral: only logical properties (inline-start/end) are used, and
+ * the chevron is mirrored for dir="rtl", so the same rules serve Arabic.
  */
 
 .wams-collapsible-nav-section {
@@ -34,10 +37,18 @@
 }
 
 .wams-collapsible-nav-section__title {
+  flex: 1;
   font-size: var(--lumo-font-size-s);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+/* The group icon is only shown on the icon rail, where it opens the flyout. */
+
+.wams-collapsible-nav-section__rail-icon {
+  display: none;
+  flex-shrink: 0;
 }
 
 .wams-collapsible-nav-section__toggle-icon {
@@ -47,6 +58,14 @@
 
 .wams-collapsible-nav-section--expanded .wams-collapsible-nav-section__toggle-icon {
   transform: rotate(90deg);
+}
+
+[dir='rtl'] .wams-collapsible-nav-section__toggle-icon {
+  transform: scaleX(-1);
+}
+
+[dir='rtl'] .wams-collapsible-nav-section--expanded .wams-collapsible-nav-section__toggle-icon {
+  transform: scaleX(-1) rotate(90deg);
 }
 
 /* ── Content (collapsible body) ──────────────────────────────────────── */
@@ -70,54 +89,61 @@
   padding-inline-start: var(--lumo-space-l);
 }
 
-/* ── Collapsed sidebar (icon-only rail) ──────────────────────────────────
-   BaseMainLayout adds 'wams-sidebar-collapsed' to the layout's root element.
-   The header (title + chevron) disappears — same treatment as a plain
-   SideNav's [slot='label'] in layout/_app-shell.scss — and every item stays visible as
-   an icon regardless of accordion state, matching how a plain (non-
-   collapsible) SideNav group behaves once the sidebar itself collapses. ── */
+/* ── Icon rail (desktop only) ────────────────────────────────────────────
+   BaseMainLayout adds 'wams-sidebar-collapsed' to the layout root. On the
+   rail a group is just its icon: the title, chevron and inline items are
+   hidden, and hovering or clicking the icon opens a flyout (a Popover that
+   Java enables only while the rail is active) listing the group's items.
+   The icon is tinted when the current page lives inside the group. ─────── */
 
-.wams-sidebar-collapsed .wams-collapsible-nav-section__title,
-.wams-sidebar-collapsed .wams-collapsible-nav-section__toggle-icon {
-  display: none;
+@media (min-width: 801px) {
+  .wams-sidebar-collapsed .wams-collapsible-nav-section__title,
+  .wams-sidebar-collapsed .wams-collapsible-nav-section__toggle-icon,
+  .wams-sidebar-collapsed .wams-collapsible-nav-section__content {
+    display: none;
+  }
+
+  .wams-sidebar-collapsed .wams-collapsible-nav-section__rail-icon {
+    display: inline-block;
+  }
+
+  .wams-sidebar-collapsed .wams-collapsible-nav-section__header {
+    justify-content: center;
+    padding: var(--lumo-space-s);
+    min-height: 40px;
+  }
+
+  .wams-sidebar-collapsed .wams-collapsible-nav-section:has(vaadin-side-nav-item[current]) .wams-collapsible-nav-section__rail-icon {
+    color: var(--lumo-primary-color);
+  }
 }
 
-.wams-sidebar-collapsed .wams-collapsible-nav-section__header {
-  justify-content: center;
-  padding: var(--lumo-space-s);
-  position: relative;
+/* ── Flyout (rendered in the overlay layer, outside the drawer) ──────────── */
+
+.wams-nav-flyout::part(overlay) {
+  min-width: 200px;
+  padding: var(--lumo-space-xs);
 }
 
-.wams-sidebar-collapsed .wams-collapsible-nav-section__content {
-  max-height: none;
-  overflow: visible;
+.wams-nav-flyout__title {
+  display: block;
+  padding: var(--lumo-space-xs) var(--lumo-space-m);
+  font-size: var(--lumo-font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--lumo-tertiary-text-color);
 }
 
-.wams-sidebar-collapsed .wams-collapsible-nav-section__items vaadin-side-nav-item {
-  padding-inline-start: 0;
+.wams-nav-flyout__items vaadin-side-nav-item::part(link) {
+  border-radius: var(--lumo-border-radius-m);
+  min-height: 36px;
 }
 
-/* Section title surfaces as a hover tooltip next to the icon rail. */
-
-.wams-sidebar-collapsed .wams-collapsible-nav-section__header:hover::after {
-  content: attr(data-title);
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-left: var(--lumo-space-xs);
-  background: var(--lumo-base-color);
-  color: var(--lumo-body-text-color);
-  border: 1px solid var(--lumo-contrast-10pct);
-  padding: var(--lumo-space-xs) var(--lumo-space-s);
-  border-radius: var(--lumo-border-radius-s);
-  box-shadow: var(--lumo-box-shadow-s);
-  font-size: var(--lumo-font-size-s);
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: normal;
-  white-space: nowrap;
-  z-index: 100;
+.wams-nav-flyout__items vaadin-side-nav-item[current]::part(link) {
+  background-color: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+  font-weight: 600;
 }
 
 @media (prefers-reduced-motion: reduce) {

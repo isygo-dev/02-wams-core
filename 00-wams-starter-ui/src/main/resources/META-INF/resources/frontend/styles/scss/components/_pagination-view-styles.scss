@@ -100,8 +100,10 @@ color 0.15s ease;
   user-select: none;
 }
 
-// ── Dark theme (optional) ────────────────────────────────────
-:host([theme~="dark"]) .pagination-bar {
+// ── Dark theme ───────────────────────────────────────────────
+// Lumo's dark mode is an attribute on the document root, not on each component, so the dark rules apply under
+// html[theme~="dark"] as well as under a component-level theme="dark".
+@mixin pagination-dark {
   .pagination-btn {
     background: #1e1e1e;
     border-color: #424242;
@@ -127,4 +129,12 @@ color 0.15s ease;
   .pagination-ellipsis {
     color: #9e9e9e;
   }
+}
+
+:host([theme~="dark"]) .pagination-bar {
+  @include pagination-dark;
+}
+
+[theme~="dark"] .pagination-bar {
+  @include pagination-dark;
 }

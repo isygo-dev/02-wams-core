@@ -22,7 +22,7 @@
 }
 
 .wams-main-header__right {
-  margin-right: var(--lumo-space-m);
+  margin-inline-end: var(--lumo-space-m);
 }
 
 /* Touch-target sizing: Lumo's LUMO_TERTIARY_INLINE button variant strips
@@ -66,7 +66,7 @@ vaadin-drawer-toggle {
   width: 28px;
   height: 28px;
   padding: 5px;
-  margin-right: var(--lumo-space-s);
+  margin-inline-end: var(--lumo-space-s);
   border-radius: var(--lumo-border-radius-l);
   color: var(--lumo-primary-contrast-color);
   background: linear-gradient(135deg, var(--lumo-primary-color), var(--wams-module-accent, #0055CC));
@@ -289,7 +289,7 @@ vaadin-app-layout {
 vaadin-app-layout::part(drawer) {
   transition: width 0.2s ease, transform var(--vaadin-app-layout-transition, 200ms), visibility var(--vaadin-app-layout-transition, 200ms);
   background: var(--lumo-base-color);
-  border-right: 1px solid var(--lumo-contrast-10pct);
+  border-inline-end: 1px solid var(--lumo-contrast-10pct);
 }
 
 .wams-sidebar-collapsed {
@@ -354,6 +354,11 @@ vaadin-side-nav-item[current]::part(link) {
   box-shadow: inset 3px 0 0 0 var(--lumo-primary-color);
 }
 
+/* The active bar sits on the inline-start edge: the right edge in Arabic. */
+[dir='rtl'] vaadin-side-nav-item[current]::part(link) {
+  box-shadow: inset -3px 0 0 0 var(--lumo-primary-color);
+}
+
 vaadin-side-nav-item[current]::part(link) vaadin-icon,
 vaadin-side-nav-item[current]::part(link) [slot='prefix'] {
   color: var(--lumo-primary-color);
@@ -379,6 +384,70 @@ vaadin-side-nav-item[slot='children'] {
 .wams-sidebar-collapse-toggle:hover {
   background-color: var(--lumo-contrast-5pct);
   color: var(--lumo-primary-color);
+}
+
+/* The chevron points at the sidebar's own edge, so it mirrors with the direction. */
+[dir='rtl'] .wams-sidebar-collapse-toggle vaadin-icon {
+  transform: scaleX(-1);
+}
+
+/* ── Drawer footer: user card + collapse toggle ──────────────────────────── */
+
+.wams-drawer-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--lumo-contrast-10pct);
+}
+
+.wams-drawer-footer .wams-sidebar-collapse-toggle {
+  border-top: 0;
+}
+
+.wams-user-card {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+  margin: var(--lumo-space-xs) var(--lumo-space-s);
+  padding: var(--lumo-space-xs) var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-m);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.wams-user-card:hover {
+  background-color: var(--lumo-contrast-5pct);
+}
+
+.wams-user-card:focus-visible {
+  outline: 2px solid var(--lumo-primary-color);
+  outline-offset: -2px;
+}
+
+.wams-user-card__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.wams-user-card__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--lumo-font-size-s);
+  font-weight: 600;
+  color: var(--lumo-header-text-color);
+}
+
+.wams-user-card__role {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-secondary-text-color);
+}
+
+.wams-user-card__role:empty {
+  display: none;
 }
 
 /* ── Collapsed (icon-rail) mode: hide labels/section headers, show icons only.
@@ -426,5 +495,16 @@ vaadin-side-nav-item[slot='children'] {
 
   .wams-sidebar-collapsed vaadin-side-nav-item[slot='children'] {
     padding-inline-start: 0;
+  }
+
+  /* Icon rail: the user card shrinks to its avatar, centred. */
+  .wams-sidebar-collapsed .wams-user-card {
+    justify-content: center;
+    margin-inline: var(--lumo-space-xs);
+    padding-inline: 0;
+  }
+
+  .wams-sidebar-collapsed .wams-user-card__text {
+    display: none;
   }
 }

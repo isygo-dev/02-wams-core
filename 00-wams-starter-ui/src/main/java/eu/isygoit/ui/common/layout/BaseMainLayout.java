@@ -2,6 +2,7 @@ package eu.isygoit.ui.common.layout;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -27,12 +28,15 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.dto.data.AccountDto;
+import com.vaadin.flow.shared.Registration;
+import eu.isygoit.dto.response.UserDataResponseDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.component.AppSearchBar;
+import eu.isygoit.ui.common.component.CollapsibleNavSection;
 import eu.isygoit.ui.common.component.LanguageSelectorComponent;
+import eu.isygoit.ui.common.component.ThemeToggleButton;
 import eu.isygoit.ui.common.nav.NavRegistryProvider;
 import eu.isygoit.ui.common.spring.SpringContextUtil;
 import eu.isygoit.util.SecurityUtils;
@@ -64,6 +68,10 @@ import java.nio.charset.StandardCharsets;
 public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
 
     private static final String SIDEBAR_COLLAPSED_SESSION_KEY = "wams-sidebar-collapsed";
+    /**
+     * Above this viewport width the drawer is a docked sidebar; at or below it, an overlay (see _app-shell.scss).
+     */
+    private static final int DESKTOP_MIN_WIDTH = 800;
 
     private final NavRegistryProvider navRegistryProvider;
     private final AccountService accountService;
@@ -71,6 +79,9 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     private Div rightSlot; // container for search/notifications/settings/language/profile
     private Button sidebarCollapseToggle;
     private boolean sidebarCollapsed;
+    private Div drawerRoot;
+    private boolean desktopViewport = true;
+    private Registration resizeRegistration;
 
     public BaseMainLayout() {
         // Retrieve services statically (layout is not a Spring bean)
@@ -81,6 +92,10 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         if (!getModuleKey().isBlank()) {
             addClassName("wams-module-" + getModuleKey());
         }
+
+        // The drawer docks on the inline-start side: set the direction on the layout itself too, so the sidebar is
+        // on the right for Arabic from the first render, whatever the document-level attribute timing.
+        getElement().setAttribute("dir", PageEnvironment.currentDirection());
 
         this.sidebarCollapsed = isSidebarCollapsedInSession();
         if (sidebarCollapsed) {
@@ -198,6 +213,30 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         // settings, language selector, profile)
         rightSlot.removeAll();
         rightSlot.add(createRightHeaderContent());
+
+        // Direction, language and light/dark theme, re-applied on every layout so they survive full page loads and
+        // module switches (see PageEnvironment).
+        UI ui = attachEvent.getUI();
+        PageEnvironment.apply(ui);
+
+        // Track whether the drawer is the desktop sidebar (rail allowed) or the mobile overlay.
+        ui.getPage().executeJs("return window.innerWidth").then(Integer.class, width -> {
+            desktopViewport = width != null && width > DESKTOP_MIN_WIDTH;
+            applyRailMode();
+        });
+        resizeRegistration = ui.getPage().addBrowserWindowResizeListener(event -> {
+            desktopViewport = event.getWidth() > DESKTOP_MIN_WIDTH;
+            applyRailMode();
+        });
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        if (resizeRegistration != null) {
+            resizeRegistration.remove();
+            resizeRegistration = null;
+        }
+        super.onDetach(detachEvent);
     }
 
     /**
@@ -226,7 +265,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         iconCluster.setSpacing(true);
         iconCluster.setPadding(false);
         iconCluster.add(createSearchToggleButton(), createNotificationsButton(), createSettingsButton(),
-                new LanguageSelectorComponent(), createProfileComponent());
+                new ThemeToggleButton(), new LanguageSelectorComponent(), createProfileComponent());
 
         rightContent.add(searchSlot, iconCluster);
         return rightContent;
@@ -288,32 +327,24 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
         menuBar.addClassName("wams-profile-menu");
 
-        AccountDto currentAccount = getCurrentAccount();
+        // Same source as the sidebar user card, so the header and the footer always show the same person.
+        UserDataResponseDto currentUser = loadCurrentUser();
 
-        Avatar avatar = new Avatar();
+        Avatar avatar = new Avatar(displayNameOf(currentUser));
         avatar.setThemeName("small");
         avatar.addClassName("wams-avatar-bordered");
-
-        if (currentAccount != null) {
-            String fullName = currentAccount.getFullName();
-            if (fullName != null && !fullName.isBlank()) {
-                avatar.setName(fullName);
-            } else {
-                avatar.setName(currentAccount.getEmail());
-            }
-            loadProfileImage(avatar, currentAccount.getId());
-        } else {
-            avatar.setName(I18n.t("common.layout.avatar.user.default.name"));
+        if (currentUser != null) {
+            loadProfileImage(avatar, currentUser.getId());
         }
 
         MenuItem menuItem = menuBar.addItem(avatar);
         menuItem.getElement().setAttribute("aria-label", I18n.t("common.layout.avatar.profile"));
         SubMenu subMenu = menuItem.getSubMenu();
 
-        if (currentAccount != null) {
+        if (currentUser != null) {
             Span name = new Span(avatar.getName());
             name.addClassName("wams-profile-menu__name");
-            Span email = new Span(currentAccount.getEmail() != null ? currentAccount.getEmail() : "");
+            Span email = new Span(currentUser.getEmail() != null ? currentUser.getEmail() : "");
             email.addClassName("wams-profile-menu__email");
             Div identity = new Div(name, email);
             identity.addClassName("wams-profile-menu__identity");
@@ -344,11 +375,108 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         Div scrollArea = new Div(content);
         scrollArea.addClassName("wams-drawer-scroll-area");
 
-        Div wrapper = new Div(scrollArea, createSidebarCollapseToggle());
+        Div footer = new Div(createSidebarUserCard(), createSidebarCollapseToggle());
+        footer.addClassName("wams-drawer-footer");
+
+        Div wrapper = new Div(scrollArea, footer);
         wrapper.addClassName("wams-drawer-wrapper");
         wrapper.setSizeFull();
 
+        drawerRoot = wrapper;
         addToDrawer(wrapper);
+        applyRailMode();
+    }
+
+    /**
+     * User card pinned above the collapse toggle: avatar, name and role (avatar only on the icon rail). Opens the
+     * profile page. The data comes from the identity service once per session.
+     */
+    private Component createSidebarUserCard() {
+        UserDataResponseDto user = loadCurrentUser();
+
+        String displayName = displayNameOf(user);
+        Avatar avatar = new Avatar(displayName);
+        avatar.setThemeName("small");
+        avatar.addClassName("wams-avatar-bordered");
+        if (user != null) {
+            loadProfileImage(avatar, user.getId());
+        }
+
+        Span name = new Span(displayName);
+        name.addClassName("wams-user-card__name");
+        String roleText = user != null && user.getRole() != null ? user.getRole() : "";
+        Span role = new Span(roleText);
+        role.addClassName("wams-user-card__role");
+        Div text = new Div(name, role);
+        text.addClassName("wams-user-card__text");
+
+        Div card = new Div(avatar, text);
+        card.addClassName("wams-user-card");
+        card.getElement().setAttribute("role", "link");
+        card.getElement().setAttribute("tabindex", "0");
+        card.getElement().setAttribute("aria-label", I18n.t("common.layout.avatar.profile"));
+        Tooltip.forComponent(card).setText(displayName);
+        card.addClickListener(e -> UI.getCurrent().navigate(getProfileRoute()));
+        return card;
+    }
+
+    private static String displayNameOf(UserDataResponseDto user) {
+        if (user != null) {
+            String full = ((user.getFirstName() != null ? user.getFirstName() : "") + " "
+                    + (user.getLastName() != null ? user.getLastName() : "")).trim();
+            if (!full.isEmpty()) {
+                return full;
+            }
+            if (user.getUserName() != null && !user.getUserName().isBlank()) {
+                return user.getUserName();
+            }
+            if (user.getEmail() != null && !user.getEmail().isBlank()) {
+                return user.getEmail();
+            }
+        }
+        Object sessionUser = SecurityUtils.getCurrentUser();
+        return sessionUser != null ? sessionUser.toString() : I18n.t("common.layout.avatar.user.default.name");
+    }
+
+    private UserDataResponseDto loadCurrentUser() {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session != null) {
+            UserDataResponseDto cached = session.getAttribute(UserDataResponseDto.class);
+            if (cached != null) {
+                return cached;
+            }
+        }
+        try {
+            ResponseEntity<UserDataResponseDto> response = accountService.connectedUser();
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                if (session != null) {
+                    session.setAttribute(UserDataResponseDto.class, response.getBody());
+                }
+                return response.getBody();
+            }
+        } catch (Exception e) {
+            log.warn("Could not load the signed-in user for the sidebar card", e);
+        }
+        return null;
+    }
+
+    /**
+     * The group flyouts only make sense on the desktop icon rail; on the overlay drawer (below 800px) groups keep
+     * their normal accordion behaviour even if the rail preference is stored in the session.
+     */
+    private void applyRailMode() {
+        if (drawerRoot == null) {
+            return;
+        }
+        boolean rail = sidebarCollapsed && desktopViewport;
+        forEachNavSection(drawerRoot, section -> section.setRailMode(rail));
+    }
+
+    private static void forEachNavSection(Component root, java.util.function.Consumer<CollapsibleNavSection> action) {
+        if (root instanceof CollapsibleNavSection section) {
+            action.accept(section);
+        }
+        root.getChildren().forEach(child -> forEachNavSection(child, action));
     }
 
     /**
@@ -372,6 +500,7 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     private void toggleSidebarCollapsed() {
         sidebarCollapsed = !sidebarCollapsed;
         getElement().getClassList().set("wams-sidebar-collapsed", sidebarCollapsed);
+        applyRailMode();
         sidebarCollapseToggle.setIcon(collapseToggleIcon());
         sidebarCollapseToggle.setTooltipText(collapseToggleTooltip());
         if (VaadinSession.getCurrent() != null) {
@@ -396,51 +525,62 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         return Boolean.TRUE.equals(VaadinSession.getCurrent().getAttribute(SIDEBAR_COLLAPSED_SESSION_KEY));
     }
 
-    private AccountDto getCurrentAccount() {
-        try {
-            var authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication != null && authentication.isAuthenticated()) {
-                Object principal = authentication.getPrincipal();
-                if (principal instanceof AccountDto) {
-                    return (AccountDto) principal;
-                }
-            }
-            if (VaadinSession.getCurrent() != null) {
-                return VaadinSession.getCurrent().getAttribute(AccountDto.class);
-            }
-        } catch (Exception e) {
-            // ignore
+    /**
+     * Gives the avatar a lazily-streamed image: the browser fetches it through Vaadin's own stream handler when
+     * the avatar is rendered, so nothing has to be pushed from a background thread (the layouts do not enable
+     * server push, which is why an image loaded on another thread never showed up). When there is no image or the
+     * call fails, the stream is empty, the browser reports a load error and the avatar falls back to initials.
+     */
+    private void loadProfileImage(Avatar avatar, Long accountId) {
+        if (accountId == null) {
+            return;
         }
-        // For development without auth, return a fake account
-        AccountDto fake = new AccountDto();
-        fake.setId(1L);
-        fake.setEmail("demo@isygoit.eu");
-        fake.setFullName("Demo User");
-        return fake;
+        avatar.setImageResource(new StreamResource("profile_" + accountId + ".jpg",
+                () -> new ByteArrayInputStream(avatarBytes(accountId))));
     }
 
-    private void loadProfileImage(Avatar avatar, Long accountId) {
-        UI ui = UI.getCurrent();
-        if (accountId == null || ui == null) return;
-        // UI.getCurrent() is null on a plain thread, so the UI is captured up front.
-        Thread loader = new Thread(() -> {
-            try {
-                ResponseEntity<Resource> response = accountImageService.downloadImage(accountId);
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    byte[] imageBytes = response.getBody().getContentAsByteArray();
-                    ui.access(() -> avatar.setImageResource(new StreamResource(
-                            "profile_" + accountId + ".jpg", () -> new ByteArrayInputStream(imageBytes))));
-                }
-            } catch (FeignException ex) {
-                if (ex.status() != 404) {
-                    log.warn("Failed to load profile image for account {}", accountId, ex);
-                }
-            } catch (IOException | RuntimeException ex) {
+    private byte[] avatarBytes(Long accountId) {
+        VaadinSession session = VaadinSession.getCurrent();
+        String cacheKey = avatarCacheKey(accountId);
+        if (session != null && session.getAttribute(cacheKey) instanceof byte[] cached) {
+            return cached;
+        }
+
+        byte[] bytes = new byte[0];
+        boolean cacheable = true;
+        try {
+            ResponseEntity<Resource> response = accountImageService.downloadImage(accountId);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                bytes = response.getBody().getContentAsByteArray();
+            }
+        } catch (FeignException ex) {
+            // 404 = the account has no image: remember that. Anything else may be temporary: try again later.
+            if (ex.status() != 404) {
+                cacheable = false;
                 log.warn("Failed to load profile image for account {}", accountId, ex);
             }
-        }, "wams-profile-image-loader");
-        loader.setDaemon(true);
-        loader.start();
+        } catch (IOException | RuntimeException ex) {
+            cacheable = false;
+            log.warn("Failed to load profile image for account {}", accountId, ex);
+        }
+        if (cacheable && session != null) {
+            session.setAttribute(cacheKey, bytes);
+        }
+        return bytes;
+    }
+
+    private static String avatarCacheKey(Long accountId) {
+        return "wams-avatar-" + accountId;
+    }
+
+    /**
+     * Drops the cached avatar so the next layout shows the new image (call after an upload or removal).
+     */
+    public static void invalidateAvatarCache(Long accountId) {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session != null && accountId != null) {
+            session.setAttribute(avatarCacheKey(accountId), null);
+        }
     }
 
     private void logout() {

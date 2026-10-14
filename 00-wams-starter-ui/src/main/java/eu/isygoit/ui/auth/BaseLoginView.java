@@ -14,6 +14,7 @@ import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.flow.component.UIDetachedException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.auth.AuthServiceFacade.Failure;
+import eu.isygoit.ui.common.layout.PageEnvironment;
 import eu.isygoit.util.SecurityUtils;
 
 import java.util.concurrent.CompletionException;
@@ -62,6 +63,7 @@ public abstract class BaseLoginView extends Div implements BeforeEnterObserver, 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         event.getUI().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
+        PageEnvironment.apply(event.getUI());
         redirectTarget = SecurityUtils.consumeRedirect();
         if (redirectTarget == null) {
             redirectTarget = event.getLocation()

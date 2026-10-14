@@ -31,7 +31,7 @@ public class KmsMainLayout extends BaseMainLayout {
         overview.addItem(navItem(I18n.t("kms.nav.dashboard"), "kms/home", VaadinIcon.HOME));
 
         CollapsibleNavSection keyManagement = new CollapsibleNavSection(
-                I18n.t("kms.nav.key.management"),
+                I18n.t("kms.nav.key.management"), VaadinIcon.KEY,
                 navItem(I18n.t("kms.nav.keys"), "kms/keys", VaadinIcon.KEY),
                 navItem(I18n.t("kms.nav.aliases"), "kms/aliases", VaadinIcon.LINK),
                 navItem(I18n.t("kms.nav.tags"), "kms/tags", VaadinIcon.TAGS),
@@ -43,20 +43,20 @@ public class KmsMainLayout extends BaseMainLayout {
         );
 
         CollapsibleNavSection generators = new CollapsibleNavSection(
-                I18n.t("kms.nav.key.value.generators"),
+                I18n.t("kms.nav.key.value.generators"), VaadinIcon.MAGIC,
                 navItem(I18n.t("kms.nav.random.keys"), "kms/random-keys", VaadinIcon.RANDOM),
                 navItem(I18n.t("kms.nav.incremental.key"), "kms/incremental-key", VaadinIcon.CLOCK)
         );
 
         CollapsibleNavSection secrets = new CollapsibleNavSection(
-                I18n.t("kms.nav.secrets"),
+                I18n.t("kms.nav.secrets"), VaadinIcon.LOCK,
                 navItem(I18n.t("kms.nav.peb.config"), "kms/peb-configs", VaadinIcon.COG),
                 navItem(I18n.t("kms.nav.digest.config"), "kms/digest-configs", VaadinIcon.HASH),
                 navItem(I18n.t("kms.nav.password.config"), "kms/password-configs", VaadinIcon.ASTERISK)
         );
 
         CollapsibleNavSection tokenizer = new CollapsibleNavSection(
-                I18n.t("kms.nav.tokenizer"),
+                I18n.t("kms.nav.tokenizer"), VaadinIcon.TICKET,
                 navItem(I18n.t("kms.nav.token.configurations"), "kms/token-configs", VaadinIcon.TABLE),
                 navItem(I18n.t("kms.nav.token.builder"), "kms/token-builder", VaadinIcon.COG)
         );

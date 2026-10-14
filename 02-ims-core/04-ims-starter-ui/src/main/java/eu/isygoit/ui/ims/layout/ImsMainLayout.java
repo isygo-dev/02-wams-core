@@ -32,7 +32,7 @@ public class ImsMainLayout extends BaseMainLayout {
 
         // "Who's who": people/organization records.
         CollapsibleNavSection directory = new CollapsibleNavSection(
-                I18n.t("ims.nav.section.directory"),
+                I18n.t("ims.nav.section.directory"), VaadinIcon.USERS,
                 navItem(I18n.t("ims.nav.accounts"), "ims/accounts", VaadinIcon.USER),
                 navItem(I18n.t("ims.nav.customers"), "ims/customers", VaadinIcon.GROUP),
                 navItem(I18n.t("ims.nav.tenants"), "ims/tenants", VaadinIcon.BUILDING),
@@ -41,14 +41,14 @@ public class ImsMainLayout extends BaseMainLayout {
 
         // Access control: what can reach the system, and with which permissions.
         CollapsibleNavSection access = new CollapsibleNavSection(
-                I18n.t("ims.nav.section.access"),
+                I18n.t("ims.nav.section.access"), VaadinIcon.LOCK,
                 navItem(I18n.t("ims.nav.roles"), "ims/roles", VaadinIcon.SHIELD),
                 navItem(I18n.t("ims.nav.applications"), "ims/applications", VaadinIcon.PAPERCLIP)
         );
 
         // System-level configuration/extensibility records.
         CollapsibleNavSection configuration = new CollapsibleNavSection(
-                I18n.t("ims.nav.section.configuration"),
+                I18n.t("ims.nav.section.configuration"), VaadinIcon.COG,
                 navItem(I18n.t("ims.nav.parameters"), "ims/parameters", VaadinIcon.KEYBOARD),
                 navItem(I18n.t("ims.nav.annexes"), "ims/annexes", VaadinIcon.FOLDER_OPEN)
         );

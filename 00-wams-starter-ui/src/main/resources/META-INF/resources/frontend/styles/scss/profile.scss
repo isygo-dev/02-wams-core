@@ -687,20 +687,22 @@
 
 /* ── Dark Mode Support ─────────────────────────────────────────────────── */
 
-@media (prefers-color-scheme: dark) {
-  .profile-header-card,
-  .profile-section-card,
-  .profile-connection-item {
-    background: var(--lumo-shade-20pct);
-  }
+/* Follows Lumo's dark theme (theme="dark" on the document root, set by the header
+   toggle or the stored/OS preference) rather than the OS media query alone, so
+   the manual switch applies to the profile page too. */
 
-  .profile-connection-item:hover {
-    background: var(--lumo-shade-30pct);
-  }
+[theme~='dark'] .profile-header-card,
+[theme~='dark'] .profile-section-card,
+[theme~='dark'] .profile-connection-item {
+  background: var(--lumo-shade-20pct);
+}
 
-  /* Highcharts honours its own theme colours; only soften the frame so the
-     chart doesn't glare against the dark card. */
-  .profile-chart-holder {
-    background: transparent;
-  }
+[theme~='dark'] .profile-connection-item:hover {
+  background: var(--lumo-shade-30pct);
+}
+
+/* Highcharts honours its own theme colours; only soften the frame so the
+   chart doesn't glare against the dark card. */
+[theme~='dark'] .profile-chart-holder {
+  background: transparent;
 }

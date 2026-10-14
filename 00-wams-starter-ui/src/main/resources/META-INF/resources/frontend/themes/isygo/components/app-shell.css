@@ -85,6 +85,10 @@ vaadin-side-nav-item[current]::part(link) {
     font-weight: 600;
 }
 
+html[dir="rtl"] vaadin-side-nav-item[current]::part(link) {
+    box-shadow: inset -3px 0 0 var(--module-accent-strong, var(--lumo-primary-text-color));
+}
+
 vaadin-side-nav-item[current]::part(link) vaadin-icon,
 vaadin-side-nav-item[current]::part(link) [slot="prefix"] {
     color: var(--module-accent-strong, var(--lumo-primary-text-color));

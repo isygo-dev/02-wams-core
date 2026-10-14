@@ -40,6 +40,33 @@
   background: #f7f8f9;
 }
 
+// Dark theme (Lumo's html[theme~="dark"]): the light-mode text colours above are too dark on a dark surface, so
+// the tags switch to the theme's own readable text colours with the same translucent washes.
+[theme~="dark"] .wams-enum-tag--success {
+  color: var(--lumo-success-text-color);
+  background: var(--lumo-success-color-10pct);
+}
+
+[theme~="dark"] .wams-enum-tag--warning {
+  color: var(--lumo-warning-text-color);
+  background: var(--lumo-warning-color-10pct);
+}
+
+[theme~="dark"] .wams-enum-tag--danger {
+  color: var(--lumo-error-text-color);
+  background: var(--lumo-error-color-10pct);
+}
+
+[theme~="dark"] .wams-enum-tag--info {
+  color: var(--lumo-primary-text-color);
+  background: var(--lumo-primary-color-10pct);
+}
+
+[theme~="dark"] .wams-enum-tag--neutral {
+  color: var(--lumo-secondary-text-color);
+  background: var(--lumo-contrast-10pct);
+}
+
 // Larger variant used when a tag stands in for a card title.
 .wams-enum-tag--title {
   font-size: var(--lumo-font-size-m);

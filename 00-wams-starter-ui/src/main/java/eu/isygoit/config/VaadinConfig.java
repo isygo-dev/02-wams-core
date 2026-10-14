@@ -4,12 +4,10 @@ import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import eu.isygoit.i18n.CustomI18nProvider;
-import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.layout.PageEnvironment;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.Locale;
 
 /**
  * Configuration Vaadin pour l'application.
@@ -32,15 +30,9 @@ public class VaadinConfig implements VaadinServiceInitListener {
         event.getSource().addUIInitListener(uiInitEvent -> {
             var ui = uiInitEvent.getUI();
             ui.getLoadingIndicatorConfiguration().setApplyDefaultTheme(false);
-
-            String direction = isRightToLeft(I18n.getCurrentLocale()) ? "rtl" : "ltr";
-            ui.getElement().setAttribute("dir", direction);
-            ui.getPage().executeJs(
-                    "document.documentElement.setAttribute('dir', $0)", direction);
+            // Direction (Arabic = rtl), language and Lumo light/dark theme; layouts and sign-in views apply the
+            // same settings again when they are shown.
+            PageEnvironment.apply(ui);
         });
-    }
-
-    private boolean isRightToLeft(Locale locale) {
-        return locale != null && "ar".equalsIgnoreCase(locale.getLanguage());
     }
 }
