@@ -24,6 +24,7 @@ import eu.isygoit.service.IPasswordService;
 import eu.isygoit.service.ITenantService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -44,7 +45,25 @@ import java.util.Set;
 @Transactional
 public class PasswordService implements IPasswordService {
 
+    private static final int OTP_MAX_LENGTH = 8;
+
     private final AppProperties appProperties;
+
+    /**
+     * Wrong attempts allowed against one one-time code before it is locked.
+     */
+    @Value("${app.otp.max-attempts:5}")
+    private int otpMaxAttempts = 5;
+    /**
+     * Minimum delay before a new one-time code is issued; requests inside the window reuse the code already sent.
+     */
+    @Value("${app.otp.resend-cooldown-seconds:60}")
+    private int otpResendCooldownSeconds = 60;
+    /**
+     * Minimum one-time code length, whatever the tenant configuration says.
+     */
+    @Value("${app.otp.min-length:6}")
+    private int otpMinLength = 6;
 
     @Autowired
     private PasswordConfigRepository passwordConfigRepository;
@@ -102,6 +121,15 @@ public class PasswordService implements IPasswordService {
                 return accessKeyResponse;
             }
             case OTP -> {
+                //Resend cooldown: inside the window the code already sent stays valid and no new one is issued
+                //(no extra email, and nobody can keep invalidating a user's code by requesting new ones)
+                if (isOtpResendCoolingDown(account)) {
+                    log.info("OTP resend skipped (cooldown) for {}/{}", tenant, userName);
+                    return AccessKeyResponseDto.builder()
+                            .length(configuredOtpLength(tenant))
+                            .lifeTime(configuredOtpLifetime(tenant))
+                            .build();
+                }
                 //Generate OTP code
                 AccessKeyResponseDto accessKeyResponse = this.registerNewPassword(tenant, account, null, authType);
                 emailSenderService.sendOTPEmail(senderTenant, account, accessKeyResponse.getKey(), accessKeyResponse.getLifeTime());
@@ -180,7 +208,7 @@ public class PasswordService implements IPasswordService {
                     expiryDate = LocalDateTime.now().plusDays(90);
                 }
                 case OTP -> {
-                    length = 4;
+                    length = otpMinLength;
                     charSetType = IEnumCharSet.Types.NUMERIC;
                     lifetime = 3;
                     expiryDate = LocalDateTime.now().plusMinutes(3);
@@ -190,6 +218,10 @@ public class PasswordService implements IPasswordService {
                     throw new UnsuportedAuthTypeException("Auth type is missing or not supported: " + authType);
                 }
             }
+        }
+
+        if (authType == IEnumAuth.Types.OTP) {
+            length = clampOtpLength(length);
         }
 
         if (!StringUtils.hasText(newPassword)) {
@@ -240,6 +272,9 @@ public class PasswordService implements IPasswordService {
             if (IEnumAuth.Types.TOKEN == authType) {
                 return IEnumPasswordStatus.Types.VALID;
             }
+            if (IEnumAuth.Types.OTP == authType) {
+                return matchesOtp(senderTenant, account, userName, plainPassword);
+            }
             List<PasswordInfo> passwordInfos = passwordInfoRepository.findByUserIdAndAuthTypeOrderByCreateDateDesc(account.getId(), authType);
             if (!CollectionUtils.isEmpty(passwordInfos)) {
                 PasswordInfo passwordInfo = passwordInfos.get(0);
@@ -275,6 +310,95 @@ public class PasswordService implements IPasswordService {
         } else {
             throw new UserNotFoundException("tenant/username: " + senderTenant + "/" + userName);
         }
+    }
+
+    /**
+     * One-time code check. Only a VALID code can match; every other status is final. A wrong code counts against
+     * the code's attempt budget (atomically) and the code is locked when the budget is spent, instead of the old
+     * behaviour of invalidating it on the first mistake. A correct code is NOT consumed here: the login flow checks
+     * it twice (IMS matcher, then token issuing), and it is consumed when the tokens are issued.
+     */
+    private IEnumPasswordStatus.Types matchesOtp(String senderTenant, Account account, String userName, String plainOtp) {
+        List<PasswordInfo> passwordInfos = passwordInfoRepository.findByUserIdAndAuthTypeOrderByCreateDateDesc(account.getId(), IEnumAuth.Types.OTP);
+        if (CollectionUtils.isEmpty(passwordInfos)) {
+            throw new UserPasswordNotFoundException("for user name " + userName);
+        }
+
+        PasswordInfo passwordInfo = passwordInfos.get(0);
+        if (passwordInfo.getStatus() != IEnumPasswordStatus.Types.VALID) {
+            return passwordInfo.getStatus();
+        }
+
+        long[] crc = this.signPassword(passwordInfo.getPassword());
+        if (passwordInfo.getCrc16() != crc[0] || passwordInfo.getCrc32() != crc[1]) {
+            return updateStatus(passwordInfo, IEnumPasswordStatus.Types.BROKEN);
+        }
+        if (passwordInfo.isExpired()) {
+            return updateStatus(passwordInfo, IEnumPasswordStatus.Types.EXPIRED);
+        }
+        if (StringUtils.hasText(plainOtp)
+                && cryptoService.getPasswordEncryptor(senderTenant).checkPassword(plainOtp, passwordInfo.getPassword())) {
+            return IEnumPasswordStatus.Types.VALID;
+        }
+
+        passwordInfoRepository.incrementFailedAttempts(passwordInfo.getId());
+        if (passwordInfoRepository.findFailedAttempts(passwordInfo.getId()) >= otpMaxAttempts) {
+            passwordInfoRepository.lockIfValid(passwordInfo.getId());
+            return IEnumPasswordStatus.Types.LOCKED;
+        }
+        return IEnumPasswordStatus.Types.BAD;
+    }
+
+    private IEnumPasswordStatus.Types updateStatus(PasswordInfo passwordInfo, IEnumPasswordStatus.Types status) {
+        passwordInfo.setStatus(status);
+        passwordInfoRepository.save(passwordInfo);
+        return status;
+    }
+
+    @Override
+    public boolean consumeOtp(String senderTenant, String userName) {
+        Account account = tenantService.checkAccountIfExists(senderTenant, null, null, userName, null, false);
+        if (account == null) {
+            return false;
+        }
+        List<PasswordInfo> passwordInfos = passwordInfoRepository.findByUserIdAndAuthTypeOrderByCreateDateDesc(account.getId(), IEnumAuth.Types.OTP);
+        if (CollectionUtils.isEmpty(passwordInfos)) {
+            return false;
+        }
+        return passwordInfoRepository.consumeIfValid(passwordInfos.get(0).getId()) == 1;
+    }
+
+    private boolean isOtpResendCoolingDown(Account account) {
+        if (otpResendCooldownSeconds <= 0) {
+            return false;
+        }
+        List<PasswordInfo> passwordInfos = passwordInfoRepository.findByUserIdAndAuthTypeOrderByCreateDateDesc(account.getId(), IEnumAuth.Types.OTP);
+        if (CollectionUtils.isEmpty(passwordInfos)) {
+            return false;
+        }
+        PasswordInfo latest = passwordInfos.get(0);
+        return latest.getStatus() == IEnumPasswordStatus.Types.VALID
+                && !latest.isExpired()
+                && latest.getCreateDate() != null
+                && latest.getCreateDate().isAfter(LocalDateTime.now().minusSeconds(otpResendCooldownSeconds));
+    }
+
+    private int clampOtpLength(Integer configured) {
+        int length = configured == null ? otpMinLength : configured;
+        return Math.min(OTP_MAX_LENGTH, Math.max(otpMinLength, length));
+    }
+
+    private int configuredOtpLength(String tenant) {
+        Integer configured = passwordConfigRepository.findByTenantIgnoreCaseAndType(tenant, IEnumAuth.Types.OTP)
+                .map(PasswordConfig::getMaxLength)
+                .orElse(null);
+        return clampOtpLength(configured);
+    }
+
+    private int configuredOtpLifetime(String tenant) {
+        return passwordConfigRepository.findByTenantIgnoreCaseAndType(tenant, IEnumAuth.Types.OTP)
+                .map(PasswordConfig::getLifeTime)
+                .orElse(3);
     }
 
     @Override

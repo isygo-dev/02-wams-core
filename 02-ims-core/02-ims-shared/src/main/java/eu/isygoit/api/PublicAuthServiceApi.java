@@ -112,24 +112,6 @@ public interface PublicAuthServiceApi {
     ResponseEntity<List<UserAccountDto>> getAvailableEmailAccounts(@RequestParam(name = RestApiConstants.EMAIL) String email);
 
     /**
-     * Switch auth type response entity.
-     *
-     * @param authenticationContextRequest the switch auth type request
-     * @return the response entity
-     */
-    @Operation(summary = "switchAuthType Api",
-            description = "switchAuthType")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Api executed successfully",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Boolean.class))})
-    })
-    @PostMapping(path = "/updateAuthType")
-    ResponseEntity<Boolean> switchAuthType(
-            @Valid @RequestBody AuthenticationContextRequest authenticationContextRequest);
-
-    /**
      * Register new account response entity.
      *
      * @param registeredUserDto the register new account dto

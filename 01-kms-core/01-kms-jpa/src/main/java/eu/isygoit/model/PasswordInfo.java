@@ -67,6 +67,14 @@ public class PasswordInfo extends AuditableEntity<Long> {
     private Long crc32;
 
     /**
+     * Wrong attempts against this credential. Used by one-time codes: the code is locked once the cap is reached.
+     */
+    @Builder.Default
+    @ColumnDefault("0")
+    @Column(name = "failed_attempts", nullable = false)
+    private int failedAttempts = 0;
+
+    /**
      * Is expired boolean.
      *
      * @return the boolean

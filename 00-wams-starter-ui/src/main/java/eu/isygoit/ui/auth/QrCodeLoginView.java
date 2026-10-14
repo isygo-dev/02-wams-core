@@ -110,9 +110,9 @@ public class QrCodeLoginView extends BaseLoginView {
                         return;
                     }
                     if (!result.succeeded()) {
-                        showError(failureMessage(result.failure(), "auth.qrcode.status.tokenFailed",
-                                "auth.qrcode.status.serviceError"), result.failure());
-                        setQrStatus(I18n.t("auth.qrcode.status.serviceError"), true);
+                        showFailure(result, "auth.qrcode.status.tokenFailed",
+                                "auth.qrcode.status.serviceError", null, refreshQrButton);
+                        setQrStatus(failureStatus(result, "auth.qrcode.status.serviceError"), true);
                         return;
                     }
                     setChallenge(result.value(), ui);
@@ -144,11 +144,24 @@ public class QrCodeLoginView extends BaseLoginView {
     }
 
     private void schedulePoll(UI ui, String currentChallengeId) {
+        schedulePoll(ui, currentChallengeId, 2);
+    }
+
+    private void schedulePoll(UI ui, String currentChallengeId, long delaySeconds) {
         if (!ui.isAttached() || !currentChallengeId.equals(challengeId)) {
             return;
         }
         scheduledPoll = pollScheduler.schedule(
-                () -> pollStatus(ui, currentChallengeId), 2, TimeUnit.SECONDS);
+                () -> pollStatus(ui, currentChallengeId), delaySeconds, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Status line for a failed call: the rate-limit message when throttled, otherwise the given default.
+     */
+    private String failureStatus(AuthServiceFacade.Result<?> result, String defaultKey) {
+        return result.failure() == Failure.RATE_LIMITED
+                ? I18n.t("auth.common.error.rateLimited")
+                : I18n.t(defaultKey);
     }
 
     private void pollStatus(UI ui, String currentChallengeId) {
@@ -171,9 +184,13 @@ public class QrCodeLoginView extends BaseLoginView {
                     return;
                 }
                 if (!result.succeeded()) {
-                    showError(failureMessage(result.failure(), "auth.qrcode.status.authFailed",
-                            "auth.qrcode.status.serviceError"), result.failure());
-                    setQrStatus(I18n.t("auth.qrcode.status.serviceError"), true);
+                    showFailure(result, "auth.qrcode.status.authFailed",
+                            "auth.qrcode.status.serviceError", null);
+                    setQrStatus(failureStatus(result, "auth.qrcode.status.serviceError"), true);
+                    if (result.failure() == Failure.RATE_LIMITED) {
+                        // Back off for the announced time, then keep polling the same challenge.
+                        schedulePoll(ui, currentChallengeId, Math.max(2, result.retryAfterSeconds()));
+                    }
                     return;
                 }
 
@@ -212,9 +229,15 @@ public class QrCodeLoginView extends BaseLoginView {
                         return;
                     }
                     if (!result.succeeded()) {
-                        showError(failureMessage(result.failure(), "auth.qrcode.status.authFailed",
-                                "auth.qrcode.status.serviceError"), result.failure());
-                        setQrStatus(I18n.t("auth.qrcode.status.authFailed"), true);
+                        showFailure(result, "auth.qrcode.status.authFailed",
+                                "auth.qrcode.status.serviceError", null, refreshQrButton);
+                        setQrStatus(failureStatus(result, "auth.qrcode.status.authFailed"), true);
+                        if (result.failure() == Failure.RATE_LIMITED && result.retryAfterSeconds() > 0) {
+                            // The challenge is still approved: retry the completion once the wait is over.
+                            scheduledPoll = pollScheduler.schedule(
+                                    () -> ui.access(() -> completeQrLogin(ui, currentChallengeId)),
+                                    result.retryAfterSeconds(), TimeUnit.SECONDS);
+                        }
                         return;
                     }
 

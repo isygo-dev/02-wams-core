@@ -92,8 +92,8 @@ public class LoginView extends BaseLoginView {
                         return;
                     }
                     if (!result.succeeded()) {
-                        showError(failureMessage(result.failure(), "auth.login.error.authMethodUnavailable",
-                                "auth.login.error.serviceUnavailable"), result.failure());
+                        showFailure(result, "auth.login.error.authMethodUnavailable",
+                                "auth.login.error.serviceUnavailable", null, continueButton);
                         return;
                     }
                     navigateToAuthentication(ui, result.value(), tenant, username);

@@ -96,11 +96,26 @@ public class PublicPasswordController extends ControllerUtils implements PublicP
                                 .getToken())
                         .build());
             } else {
+                IEnumPasswordStatus.Types status = passwordService.matches(accessRequest.getTenant().trim().toLowerCase()
+                        , accessRequest.getUserName().trim().toLowerCase()
+                        , accessRequest.getPassword()
+                        , accessRequest.getAuthType());
+                if (status != IEnumPasswordStatus.Types.VALID) {
+                    // Never mint tokens unless the credential is VALID: return the status only.
+                    return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
+                            .status(status != null ? status : IEnumPasswordStatus.Types.UNAUTHORIZED)
+                            .build());
+                }
+                if (IEnumAuth.Types.OTP == accessRequest.getAuthType()
+                        && !passwordService.consumeOtp(accessRequest.getTenant().trim().toLowerCase(),
+                        accessRequest.getUserName().trim().toLowerCase())) {
+                    // One-time code already used by a concurrent login: single use, no tokens.
+                    return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
+                            .status(IEnumPasswordStatus.Types.DEPRECATED)
+                            .build());
+                }
                 return ResponseFactory.responseOk(AccessTokenResponseDto.builder()
-                        .status(passwordService.matches(accessRequest.getTenant().trim().toLowerCase()
-                                , accessRequest.getUserName().trim().toLowerCase()
-                                , accessRequest.getPassword()
-                                , accessRequest.getAuthType()))
+                        .status(status)
                         .tokenType(IEnumWebToken.Types.Bearer)
                         .accessToken(tokenService.buildAccessToken(accessRequest.getTenant().trim().toLowerCase(),
                                 Set.of(accessRequest.getApplication()),
@@ -195,8 +210,8 @@ public class PublicPasswordController extends ControllerUtils implements PublicP
                     generatePwdRequest.getUserName(),
                     generatePwdRequest.getFullName(),
                     IEnumAuth.Types.OTP);
-            //Never return the password
-            log.info("password generated for {}/{} : {}", generatePwdRequest.getTenant(), generatePwdRequest.getUserName(), accessKeyResponse.getKey());
+            //Never log or return the code itself
+            log.info("OTP issued for {}/{}", generatePwdRequest.getTenant(), generatePwdRequest.getUserName());
             return ResponseFactory.responseOk(accessKeyResponse.getLength());
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

@@ -80,6 +80,16 @@ public interface IPasswordService {
      */
     IEnumPasswordStatus.Types matches(String senderTenant, String userName, String plainPassword, IEnumAuth.Types authType) throws UserPasswordNotFoundException, UserNotFoundException;
 
+    /**
+     * Marks the current one-time code of the account as used. Call it once a login has been accepted with that
+     * code; the code can then never be used again.
+     *
+     * @param senderTenant the tenant
+     * @param userName     the user name
+     * @return true if this call consumed the code, false if it was already used, locked, expired or replaced
+     */
+    boolean consumeOtp(String senderTenant, String userName);
+
 
     /**
      * Sign password int [ ].

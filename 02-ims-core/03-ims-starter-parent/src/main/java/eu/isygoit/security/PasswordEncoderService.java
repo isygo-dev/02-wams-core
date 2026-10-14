@@ -11,8 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-
 /**
  * The type Password encoder service.
  */
@@ -62,9 +60,8 @@ public class PasswordEncoderService implements PasswordEncoder {
                     .password(rawPassword.toString())
                     .build();
 
-            return !Arrays.asList(IEnumPasswordStatus.Types.BAD, IEnumPasswordStatus.Types.BROKEN).contains(
-                    getAuthType(authType, matchesRequestDto)
-            );
+            // Allowlist: only VALID is a match. null (empty KMS body) and every other status fail closed.
+            return getAuthType(authType, matchesRequestDto) == IEnumPasswordStatus.Types.VALID;
         }
         return false;
     }

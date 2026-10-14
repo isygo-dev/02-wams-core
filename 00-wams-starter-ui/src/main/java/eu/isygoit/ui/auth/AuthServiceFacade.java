@@ -11,6 +11,8 @@ import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.remote.ims.PublicAuthService;
 import org.springframework.beans.factory.annotation.Qualifier;
+import feign.FeignException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +36,53 @@ public class AuthServiceFacade {
 
     private static boolean isSuccessful(ResponseEntity<?> response) {
         return response.getStatusCode().is2xxSuccessful();
+    }
+
+    private static final long MAX_RETRY_AFTER_SECONDS = 3600;
+
+    /**
+     * Reads Retry-After (delta-seconds). Returns 0 when absent or unparsable, so the UI falls back to a generic
+     * message instead of inventing a wait time.
+     */
+    static long retryAfterSeconds(ResponseEntity<?> response) {
+        String header = response.getHeaders().getFirst(HttpHeaders.RETRY_AFTER);
+        if (header == null) {
+            return 0;
+        }
+        try {
+            long seconds = Long.parseLong(header.trim());
+            return seconds <= 0 ? 0 : Math.min(seconds, MAX_RETRY_AFTER_SECONDS);
+        } catch (NumberFormatException exception) {
+            return 0;
+        }
+    }
+
+    private static <T> Result<T> failureResult(ResponseEntity<?> response, Failure fallback) {
+        Failure failure = mapFailure(response, fallback);
+        return failure == Failure.RATE_LIMITED
+                ? Result.rateLimited(retryAfterSeconds(response))
+                : Result.failure(failure);
+    }
+
+    /**
+     * Feign throws on any non-2xx status, which would hide 4xx statuses (429, 423, 410, 401...) behind a generic
+     * "service unavailable". 4xx responses are converted back to a ResponseEntity so {@link #mapFailure} and the
+     * Retry-After header can be used. 5xx and transport errors keep propagating as exceptions.
+     */
+    private static <T> Supplier<ResponseEntity<T>> clientErrorsAsResponses(Supplier<ResponseEntity<T>> request) {
+        return () -> {
+            try {
+                return request.get();
+            } catch (FeignException exception) {
+                if (exception.status() < 400 || exception.status() > 499) {
+                    throw exception;
+                }
+                HttpHeaders headers = new HttpHeaders();
+                exception.responseHeaders().forEach((name, values) ->
+                        values.forEach(value -> headers.add(name, value)));
+                return ResponseEntity.<T>status(exception.status()).headers(headers).build();
+            }
+        };
     }
 
     private static Failure mapFailure(ResponseEntity<?> response, Failure fallback) {
@@ -61,7 +110,7 @@ public class AuthServiceFacade {
             if (isSuccessful(response) && response.getBody() != null) {
                 return Result.success(response.getBody());
             }
-            return Result.failure(mapFailure(response, Failure.SERVICE_ERROR));
+            return failureResult(response, Failure.SERVICE_ERROR);
         });
     }
 
@@ -75,7 +124,7 @@ public class AuthServiceFacade {
                     && body.getAccessToken() != null && !body.getAccessToken().isBlank()) {
                 return Result.success(body);
             }
-            return Result.failure(mapFailure(response, fallback));
+            return failureResult(response, fallback);
         });
     }
 
@@ -88,7 +137,7 @@ public class AuthServiceFacade {
                     || response.getStatusCode().is4xxClientError()
                     ? Failure.REGISTRATION_REJECTED
                     : Failure.SERVICE_ERROR;
-            return Result.failure(mapFailure(response, fallback));
+            return failureResult(response, fallback);
         });
     }
 
@@ -101,7 +150,7 @@ public class AuthServiceFacade {
                     && response.getBody().getStatus() != null) {
                 return Result.success(response.getBody());
             }
-            return Result.failure(mapFailure(response, Failure.SERVICE_ERROR));
+            return failureResult(response, Failure.SERVICE_ERROR);
         });
     }
 
@@ -115,7 +164,7 @@ public class AuthServiceFacade {
                     && body.getAccessToken() != null && !body.getAccessToken().isBlank()) {
                 return Result.success(body);
             }
-            return Result.failure(mapFailure(response, Failure.INVALID_TOKEN));
+            return failureResult(response, Failure.INVALID_TOKEN);
         });
     }
 
@@ -123,7 +172,8 @@ public class AuthServiceFacade {
             Supplier<ResponseEntity<T>> request,
             Function<ResponseEntity<T>, Result<T>> responseMapper) {
         try {
-            return ContextAwareAsync.supplyAsync(request, authExecutor).thenApply(responseMapper);
+            return ContextAwareAsync.supplyAsync(clientErrorsAsResponses(request), authExecutor)
+                    .thenApply(responseMapper);
         } catch (RejectedExecutionException exception) {
             return CompletableFuture.failedFuture(exception);
         }
@@ -140,14 +190,25 @@ public class AuthServiceFacade {
         REGISTRATION_REJECTED
     }
 
-    public record Result<T>(T value, Failure failure) {
+    /**
+     * @param retryAfterSeconds wait time announced by the server for RATE_LIMITED, 0 when unknown
+     */
+    public record Result<T>(T value, Failure failure, long retryAfterSeconds) {
+
+        public Result(T value, Failure failure) {
+            this(value, failure, 0);
+        }
 
         public static <T> Result<T> success(T value) {
-            return new Result<>(value, null);
+            return new Result<>(value, null, 0);
         }
 
         public static <T> Result<T> failure(Failure failure) {
-            return new Result<>(null, failure);
+            return new Result<>(null, failure, 0);
+        }
+
+        public static <T> Result<T> rateLimited(long retryAfterSeconds) {
+            return new Result<>(null, Failure.RATE_LIMITED, retryAfterSeconds);
         }
 
         public boolean succeeded() {

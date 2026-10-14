@@ -51,4 +51,32 @@ public interface PasswordInfoRepository extends JpaPagingAndSortingRepository<Pa
     @Query("update PasswordInfo pi set pi.status = 'DEPRECATED' where pi.userId= :userId and pi.authType= :authType")
     int deactivateOldPasswords(@Param("userId") Long userId,
                                @Param("authType") IEnumAuth.Types authType);
+
+    /**
+     * Atomically marks a still-VALID one-time code as used (DEPRECATED). Returns 1 for the single caller that wins,
+     * 0 if the code was already used, locked or replaced.
+     */
+    @Modifying
+    @Query("update PasswordInfo pi set pi.status = 'DEPRECATED' where pi.id = :id and pi.status = 'VALID'")
+    int consumeIfValid(@Param("id") Long id);
+
+    /**
+     * Atomically counts one failed attempt (no lost updates under concurrent guessing).
+     */
+    @Modifying
+    @Query("update PasswordInfo pi set pi.failedAttempts = pi.failedAttempts + 1 where pi.id = :id")
+    int incrementFailedAttempts(@Param("id") Long id);
+
+    /**
+     * Reads the stored attempt counter straight from the database (not from the persistence context).
+     */
+    @Query("select pi.failedAttempts from PasswordInfo pi where pi.id = :id")
+    int findFailedAttempts(@Param("id") Long id);
+
+    /**
+     * Locks a still-VALID credential once its attempt budget is exhausted.
+     */
+    @Modifying
+    @Query("update PasswordInfo pi set pi.status = 'LOCKED' where pi.id = :id and pi.status = 'VALID'")
+    int lockIfValid(@Param("id") Long id);
 }

@@ -238,15 +238,4 @@ public class PublicAuthController extends ControllerUtils implements PublicAuthS
         }
     }
 
-    @Override
-    public ResponseEntity<Boolean> switchAuthType(
-            AuthenticationContextRequest authenticationContextRequest) {
-        try {
-            return ResponseFactory.responseOk(accountService.switchAuthType(requestContextService().getCurrentContext().getSenderTenant(),
-                    authenticationContextRequest));
-        } catch (Throwable e) {
-            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
-            return getBackExceptionResponse(e);
-        }
-    }
 }

@@ -147,8 +147,8 @@ public class RegisterView extends BaseLoginView {
                         reportUnexpectedFailure(failure);
                         showError(I18n.t("auth.register.error.serviceError"), Failure.SERVICE_ERROR);
                     } else if (!result.succeeded()) {
-                        showError(failureMessage(result.failure(), "auth.register.error.failed",
-                                "auth.register.error.serviceError"), result.failure());
+                        showFailure(result, "auth.register.error.failed",
+                                "auth.register.error.serviceError", null, registerButton);
                     } else {
                         ui.navigate(AuthRoutes.REGISTRATION_CONFIRMATION);
                     }

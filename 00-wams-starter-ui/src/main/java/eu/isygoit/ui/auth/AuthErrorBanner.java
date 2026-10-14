@@ -41,6 +41,20 @@ public class AuthErrorBanner extends Component {
         setVisible(true);
     }
 
+    /**
+     * Updates a running countdown without re-announcing it to screen readers every second.
+     * The first message of a countdown should go through {@link #showError} so it is announced once.
+     */
+    public void showCountdown(String message) {
+        getElement().setText(message);
+        getElement().setAttribute("role", "timer");
+        getElement().setAttribute("aria-live", "off");
+        getElement().setAttribute("data-state", stateName(Failure.RATE_LIMITED));
+        addClassName("has-error");
+        removeClassName("is-success");
+        setVisible(true);
+    }
+
     public void showSuccess(String message) {
         getElement().setText(message);
         getElement().setAttribute("role", "status");

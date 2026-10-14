@@ -16,6 +16,7 @@ import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.auth.AuthServiceFacade.Failure;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -34,6 +35,10 @@ public class OtpLoginView extends BaseLoginView {
             I18n.t("auth.otp.button.signIn"), VaadinIcon.SIGN_IN.create());
     private final AuthServiceFacade authService;
     private final AuthSession authSession;
+    /**
+     * Mirrors the server-side rule: no new code is issued inside this window after the last one.
+     */
+    private final int resendCooldownSeconds;
     private String tenant;
     private String username;
     private int otpLength = 6;
@@ -41,10 +46,12 @@ public class OtpLoginView extends BaseLoginView {
     private boolean submitting;
     private boolean otpConfigurationValid = true;
 
-    public OtpLoginView(AuthServiceFacade authService, AuthSession authSession) {
+    public OtpLoginView(AuthServiceFacade authService, AuthSession authSession,
+                        @Value("${app.otp.resend-cooldown-seconds:60}") int resendCooldownSeconds) {
         super("auth.page.title.otpLogin");
         this.authService = authService;
         this.authSession = authSession;
+        this.resendCooldownSeconds = resendCooldownSeconds;
 
         describeErrors(usernameField);
         otpInput.setErrorDescriptionId(AuthErrorBanner.ID);
@@ -94,11 +101,12 @@ public class OtpLoginView extends BaseLoginView {
                         reportUnexpectedFailure(failure);
                         showError(I18n.t("auth.otp.error.requestFailed"), Failure.OFFLINE);
                     } else if (!result.succeeded()) {
-                        showError(failureMessage(result.failure(), "auth.otp.error.requestFailed",
-                                "auth.otp.error.requestFailed"), result.failure());
+                        showFailure(result, "auth.otp.error.requestFailed",
+                                "auth.otp.error.requestFailed", null, requestOtpButton, loginButton);
                     } else {
                         errorBanner.showSuccess(I18n.t("auth.otp.notification.otpSent"));
                         otpInput.focusFirst();
+                        startResendCooldown();
                     }
                 }));
     }
@@ -132,9 +140,17 @@ public class OtpLoginView extends BaseLoginView {
                         reportUnexpectedFailure(failure);
                         showError(I18n.t("auth.common.error.authenticationError"), Failure.OFFLINE);
                     } else if (!result.succeeded()) {
-                        showError(failureMessage(result.failure(), "auth.otp.error.invalidOtp",
-                                        "auth.common.error.authenticationError"), result.failure(),
-                                otpInput);
+                        showFailure(result, "auth.otp.error.invalidOtp",
+                                "auth.common.error.authenticationError", otpInput, loginButton, requestOtpButton);
+                        if (result.failure() == Failure.INVALID_CREDENTIALS) {
+                            // A wrong code counts against the code's attempt budget on the server: start over
+                            // with an empty field, and let the user ask for a new code without waiting.
+                            stopButtonCooldown(requestOtpButton, I18n.t("auth.otp.button.requestOtp"));
+                            requestOtpButton.setEnabled(otpConfigurationValid && !requestingOtp);
+                            otpInput.clear();
+                            otpInput.focusFirst();
+                            updateLoginButtonState();
+                        }
                     } else {
                         completeLogin(ui, result.value().getAccessToken());
                     }
@@ -150,6 +166,19 @@ public class OtpLoginView extends BaseLoginView {
             reportUnexpectedFailure(exception);
             showError(I18n.t("auth.common.error.authenticationError"), Failure.SERVICE_ERROR);
         }
+    }
+
+    @Override
+    protected void onRateLimitEnded() {
+        requestOtpButton.setEnabled(otpConfigurationValid && !requestingOtp && !isButtonCoolingDown());
+        updateLoginButtonState();
+    }
+
+    private void startResendCooldown() {
+        startButtonCooldown(requestOtpButton, resendCooldownSeconds,
+                remaining -> I18n.t("auth.otp.button.resendIn", formatClock(remaining)),
+                I18n.t("auth.otp.button.requestOtp"),
+                () -> requestOtpButton.setEnabled(otpConfigurationValid && !requestingOtp));
     }
 
     private void updateLoginButtonState() {
@@ -206,5 +235,7 @@ public class OtpLoginView extends BaseLoginView {
         otpInput.clear();
         otpInput.focusFirst();
         updateLoginButtonState();
+        // The code was just sent by the previous step (auth type resolution): mirror the server resend cooldown.
+        startResendCooldown();
     }
 }

@@ -79,10 +79,8 @@ public class PasswordLoginView extends BaseLoginView {
                         reportUnexpectedFailure(failure);
                         showError(I18n.t("auth.password.error.serviceError"), Failure.OFFLINE);
                     } else if (!result.succeeded()) {
-                        showError(failureMessage(result.failure(),
-                                        "auth.password.error.invalidCredentials",
-                                        "auth.password.error.serviceError"), result.failure(),
-                                passwordField.getField());
+                        showFailure(result, "auth.password.error.invalidCredentials",
+                                "auth.password.error.serviceError", passwordField.getField(), loginButton);
                     } else {
                         completeLogin(ui, result.value().getAccessToken());
                     }
