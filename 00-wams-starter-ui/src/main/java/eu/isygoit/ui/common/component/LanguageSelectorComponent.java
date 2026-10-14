@@ -227,9 +227,11 @@ public class LanguageSelectorComponent extends HorizontalLayout {
             default -> I18n.t("common.language.selector.fallback");
         };
 
+        /*
         if (locale.getCountry() != null && !locale.getCountry().isEmpty()) {
             return languageName + " (" + locale.getDisplayCountry(locale) + ")";
         }
+         */
         return languageName;
     }
 
