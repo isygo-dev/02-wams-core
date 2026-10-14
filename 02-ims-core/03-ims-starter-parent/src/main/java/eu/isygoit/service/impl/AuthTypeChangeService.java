@@ -72,6 +72,24 @@ public class AuthTypeChangeService {
     }
 
     /**
+     * Sends a one-time code to the caller so it can be used as the current credential. Only meaningful for an OTP
+     * account; the code generator applies its own resend cooldown.
+     *
+     * @return true if a code was requested, false if the caller does not use OTP
+     */
+    public boolean sendReauthenticationCode(String callerTenant, String callerUser) {
+        Account caller = accountService.findByTenantAndUserName(callerTenant, callerUser);
+        if (caller == null || caller.getAuthType() != IEnumAuth.Types.OTP) {
+            return false;
+        }
+        accountService.resolveAuthContext(AuthenticationContextRequest.builder()
+                .tenant(callerTenant)
+                .userName(callerUser)
+                .build());
+        return true;
+    }
+
+    /**
      * Verifies the caller's own credential using the caller's current auth type. Only VALID counts; any other
      * status, a null body or a KMS failure fails closed.
      */
@@ -79,17 +97,20 @@ public class AuthTypeChangeService {
         if (!StringUtils.hasText(credential) || caller.getAuthType() == null) {
             return false;
         }
+        // A QR code cannot be typed, so QR accounts confirm a change with the account password instead.
+        IEnumAuth.Types verifyWith = caller.getAuthType() == IEnumAuth.Types.QRC
+                ? IEnumAuth.Types.PWD
+                : caller.getAuthType();
         MatchesRequestDto matches = MatchesRequestDto.builder()
                 .tenant(caller.getTenant().toLowerCase(Locale.ROOT))
                 .userName(caller.getCode().toLowerCase(Locale.ROOT))
-                .authType(caller.getAuthType())
+                .authType(verifyWith)
                 .password(credential)
                 .build();
         try {
-            IEnumPasswordStatus.Types status = switch (caller.getAuthType()) {
+            IEnumPasswordStatus.Types status = switch (verifyWith) {
                 case PWD -> kmsPasswordService.matchesPassword(matches).getBody();
                 case OTP -> kmsPublicPasswordService.matchesOtp(matches).getBody();
-                case QRC -> kmsPublicPasswordService.matchesQrc(matches).getBody();
                 default -> null;
             };
             return status == IEnumPasswordStatus.Types.VALID;

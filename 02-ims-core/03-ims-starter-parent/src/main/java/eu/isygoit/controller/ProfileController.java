@@ -11,6 +11,9 @@ import eu.isygoit.dto.common.RequestContextDto;
 import eu.isygoit.dto.common.ResourceDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.AccountStatDto;
+import eu.isygoit.dto.data.ConnectionPageDto;
+import eu.isygoit.dto.data.DailyLoginCountDto;
+import eu.isygoit.dto.request.ChangeAuthTypeRequestDto;
 import eu.isygoit.dto.request.MatchesRequestDto;
 import eu.isygoit.enums.IEnumPasswordStatus;
 import eu.isygoit.exception.*;
@@ -19,18 +22,25 @@ import eu.isygoit.helper.DateHelper;
 import eu.isygoit.mapper.AccountMapper;
 import eu.isygoit.model.Account;
 import eu.isygoit.model.AccountDetails;
+import eu.isygoit.model.ConnectionTracking;
 import eu.isygoit.service.IAccountService;
+import eu.isygoit.service.impl.AuthTypeChangeService;
+import eu.isygoit.service.impl.ProfileActivityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Profile Controller for managing user profiles.
@@ -52,6 +62,10 @@ public class ProfileController extends ControllerUtils implements ProfileService
     private PasswordServiceApi passwordServiceApi;
     @Autowired
     private AccountMapper accountMapper;
+    @Autowired
+    private AuthTypeChangeService authTypeChangeService;
+    @Autowired
+    private ProfileActivityService profileActivityService;
 
     /**
      * Instantiates a new Profile controller.
@@ -102,11 +116,32 @@ public class ProfileController extends ControllerUtils implements ProfileService
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Boolean> changeAuthType(ChangeAuthTypeRequestDto request) {
+        Account caller = getAuthenticatedAccount();
+        return switch (authTypeChangeService.changeAuthType(caller.getTenant(), caller.getCode(), request)) {
+            case CHANGED -> ResponseFactory.responseOk(true);
+            case NOT_ALLOWED -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            case REAUTH_FAILED -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            case INVALID_AUTH_TYPE -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        };
+    }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Boolean> sendReauthenticationCode() {
+        Account caller = getAuthenticatedAccount();
+        return ResponseFactory.responseOk(
+                authTypeChangeService.sendReauthenticationCode(caller.getTenant(), caller.getCode()));
+    }
+
+    @Override
     public ResponseEntity<AccountDto> getProfile() {
         log.info("Getting profile for current user");
 
         Account account = getAuthenticatedAccount();
-        return ResponseFactory.responseOk(accountMapper.entityToDto(account));
+        return ResponseFactory.responseOk(accountMapper.entityToProfileDto(account));
     }
 
     @Override
@@ -146,7 +181,7 @@ public class ProfileController extends ControllerUtils implements ProfileService
         }
 
         Account updatedAccount = accountService.update(account.getTenant(), account);
-        return ResponseFactory.responseOk(accountMapper.entityToDto(updatedAccount));
+        return ResponseFactory.responseOk(accountMapper.entityToProfileDto(updatedAccount));
     }
 
     @Override
@@ -230,7 +265,7 @@ public class ProfileController extends ControllerUtils implements ProfileService
         }
 
         Account updatedAccount = accountService.uploadImage(account.getTenant(), account.getId(), file);
-        return ResponseFactory.responseOk(accountMapper.entityToDto(updatedAccount));
+        return ResponseFactory.responseOk(accountMapper.entityToProfileDto(updatedAccount));
     }
 
     @Override
@@ -270,9 +305,16 @@ public class ProfileController extends ControllerUtils implements ProfileService
             builder.createDate(account.getCreateDate());
         }
 
-        if (account.getConnectionTracking() != null && !account.getConnectionTracking().isEmpty()) {
-            builder.lastLogin(DateHelper.legacyDatetoLocalDateTime(account.getConnectionTracking().get(0).getLoginDate()));
-            builder.totalConnections(account.getConnectionTracking().size());
+        // Count and newest login straight from the database, without loading the whole connection list.
+        Page<ConnectionTracking> latest = profileActivityService.latestConnection(account.getId());
+        builder.totalConnections((int) Math.min(Integer.MAX_VALUE, latest.getTotalElements()));
+        if (latest.hasContent()) {
+            ConnectionTracking last = latest.getContent().get(0);
+            builder.lastLogin(DateHelper.legacyDatetoLocalDateTime(last.getLoginDate()))
+                    .lastLoginDevice(last.getDevice())
+                    .lastLoginBrowser(last.getBrowser())
+                    .lastLoginIp(last.getIpAddress())
+                    .lastLoginApp(last.getLogApp());
         }
 
         if (account.getRoleInfo() != null) {
@@ -287,5 +329,17 @@ public class ProfileController extends ControllerUtils implements ProfileService
         }
 
         return ResponseFactory.responseOk(builder.build());
+    }
+
+    @Override
+    public ResponseEntity<ConnectionPageDto> getConnections(int page, int size) {
+        Account account = getAuthenticatedAccount();
+        return ResponseFactory.responseOk(profileActivityService.getConnections(account.getId(), page, size));
+    }
+
+    @Override
+    public ResponseEntity<List<DailyLoginCountDto>> getLoginActivity(int days) {
+        Account account = getAuthenticatedAccount();
+        return ResponseFactory.responseOk(profileActivityService.getLoginActivity(account.getId(), days));
     }
 }

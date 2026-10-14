@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.ChangeAuthTypeRequestDto;
+import eu.isygoit.dto.request.MatchesRequestDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumPasswordStatus;
 import eu.isygoit.model.Account;
@@ -130,6 +131,33 @@ class AuthTypeChangeServiceTest {
 
         assertEquals(Result.CHANGED, result);
         verifyNoInteractions(kmsPasswordService);
+    }
+
+    @Test
+    void qrCallerConfirmsWithTheAccountPasswordNotAQrCode() {
+        when(accountService.findByTenantAndUserName(TENANT, "alice")).thenReturn(account("alice", IEnumAuth.Types.QRC, false));
+        when(kmsPasswordService.matchesPassword(any())).thenReturn(ResponseEntity.ok(IEnumPasswordStatus.Types.VALID));
+
+        Result result = service().changeAuthType(TENANT, "alice", request(null, IEnumAuth.Types.PWD, "pwd"));
+
+        assertEquals(Result.CHANGED, result);
+        ArgumentCaptor<MatchesRequestDto> captor = ArgumentCaptor.forClass(MatchesRequestDto.class);
+        verify(kmsPasswordService).matchesPassword(captor.capture());
+        assertEquals(IEnumAuth.Types.PWD, captor.getValue().getAuthType());
+        verifyNoInteractions(kmsPublicPasswordService);
+    }
+
+    @Test
+    void switchingToQrIsAllowedWithAValidCredential() {
+        when(accountService.findByTenantAndUserName(TENANT, "alice")).thenReturn(account("alice", IEnumAuth.Types.PWD, false));
+        when(kmsPasswordService.matchesPassword(any())).thenReturn(ResponseEntity.ok(IEnumPasswordStatus.Types.VALID));
+
+        Result result = service().changeAuthType(TENANT, "alice", request(null, IEnumAuth.Types.QRC, "pwd"));
+
+        assertEquals(Result.CHANGED, result);
+        ArgumentCaptor<AuthenticationContextRequest> captor = ArgumentCaptor.forClass(AuthenticationContextRequest.class);
+        verify(accountService).switchAuthType(eq(TENANT), captor.capture());
+        assertEquals(IEnumAuth.Types.QRC, captor.getValue().getAuthType());
     }
 
     @Test

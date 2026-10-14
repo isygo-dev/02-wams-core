@@ -19,6 +19,13 @@ public class AccountStatDto {
 
     private LocalDateTime createDate;
     private LocalDateTime lastLogin;
+    /**
+     * Where the most recent login came from.
+     */
+    private String lastLoginDevice;
+    private String lastLoginBrowser;
+    private String lastLoginIp;
+    private String lastLoginApp;
     private Integer totalConnections;
     private Integer roleCount;
     private Integer totalPermissions;

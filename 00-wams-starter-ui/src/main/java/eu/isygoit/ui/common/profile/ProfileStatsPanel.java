@@ -1,7 +1,6 @@
 package eu.isygoit.ui.common.profile;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
-import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.AccountStatDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.component.StatCard;
@@ -12,11 +11,13 @@ import eu.isygoit.ui.common.component.StatCardGrid;
  */
 class ProfileStatsPanel extends StatCardGrid {
 
-    ProfileStatsPanel(AccountDto account, AccountStatDto stats) {
+    private static final String NO_VALUE = "—";
+
+    ProfileStatsPanel(AccountStatDto stats) {
         super(
                 new StatCard(VaadinIcon.CALENDAR, StatCard.Variant.PRIMARY,
                         I18n.t("profile.stat.member.since"),
-                        stats.getCreateDate() != null ? stats.getCreateDate().format(ProfileFormatUtils.DATE_FMT) : "N/A"),
+                        stats.getCreateDate() != null ? ProfileFormatUtils.formatDate(stats.getCreateDate()) : NO_VALUE),
                 new StatCard(VaadinIcon.CLOCK, StatCard.Variant.NEUTRAL,
                         I18n.t("profile.stat.last.active"),
                         stats.getLastLogin() != null
@@ -24,7 +25,7 @@ class ProfileStatsPanel extends StatCardGrid {
                                 : I18n.t("profile.time.never")),
                 new StatCard(VaadinIcon.SIGN_IN, StatCard.Variant.SUCCESS,
                         I18n.t("profile.stat.total.sessions"),
-                        String.valueOf(ProfileFormatUtils.totalSessions(account, stats))),
+                        String.valueOf(ProfileFormatUtils.totalSessions(stats))),
                 new StatCard(VaadinIcon.USERS, StatCard.Variant.PRIMARY,
                         I18n.t("profile.stat.roles"),
                         stats.getRoleCount() != null ? String.valueOf(stats.getRoleCount()) : "0",

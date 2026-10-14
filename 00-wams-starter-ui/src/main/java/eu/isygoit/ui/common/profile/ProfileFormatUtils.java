@@ -1,57 +1,73 @@
 package eu.isygoit.ui.common.profile;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.AccountStatDto;
-import eu.isygoit.dto.data.ConnectionTrackingDto;
 import eu.isygoit.i18n.I18n;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
+import java.time.format.FormatStyle;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 /**
- * Formatting and connection-history helpers shared by the profile page and
- * its panels/cards, so date/relative-time/device-icon logic lives in one
- * place instead of being copied into each component.
+ * Formatting helpers shared by the profile page and its panels/cards, so date/relative-time/device-icon logic
+ * lives in one place instead of being copied into each component. Dates follow the user's UI locale.
  */
 final class ProfileFormatUtils {
-
-    static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy");
-    static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
 
     private ProfileFormatUtils() {
     }
 
-    static List<ConnectionTrackingDto> connectionHistory(AccountDto account) {
-        return account.getConnectionTracking() != null ? account.getConnectionTracking() : List.of();
+    private static Locale locale() {
+        UI ui = UI.getCurrent();
+        return ui != null ? ui.getLocale() : Locale.getDefault();
     }
 
-    static List<ConnectionTrackingDto> recentFirst(List<ConnectionTrackingDto> history) {
-        return history.stream()
-                .sorted(Comparator.comparing(ConnectionTrackingDto::getLoginDate, Comparator.nullsLast(Comparator.reverseOrder())))
-                .collect(Collectors.toList());
+    static String formatDate(LocalDateTime dateTime) {
+        return dateTime == null ? null
+                : dateTime.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale()));
     }
 
-    static long countWithinDays(List<ConnectionTrackingDto> history, int days) {
-        Instant cutoff = Instant.now().minus(Duration.ofDays(days));
-        return history.stream()
-                .filter(c -> c.getLoginDate() != null && c.getLoginDate().toInstant().isAfter(cutoff))
-                .count();
+    static String formatDate(LocalDate date) {
+        return date == null ? null
+                : date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale()));
     }
 
-    static int totalSessions(AccountDto account, AccountStatDto stats) {
-        if (stats.getTotalConnections() != null) {
-            return stats.getTotalConnections();
+    static String formatDateTime(LocalDateTime dateTime) {
+        return dateTime == null ? null
+                : dateTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                .withLocale(locale()));
+    }
+
+    static LocalDate toLocalDate(Date date) {
+        return date == null ? null : date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
+    /**
+     * "Today", "Yesterday" or the formatted date: the heading of a day group in the activity timeline.
+     */
+    static String formatDayLabel(LocalDate day) {
+        if (day == null) {
+            return I18n.t("profile.time.unknown");
         }
-        return connectionHistory(account).size();
+        LocalDate today = LocalDate.now();
+        if (day.equals(today)) {
+            return I18n.t("profile.time.today");
+        }
+        if (day.equals(today.minusDays(1))) {
+            return I18n.t("profile.time.yesterday");
+        }
+        return formatDate(day);
+    }
+
+    static int totalSessions(AccountStatDto stats) {
+        return stats != null && stats.getTotalConnections() != null ? stats.getTotalConnections() : 0;
     }
 
     static VaadinIcon deviceIcon(String device) {
@@ -99,7 +115,7 @@ final class ProfileFormatUtils {
             return I18n.t("profile.time.unknown");
         }
         LocalDateTime ldt = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
-        return ldt.format(DATETIME_FMT) + " · " + formatRelativeTime(date);
+        return formatDateTime(ldt) + " · " + formatRelativeTime(date);
     }
 
     static String formatRelativeTime(Date date) {

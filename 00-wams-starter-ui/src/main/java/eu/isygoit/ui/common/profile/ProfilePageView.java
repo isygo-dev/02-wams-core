@@ -3,6 +3,8 @@ package eu.isygoit.ui.common.profile;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -13,10 +15,8 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.server.StreamResource;
 import eu.isygoit.api.ProfileServiceApi;
-import eu.isygoit.dto.data.AccountDetailsDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.AccountStatDto;
-import eu.isygoit.dto.data.ConnectionTrackingDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.dialog.ImageCropperDialog;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
@@ -30,8 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * Professional, mobile-first profile page: identity header, key-metric stat
@@ -67,11 +65,27 @@ public class ProfilePageView extends ManagementVerticalView {
         setPadding(false);
         setSpacing(false);
         addClassName("profile-page-view");
+        showContent();
+    }
+
+    private void showContent() {
+        removeAll();
         loadUserData();
-        add(buildMainContent());
+        add(currentAccount != null ? buildMainContent() : buildLoadError());
+    }
+
+    private Component buildLoadError() {
+        Button retry = new Button(I18n.t("profile.load.retry"), VaadinIcon.REFRESH.create());
+        retry.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        retry.addClickListener(e -> showContent());
+        Div error = new Div(new Span(I18n.t("profile.load.error")), retry);
+        error.addClassName("profile-load-error");
+        return error;
     }
 
     private void loadUserData() {
+        currentAccount = null;
+        accountStats = null;
         try {
             ResponseEntity<AccountDto> profileResponse = profileService.getProfile();
             if (profileResponse.getStatusCode().is2xxSuccessful() && profileResponse.hasBody()) {
@@ -83,14 +97,12 @@ public class ProfilePageView extends ManagementVerticalView {
                 accountStats = statsResponse.getBody();
             }
         } catch (Exception e) {
-            log.warn("Failed to load profile data, falling back to placeholder content", e);
+            log.warn("Failed to load profile data", e);
         }
 
-        if (currentAccount == null) {
-            currentAccount = createFallbackAccount();
-        }
-        if (accountStats == null) {
-            accountStats = createFallbackStats();
+        // Statistics are secondary: show the profile with empty counters rather than invented numbers.
+        if (currentAccount != null && accountStats == null) {
+            accountStats = new AccountStatDto();
         }
     }
 
@@ -102,7 +114,7 @@ public class ProfilePageView extends ManagementVerticalView {
         mainContent.addClassName("profile-main-content");
 
         mainContent.add(buildHeader());
-        mainContent.add(new ProfileStatsPanel(currentAccount, accountStats));
+        mainContent.add(new ProfileStatsPanel(accountStats));
 
         profileTabs = buildTabs();
         mainContent.add(profileTabs);
@@ -129,12 +141,12 @@ public class ProfilePageView extends ManagementVerticalView {
     }
 
     private Component buildTabContent(String tabId) {
-        List<ConnectionTrackingDto> history = ProfileFormatUtils.connectionHistory(currentAccount);
         return switch (tabId) {
-            case "activity" -> new ProfileActivityPanel(history);
+            case "activity" -> new ProfileActivityPanel(profileService);
             case "connections" ->
-                    new ProfileConnectionsPanel(currentAccount, accountStats, history, () -> scrollToTab("activity"));
-            case "settings" -> new ProfileSettingsPanel(profileService);
+                    new ProfileConnectionsPanel(accountStats, profileService, () -> scrollToTab("activity"));
+            case "settings" -> new ProfileSettingsPanel(profileService, currentAccount.getAuthType(),
+                    newAuthType -> currentAccount.setAuthType(newAuthType));
             default -> new ProfileOverviewPanel(currentAccount, accountStats);
         };
     }
@@ -217,7 +229,7 @@ public class ProfilePageView extends ManagementVerticalView {
     private void refreshView() {
         mainContent.removeAll();
         mainContent.add(buildHeader());
-        mainContent.add(new ProfileStatsPanel(currentAccount, accountStats));
+        mainContent.add(new ProfileStatsPanel(accountStats));
         mainContent.add(profileTabs);
         tabContent.removeAll();
         tabContent.add(buildTabContent(profileTabs.getSelectedTab().getId().orElse("overview")));
@@ -238,33 +250,4 @@ public class ProfilePageView extends ManagementVerticalView {
                 });
     }
 
-    // ------------------------------------------------------------------------
-    // Fallback content (used only if the backend call fails)
-    // ------------------------------------------------------------------------
-
-    private AccountDto createFallbackAccount() {
-        AccountDto dto = new AccountDto();
-        dto.setId(1L);
-        dto.setEmail("demo@isygoit.eu");
-        dto.setPhoneNumber("+1234567890");
-        dto.setFunctionRole("Administrator");
-        dto.setAccountType("TENANT_USER");
-        dto.setTenant("demo");
-        AccountDetailsDto details = new AccountDetailsDto();
-        details.setFirstName("Demo");
-        details.setLastName("User");
-        dto.setAccountDetails(details);
-        return dto;
-    }
-
-    private AccountStatDto createFallbackStats() {
-        return AccountStatDto.builder()
-                .createDate(LocalDateTime.now().minusMonths(6))
-                .lastLogin(LocalDateTime.now().minusHours(2))
-                .totalConnections(42)
-                .roleCount(2)
-                .totalPermissions(15)
-                .isActive(true)
-                .build();
-    }
 }

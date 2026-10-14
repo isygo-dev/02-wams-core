@@ -3,6 +3,8 @@ package eu.isygoit.api;
 import eu.isygoit.dto.common.ChangePasswordRequestDto;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.AccountStatDto;
+import eu.isygoit.dto.data.ConnectionPageDto;
+import eu.isygoit.dto.data.DailyLoginCountDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Profile Service API interface.
@@ -25,7 +28,7 @@ import java.io.IOException;
  * Uses RequestContext to identify the authenticated user (tenant + username).
  */
 @Tag(name = "Profile Management", description = "API for managing user profiles")
-public interface ProfileServiceApi {
+public interface ProfileServiceApi extends AuthTypeServiceApi {
 
     /**
      * Get current user profile.
@@ -145,4 +148,39 @@ public interface ProfileServiceApi {
     })
     @GetMapping("/statistics")
     ResponseEntity<AccountStatDto> getUserStatistics();
+
+    /**
+     * One page of the authenticated user's login history, newest first.
+     *
+     * @param page zero-based page index
+     * @param size page size (the server caps it at 50)
+     * @return the page
+     */
+    @Operation(summary = "Get login history page",
+            description = "Retrieves one page of the authenticated user's tracked logins, newest first")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Page retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = ConnectionPageDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @GetMapping("/connections")
+    ResponseEntity<ConnectionPageDto> getConnections(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size);
+
+    /**
+     * Logins per day over the last days (zero-filled), oldest first.
+     *
+     * @param days number of days including today (the server caps it at 90)
+     * @return the daily counts
+     */
+    @Operation(summary = "Get daily login counts",
+            description = "Retrieves the number of tracked logins per day for the last days, oldest first")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Counts retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @GetMapping("/connections/activity")
+    ResponseEntity<List<DailyLoginCountDto>> getLoginActivity(
+            @RequestParam(name = "days", defaultValue = "30") int days);
 }

@@ -1,18 +1,15 @@
 package eu.isygoit.ui.common.profile;
 
 import com.storedobject.chart.*;
-import eu.isygoit.dto.data.ConnectionTrackingDto;
+import eu.isygoit.dto.data.DailyLoginCountDto;
 import eu.isygoit.i18n.I18n;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Column chart showing the number of tracked logins per day for the last
@@ -37,7 +34,7 @@ class LoginActivityChart extends SOChart {
      */
     private int windowDays;
 
-    LoginActivityChart(List<ConnectionTrackingDto> history, int days) {
+    LoginActivityChart(List<DailyLoginCountDto> history, int days) {
         addClassName("profile-login-activity-chart");
         setHeight("300px");
         setWidthFull();
@@ -63,44 +60,22 @@ class LoginActivityChart extends SOChart {
     }
 
     /**
-     * Convert supported login timestamp types to the user's local calendar date.
+     * Recompute the buckets for the last {@code days} days from the server's daily counts (which may cover a
+     * longer period) and update the existing chart.
      */
-    private static LocalDate toLocalDate(ConnectionTrackingDto dto) {
-        if (dto == null || dto.getLoginDate() == null) {
-            return null;
-        }
-        Object login = dto.getLoginDate();
-        if (login instanceof LocalDate ld) {
-            return ld;
-        }
-        if (login instanceof java.time.LocalDateTime ldt) {
-            return ldt.toLocalDate();
-        }
-        if (login instanceof java.time.Instant inst) {
-            return inst.atZone(ZoneId.systemDefault()).toLocalDate();
-        }
-        if (login instanceof java.util.Date date) {
-            return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        }
-        return null;
-    }
-
-    /**
-     * Recompute the buckets for {@code days} and update the existing chart.
-     */
-    void update(List<ConnectionTrackingDto> history, int days) {
+    void update(List<DailyLoginCountDto> history, int days) {
         this.windowDays = days;
 
         LocalDate today = LocalDate.now();
         LocalDate from = today.minusDays(days - 1L);
 
-        Map<LocalDate, Long> counts = history.stream()
-                .map(LoginActivityChart::toLocalDate)
-                .filter(d -> d != null && !d.isBefore(from) && !d.isAfter(today))
-                .collect(Collectors.groupingBy(
-                        Function.identity(),
-                        LinkedHashMap::new,
-                        Collectors.counting()));
+        Map<LocalDate, Long> counts = new LinkedHashMap<>();
+        for (DailyLoginCountDto daily : history) {
+            LocalDate day = daily.getDate();
+            if (day != null && !day.isBefore(from) && !day.isAfter(today)) {
+                counts.merge(day, daily.getCount(), Long::sum);
+            }
+        }
 
         List<String> labels = new ArrayList<>(days);
         List<Number> dailyValues = new ArrayList<>(days);
