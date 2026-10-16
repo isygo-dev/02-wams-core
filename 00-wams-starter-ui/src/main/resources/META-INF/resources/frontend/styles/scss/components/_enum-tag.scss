@@ -71,3 +71,24 @@
 .wams-enum-tag--title {
   font-size: var(--lumo-font-size-m);
 }
+
+// Extra tones for categorical values (types, categories, roles...), see EnumTags.CATEGORICAL_TONES.
+.wams-enum-tag--accent {
+  color: #6e3fc4;
+  background: rgba(110, 63, 196, 0.1);
+}
+
+.wams-enum-tag--teal {
+  color: #0b7285;
+  background: rgba(11, 114, 133, 0.1);
+}
+
+[theme~="dark"] .wams-enum-tag--accent {
+  color: #c4a8ff;
+  background: rgba(150, 110, 230, 0.18);
+}
+
+[theme~="dark"] .wams-enum-tag--teal {
+  color: #66d9e8;
+  background: rgba(32, 178, 200, 0.16);
+}

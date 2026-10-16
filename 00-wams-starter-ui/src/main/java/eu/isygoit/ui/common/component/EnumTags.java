@@ -30,6 +30,32 @@ public class EnumTags {
      * Tone (success / warning / danger / info) of every known enum constant; neutral otherwise.
      */
     private static final Map<String, String> TONES = Map.ofEntries(
+            Map.entry("ASSIGNED", "info"),
+            Map.entry("PROMISE", "info"),
+            Map.entry("APPLICANT", "info"),
+            Map.entry("EXCHANGE", "info"),
+            Map.entry("TRANSFERRED", "info"),
+            Map.entry("CLOSED", "neutral"),
+            Map.entry("ARCHIVED", "neutral"),
+            Map.entry("RETIRED", "neutral"),
+            Map.entry("ENDED", "neutral"),
+            Map.entry("UNKNOWN", "neutral"),
+            Map.entry("WITHDRAWN", "neutral"),
+            Map.entry("NOT_APPLICABLE", "neutral"),
+            Map.entry("OTHER", "neutral"),
+            Map.entry("NONE", "neutral"),
+            Map.entry("DEFINITIVE", "success"),
+            Map.entry("CONFIRMED", "success"),
+            Map.entry("OK", "success"),
+            Map.entry("INVESTIGATING", "warning"),
+            Map.entry("ON_HOLD", "warning"),
+            Map.entry("OCCUPIED", "warning"),
+            Map.entry("UNDER_MAINTENANCE", "warning"),
+            Map.entry("PROVISIONAL", "warning"),
+            Map.entry("PARTIALLY_PAID", "warning"),
+            Map.entry("WAITING_LIST", "warning"),
+            Map.entry("MEDICAL_LEAVE", "warning"),
+            Map.entry("REPORTED", "warning"),
             Map.entry("CANCELLED", "danger"),
             Map.entry("CRITICAL", "danger"),
             Map.entry("DELETED", "danger"),
@@ -87,7 +113,13 @@ public class EnumTags {
             Map.entry("WARNING", "warning")
     );
 
-    private static final String[] ALL_TONES = {"success", "warning", "danger", "info", "neutral"};
+    private static final String[] ALL_TONES = {"success", "warning", "danger", "info", "neutral", "accent", "teal"};
+
+    /**
+     * Categorical values (types, categories, roles...) carry no good/bad meaning: each gets a stable colour taken
+     * from these tones, derived from its name, so that every enum value is coloured.
+     */
+    private static final String[] CATEGORICAL_TONES = {"info", "accent", "teal", "warning"};
 
     private final String fallbackPrefix;
     private final String unknownLabelKey;
@@ -105,7 +137,13 @@ public class EnumTags {
     /* ---- tags ---- */
 
     private static String tone(String enumValue) {
-        return enumValue == null ? "neutral" : TONES.getOrDefault(enumValue.toUpperCase(Locale.ROOT), "neutral");
+        if (enumValue == null) {
+            return "neutral";
+        }
+        String upper = enumValue.toUpperCase(Locale.ROOT);
+        String known = TONES.get(upper);
+        return known != null ? known
+                : CATEGORICAL_TONES[Math.floorMod(upper.hashCode(), CATEGORICAL_TONES.length)];
     }
 
     private static String humanize(String value) {
