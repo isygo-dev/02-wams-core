@@ -148,6 +148,37 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     }
 
     /**
+     * Adds the actions column of a table by reusing the buttons of the item's card (same icons, tooltips, visibility
+     * rules and handlers), so a table never needs its own copy of the card actions. The card is built but never
+     * attached: only its button bar is moved into the cell.
+     */
+    protected Grid.Column<T> addCardActionsColumn(Grid<T> grid) {
+        return grid.addComponentColumn(item -> {
+            Div cell = new Div();
+            cell.addClassName("management-grid__actions");
+            Component bar = findByClass(renderItem(item), "wams-card__button-bar");
+            if (bar != null) {
+                bar.getElement().removeFromParent();
+                cell.add(bar);
+            }
+            return cell;
+        }).setHeader("").setAutoWidth(true).setFlexGrow(0);
+    }
+
+    private static Component findByClass(Component root, String cssClass) {
+        if (root.getElement().getClassList().contains(cssClass)) {
+            return root;
+        }
+        for (Component child : root.getChildren().toList()) {
+            Component found = findByClass(child, cssClass);
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
+    }
+
+    /**
      * i18n key used when the backend call fails.
      */
     protected String getLoadErrorKey() {

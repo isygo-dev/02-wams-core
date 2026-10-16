@@ -244,3 +244,13 @@ vaadin-dialog-overlay::part(header) {
     font-weight: 600;
   }
 }
+
+.management-grid__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.management-grid__photo {
+  flex: none;
+}
