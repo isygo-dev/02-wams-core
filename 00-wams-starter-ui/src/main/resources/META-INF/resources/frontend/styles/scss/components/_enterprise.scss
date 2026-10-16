@@ -1,0 +1,246 @@
+// Enterprise design layer — loaded last, built only from existing Lumo/WAMS tokens so light, dark and RTL keep
+// working. It changes presentation only (no markup, no behaviour).
+//
+// Direction: a calm tinted canvas with crisp white surfaces. Hierarchy comes from three radii (controls < cards <
+// dialogs), one border colour, one elevation step on hover, and a tighter type scale with tabular figures.
+// The brand blue stays the only saturated colour; amber is reserved for the single "current record" accent.
+
+html {
+  --wams-canvas: #f4f6fa;
+  --wams-surface-line: #dce1ea;
+  --wams-surface-line-strong: #c3cad6;
+  --wams-shadow-hover: 0 6px 18px -6px rgba(9, 30, 66, 0.2), 0 0 1px rgba(9, 30, 66, 0.14);
+  --lumo-font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Noto Sans', 'Noto Naskh Arabic',
+    sans-serif;
+}
+
+[theme~='dark'] {
+  --wams-canvas: var(--lumo-base-color);
+  --wams-surface-line: var(--lumo-contrast-20pct);
+  --wams-surface-line-strong: var(--lumo-contrast-30pct);
+  --wams-shadow-hover: 0 6px 18px -6px rgba(0, 0, 0, 0.6);
+}
+
+/* ── Canvas ───────────────────────────────────────────────────────────── */
+
+vaadin-app-layout::part(content) {
+  background: var(--wams-canvas);
+}
+
+.management-view {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Page header: one clear title, one quiet line under it ────────────── */
+
+.administration-header {
+  margin-bottom: var(--lumo-space-m);
+
+  h2 {
+    margin: 0;
+    font-size: var(--lumo-font-size-xxl);
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    color: var(--lumo-header-text-color);
+  }
+}
+
+.administration-subtitle {
+  margin: var(--lumo-space-xs) 0 0;
+  max-width: 70ch;
+  font-size: var(--lumo-font-size-m);
+  color: var(--lumo-secondary-text-color);
+}
+
+/* ── Toolbar and filter surfaces: same border, same radius ────────────── */
+
+.administration-toolbar,
+.filter-card {
+  border: 1px solid var(--wams-surface-line);
+  border-radius: var(--lumo-border-radius-l);
+  background: var(--lumo-base-color);
+  box-shadow: none;
+}
+
+.toolbar-add-btn {
+  font-weight: 600;
+}
+
+/* ── Cards: flat at rest, one elevation step on hover ─────────────────── */
+
+.wams-card-shell,
+.wams-card {
+  border-radius: var(--lumo-border-radius-l);
+}
+
+.wams-card {
+  border: 1px solid var(--wams-surface-line);
+  box-shadow: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: var(--wams-surface-line-strong);
+    box-shadow: var(--wams-shadow-hover);
+  }
+}
+
+.wams-card__title-text,
+.wams-profile-card__full-name {
+  font-size: var(--lumo-font-size-l);
+  font-weight: 650;
+  letter-spacing: -0.005em;
+  color: var(--lumo-header-text-color);
+}
+
+.wams-profile-card__subtitle {
+  color: var(--lumo-secondary-text-color);
+}
+
+.wams-profile-card__avatar-wrap {
+  border: 2px solid var(--wams-surface-line);
+  box-shadow: none;
+}
+
+// body rows: label quiet, value readable
+.wams-profile-card__row-label,
+.card__row-label {
+  color: var(--lumo-secondary-text-color);
+  font-weight: 500;
+}
+
+.wams-profile-card__row-value,
+.card__row-value {
+  color: var(--lumo-body-text-color);
+  font-weight: 500;
+}
+
+// footer: a quiet divider, compact icon buttons with a clear hover and a clear danger state
+.wams-card__footer-row {
+  border-top: 1px solid var(--wams-surface-line);
+}
+
+.wams-action-btn {
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border-radius: var(--lumo-border-radius-m);
+  color: var(--lumo-secondary-text-color);
+  transition: background-color 0.12s ease, color 0.12s ease;
+
+  &:hover {
+    background: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lumo-primary-color);
+    outline-offset: 1px;
+  }
+
+  &--danger:hover {
+    background: var(--lumo-error-color-10pct);
+    color: var(--lumo-error-text-color);
+  }
+}
+
+/* ── Status chips: the same pill language as the enum tags (no shouting caps) ─ */
+
+.status-chip {
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: var(--lumo-font-size-xs);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ── Empty state: an invitation, centred and calm ─────────────────────── */
+
+.panel__empty {
+  border: 1px dashed var(--wams-surface-line-strong);
+  border-radius: var(--lumo-border-radius-xl);
+  background: var(--lumo-base-color);
+}
+
+.panel__empty__title {
+  font-weight: 650;
+  color: var(--lumo-header-text-color);
+}
+
+.panel__empty__description {
+  max-width: 48ch;
+  color: var(--lumo-secondary-text-color);
+}
+
+/* ── Pagination: lighter buttons ──────────────────────────────────────── */
+
+.pagination-bar {
+  border-top: 1px solid var(--wams-surface-line);
+}
+
+/* ── Dialogs: larger radius, header separated from the body ───────────── */
+
+vaadin-dialog-overlay::part(overlay) {
+  border-radius: var(--lumo-border-radius-xl);
+  box-shadow: var(--lumo-box-shadow-xl);
+}
+
+vaadin-dialog-overlay::part(header) {
+  border-bottom: 1px solid var(--wams-surface-line);
+}
+
+/* ── Focus: always visible for keyboard users ─────────────────────────── */
+
+:where(a, button, vaadin-button, vaadin-text-field, vaadin-combo-box, vaadin-select):focus-visible {
+  outline: 2px solid var(--lumo-primary-color);
+  outline-offset: 2px;
+}
+
+/* ── Motion: honour the user's setting ────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .wams-card,
+  .wams-action-btn,
+  vaadin-side-nav-item::part(link),
+  vaadin-app-layout::part(drawer) {
+    transition: none;
+  }
+}
+
+/* ── Cards / table switch and table mode ──────────────────────────────── */
+
+.view-mode-switch {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--wams-surface-line);
+  border-radius: var(--lumo-border-radius-m);
+  background: var(--lumo-base-color);
+
+  &__button {
+    margin: 0;
+    padding: 0 var(--lumo-space-s);
+    min-width: 0;
+    height: 30px;
+    color: var(--lumo-secondary-text-color);
+
+    &--active {
+      background: var(--lumo-primary-color-10pct);
+      color: var(--lumo-primary-text-color);
+    }
+  }
+}
+
+.management-grid {
+  border: 1px solid var(--wams-surface-line);
+  border-radius: var(--lumo-border-radius-l);
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+
+  &::part(header-cell) {
+    background: var(--lumo-contrast-5pct);
+    color: var(--lumo-secondary-text-color);
+    font-size: var(--lumo-font-size-s);
+    font-weight: 600;
+  }
+}

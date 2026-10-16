@@ -3,6 +3,8 @@ package eu.isygoit.ui.common.view;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -15,8 +17,10 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.server.VaadinSession;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.notification.AppNotifications;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -51,6 +55,15 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     protected final TextField searchField = new TextField();
     protected final Button createButton = new Button();
     protected final PaginationBar paginationBar = new PaginationBar();
+
+    // ─── Optional table mode ───────────────────────────────────────
+    /** Table of the current page, available when {@link #configureGrid(Grid)} returns true. */
+    protected final Grid<T> grid = new Grid<>();
+    private boolean gridSupported;
+    private boolean gridMode;
+    private int renderedCount;
+    private Button cardsModeButton;
+    private Button tableModeButton;
 
     // ─── Pagination state ──────────────────────────────────────────
     protected int currentPage = 0;
@@ -123,6 +136,15 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
      */
     protected Component buildAdditionalToolbar() {
         return null;
+    }
+
+    /**
+     * Optional table mode: declare the columns of {@link #grid} and return {@code true} to offer a Cards / Table
+     * switch. The table shows the same page, search and filters as the cards, so pagination and criteria are unchanged.
+     * Default: no table (cards only).
+     */
+    protected boolean configureGrid(Grid<T> grid) {
+        return false;
     }
 
     /**
@@ -205,6 +227,9 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         headerBlock.add(header, subtitle);
         add(headerBlock);
 
+        gridSupported = configureGrid(grid);
+        gridMode = gridSupported && "table".equals(modeAttribute());
+
         // ─── Panel shell ───────────────────────────────────────────
         VerticalLayout panel = new VerticalLayout();
         panel.setPadding(false);
@@ -232,6 +257,15 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         cardsContainer.setWidthFull();
         cardsContainer.addClassName("cards-grid");
         panel.add(cardsContainer);
+
+        if (gridSupported) {
+            grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_NO_BORDER);
+            grid.setAllRowsVisible(true);
+            grid.setWidthFull();
+            grid.addClassName("management-grid");
+            grid.setVisible(false);
+            panel.add(grid);
+        }
 
         paginationBar.setVisible(false);
         panel.add(paginationBar);
@@ -285,6 +319,9 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         for (Component c : buildToolbarActions()) {
             right.add(c);
         }
+        if (gridSupported) {
+            right.add(buildModeSwitch());
+        }
         right.add(createButton);
 
         toolbar.add(left, right);
@@ -326,9 +363,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
             onPageLoaded();
         } catch (Exception e) {
             log.error("Error loading page {} of {}", page, getClass().getSimpleName(), e);
-            Notification.show(I18n.t(getLoadErrorKey(), extractErrorMessage(e)),
-                            6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            AppNotifications.error(I18n.t(getLoadErrorKey(), extractErrorMessage(e)));
         } finally {
             showLoading(false);
         }
@@ -343,7 +378,8 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
 
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
+        cardsContainer.setVisible(!show && !showingGrid());
+        grid.setVisible(!show && showingGrid());
         createButton.setEnabled(!show);
         paginationBar.setVisible(!show && totalPages > 0);
     }
@@ -366,13 +402,67 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
 
     protected void renderItems(List<T> items) {
         cardsContainer.removeAll();
+        renderedCount = items.size();
         if (items.isEmpty()) {
             cardsContainer.add(buildEmptyState());
+        } else if (gridSupported) {
+            grid.setItems(items);
+        }
+        if (!items.isEmpty() && !gridMode) {
+            for (T item : items) {
+                cardsContainer.add(renderItem(item));
+            }
+        }
+        cardsContainer.setVisible(!showingGrid());
+        grid.setVisible(showingGrid());
+    }
+
+    private boolean showingGrid() {
+        return gridSupported && gridMode && renderedCount > 0;
+    }
+
+    private String modeAttribute() {
+        Object value = VaadinSession.getCurrent() == null ? null
+                : VaadinSession.getCurrent().getAttribute("view-mode:" + getClass().getName());
+        return value == null ? "cards" : value.toString();
+    }
+
+    private Component buildModeSwitch() {
+        cardsModeButton = modeButton(VaadinIcon.GRID_BIG_O, "common.view.cards", false);
+        tableModeButton = modeButton(VaadinIcon.LIST, "common.view.table", true);
+        Div group = new Div(cardsModeButton, tableModeButton);
+        group.addClassName("view-mode-switch");
+        updateModeButtons();
+        return group;
+    }
+
+    private Button modeButton(VaadinIcon icon, String labelKey, boolean table) {
+        Button button = new Button(icon.create());
+        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        button.addClassName("view-mode-switch__button");
+        button.setTooltipText(I18n.t(labelKey));
+        button.setAriaLabel(I18n.t(labelKey));
+        button.addClickListener(e -> setGridMode(table));
+        return button;
+    }
+
+    private void setGridMode(boolean table) {
+        if (gridMode == table) {
             return;
         }
-        for (T item : items) {
-            cardsContainer.add(renderItem(item));
+        gridMode = table;
+        if (VaadinSession.getCurrent() != null) {
+            VaadinSession.getCurrent().setAttribute("view-mode:" + getClass().getName(), table ? "table" : "cards");
         }
+        updateModeButtons();
+        applyLocalFilter();
+    }
+
+    private void updateModeButtons() {
+        cardsModeButton.getElement().setAttribute("aria-pressed", String.valueOf(!gridMode));
+        tableModeButton.getElement().setAttribute("aria-pressed", String.valueOf(gridMode));
+        cardsModeButton.setClassName("view-mode-switch__button--active", !gridMode);
+        tableModeButton.setClassName("view-mode-switch__button--active", gridMode);
     }
 
     protected Component buildEmptyState() {

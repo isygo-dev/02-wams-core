@@ -47,10 +47,10 @@ html {
   --wams-secondary-text-rgb: 68, 84, 111;
 
   /* ── Shape: compact, mostly-square controls (not pill-shaped) ────────── */
-  --lumo-border-radius-s: 3px;
-  --lumo-border-radius-m: 3px;
-  --lumo-border-radius-l: 6px;
-  --lumo-border-radius-xl: 8px;
+  --lumo-border-radius-s: 4px;
+  --lumo-border-radius-m: 6px;
+  --lumo-border-radius-l: 10px;
+  --lumo-border-radius-xl: 14px;
 
   /* ── Shadows: subtle, flat elevation ── */
   --lumo-box-shadow-xs: 0 1px 1px rgba(9, 30, 66, 0.13);
