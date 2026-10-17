@@ -26,7 +26,6 @@ import java.time.LocalDateTime;
 public class MinAccountDto extends AccountModelDto<Long> {
 
     private Long id;
-    @NotEmpty
     private String tenant;
     private String imagePath;
     private String functionRole;

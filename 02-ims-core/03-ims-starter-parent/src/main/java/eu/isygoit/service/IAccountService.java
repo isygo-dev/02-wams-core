@@ -27,6 +27,18 @@ import java.util.Optional;
 public interface IAccountService extends ICrudTenantServiceOperations<Long, Account>, IImageTenantServiceOperations<Long, Account> {
 
     /**
+     * Saves the personal information a user edited on their own account (names, email, phone, country, language,
+     * address and contacts) in one transaction. Only these fields are written; everything else on the account is
+     * left untouched.
+     *
+     * @param tenant   tenant of the connected user
+     * @param userName code of the connected user
+     * @param request  the values sent by the user (only the editable fields are read)
+     * @return the saved account
+     */
+    Account updateProfile(String tenant, String userName, eu.isygoit.dto.data.AccountDto request);
+
+    /**
      * Find by tenant and user name account.
      *
      * @param tenant   the tenant

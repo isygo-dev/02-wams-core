@@ -40,7 +40,7 @@ public class AccountDetails extends AuditableEntity<Long> {
     @Column(name = SchemaColumnConstantName.C_LAST_NAME, length = SchemaConstantSize.S_NAME, nullable = false)
     private String lastName;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL /* Cascade only for OneToMany*/)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = SchemaColumnConstantName.C_ACCOUNT_DETAILS_ID
             , foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_ACCOUNT_DETAILS_REF_CONTACT))
     private List<AccountContact> contacts;

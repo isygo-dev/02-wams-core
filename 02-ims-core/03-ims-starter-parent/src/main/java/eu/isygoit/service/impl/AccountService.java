@@ -98,6 +98,123 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
         return !challenge.getExpiresAt().after(new Date());
     }
 
+    private static final java.util.regex.Pattern PROFILE_PHONE = java.util.regex.Pattern.compile("^[+]?[0-9 ().\\-]{6,25}$");
+    private static final java.util.regex.Pattern PROFILE_EMAIL = java.util.regex.Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
+
+    @Override
+    @Transactional
+    public Account updateProfile(String tenant, String userName, eu.isygoit.dto.data.AccountDto request) {
+        Account account = findByTenantAndUserName(tenant, userName);
+        if (account == null) {
+            throw new eu.isygoit.exception.ObjectNotFoundException("account " + userName);
+        }
+
+        // ---- account level ----
+        if (request.getEmail() != null) {
+            String email = request.getEmail().trim();
+            if (!PROFILE_EMAIL.matcher(email).matches()) {
+                throw new eu.isygoit.exception.BadRequestException("Invalid email address");
+            }
+            account.setEmail(email);
+        }
+        if (request.getPhoneNumber() != null) {
+            String phone = request.getPhoneNumber().trim();
+            if (!phone.isEmpty() && !PROFILE_PHONE.matcher(phone).matches()) {
+                throw new eu.isygoit.exception.BadRequestException("Invalid phone number");
+            }
+            account.setPhoneNumber(phone.isEmpty() ? null : phone);
+        }
+        if (request.getLanguage() != null) {
+            account.setLanguage(request.getLanguage());
+        }
+
+        // ---- details ----
+        AccountDetails details = account.getAccountDetails();
+        if (details == null) {
+            details = AccountDetails.builder().build();
+            account.setAccountDetails(details);
+        }
+        eu.isygoit.dto.data.AccountDetailsDto sent = request.getAccountDetails();
+        if (sent != null) {
+            if (sent.getFirstName() != null) {
+                details.setFirstName(requireName(sent.getFirstName(), "first name"));
+            }
+            if (sent.getLastName() != null) {
+                details.setLastName(requireName(sent.getLastName(), "last name"));
+            }
+            if (sent.getCountry() != null) {
+                details.setCountry(blankToNull(sent.getCountry()));
+            }
+            applyAddress(details, sent.getAddress());
+            applyContacts(details, sent.getContacts());
+        }
+
+        try {
+            return repository().saveAndFlush(account);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new eu.isygoit.exception.EmailAlreadyUsedException(
+                    "The email or another profile value is already used: " + e.getMostSpecificCause().getMessage());
+        }
+    }
+
+    private static String requireName(String value, String label) {
+        String name = value.trim();
+        if (name.length() < 2 || name.length() > 50) {
+            throw new eu.isygoit.exception.BadRequestException("The " + label + " must have 2 to 50 characters");
+        }
+        return name;
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    /**
+     * Each address field is replaced by what was sent (empty clears it); coordinates and the composed address lines
+     * are not user input and stay as they are.
+     */
+    private static void applyAddress(AccountDetails details, eu.isygoit.dto.AddressDto sent) {
+        if (sent == null) {
+            return;
+        }
+        eu.isygoit.model.AccountAddress address = details.getAddress();
+        if (address == null) {
+            address = new eu.isygoit.model.AccountAddress();
+            details.setAddress(address);
+        }
+        address.setStreet(blankToNull(sent.getStreet()));
+        address.setZipCode(blankToNull(sent.getZipCode()));
+        address.setCity(blankToNull(sent.getCity()));
+        address.setState(blankToNull(sent.getState()));
+        address.setCountry(blankToNull(sent.getCountry()));
+        address.setAdditionalInfo(blankToNull(sent.getAdditionalInfo()));
+    }
+
+    /**
+     * Replaces the contacts by the list sent; entries without a type or a value are dropped and the contacts that
+     * disappear are deleted (orphan removal).
+     */
+    private static void applyContacts(AccountDetails details, java.util.List<eu.isygoit.dto.ContactDto> sent) {
+        if (sent == null) {
+            return;
+        }
+        java.util.List<eu.isygoit.model.AccountContact> contacts = details.getContacts();
+        if (contacts == null) {
+            contacts = new java.util.ArrayList<>();
+            details.setContacts(contacts);
+        }
+        contacts.clear();
+        for (eu.isygoit.dto.ContactDto dto : sent) {
+            String value = blankToNull(dto.getValue());
+            if (dto.getType() != null && value != null) {
+                eu.isygoit.model.AccountContact contact = new eu.isygoit.model.AccountContact();
+                contact.setType(dto.getType());
+                contact.setValue(value);
+                contacts.add(contact);
+            }
+        }
+    }
+
     @Override
     public Account findByTenantAndUserName(String tenant /*senderTenant*/, String userName) {
         Optional<Account> optional = repository().findByTenantIgnoreCaseAndCodeIgnoreCase(tenant, userName);

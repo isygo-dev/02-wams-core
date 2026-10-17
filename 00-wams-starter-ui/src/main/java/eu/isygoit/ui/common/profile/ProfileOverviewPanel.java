@@ -33,6 +33,7 @@ class ProfileOverviewPanel extends VerticalLayout {
         addClassName("profile-tab-panel");
 
         add(buildPersonalCard(account),
+                buildAddressCard(account),
                 buildAccountCard(account, stats),
                 buildAccessCard(account));
         if (stats.getLastLogin() != null) {
@@ -50,6 +51,30 @@ class ProfileOverviewPanel extends VerticalLayout {
                 field(VaadinIcon.GLOBE, I18n.t("profile.field.country"), details != null ? details.getCountry() : null),
                 field(VaadinIcon.FLAG, I18n.t("profile.field.language"),
                         ProfileFormatUtils.formatLanguage(account.getLanguage())));
+    }
+
+    /**
+     * The address and the additional contacts the user can edit in {@link EditProfileDialog}.
+     */
+    private Div buildAddressCard(AccountDto account) {
+        AccountDetailsDto details = account.getAccountDetails();
+        eu.isygoit.dto.AddressDto address = details != null ? details.getAddress() : null;
+
+        java.util.List<Div> fields = new java.util.ArrayList<>(java.util.List.of(
+                field(VaadinIcon.HOME, I18n.t("profile.field.street"), address != null ? address.getStreet() : null),
+                field(VaadinIcon.MAILBOX, I18n.t("profile.field.zipCode"), address != null ? address.getZipCode() : null),
+                field(VaadinIcon.BUILDING, I18n.t("profile.field.city"), address != null ? address.getCity() : null),
+                field(VaadinIcon.MAP_MARKER, I18n.t("profile.field.state"), address != null ? address.getState() : null)));
+        if (details != null && details.getContacts() != null) {
+            for (eu.isygoit.dto.ContactDto contact : details.getContacts()) {
+                if (contact.getType() != null && contact.getValue() != null) {
+                    fields.add(field(contact.getType() == eu.isygoit.enums.IEnumContact.Types.EMAIL
+                                    ? VaadinIcon.ENVELOPE : VaadinIcon.PHONE,
+                            I18n.t("profile.contact.type." + contact.getType().name()), contact.getValue()));
+                }
+            }
+        }
+        return card(I18n.t("profile.section.address"), fields.toArray(new Div[0]));
     }
 
     private Div buildAccountCard(AccountDto account, AccountStatDto stats) {

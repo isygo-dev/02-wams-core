@@ -148,40 +148,11 @@ public class ProfileController extends ControllerUtils implements ProfileService
     public ResponseEntity<AccountDto> updateProfile(AccountDto accountDto) {
         log.info("Updating profile for current user");
 
-        Account account = getAuthenticatedAccount();
-
-        // Update account fields
-        if (accountDto.getPhoneNumber() != null) {
-            account.setPhoneNumber(accountDto.getPhoneNumber());
-        }
-        if (accountDto.getLanguage() != null) {
-            account.setLanguage(accountDto.getLanguage());
-        }
-        if (accountDto.getEmail() != null) {
-            account.setEmail(accountDto.getEmail());
-        }
-
-        // Update account details
-        AccountDetails details = account.getAccountDetails();
-        if (details == null) {
-            details = AccountDetails.builder().build();
-            account.setAccountDetails(details);
-        }
-
-        if (accountDto.getAccountDetails() != null) {
-            if (accountDto.getAccountDetails().getFirstName() != null) {
-                details.setFirstName(accountDto.getAccountDetails().getFirstName());
-            }
-            if (accountDto.getAccountDetails().getLastName() != null) {
-                details.setLastName(accountDto.getAccountDetails().getLastName());
-            }
-            if (accountDto.getAccountDetails().getCountry() != null) {
-                details.setCountry(accountDto.getAccountDetails().getCountry());
-            }
-        }
-
-        Account updatedAccount = accountService.update(account.getTenant(), account);
-        return ResponseFactory.responseOk(accountMapper.entityToProfileDto(updatedAccount));
+        // The work is done in one transaction by the service, on a freshly loaded account: the edited fields are
+        // validated, written and flushed to the database, and what comes back is what was stored.
+        Account caller = getAuthenticatedAccount();
+        Account saved = accountService.updateProfile(caller.getTenant(), caller.getCode(), accountDto);
+        return ResponseFactory.responseOk(accountMapper.entityToProfileDto(saved));
     }
 
     @Override
