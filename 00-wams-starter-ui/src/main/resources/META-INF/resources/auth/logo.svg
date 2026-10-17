@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80" width="100" height="80">
+    <defs>
+        <style>
+            .book-teal { fill: #009B8D; }
+            .star-yellow { fill: #FFB300; }
+        </style>
+    </defs>
+    <!-- Left Page -->
+    <path class="book-teal" d="M 50,35 C 40,30 20,28 5,35 L 5,65 C 20,58 40,60 50,65 Z"/>
+    <!-- Right Page -->
+    <path class="book-teal" d="M 50,35 C 60,30 80,28 95,35 L 95,65 C 80,58 60,60 50,65 Z"/>
+    <!-- Page Line (Center) -->
+    <path d="M 50,35 L 50,65" stroke="#FCF8F2" stroke-width="2"/>
+    <!-- Star -->
+    <polygon class="star-yellow" points="50,5 54,18 68,18 57,26 61,40 50,32 39,40 43,26 32,18 46,18"/>
+</svg>

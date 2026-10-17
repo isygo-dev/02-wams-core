@@ -12,7 +12,18 @@ import eu.isygoit.i18n.I18n;
 public class BrandHeader extends Component implements HasComponents {
 
     public BrandHeader(String title, String subtitle) {
-        Avatar logo = new Avatar(I18n.t("auth.common.brand.title"));
+        Component logo;
+        if (AuthBranding.isBranded()) {
+            // the brand logo and wordmark (the hero is hidden on narrow screens, the card must carry the brand)
+            com.vaadin.flow.component.html.Image mark = new com.vaadin.flow.component.html.Image("auth/edyra-mark.svg", "");
+            mark.addClassName("auth-brand__mark");
+            com.vaadin.flow.component.html.Span name = new com.vaadin.flow.component.html.Span(AuthBranding.title());
+            name.addClassName("auth-brand__name");
+            logo = new com.vaadin.flow.component.html.Div(mark, name);
+            logo.getElement().getClassList().add("auth-brand__lockup");
+        } else {
+            logo = new Avatar(I18n.t("auth.common.brand.title"));
+        }
         logo.getElement().setAttribute("aria-hidden", "true");
 
         H1 heading = new H1(title);

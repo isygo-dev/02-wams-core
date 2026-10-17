@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 50" width="200" height="50">
+    <defs>
+        <style>
+            .form-icon { fill: none; stroke: #334155; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        </style>
+    </defs>
+
+    <!-- Icon 1: School -->
+    <g class="form-icon" transform="translate(10, 10)">
+        <path d="M2,18 L15,5 L28,18"/>
+        <path d="M5,18 L5,30 L25,30 L25,18"/>
+        <path d="M12,30 L12,22 L18,22 L18,30"/>
+        <line x1="15" y1="2" x2="15" y2="5"/>
+    </g>
+
+    <!-- Icon 2: User -->
+    <g class="form-icon" transform="translate(70, 10)">
+        <circle cx="15" cy="10" r="6"/>
+        <path d="M5,30 C5,22 9,18 15,18 C21,18 25,22 25,30"/>
+    </g>
+
+    <!-- Icon 3: Lock -->
+    <g class="form-icon" transform="translate(130, 10)">
+        <rect x="5" y="15" width="20" height="15" rx="2"/>
+        <path d="M9,15 L9,10 C9,6 11,4 15,4 C19,4 21,6 21,10 L21,15"/>
+        <circle cx="15" cy="22" r="2" fill="#334155"/>
+    </g>
+</svg>

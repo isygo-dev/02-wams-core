@@ -10,6 +10,11 @@ public class AuthLayout extends Component {
 
     public AuthLayout() {
         getElement().setAttribute("role", "main");
+        String variant = AuthBranding.variant();
+        getElement().setAttribute("data-variant", variant);
+        if (AuthBranding.isBranded()) {
+            getElement().appendChild(new AuthHero().getElement());
+        }
         getElement().appendChild(card.getElement());
     }
 

@@ -1,0 +1,358 @@
+// EDYRA brand of the authentication pages: split screen, warm ivory page, deep navy type, teal actions, mint accents.
+// Active only when the application defines `auth.brand.variant=edyra` (see AuthBranding), so the other brands keep the
+// compact centred card.
+
+$edyra-ivory: #fbf6ea;
+$edyra-navy: #0f2a44;
+$edyra-slate: #4a5d70;
+$edyra-teal: #0e7c7b;
+$edyra-teal-hover: #0a6665;
+$edyra-teal-text: #0a6a69;
+$edyra-mint: #cfe9e3;
+$edyra-line: #ddd5c2;
+$edyra-focus: #0b3a5c;
+$edyra-serif: "Source Serif 4", ui-serif, Georgia, "Noto Serif", "Noto Naskh Arabic", "Times New Roman", serif;
+
+auth-layout[data-variant="edyra"] {
+  --lumo-primary-color: #{$edyra-teal};
+  --lumo-primary-text-color: #{$edyra-teal-text};
+  --lumo-primary-color-50pct: rgba(14, 124, 123, 0.5);
+  --lumo-primary-color-10pct: rgba(14, 124, 123, 0.1);
+  --lumo-body-text-color: #{$edyra-navy};
+  --lumo-header-text-color: #{$edyra-navy};
+  --lumo-secondary-text-color: #{$edyra-slate};
+  --lumo-border-radius-m: 8px;
+  --lumo-border-radius-l: 16px;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+  overflow: hidden;
+  background: $edyra-ivory;
+  color: $edyra-navy;
+
+  // soft mint arcs behind the card: the only decoration of the page
+  &::before,
+  &::after {
+    position: absolute;
+    z-index: 0;
+    border-radius: 50%;
+    background: $edyra-mint;
+    content: "";
+    pointer-events: none;
+  }
+
+  &::before {
+    inset-block-start: -22%;
+    inset-inline-end: -12%;
+    width: 52vw;
+    height: 52vw;
+    opacity: 0.55;
+  }
+
+  &::after {
+    inset-block-end: -30%;
+    inset-inline-end: 8%;
+    width: 36vw;
+    height: 36vw;
+    opacity: 0.4;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: $edyra-serif;
+  }
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────── */
+
+auth-layout[data-variant="edyra"] auth-hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+  padding: clamp(2rem, 5vw, 4.5rem);
+}
+
+.auth-hero__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.auth-hero__mark {
+  width: 3.25rem;
+  height: auto;
+}
+
+.auth-hero__name {
+  font-family: $edyra-serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: $edyra-navy;
+}
+
+.auth-hero__headline {
+  max-width: 14ch;
+  margin: clamp(1rem, 4vh, 3rem) 0 0;
+  font-size: clamp(2.5rem, 4.6vw, 4.25rem);
+  font-weight: 700;
+  line-height: 1.04;
+  color: $edyra-navy;
+  text-wrap: balance;
+}
+
+.auth-hero__subtitle {
+  max-width: 34rem;
+  margin: 0;
+  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+  line-height: 1.5;
+  color: $edyra-navy;
+}
+
+.auth-hero__benefits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 0;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.auth-hero__benefit {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-inline: 1.25rem;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  color: $edyra-navy;
+
+  &:first-child {
+    padding-inline-start: 0;
+  }
+
+  & + & {
+    border-inline-start: 1px solid $edyra-line;
+  }
+
+  vaadin-icon {
+    flex: none;
+    width: 1.9rem;
+    height: 1.9rem;
+    color: $edyra-teal;
+  }
+}
+
+.auth-hero__illustration {
+  align-self: flex-start;
+  width: min(100%, 40rem);
+  max-height: 38vh;
+  margin-block-start: auto;
+  object-fit: contain;
+  object-position: left bottom;
+}
+
+[dir="rtl"] .auth-hero__illustration {
+  object-position: right bottom;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────── */
+
+auth-layout[data-variant="edyra"] auth-card {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  justify-self: center;
+  width: min(calc(100% - 2rem), 28rem);
+  margin: clamp(1.25rem, 4vw, 3rem) 0;
+  gap: 1.1rem;
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border: 1px solid rgba(15, 42, 68, 0.1);
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 1.25rem 3rem rgba(15, 42, 68, 0.1);
+}
+
+auth-layout[data-variant="edyra"][data-size="wide"] auth-card {
+  width: min(calc(100% - 2rem), 40rem);
+}
+
+.auth-brand__lockup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.auth-brand__mark {
+  width: 2.5rem;
+  height: auto;
+}
+
+.auth-brand__name {
+  font-family: $edyra-serif;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: $edyra-navy;
+}
+
+auth-layout[data-variant="edyra"] auth-brand {
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid $edyra-line;
+}
+
+auth-layout[data-variant="edyra"] auth-brand h1 {
+  font-family: $edyra-serif;
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+  color: $edyra-navy;
+}
+
+auth-layout[data-variant="edyra"] auth-brand p {
+  color: $edyra-slate;
+  font-size: 1.05rem;
+}
+
+/* ── Fields, buttons and links ────────────────────────────────────────── */
+
+auth-layout[data-variant="edyra"] auth-card vaadin-text-field::part(input-field),
+auth-layout[data-variant="edyra"] auth-card vaadin-password-field::part(input-field),
+auth-layout[data-variant="edyra"] auth-card vaadin-email-field::part(input-field) {
+  border-radius: 0.5rem;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px #c9d1d6;
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-text-field::part(label),
+auth-layout[data-variant="edyra"] auth-card vaadin-password-field::part(label),
+auth-layout[data-variant="edyra"] auth-card vaadin-email-field::part(label) {
+  color: $edyra-navy;
+  font-weight: 600;
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-text-field:focus-within::part(input-field),
+auth-layout[data-variant="edyra"] auth-card vaadin-password-field:focus-within::part(input-field),
+auth-layout[data-variant="edyra"] auth-card vaadin-email-field:focus-within::part(input-field),
+auth-layout[data-variant="edyra"] auth-card vaadin-button:focus-visible::part(button),
+auth-layout[data-variant="edyra"] auth-card a:focus-visible,
+auth-layout[data-variant="edyra"] auth-card vaadin-password-field::part(reveal-button):focus-visible {
+  outline: 3px solid $edyra-focus;
+  outline-offset: 2px;
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-button {
+  border-radius: 0.5rem;
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-button[theme~="primary"] {
+  background-color: $edyra-teal;
+  color: #ffffff;
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-button[theme~="primary"]:hover:not([disabled]) {
+  background-color: $edyra-teal-hover;
+}
+
+auth-layout[data-variant="edyra"] auth-card a {
+  color: $edyra-teal-text;
+}
+
+auth-layout[data-variant="edyra"] auth-footer {
+  border-top-color: $edyra-line;
+}
+
+/* ── Responsive: the form first ───────────────────────────────────────── */
+
+@media (max-width: 1180px) {
+  .auth-hero__illustration {
+    display: none;
+  }
+
+  .auth-hero__headline {
+    font-size: clamp(2.25rem, 4.4vw, 3rem);
+  }
+}
+
+@media (max-width: 860px) {
+  auth-layout[data-variant="edyra"] {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100dvh;
+    background: $edyra-ivory;
+  }
+
+  auth-layout[data-variant="edyra"]::before,
+  auth-layout[data-variant="edyra"]::after,
+  auth-layout[data-variant="edyra"] auth-hero {
+    display: none;
+  }
+
+  auth-layout[data-variant="edyra"] auth-card {
+    width: min(100%, 30rem);
+    margin: clamp(1rem, 6vw, 2.5rem) 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  auth-layout[data-variant="edyra"] auth-card {
+    width: 100%;
+    min-height: 100dvh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* ── Dark theme ───────────────────────────────────────────────────────── */
+
+html[theme~="dark"] auth-layout[data-variant="edyra"] {
+  --lumo-base-color: #10243a;
+  --lumo-body-text-color: #eef3f6;
+  --lumo-header-text-color: #eef3f6;
+  --lumo-secondary-text-color: #a9bac8;
+  --lumo-primary-text-color: #6fd3cd;
+
+  background: #0b1c2c;
+  color: #eef3f6;
+}
+
+html[theme~="dark"] auth-layout[data-variant="edyra"]::before,
+html[theme~="dark"] auth-layout[data-variant="edyra"]::after {
+  opacity: 0.08;
+}
+
+html[theme~="dark"] .auth-hero__name,
+html[theme~="dark"] .auth-hero__headline,
+html[theme~="dark"] .auth-hero__subtitle,
+html[theme~="dark"] .auth-hero__benefit,
+html[theme~="dark"] .auth-brand__name,
+html[theme~="dark"] auth-layout[data-variant="edyra"] auth-brand h1 {
+  color: #eef3f6;
+}
+
+html[theme~="dark"] auth-layout[data-variant="edyra"] auth-card {
+  border-color: rgba(238, 243, 246, 0.16);
+  background: #10243a;
+  box-shadow: 0 1.25rem 3rem rgba(0, 0, 0, 0.4);
+}
+
+html[theme~="dark"] auth-layout[data-variant="edyra"] auth-card a {
+  color: #6fd3cd;
+}
+
+html[theme~="dark"] auth-layout[data-variant="edyra"] auth-card vaadin-text-field::part(input-field),
+html[theme~="dark"] auth-layout[data-variant="edyra"] auth-card vaadin-password-field::part(input-field) {
+  background: #0b1c2c;
+  box-shadow: inset 0 0 0 1px #35516b;
+}

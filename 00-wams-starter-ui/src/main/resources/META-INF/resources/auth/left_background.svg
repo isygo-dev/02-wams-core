@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 700" width="800" height="700">
+    <defs>
+        <!-- Faint Grid Pattern -->
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#E5E7EB" stroke-width="1" opacity="0.5"/>
+        </pattern>
+    </defs>
+
+    <!-- Base Cream Background -->
+    <rect width="800" height="700" fill="#FDFBF7"/>
+
+    <!-- Grid Overlay -->
+    <rect width="800" height="700" fill="url(#grid)"/>
+
+    <!-- Large Top Right Overlapping Circles -->
+    <circle cx="700" cy="-50" r="250" fill="#E0F2F1" opacity="0.6"/>
+    <circle cx="500" cy="50" r="200" fill="#B2DFDB" opacity="0.4"/>
+
+    <!-- Bottom Right Circle -->
+    <circle cx="750" cy="650" r="150" fill="#B2DFDB" opacity="0.5"/>
+</svg>

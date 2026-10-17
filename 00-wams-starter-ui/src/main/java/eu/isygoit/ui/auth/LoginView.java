@@ -56,8 +56,8 @@ public class LoginView extends BaseLoginView {
         continueButton.addClickShortcut(com.vaadin.flow.component.Key.ENTER);
 
         Anchor registerLink = new Anchor(AuthRoutes.REGISTER, I18n.t("auth.login.link.register"));
-        addToCard(new BrandHeader(I18n.t("auth.common.brand.title"),
-                        I18n.t("auth.common.brand.subtitle")),
+        addToCard(new BrandHeader(AuthBranding.loginHeading(),
+                        AuthBranding.subtitle()),
                 tenantField, usernameField, continueButton, errorBanner, registerLink, new AuthFooter());
     }
 
