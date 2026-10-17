@@ -10,11 +10,20 @@ public class AuthLayout extends Component {
 
     public AuthLayout() {
         getElement().setAttribute("role", "main");
-        String variant = AuthBranding.variant();
-        getElement().setAttribute("data-variant", variant);
+        getElement().setAttribute("data-variant", AuthBranding.variant());
         if (AuthBranding.isBranded()) {
+            // images of the brand reach the stylesheet as custom properties: the theme names no module's file
+            String background = AuthBranding.asset("background.svg");
+            if (background != null) {
+                getElement().getStyle().set("--auth-brand-background", "url(\"" + background + "\")");
+            }
+            String input = AuthBranding.asset("input-field.svg");
+            if (input != null) {
+                getElement().getStyle().set("--auth-brand-input", "url(\"" + input + "\")");
+            }
             getElement().appendChild(new AuthHero().getElement());
         }
+        getElement().appendChild(new AuthToolbar().getElement());
         getElement().appendChild(card.getElement());
     }
 

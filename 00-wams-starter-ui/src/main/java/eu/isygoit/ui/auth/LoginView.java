@@ -29,8 +29,8 @@ import java.util.Map;
 @PermitAll
 public class LoginView extends BaseLoginView {
 
-    private final TextField tenantField = new TextField(I18n.t("auth.login.field.tenant.label"));
-    private final TextField usernameField = new TextField(I18n.t("auth.login.field.username.label"));
+    private final TextField tenantField = new TextField(AuthBranding.text("auth.login.field.tenant.label"));
+    private final TextField usernameField = new TextField(AuthBranding.text("auth.login.field.username.label"));
     private final Button continueButton = new Button(
             I18n.t("auth.login.button.continue"), VaadinIcon.ARROW_RIGHT.create());
     private final AuthServiceFacade authService;
@@ -40,12 +40,14 @@ public class LoginView extends BaseLoginView {
         super("auth.page.title.login");
         this.authService = authService;
 
-        tenantField.setPlaceholder(I18n.t("auth.login.field.tenant.placeholder"));
+        tenantField.setPlaceholder(AuthBranding.text("auth.login.field.tenant.placeholder"));
         tenantField.setRequiredIndicatorVisible(true);
         tenantField.getElement().setAttribute("autocomplete", "organization");
-        usernameField.setPlaceholder(I18n.t("auth.login.field.username.placeholder"));
+        usernameField.setPlaceholder(AuthBranding.text("auth.login.field.username.placeholder"));
         usernameField.setRequiredIndicatorVisible(true);
         usernameField.getElement().setAttribute("autocomplete", "username");
+        decorate(tenantField, "icon-school.svg");
+        decorate(usernameField, "icon-user.svg");
         describeErrors(tenantField);
         describeErrors(usernameField);
         tenantField.addValueChangeListener(event -> clearError());
@@ -56,9 +58,25 @@ public class LoginView extends BaseLoginView {
         continueButton.addClickShortcut(com.vaadin.flow.component.Key.ENTER);
 
         Anchor registerLink = new Anchor(AuthRoutes.REGISTER, I18n.t("auth.login.link.register"));
+        com.vaadin.flow.component.html.Image registerIcon = AuthBranding.image("icon-user-plus.svg", "auth-icon");
+        if (registerIcon != null) {
+            registerLink.getElement().insertChild(0, registerIcon.getElement());
+        }
+        com.vaadin.flow.component.html.Image arrow = AuthBranding.image("icon-arrow-right.svg", "auth-icon");
+        if (arrow != null) {
+            continueButton.setIcon(arrow);
+        }
         addToCard(new BrandHeader(AuthBranding.loginHeading(),
                         AuthBranding.subtitle()),
                 tenantField, usernameField, continueButton, errorBanner, registerLink, new AuthFooter());
+    }
+
+    /** Puts the brand's icon in front of a field (nothing for brands without assets). */
+    private static void decorate(TextField field, String iconFile) {
+        com.vaadin.flow.component.html.Image icon = AuthBranding.image(iconFile, "auth-icon");
+        if (icon != null) {
+            field.setPrefixComponent(icon);
+        }
     }
 
     private void handleContinue() {

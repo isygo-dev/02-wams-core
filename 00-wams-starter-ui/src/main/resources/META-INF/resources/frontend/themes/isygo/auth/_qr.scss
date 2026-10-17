@@ -1,6 +1,6 @@
 @use "./variables" as v;
 
-auth-card img {
+auth-card img.auth-qr-image {
   display: block;
   box-sizing: border-box;
   width: min(100%, 12.5rem);

@@ -31,35 +31,8 @@ auth-layout[data-variant="edyra"] {
   justify-content: stretch;
   padding: 0;
   overflow: hidden;
-  background: $edyra-ivory;
+  background: var(--auth-brand-background, none) center / cover no-repeat, $edyra-ivory;
   color: $edyra-navy;
-
-  // soft mint arcs behind the card: the only decoration of the page
-  &::before,
-  &::after {
-    position: absolute;
-    z-index: 0;
-    border-radius: 50%;
-    background: $edyra-mint;
-    content: "";
-    pointer-events: none;
-  }
-
-  &::before {
-    inset-block-start: -22%;
-    inset-inline-end: -12%;
-    width: 52vw;
-    height: 52vw;
-    opacity: 0.55;
-  }
-
-  &::after {
-    inset-block-end: -30%;
-    inset-inline-end: 8%;
-    width: 36vw;
-    height: 36vw;
-    opacity: 0.4;
-  }
 
   h1,
   h2,
@@ -71,6 +44,8 @@ auth-layout[data-variant="edyra"] {
 /* ── Hero ─────────────────────────────────────────────────────────────── */
 
 auth-layout[data-variant="edyra"] auth-hero {
+  --auth-hero-pad: clamp(2rem, 5vw, 4.5rem);
+
   position: relative;
   z-index: 1;
   display: flex;
@@ -78,7 +53,7 @@ auth-layout[data-variant="edyra"] auth-hero {
   flex-direction: column;
   gap: 1.25rem;
   min-width: 0;
-  padding: clamp(2rem, 5vw, 4.5rem);
+  padding: var(--auth-hero-pad);
 }
 
 .auth-hero__brand {
@@ -143,26 +118,53 @@ auth-layout[data-variant="edyra"] auth-hero {
   & + & {
     border-inline-start: 1px solid $edyra-line;
   }
+}
 
-  vaadin-icon {
-    flex: none;
-    width: 1.9rem;
-    height: 1.9rem;
-    color: $edyra-teal;
-  }
+.auth-hero__icon {
+  box-sizing: border-box;
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  padding: 0.7rem;
+  border-radius: 50%;
+  background: $edyra-mint;
+}
+
+/* Icons placed inside the form (field prefixes, button, links). */
+.auth-icon {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-inline-end: 0.25rem;
 }
 
 .auth-hero__illustration {
+  display: block;
   align-self: flex-start;
-  width: min(100%, 40rem);
-  max-height: 38vh;
-  margin-block-start: auto;
+  width: auto;
+  max-width: calc(100% + var(--auth-hero-pad));
+  height: min(44vh, 34rem);
+  margin-block: auto calc(-1 * var(--auth-hero-pad));
+  margin-inline: calc(-1 * var(--auth-hero-pad)) 0;
   object-fit: contain;
   object-position: left bottom;
+  // light fade at the top and towards the card: the faces stay untouched
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%),
+    linear-gradient(to right, #000 86%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12%),
+    linear-gradient(to right, #000 86%, transparent 100%);
+  mask-composite: intersect;
 }
 
 [dir="rtl"] .auth-hero__illustration {
+  margin-inline: 0 calc(-1 * var(--auth-hero-pad));
+  align-self: flex-end;
   object-position: right bottom;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%),
+    linear-gradient(to left, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12%),
+    linear-gradient(to left, #000 86%, transparent 100%);
 }
 
 /* ── Card ─────────────────────────────────────────────────────────────── */
@@ -172,10 +174,10 @@ auth-layout[data-variant="edyra"] auth-card {
   z-index: 1;
   align-self: center;
   justify-self: center;
-  width: min(calc(100% - 2rem), 28rem);
-  margin: clamp(1.25rem, 4vw, 3rem) 0;
-  gap: 1.1rem;
-  padding: clamp(1.5rem, 3vw, 2.5rem);
+  width: min(calc(100% - 3rem), 31rem);
+  margin: clamp(1.5rem, 5vw, 4rem) 0;
+  gap: 1.25rem;
+  padding: clamp(1.75rem, 3.2vw, 3rem);
   border: 1px solid rgba(15, 42, 68, 0.1);
   border-radius: 1rem;
   background: #ffffff;
@@ -195,19 +197,19 @@ auth-layout[data-variant="edyra"][data-size="wide"] auth-card {
 }
 
 .auth-brand__mark {
-  width: 2.5rem;
+  width: 3rem;
   height: auto;
 }
 
 .auth-brand__name {
   font-family: $edyra-serif;
-  font-size: 1.9rem;
+  font-size: 2.1rem;
   font-weight: 700;
   color: $edyra-navy;
 }
 
 auth-layout[data-variant="edyra"] auth-brand {
-  padding-bottom: 0.85rem;
+  padding-bottom: 1.1rem;
   border-bottom: 1px solid $edyra-line;
 }
 
@@ -228,8 +230,8 @@ auth-layout[data-variant="edyra"] auth-card vaadin-text-field::part(input-field)
 auth-layout[data-variant="edyra"] auth-card vaadin-password-field::part(input-field),
 auth-layout[data-variant="edyra"] auth-card vaadin-email-field::part(input-field) {
   border-radius: 0.5rem;
-  background: #ffffff;
-  box-shadow: inset 0 0 0 1px #c9d1d6;
+  background: var(--auth-brand-input, none) center / 100% 100% no-repeat, #ffffff;
+  box-shadow: none;
 }
 
 auth-layout[data-variant="edyra"] auth-card vaadin-text-field::part(label),
@@ -324,12 +326,8 @@ html[theme~="dark"] auth-layout[data-variant="edyra"] {
   --lumo-primary-text-color: #6fd3cd;
 
   background: #0b1c2c;
+  --auth-brand-background: none;
   color: #eef3f6;
-}
-
-html[theme~="dark"] auth-layout[data-variant="edyra"]::before,
-html[theme~="dark"] auth-layout[data-variant="edyra"]::after {
-  opacity: 0.08;
 }
 
 html[theme~="dark"] .auth-hero__name,
@@ -353,6 +351,45 @@ html[theme~="dark"] auth-layout[data-variant="edyra"] auth-card a {
 
 html[theme~="dark"] auth-layout[data-variant="edyra"] auth-card vaadin-text-field::part(input-field),
 html[theme~="dark"] auth-layout[data-variant="edyra"] auth-card vaadin-password-field::part(input-field) {
-  background: #0b1c2c;
+  background: #0b1c2c !important;
   box-shadow: inset 0 0 0 1px #35516b;
+}
+
+/* ── Sizes ────────────────────────────────────────────────────────────── */
+
+auth-layout[data-variant="edyra"] auth-card vaadin-text-field::part(input-field),
+auth-layout[data-variant="edyra"] auth-card vaadin-password-field::part(input-field),
+auth-layout[data-variant="edyra"] auth-card vaadin-email-field::part(input-field) {
+  min-height: 3rem;
+  padding-inline: 0.85rem;
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-text-field::part(label),
+auth-layout[data-variant="edyra"] auth-card vaadin-password-field::part(label),
+auth-layout[data-variant="edyra"] auth-card vaadin-email-field::part(label) {
+  margin-bottom: 0.3rem;
+  font-size: 0.95rem;
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-button::part(button) {
+  min-height: 3.1rem;
+  font-size: 1.05rem;
+}
+
+auth-layout[data-variant="edyra"] auth-card a {
+  min-height: 2.5rem;
+}
+
+// the icon in front of a field or a link stays small and plain
+auth-layout[data-variant="edyra"] auth-card .auth-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+auth-layout[data-variant="edyra"] auth-card a .auth-icon {
+  margin-inline-end: 0.4rem;
 }

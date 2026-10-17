@@ -10,7 +10,7 @@ import eu.isygoit.i18n.I18n;
 public class AuthFooter extends Component implements HasComponents {
 
     public AuthFooter() {
-        add(new Paragraph(I18n.t("auth.common.footer")));
+        add(new Paragraph(AuthBranding.text("auth.common.footer")));
     }
 
     @Override

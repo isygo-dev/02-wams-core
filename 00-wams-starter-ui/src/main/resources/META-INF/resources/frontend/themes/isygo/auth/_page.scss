@@ -25,6 +25,7 @@
 }
 
 auth-layout {
+  position: relative;
   --lumo-primary-color: #6366f1;
   --lumo-primary-text-color: #{v.$auth-color-primary};
   --lumo-primary-color-50pct: rgba(99, 102, 241, 0.5);
@@ -76,4 +77,14 @@ html[theme~="dark"] auth-layout {
   auth-layout {
     padding: 0.5rem;
   }
+}
+
+// language selector: top-right corner (top-left in right-to-left languages)
+auth-toolbar {
+  position: absolute;
+  z-index: 5;
+  inset-block-start: clamp(0.5rem, 2vw, 1.25rem);
+  inset-inline-end: clamp(0.5rem, 2vw, 1.25rem);
+  display: flex;
+  align-items: center;
 }

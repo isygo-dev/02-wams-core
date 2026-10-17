@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 58" role="img" aria-label="EDYRA">
-  <path d="M32 18c-6-5-15-6-26-4v32c11-2 20-1 26 4z" fill="#0e8a86"/>
-  <path d="M32 18c6-5 15-6 26-4v32c-11-2-20-1-26 4z" fill="#13a39d"/>
-  <path d="M32 22v28" stroke="#fbf6ea" stroke-width="2"/>
-  <path d="M32 1l3.2 6.6 7.2 1-5.2 5.1 1.2 7.2L32 17.5l-6.4 3.4 1.2-7.2-5.2-5.1 7.2-1z" fill="#f2b33d"/>
-</svg>

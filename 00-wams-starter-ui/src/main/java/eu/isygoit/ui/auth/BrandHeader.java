@@ -15,11 +15,15 @@ public class BrandHeader extends Component implements HasComponents {
         Component logo;
         if (AuthBranding.isBranded()) {
             // the brand logo and wordmark (the hero is hidden on narrow screens, the card must carry the brand)
-            com.vaadin.flow.component.html.Image mark = new com.vaadin.flow.component.html.Image("auth/edyra-mark.svg", "");
-            mark.addClassName("auth-brand__mark");
+            com.vaadin.flow.component.html.Image mark = AuthBranding.image("logo.svg", "auth-brand__mark");
             com.vaadin.flow.component.html.Span name = new com.vaadin.flow.component.html.Span(AuthBranding.title());
             name.addClassName("auth-brand__name");
-            logo = new com.vaadin.flow.component.html.Div(mark, name);
+            com.vaadin.flow.component.html.Div lockup = new com.vaadin.flow.component.html.Div();
+            if (mark != null) {
+                lockup.add(mark);
+            }
+            lockup.add(name);
+            logo = lockup;
             logo.getElement().getClassList().add("auth-brand__lockup");
         } else {
             logo = new Avatar(I18n.t("auth.common.brand.title"));

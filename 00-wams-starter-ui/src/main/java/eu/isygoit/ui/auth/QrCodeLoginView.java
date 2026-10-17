@@ -59,6 +59,7 @@ public class QrCodeLoginView extends BaseLoginView {
         this.pollScheduler = pollScheduler;
 
         qrImage.setAlt(I18n.t("auth.qrcode.image.alt"));
+        qrImage.addClassName("auth-qr-image");
         qrImage.setVisible(false);
         statusContainer.getElement().setAttribute("role", "status");
         statusContainer.getElement().setAttribute("aria-live", "polite");

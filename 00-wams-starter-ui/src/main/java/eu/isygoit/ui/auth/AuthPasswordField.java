@@ -16,6 +16,10 @@ public class AuthPasswordField extends Component implements HasComponents {
 
     public AuthPasswordField() {
         field.setRequiredIndicatorVisible(true);
+        com.vaadin.flow.component.html.Image lock = AuthBranding.image("icon-lock.svg", "auth-icon");
+        if (lock != null) {
+            field.setPrefixComponent(lock);
+        }
         field.setRevealButtonVisible(true);
         field.setPlaceholder(I18n.t("auth.password.field.password.placeholder"));
         field.getElement().setAttribute("autocomplete", "current-password");
