@@ -25,6 +25,8 @@ auth-layout[data-variant="edyra"] {
   --lumo-border-radius-l: 16px;
 
   position: relative;
+  // own stacking context: the illustration (z-index -1) sits above the page background yet blends with it
+  isolation: isolate;
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(24rem, 1fr);
   grid-template-rows: minmax(0, 1fr);
@@ -51,7 +53,6 @@ auth-layout[data-variant="edyra"] auth-hero {
   --auth-hero-pad: clamp(2rem, 5vw, 4.5rem);
 
   position: relative;
-  z-index: 1;
   display: flex;
   box-sizing: border-box;
   flex-direction: column;
@@ -150,35 +151,33 @@ auth-layout[data-variant="edyra"] auth-hero {
   margin-inline-end: 0.25rem;
 }
 
+// Pinned to the bottom of the hero, as tall as the longest translation of the text above it allows, with a size that
+// only depends on the screen height: the scene looks the same whatever the language. It starts on the same edge as
+// the hero text and melts into the page: the cream of the artwork is multiplied with the page colour and the top and
+// all four sides fade out.
 .auth-hero__illustration {
+  position: static;
+  z-index: -1;
+  inset-block-end: 0;
+  inset-inline-start: var(--auth-hero-pad);
   display: block;
-  align-self: flex-start;
-  width: calc(100% + var(--auth-hero-pad));
+  box-sizing: border-box;
+  width: calc(100% - var(--auth-hero-pad));
   max-width: none;
-  flex: 1 1 0;
-  min-height: 0;
-  height: auto;
-  max-height: 62vh;
-  margin-block: 0;
-  // starts on the same edge as the hero text and runs under the sign-in card side, where it fades out
-  margin-inline: 0 calc(-1 * var(--auth-hero-pad));
+  height: min(62vh, 52rem);
   object-fit: contain;
   object-position: left bottom;
-  // light fade at the top and on the side of the sign-in card (the end side of the hero): the faces stay untouched
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
-    linear-gradient(to right, #000 88%, transparent 100%);
+  mix-blend-mode: multiply;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26%, #000 94%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 8%, #000 90%, transparent 100%);
   -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
-    linear-gradient(to right, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 26%, #000 94%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 8%, #000 90%, transparent 100%);
   mask-composite: intersect;
 }
 
 [dir="rtl"] .auth-hero__illustration {
   object-position: right bottom;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
-    linear-gradient(to left, #000 88%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
-    linear-gradient(to left, #000 88%, transparent 100%);
 }
 
 // The hero is the first grid column and the sign-in card the second, whatever the language: the first column is
@@ -202,13 +201,15 @@ auth-layout[data-variant="edyra"] auth-card {
 auth-layout[data-variant="edyra"] auth-card {
   position: relative;
   z-index: 1;
-  align-self: center;
-  justify-self: center;
+  place-self: center;
   width: min(calc(100% - 3rem), 31rem);
   box-sizing: border-box;
-  max-height: calc(100dvh - 1.5rem);
-  margin: 0.75rem 0;
+  // the top and bottom margins keep the card clear of the language selector (top corner)
+  max-height: calc(100dvh - 6.5rem);
+  margin: 3.25rem auto;
   overflow-y: auto;
+  // a scrollbar (very short windows) takes the same room on both sides, the content stays centred
+  scrollbar-gutter: stable both-edges;
   gap: clamp(0.75rem, 1.8vh, 1.25rem);
   padding: clamp(1.25rem, 3.4vh, 2.5rem) clamp(1.5rem, 3vw, 2.75rem);
   border: 1px solid rgba(15, 42, 68, 0.1);
@@ -308,8 +309,12 @@ auth-layout[data-variant="edyra"] auth-footer {
 /* ── Responsive: the form first ───────────────────────────────────────── */
 
 @media (max-width: 1180px) {
+  auth-layout[data-variant="edyra"] {
+    grid-template-columns: minmax(0, 1fr) minmax(22rem, 26rem);
+  }
+
   .auth-hero__illustration {
-    display: none;
+    height: min(56vh, 40rem);
   }
 
   .auth-hero__headline {
@@ -317,12 +322,12 @@ auth-layout[data-variant="edyra"] auth-footer {
   }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 860px), (max-height: 560px) {
   auth-layout[data-variant="edyra"] {
     display: flex;
     height: auto;
     overflow: visible;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     min-height: 100dvh;
     background: $edyra-ivory;
@@ -433,6 +438,171 @@ auth-layout[data-variant="edyra"] auth-footer {
   }
 }
 
+/* ── Polish: depth, motion, large screens ─────────────────────────────── */
+
+// soft light behind the hero and behind the card
+auth-layout[data-variant="edyra"] {
+  background:
+    radial-gradient(48rem 32rem at 10% 0%, rgba($edyra-mint, 0.6), transparent 70%),
+    radial-gradient(40rem 30rem at 100% 100%, rgba($edyra-mint, 0.5), transparent 70%),
+    var(--auth-brand-background, none) center / cover no-repeat,
+    $edyra-ivory;
+}
+
+// the card: layered shadow, a thin brand accent on top, frosted surface
+auth-layout[data-variant="edyra"] auth-card {
+  border-color: rgba(15, 42, 68, 0.08);
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(90deg, $edyra-teal, #5fc4b8) top / 100% 4px no-repeat,
+    rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
+    0 0.5rem 1rem rgba(15, 42, 68, 0.05),
+    0 1.75rem 3.5rem rgba(15, 42, 68, 0.12);
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-text-field:hover::part(input-field),
+auth-layout[data-variant="edyra"] auth-card vaadin-password-field:hover::part(input-field),
+auth-layout[data-variant="edyra"] auth-card vaadin-email-field:hover::part(input-field) {
+  box-shadow: inset 0 0 0 1px rgba(14, 124, 123, 0.45);
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-button[theme~="primary"] {
+  background-image: linear-gradient(180deg, #129c9a, $edyra-teal);
+  box-shadow: 0 0.4rem 1rem rgba(14, 124, 123, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-button[theme~="primary"]:hover:not([disabled]) {
+  background-image: linear-gradient(180deg, #0f8d8b, $edyra-teal-hover);
+  box-shadow: 0 0.6rem 1.25rem rgba(14, 124, 123, 0.34);
+  transform: translateY(-1px);
+}
+
+auth-layout[data-variant="edyra"] auth-card vaadin-button[theme~="primary"]:active:not([disabled]) {
+  transform: none;
+  box-shadow: 0 0.2rem 0.5rem rgba(14, 124, 123, 0.28);
+}
+
+// benefits as small frosted chips
+.auth-hero__benefits {
+  gap: 0.75rem;
+}
+
+.auth-hero__benefits .auth-hero__benefit,
+.auth-hero__benefits .auth-hero__benefit + .auth-hero__benefit {
+  padding-block: 0.45rem;
+  padding-inline: 0.5rem 1rem;
+  border: 1px solid rgba(15, 42, 68, 0.08);
+  border-radius: 1.75rem;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0.25rem 0.75rem rgba(15, 42, 68, 0.05);
+}
+
+// language selector: a pill that stays readable over the scene
+auth-toolbar {
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0.25rem 0.75rem rgba(15, 42, 68, 0.08);
+}
+
+// entrance: the content rises into place, the scene fades in
+@keyframes auth-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes auth-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+auth-layout[data-variant="edyra"] auth-card {
+  animation: auth-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.auth-hero__brand {
+  animation: auth-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.auth-hero__headline {
+  animation: auth-rise 0.55s 0.06s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.auth-hero__subtitle {
+  animation: auth-rise 0.55s 0.12s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.auth-hero__benefits {
+  animation: auth-rise 0.55s 0.18s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.auth-hero__illustration {
+  animation: auth-fade 0.9s 0.2s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  auth-layout[data-variant="edyra"] auth-card,
+  .auth-hero__brand,
+  .auth-hero__headline,
+  .auth-hero__subtitle,
+  .auth-hero__benefits,
+  .auth-hero__illustration {
+    animation: none;
+  }
+
+  auth-layout[data-variant="edyra"] auth-card vaadin-button[theme~="primary"] {
+    transition: none;
+  }
+}
+
+// large screens: more room for the type, a wider card, a bigger scene
+@media (min-width: 1600px) {
+  auth-layout[data-variant="edyra"] {
+    grid-template-columns: minmax(0, 1.9fr) minmax(30rem, 1fr);
+  }
+
+  auth-layout[data-variant="edyra"] auth-card {
+    width: min(calc(100% - 4rem), 34rem);
+  }
+
+  .auth-hero__headline {
+    font-size: clamp(3.4rem, 3.3vw, 4.4rem);
+  }
+
+  .auth-hero__subtitle {
+    max-width: 38rem;
+    font-size: 1.3rem;
+  }
+
+  .auth-hero__illustration {
+    height: min(64vh, 58rem);
+  }
+}
+
+// phones: safe areas (notches, home indicator) and a gentler card
+@media (max-width: 860px), (max-height: 560px) {
+  auth-layout[data-variant="edyra"] {
+    padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+    padding-block: env(safe-area-inset-top) env(safe-area-inset-bottom);
+    background: radial-gradient(32rem 22rem at 50% 0%, rgba($edyra-mint, 0.6), transparent 70%), $edyra-ivory;
+  }
+}
+
 /* ── Dark theme ───────────────────────────────────────────────────────── */
 
 html[theme~="dark"] auth-layout[data-variant="edyra"] {
@@ -509,4 +679,37 @@ auth-layout[data-variant="edyra"] auth-card .auth-icon {
 
 auth-layout[data-variant="edyra"] auth-card a .auth-icon {
   margin-inline-end: 0.4rem;
+}
+
+// dark theme: multiplying the cream artwork with a dark page would turn it black, so it is shown as it is, a bit softer
+html[theme~="dark"] .auth-hero__illustration {
+  mix-blend-mode: normal;
+  opacity: 0.8;
+}
+
+// registration (wide card, many fields): tighter so it fits without touching the language selector
+auth-layout[data-variant="edyra"][data-size="wide"] auth-card {
+  gap: clamp(0.5rem, 1.4vh, 1rem);
+  padding: clamp(1rem, 2.4vh, 1.75rem) clamp(1.25rem, 2.6vw, 2.25rem);
+}
+
+auth-layout[data-variant="edyra"][data-size="wide"] auth-card vaadin-text-field::part(input-field),
+auth-layout[data-variant="edyra"][data-size="wide"] auth-card vaadin-password-field::part(input-field),
+auth-layout[data-variant="edyra"][data-size="wide"] auth-card vaadin-email-field::part(input-field) {
+  min-height: 2.6rem;
+}
+
+auth-layout[data-variant="edyra"][data-size="wide"] auth-brand {
+  padding-bottom: 0.6rem;
+}
+
+auth-layout[data-variant="edyra"][data-size="wide"] auth-brand h1 {
+  font-size: clamp(1.3rem, 2.4vw, 1.6rem);
+}
+
+// the hero already shows the logo: drop the lockup of the card while the hero is visible
+@media (min-width: 861px) and (min-height: 561px) {
+  auth-layout[data-variant="edyra"][data-size="wide"] .auth-brand__lockup {
+    display: none;
+  }
 }
