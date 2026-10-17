@@ -25,6 +25,7 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
     private Function<E, LocalTime> endTimeExtractor;
     private Function<E, String> titleExtractor;
     private Function<E, String> descriptionExtractor;
+    private Function<E, String> tooltipExtractor;
     private Function<E, String> locationExtractor;
     private Function<E, Object> categoryKeyExtractor;
     private Function<E, String> ownerExtractor;
@@ -84,6 +85,15 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
 
     public WeeklyTableGridConfig<E> withDescriptionExtractor(Function<E, String> extractor) {
         this.descriptionExtractor = extractor;
+        return this;
+    }
+
+    /**
+     * Complete tooltip of an event. When set it replaces the one the grid assembles from the other extractors, so
+     * every grid (daily, weekly, monthly) can show the very same tooltip.
+     */
+    public WeeklyTableGridConfig<E> withTooltipExtractor(Function<E, String> extractor) {
+        this.tooltipExtractor = extractor;
         return this;
     }
 
@@ -260,6 +270,10 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
 
     public Function<E, String> getDescriptionExtractor() {
         return descriptionExtractor;
+    }
+
+    public Function<E, String> getTooltipExtractor() {
+        return tooltipExtractor;
     }
 
     public Function<E, String> getLocationExtractor() {

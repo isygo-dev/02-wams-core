@@ -194,6 +194,12 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
      * optional extractor will not throw NPE here.
      */
     private String buildTooltipText(E evt) {
+        if (config.getTooltipExtractor() != null) {
+            String custom = safeApply(config.getTooltipExtractor(), evt, null);
+            if (custom != null && !custom.isBlank()) {
+                return custom;
+            }
+        }
         StringBuilder sb = new StringBuilder();
 
         // Title
