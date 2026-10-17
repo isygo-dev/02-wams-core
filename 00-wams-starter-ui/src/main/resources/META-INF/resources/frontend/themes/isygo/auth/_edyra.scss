@@ -26,7 +26,7 @@ auth-layout[data-variant="edyra"] {
 
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  grid-template-columns: minmax(0, 2fr) minmax(24rem, 1fr);
   align-items: stretch;
   justify-content: stretch;
   padding: 0;
@@ -51,9 +51,10 @@ auth-layout[data-variant="edyra"] auth-hero {
   display: flex;
   box-sizing: border-box;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: clamp(0.6rem, 1.6vh, 1rem);
   min-width: 0;
-  padding: var(--auth-hero-pad);
+  padding-block: clamp(1.25rem, 3vh, 2.5rem) 0;
+  padding-inline: var(--auth-hero-pad);
 }
 
 .auth-hero__brand {
@@ -77,8 +78,8 @@ auth-layout[data-variant="edyra"] auth-hero {
 
 .auth-hero__headline {
   max-width: 14ch;
-  margin: clamp(1rem, 4vh, 3rem) 0 0;
-  font-size: clamp(2.5rem, 4.6vw, 4.25rem);
+  margin: clamp(0.5rem, 2.5vh, 1.75rem) 0 0;
+  font-size: clamp(2.25rem, 3.6vw, 3.6rem);
   font-weight: 700;
   line-height: 1.04;
   color: $edyra-navy;
@@ -88,8 +89,8 @@ auth-layout[data-variant="edyra"] auth-hero {
 .auth-hero__subtitle {
   max-width: 34rem;
   margin: 0;
-  font-size: clamp(1.05rem, 1.5vw, 1.3rem);
-  line-height: 1.5;
+  font-size: clamp(1rem, 1.3vw, 1.2rem);
+  line-height: 1.45;
   color: $edyra-navy;
 }
 
@@ -120,6 +121,11 @@ auth-layout[data-variant="edyra"] auth-hero {
   }
 }
 
+.auth-hero__benefit span:last-child {
+  max-width: 7.5rem;
+  text-wrap: balance;
+}
+
 .auth-hero__icon {
   box-sizing: border-box;
   flex: none;
@@ -141,30 +147,31 @@ auth-layout[data-variant="edyra"] auth-hero {
 .auth-hero__illustration {
   display: block;
   align-self: flex-start;
-  width: auto;
-  max-width: calc(100% + var(--auth-hero-pad));
-  height: min(44vh, 34rem);
-  margin-block: auto calc(-1 * var(--auth-hero-pad));
+  width: calc(100% + var(--auth-hero-pad));
+  max-width: none;
+  height: auto;
+  max-height: 62vh;
+  margin-block: auto 0;
   margin-inline: calc(-1 * var(--auth-hero-pad)) 0;
   object-fit: contain;
   object-position: left bottom;
   // light fade at the top and towards the card: the faces stay untouched
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%),
-    linear-gradient(to right, #000 86%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
+    linear-gradient(to right, #000 88%, transparent 100%);
   -webkit-mask-composite: source-in;
-  mask-image: linear-gradient(to bottom, transparent 0, #000 12%),
-    linear-gradient(to right, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
+    linear-gradient(to right, #000 88%, transparent 100%);
   mask-composite: intersect;
 }
 
 [dir="rtl"] .auth-hero__illustration {
-  margin-inline: 0 calc(-1 * var(--auth-hero-pad));
   align-self: flex-end;
+  margin-inline: 0 calc(-1 * var(--auth-hero-pad));
   object-position: right bottom;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%),
-    linear-gradient(to left, #000 86%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 12%),
-    linear-gradient(to left, #000 86%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
+    linear-gradient(to left, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
+    linear-gradient(to left, #000 88%, transparent 100%);
 }
 
 /* ── Card ─────────────────────────────────────────────────────────────── */
