@@ -160,10 +160,11 @@ auth-layout[data-variant="edyra"] auth-hero {
   height: auto;
   max-height: 62vh;
   margin-block: 0;
-  margin-inline: calc(-1 * var(--auth-hero-pad)) 0;
+  // starts on the same edge as the hero text and runs under the sign-in card side, where it fades out
+  margin-inline: 0 calc(-1 * var(--auth-hero-pad));
   object-fit: contain;
-  object-position: right bottom;
-  // light fade at the top and towards the card: the faces stay untouched
+  object-position: left bottom;
+  // light fade at the top and on the side of the sign-in card (the end side of the hero): the faces stay untouched
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
     linear-gradient(to right, #000 88%, transparent 100%);
   -webkit-mask-composite: source-in;
@@ -173,13 +174,27 @@ auth-layout[data-variant="edyra"] auth-hero {
 }
 
 [dir="rtl"] .auth-hero__illustration {
-  align-self: flex-end;
-  margin-inline: 0 calc(-1 * var(--auth-hero-pad));
   object-position: right bottom;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
     linear-gradient(to left, #000 88%, transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0, #000 10%),
     linear-gradient(to left, #000 88%, transparent 100%);
+}
+
+// The hero is the first grid column and the sign-in card the second, whatever the language: the first column is
+// the left one in Latin languages (card on the right) and the right one in Arabic (card on the left).
+auth-layout[data-variant="edyra"] {
+  grid-template-columns: minmax(0, 2fr) minmax(24rem, 1fr);
+}
+
+auth-layout[data-variant="edyra"] auth-hero {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+auth-layout[data-variant="edyra"] auth-card {
+  grid-column: 2;
+  grid-row: 1;
 }
 
 /* ── Card ─────────────────────────────────────────────────────────────── */
