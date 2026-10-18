@@ -60,6 +60,8 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
 
     private static final SecureRandom QR_CHALLENGE_RANDOM = new SecureRandom();
     private static final long QR_CHALLENGE_TTL_MILLIS = 120_000L;
+    private static final java.util.regex.Pattern PROFILE_PHONE = java.util.regex.Pattern.compile("^[+]?[0-9 ().\\-]{6,25}$");
+    private static final java.util.regex.Pattern PROFILE_EMAIL = java.util.regex.Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
     private final AppProperties appProperties;
     @Autowired
     private KmsPasswordService kmsPasswordService;
@@ -96,65 +98,6 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
 
     private static boolean hasExpired(QrLoginChallenge challenge) {
         return !challenge.getExpiresAt().after(new Date());
-    }
-
-    private static final java.util.regex.Pattern PROFILE_PHONE = java.util.regex.Pattern.compile("^[+]?[0-9 ().\\-]{6,25}$");
-    private static final java.util.regex.Pattern PROFILE_EMAIL = java.util.regex.Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
-
-    @Override
-    @Transactional
-    public Account updateProfile(String tenant, String userName, eu.isygoit.dto.data.AccountDto request) {
-        Account account = findByTenantAndUserName(tenant, userName);
-        if (account == null) {
-            throw new eu.isygoit.exception.ObjectNotFoundException("account " + userName);
-        }
-
-        // ---- account level ----
-        if (request.getEmail() != null) {
-            String email = request.getEmail().trim();
-            if (!PROFILE_EMAIL.matcher(email).matches()) {
-                throw new eu.isygoit.exception.BadRequestException("Invalid email address");
-            }
-            account.setEmail(email);
-        }
-        if (request.getPhoneNumber() != null) {
-            String phone = request.getPhoneNumber().trim();
-            if (!phone.isEmpty() && !PROFILE_PHONE.matcher(phone).matches()) {
-                throw new eu.isygoit.exception.BadRequestException("Invalid phone number");
-            }
-            account.setPhoneNumber(phone.isEmpty() ? null : phone);
-        }
-        if (request.getLanguage() != null) {
-            account.setLanguage(request.getLanguage());
-        }
-
-        // ---- details ----
-        AccountDetails details = account.getAccountDetails();
-        if (details == null) {
-            details = AccountDetails.builder().build();
-            account.setAccountDetails(details);
-        }
-        eu.isygoit.dto.data.AccountDetailsDto sent = request.getAccountDetails();
-        if (sent != null) {
-            if (sent.getFirstName() != null) {
-                details.setFirstName(requireName(sent.getFirstName(), "first name"));
-            }
-            if (sent.getLastName() != null) {
-                details.setLastName(requireName(sent.getLastName(), "last name"));
-            }
-            if (sent.getCountry() != null) {
-                details.setCountry(blankToNull(sent.getCountry()));
-            }
-            applyAddress(details, sent.getAddress());
-            applyContacts(details, sent.getContacts());
-        }
-
-        try {
-            return repository().saveAndFlush(account);
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            throw new eu.isygoit.exception.EmailAlreadyUsedException(
-                    "The email or another profile value is already used: " + e.getMostSpecificCause().getMessage());
-        }
     }
 
     private static String requireName(String value, String label) {
@@ -212,6 +155,62 @@ public class AccountService extends ImageTenantService<Long, Account, AccountRep
                 contact.setValue(value);
                 contacts.add(contact);
             }
+        }
+    }
+
+    @Override
+    @Transactional
+    public Account updateProfile(String tenant, String userName, eu.isygoit.dto.data.AccountDto request) {
+        Account account = findByTenantAndUserName(tenant, userName);
+        if (account == null) {
+            throw new eu.isygoit.exception.ObjectNotFoundException("account " + userName);
+        }
+
+        // ---- account level ----
+        if (request.getEmail() != null) {
+            String email = request.getEmail().trim();
+            if (!PROFILE_EMAIL.matcher(email).matches()) {
+                throw new eu.isygoit.exception.BadRequestException("Invalid email address");
+            }
+            account.setEmail(email);
+        }
+        if (request.getPhoneNumber() != null) {
+            String phone = request.getPhoneNumber().trim();
+            if (!phone.isEmpty() && !PROFILE_PHONE.matcher(phone).matches()) {
+                throw new eu.isygoit.exception.BadRequestException("Invalid phone number");
+            }
+            account.setPhoneNumber(phone.isEmpty() ? null : phone);
+        }
+        if (request.getLanguage() != null) {
+            account.setLanguage(request.getLanguage());
+        }
+
+        // ---- details ----
+        AccountDetails details = account.getAccountDetails();
+        if (details == null) {
+            details = AccountDetails.builder().build();
+            account.setAccountDetails(details);
+        }
+        eu.isygoit.dto.data.AccountDetailsDto sent = request.getAccountDetails();
+        if (sent != null) {
+            if (sent.getFirstName() != null) {
+                details.setFirstName(requireName(sent.getFirstName(), "first name"));
+            }
+            if (sent.getLastName() != null) {
+                details.setLastName(requireName(sent.getLastName(), "last name"));
+            }
+            if (sent.getCountry() != null) {
+                details.setCountry(blankToNull(sent.getCountry()));
+            }
+            applyAddress(details, sent.getAddress());
+            applyContacts(details, sent.getContacts());
+        }
+
+        try {
+            return repository().saveAndFlush(account);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new eu.isygoit.exception.EmailAlreadyUsedException(
+                    "The email or another profile value is already used: " + e.getMostSpecificCause().getMessage());
         }
     }
 

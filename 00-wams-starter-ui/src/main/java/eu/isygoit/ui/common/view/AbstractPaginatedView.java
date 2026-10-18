@@ -57,32 +57,45 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     protected final PaginationBar paginationBar = new PaginationBar();
 
     // ─── Optional table mode ───────────────────────────────────────
-    /** Table of the current page, available when {@link #configureGrid(Grid)} returns true. */
+    /**
+     * Table of the current page, available when {@link #configureGrid(Grid)} returns true.
+     */
     protected final Grid<T> grid = new Grid<>();
-    private boolean gridSupported;
-    private boolean gridMode;
-    private int renderedCount;
-    private Button cardsModeButton;
-    private Button tableModeButton;
-
     // ─── Pagination state ──────────────────────────────────────────
     protected int currentPage = 0;
     protected int pageSize = DEFAULT_PAGE_SIZE;
     protected int totalPages = 0;
     protected long totalElements = 0;
-
-    // ─── Criteria state ────────────────────────────────────────────
     /**
      * Currently active server‑side criteria string (blank = none).
      */
     protected String currentCriteria = "";
-
     // ─── Data (current page only) ──────────────────────────────────
     protected List<T> currentItems = new ArrayList<>();
+    private boolean gridSupported;
+    private boolean gridMode;
+    private int renderedCount;
+
+    // ─── Criteria state ────────────────────────────────────────────
+    private Button cardsModeButton;
+    private Button tableModeButton;
 
     // ══════════════════════════════════════════════════════════════
     //  Abstract contract — subclasses must implement
     // ══════════════════════════════════════════════════════════════
+
+    private static Component findByClass(Component root, String cssClass) {
+        if (root.getElement().getClassList().contains(cssClass)) {
+            return root;
+        }
+        for (Component child : root.getChildren().toList()) {
+            Component found = findByClass(child, cssClass);
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
+    }
 
     /**
      * Fetch one page from the backend. Return {@code null} for an empty page.
@@ -117,11 +130,11 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
 
     protected abstract String getEmptyDescriptionKey();
 
-    protected abstract VaadinIcon getEmptyIcon();
-
     // ══════════════════════════════════════════════════════════════
     //  Optional hooks — subclasses may override
     // ══════════════════════════════════════════════════════════════
+
+    protected abstract VaadinIcon getEmptyIcon();
 
     /**
      * Extra root CSS class names (e.g. {@code "student-view"}).
@@ -163,19 +176,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
             }
             return cell;
         }).setHeader("").setAutoWidth(true).setFlexGrow(0);
-    }
-
-    private static Component findByClass(Component root, String cssClass) {
-        if (root.getElement().getClassList().contains(cssClass)) {
-            return root;
-        }
-        for (Component child : root.getChildren().toList()) {
-            Component found = findByClass(child, cssClass);
-            if (found != null) {
-                return found;
-            }
-        }
-        return null;
     }
 
     /**

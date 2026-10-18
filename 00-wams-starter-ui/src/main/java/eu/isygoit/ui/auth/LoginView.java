@@ -71,7 +71,9 @@ public class LoginView extends BaseLoginView {
                 tenantField, usernameField, continueButton, errorBanner, registerLink, new AuthFooter());
     }
 
-    /** Puts the brand's icon in front of a field (nothing for brands without assets). */
+    /**
+     * Puts the brand's icon in front of a field (nothing for brands without assets).
+     */
     private static void decorate(TextField field, String iconFile) {
         com.vaadin.flow.component.html.Image icon = AuthBranding.image(iconFile, "auth-icon");
         if (icon != null) {

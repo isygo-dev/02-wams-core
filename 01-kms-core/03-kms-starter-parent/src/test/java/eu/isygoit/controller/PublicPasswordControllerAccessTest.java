@@ -54,6 +54,12 @@ class PublicPasswordControllerAccessTest {
 
     private AccessRequestDto request;
 
+    private static TokenResponseDto tokenOf(String value) {
+        TokenResponseDto dto = mock(TokenResponseDto.class);
+        when(dto.getToken()).thenReturn(value);
+        return dto;
+    }
+
     @BeforeEach
     void setUp() {
         request = AccessRequestDto.builder()
@@ -174,11 +180,5 @@ class PublicPasswordControllerAccessTest {
         verify(tokenService, never()).buildAccessToken(any(), any(), any(), any());
         verify(tokenService, never()).buildRefreshToken(any(), any(), any());
         verify(tokenService, never()).buildAuthorityToken(any(), any(), any(), any());
-    }
-
-    private static TokenResponseDto tokenOf(String value) {
-        TokenResponseDto dto = mock(TokenResponseDto.class);
-        when(dto.getToken()).thenReturn(value);
-        return dto;
     }
 }

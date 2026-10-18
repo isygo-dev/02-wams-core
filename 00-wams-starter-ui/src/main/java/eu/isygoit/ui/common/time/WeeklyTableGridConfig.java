@@ -117,7 +117,9 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
         return this;
     }
 
-    /** NEW — per-event colour (hex string, may be null/blank). */
+    /**
+     * NEW — per-event colour (hex string, may be null/blank).
+     */
     public WeeklyTableGridConfig<E> withColorExtractor(Function<E, String> extractor) {
         this.colorExtractor = extractor;
         return this;
@@ -292,7 +294,9 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
         return dateExtractor;
     }
 
-    /** NEW — per-event colour extractor, never null after {@code build()}. */
+    /**
+     * NEW — per-event colour extractor, never null after {@code build()}.
+     */
     public Function<E, String> getColorExtractor() {
         return colorExtractor;
     }

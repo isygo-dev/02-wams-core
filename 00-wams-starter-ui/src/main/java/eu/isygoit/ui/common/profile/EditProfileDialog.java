@@ -239,6 +239,64 @@ public class EditProfileDialog extends BaseActionDialog {
         contactsHost.getElement().setAttribute("data-empty", String.valueOf(contactRows.isEmpty()));
     }
 
+    @Override
+    protected boolean onOk() {
+        boolean contactsValid = contactRows.stream().map(ContactRow::validate).reduce(true, Boolean::logicalAnd);
+        if (!binder.validate().isOk() || !contactsValid) {
+            append(I18n.t("profile.validation.error"));
+            return false;
+        }
+
+        AccountDto updated = new AccountDto();
+        try {
+            binder.writeBean(updated);
+        } catch (Exception e) {
+            append(I18n.t("profile.validation.error"));
+            return false;
+        }
+
+        // address and contacts are sent as a whole: what is empty here is cleared on the account
+        AddressDto address = ensureAddress(updated);
+        address.setStreet(streetField.getValue());
+        address.setZipCode(zipCodeField.getValue());
+        address.setCity(cityField.getValue());
+        address.setState(stateField.getValue());
+        address.setAdditionalInfo(additionalInfoField.getValue());
+        AddressDto previous = detailsOf(account) != null ? detailsOf(account).getAddress() : null;
+        if (previous != null) {
+            address.setCountry(previous.getCountry());   // not editable here, keep it as it is
+        }
+
+        List<ContactDto> contacts = new ArrayList<>();
+        for (ContactRow row : contactRows) {
+            ContactDto dto = row.toDto();
+            if (dto != null) {
+                contacts.add(dto);
+            }
+        }
+        ensureAccountDetails(updated).setContacts(contacts);
+
+        try {
+            ResponseEntity<AccountDto> response = profileService.updateProfile(updated);
+            if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
+                if (onSaved != null) {
+                    onSaved.accept(response.getBody());
+                }
+                append(I18n.t("profile.update.success"));
+                return true;
+            }
+            append(I18n.t("profile.update.error"));
+            return false;
+        } catch (Exception e) {
+            append(I18n.t("profile.update.error"));
+            return false;
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Save
+     * ══════════════════════════════════════════════════════════════ */
+
     /**
      * One contact: a type, a value and a remove button.
      */
@@ -296,64 +354,6 @@ public class EditProfileDialog extends BaseActionDialog {
             dto.setType(typeCombo.getValue());
             dto.setValue(value);
             return dto;
-        }
-    }
-
-    /* ══════════════════════════════════════════════════════════════
-     * Save
-     * ══════════════════════════════════════════════════════════════ */
-
-    @Override
-    protected boolean onOk() {
-        boolean contactsValid = contactRows.stream().map(ContactRow::validate).reduce(true, Boolean::logicalAnd);
-        if (!binder.validate().isOk() || !contactsValid) {
-            append(I18n.t("profile.validation.error"));
-            return false;
-        }
-
-        AccountDto updated = new AccountDto();
-        try {
-            binder.writeBean(updated);
-        } catch (Exception e) {
-            append(I18n.t("profile.validation.error"));
-            return false;
-        }
-
-        // address and contacts are sent as a whole: what is empty here is cleared on the account
-        AddressDto address = ensureAddress(updated);
-        address.setStreet(streetField.getValue());
-        address.setZipCode(zipCodeField.getValue());
-        address.setCity(cityField.getValue());
-        address.setState(stateField.getValue());
-        address.setAdditionalInfo(additionalInfoField.getValue());
-        AddressDto previous = detailsOf(account) != null ? detailsOf(account).getAddress() : null;
-        if (previous != null) {
-            address.setCountry(previous.getCountry());   // not editable here, keep it as it is
-        }
-
-        List<ContactDto> contacts = new ArrayList<>();
-        for (ContactRow row : contactRows) {
-            ContactDto dto = row.toDto();
-            if (dto != null) {
-                contacts.add(dto);
-            }
-        }
-        ensureAccountDetails(updated).setContacts(contacts);
-
-        try {
-            ResponseEntity<AccountDto> response = profileService.updateProfile(updated);
-            if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
-                if (onSaved != null) {
-                    onSaved.accept(response.getBody());
-                }
-                append(I18n.t("profile.update.success"));
-                return true;
-            }
-            append(I18n.t("profile.update.error"));
-            return false;
-        } catch (Exception e) {
-            append(I18n.t("profile.update.error"));
-            return false;
         }
     }
 }

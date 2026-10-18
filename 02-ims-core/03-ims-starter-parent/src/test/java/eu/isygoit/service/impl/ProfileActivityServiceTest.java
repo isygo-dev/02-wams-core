@@ -41,12 +41,12 @@ class ProfileActivityServiceTest {
     @Mock
     private ConnectionTrackingMapper mapper;
 
-    private ProfileActivityService service() {
-        return new ProfileActivityService(repository, mapper);
-    }
-
     private static Date atNoon(LocalDate day) {
         return Date.from(day.atTime(12, 0).atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    private ProfileActivityService service() {
+        return new ProfileActivityService(repository, mapper);
     }
 
     @Test

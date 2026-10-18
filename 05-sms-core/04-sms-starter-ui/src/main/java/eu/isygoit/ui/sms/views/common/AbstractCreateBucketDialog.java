@@ -35,6 +35,7 @@ public abstract class AbstractCreateBucketDialog extends SmsActionDialog {
     private final Consumer<Boolean> loading;
     private final Messages messages;
     private TextField bucketNameField;
+
     protected AbstractCreateBucketDialog(String title,
                                          String okText,
                                          Runnable onSuccess,

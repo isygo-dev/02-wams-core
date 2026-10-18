@@ -41,6 +41,79 @@ class ProfileOverviewPanel extends VerticalLayout {
         }
     }
 
+    private static String applicationName(ApplicationDto application) {
+        if (application.getTitle() != null && !application.getTitle().isBlank()) {
+            return application.getTitle();
+        }
+        return application.getName();
+    }
+
+    private static String authTypeLabel(IEnumAuth.Types type) {
+        return type == null ? null : I18n.t("profile.authmethod.type." + type.name());
+    }
+
+    private static Div card(String titleText, Div... fields) {
+        Div card = new Div();
+        card.addClassName("profile-section-card");
+
+        H3 title = new H3(titleText);
+        title.addClassName("section-title");
+
+        Div grid = new Div();
+        grid.addClassName("wams-card__detail-grid");
+        grid.add(fields);
+
+        card.add(title, grid);
+        return card;
+    }
+
+    private static Div chipGroup(String label, Stream<String> values, String variantClass) {
+        Div group = new Div();
+        group.addClassName("profile-chip-group");
+
+        Span groupLabel = new Span(label);
+        groupLabel.addClassName("wams-card__detail-field-label");
+        group.add(groupLabel);
+
+        Div chips = new Div();
+        chips.addClassName("profile-badge-row");
+        long[] count = {0};
+        values.filter(v -> v != null && !v.isBlank()).forEach(v -> {
+            Span chip = new Span(v);
+            chip.addClassName("status-chip");
+            chip.addClassName(variantClass);
+            chips.add(chip);
+            count[0]++;
+        });
+        if (count[0] == 0) {
+            Span none = new Span("—");
+            none.addClassName("wams-card__detail-field-value");
+            chips.add(none);
+        }
+        group.add(chips);
+        return group;
+    }
+
+    private static Div field(VaadinIcon icon, String label, String value) {
+        Div field = new Div();
+        field.addClassName("wams-card__detail-field");
+
+        Div labelRow = new Div();
+        labelRow.addClassName("wams-card__detail-field-label-row");
+        Icon iconEl = icon.create();
+        iconEl.addClassName("detail-field-icon");
+        iconEl.setSize("16px");
+        Span labelSpan = new Span(label);
+        labelSpan.addClassName("wams-card__detail-field-label");
+        labelRow.add(iconEl, labelSpan);
+
+        Span valueSpan = new Span(value != null && !value.isBlank() ? value : "—");
+        valueSpan.addClassName("wams-card__detail-field-value");
+
+        field.add(labelRow, valueSpan);
+        return field;
+    }
+
     private Div buildPersonalCard(AccountDto account) {
         AccountDetailsDto details = account.getAccountDetails();
         return card(I18n.t("profile.section.personal"),
@@ -125,78 +198,5 @@ class ProfileOverviewPanel extends VerticalLayout {
                 field(VaadinIcon.BROWSER, I18n.t("profile.field.browser"), stats.getLastLoginBrowser()),
                 field(VaadinIcon.CONNECT, I18n.t("profile.field.ipAddress"), stats.getLastLoginIp()),
                 field(VaadinIcon.TOOLS, I18n.t("profile.field.application"), stats.getLastLoginApp()));
-    }
-
-    private static String applicationName(ApplicationDto application) {
-        if (application.getTitle() != null && !application.getTitle().isBlank()) {
-            return application.getTitle();
-        }
-        return application.getName();
-    }
-
-    private static String authTypeLabel(IEnumAuth.Types type) {
-        return type == null ? null : I18n.t("profile.authmethod.type." + type.name());
-    }
-
-    private static Div card(String titleText, Div... fields) {
-        Div card = new Div();
-        card.addClassName("profile-section-card");
-
-        H3 title = new H3(titleText);
-        title.addClassName("section-title");
-
-        Div grid = new Div();
-        grid.addClassName("wams-card__detail-grid");
-        grid.add(fields);
-
-        card.add(title, grid);
-        return card;
-    }
-
-    private static Div chipGroup(String label, Stream<String> values, String variantClass) {
-        Div group = new Div();
-        group.addClassName("profile-chip-group");
-
-        Span groupLabel = new Span(label);
-        groupLabel.addClassName("wams-card__detail-field-label");
-        group.add(groupLabel);
-
-        Div chips = new Div();
-        chips.addClassName("profile-badge-row");
-        long[] count = {0};
-        values.filter(v -> v != null && !v.isBlank()).forEach(v -> {
-            Span chip = new Span(v);
-            chip.addClassName("status-chip");
-            chip.addClassName(variantClass);
-            chips.add(chip);
-            count[0]++;
-        });
-        if (count[0] == 0) {
-            Span none = new Span("—");
-            none.addClassName("wams-card__detail-field-value");
-            chips.add(none);
-        }
-        group.add(chips);
-        return group;
-    }
-
-    private static Div field(VaadinIcon icon, String label, String value) {
-        Div field = new Div();
-        field.addClassName("wams-card__detail-field");
-
-        Div labelRow = new Div();
-        labelRow.addClassName("wams-card__detail-field-label-row");
-        Icon iconEl = icon.create();
-        iconEl.addClassName("detail-field-icon");
-        iconEl.setSize("16px");
-        Span labelSpan = new Span(label);
-        labelSpan.addClassName("wams-card__detail-field-label");
-        labelRow.add(iconEl, labelSpan);
-
-        Span valueSpan = new Span(value != null && !value.isBlank() ? value : "—");
-        valueSpan.addClassName("wams-card__detail-field-value");
-
-        field.add(labelRow, valueSpan);
-        return field;
     }
 }

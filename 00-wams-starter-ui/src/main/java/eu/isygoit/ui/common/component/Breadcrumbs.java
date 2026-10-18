@@ -58,12 +58,29 @@ public class Breadcrumbs extends Nav {
     }
 
     /**
+     * Convenience for modules that already have their labels and targets as pairs.
+     */
+    public static List<Item> trail(String[]... labelAndHref) {
+        List<Item> out = new ArrayList<>();
+        for (int i = 0; i < labelAndHref.length; i++) {
+            String[] step = labelAndHref[i];
+            boolean last = i == labelAndHref.length - 1;
+            out.add(last ? Item.current(step[0]) : Item.link(step[0], step.length > 1 ? step[1] : null));
+        }
+        return out;
+    }
+
+    /**
      * Replaces the trail. The last item is the current page unless an item is explicitly flagged as current.
      */
     public void setItems(List<Item> items) {
         this.items = items == null ? List.of() : List.copyOf(items);
         render();
     }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Rendering
+     * ══════════════════════════════════════════════════════════════ */
 
     /**
      * Number of items above which the middle ones collapse behind an ellipsis (minimum 3, default 4). The first and
@@ -73,10 +90,6 @@ public class Breadcrumbs extends Nav {
         this.maxVisible = Math.max(3, maxVisible);
         render();
     }
-
-    /* ══════════════════════════════════════════════════════════════
-     * Rendering
-     * ══════════════════════════════════════════════════════════════ */
 
     private void render() {
         list.removeAll();
@@ -225,18 +238,5 @@ public class Breadcrumbs extends Nav {
         public Item withIcon(Component icon) {
             return new Item(label, href, icon, current, disabled);
         }
-    }
-
-    /**
-     * Convenience for modules that already have their labels and targets as pairs.
-     */
-    public static List<Item> trail(String[]... labelAndHref) {
-        List<Item> out = new ArrayList<>();
-        for (int i = 0; i < labelAndHref.length; i++) {
-            String[] step = labelAndHref[i];
-            boolean last = i == labelAndHref.length - 1;
-            out.add(last ? Item.current(step[0]) : Item.link(step[0], step.length > 1 ? step[1] : null));
-        }
-        return out;
     }
 }

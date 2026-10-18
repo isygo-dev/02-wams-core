@@ -70,6 +70,10 @@ class PasswordServiceOtpTest {
     private PasswordService service;
     private Account account;
 
+    private static long anyLong() {
+        return org.mockito.ArgumentMatchers.anyLong();
+    }
+
     @BeforeEach
     void setUp() {
         service = new PasswordService(mock(AppProperties.class));
@@ -110,11 +114,11 @@ class PasswordServiceOtpTest {
                 .thenReturn(List.of(info));
     }
 
+    // ---- verification, attempt cap
+
     private IEnumPasswordStatus.Types matchOtp(String code) {
         return service.matches(TENANT, USER, code, IEnumAuth.Types.OTP);
     }
-
-    // ---- verification, attempt cap
 
     @Test
     void correctCodeMatchesAndIsNotCountedAsFailure() {
@@ -186,6 +190,8 @@ class PasswordServiceOtpTest {
         verifyNoInteractions(encryptor);
     }
 
+    // ---- single use
+
     @Test
     void tamperedRowIsBroken() {
         PasswordInfo info = otpInfo(IEnumPasswordStatus.Types.VALID, false, LocalDateTime.now());
@@ -194,8 +200,6 @@ class PasswordServiceOtpTest {
 
         assertEquals(IEnumPasswordStatus.Types.BROKEN, matchOtp("123456"));
     }
-
-    // ---- single use
 
     @Test
     void consumeOtpSucceedsOnlyForTheCallerThatWinsTheAtomicUpdate() {
@@ -206,6 +210,8 @@ class PasswordServiceOtpTest {
         assertFalse(service.consumeOtp(TENANT, USER));
     }
 
+    // ---- length and generation
+
     @Test
     void consumeOtpWithoutACodeIsFalse() {
         when(passwordInfoRepository.findByUserIdAndAuthTypeOrderByCreateDateDesc(ACCOUNT_ID, IEnumAuth.Types.OTP))
@@ -213,8 +219,6 @@ class PasswordServiceOtpTest {
 
         assertFalse(service.consumeOtp(TENANT, USER));
     }
-
-    // ---- length and generation
 
     @Test
     void defaultCodeIsSixDigits() {
@@ -256,6 +260,8 @@ class PasswordServiceOtpTest {
         assertEquals(8, service.registerNewPassword(TENANT, account, null, IEnumAuth.Types.OTP).getLength());
     }
 
+    // ---- resend cooldown
+
     @Test
     void storedValueIsTheHashNotTheCode() {
         when(passwordConfigRepository.findByTenantIgnoreCaseAndType(TENANT, IEnumAuth.Types.OTP))
@@ -270,8 +276,6 @@ class PasswordServiceOtpTest {
         assertEquals("hashed-otp", saved.getValue().getPassword());
         assertEquals(IEnumPasswordStatus.Types.VALID, saved.getValue().getStatus());
     }
-
-    // ---- resend cooldown
 
     @Test
     void requestInsideTheCooldownReusesTheCodeAndSendsNothing() throws Exception {
@@ -308,9 +312,5 @@ class PasswordServiceOtpTest {
 
         verify(passwordInfoRepository).deactivateOldPasswords(ACCOUNT_ID, IEnumAuth.Types.OTP);
         verify(emailSenderService).sendOTPEmail(any(), any(), eq("654321"), any());
-    }
-
-    private static long anyLong() {
-        return org.mockito.ArgumentMatchers.anyLong();
     }
 }

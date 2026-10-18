@@ -55,6 +55,13 @@ public abstract class BaseLoginView extends Div implements BeforeEnterObserver, 
         });
     }
 
+    /**
+     * Formats seconds as m:ss.
+     */
+    protected static String formatClock(long seconds) {
+        return String.format("%d:%02d", seconds / 60, seconds % 60);
+    }
+
     @Override
     public String getPageTitle() {
         return I18n.t(pageTitleKey);
@@ -236,13 +243,6 @@ public abstract class BaseLoginView extends Div implements BeforeEnterObserver, 
 
     protected boolean isButtonCoolingDown() {
         return buttonCooldown != null;
-    }
-
-    /**
-     * Formats seconds as m:ss.
-     */
-    protected static String formatClock(long seconds) {
-        return String.format("%d:%02d", seconds / 60, seconds % 60);
     }
 
     private void cancelButtonCooldown() {

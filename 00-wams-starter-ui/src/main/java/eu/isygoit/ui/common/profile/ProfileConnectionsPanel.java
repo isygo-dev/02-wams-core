@@ -39,8 +39,6 @@ class ProfileConnectionsPanel extends VerticalLayout {
 
     private final transient ProfileServiceApi profileService;
     private final Div sessionsBody = new Div();
-    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
-
     ProfileConnectionsPanel(AccountStatDto stats, ProfileServiceApi profileService, Runnable onViewAllActivity) {
         this.profileService = profileService;
 
@@ -66,7 +64,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
 
         add(miniStats, buildChartCard(activity), buildRecentSessionsCard(onViewAllActivity));
         loadSessions(0);
-    }
+    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
 
     private static long sumLastDays(List<DailyLoginCountDto> activity, int days) {
         LocalDate from = LocalDate.now().minusDays(days - 1L);
@@ -202,4 +200,6 @@ class ProfileConnectionsPanel extends VerticalLayout {
         }
         return null;
     }
+
+
 }

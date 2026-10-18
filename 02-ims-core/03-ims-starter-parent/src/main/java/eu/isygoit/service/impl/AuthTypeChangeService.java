@@ -34,8 +34,6 @@ public class AuthTypeChangeService {
     private final KmsPasswordService kmsPasswordService;
     private final KmsPublicPasswordService kmsPublicPasswordService;
 
-    public enum Result {CHANGED, NOT_ALLOWED, REAUTH_FAILED, NOT_FOUND, INVALID_AUTH_TYPE}
-
     public Result changeAuthType(String callerTenant, String callerUser, ChangeAuthTypeRequestDto request) {
         if (request.getAuthType() == null || !ALLOWED_TARGET_TYPES.contains(request.getAuthType())) {
             return Result.INVALID_AUTH_TYPE;
@@ -119,4 +117,6 @@ public class AuthTypeChangeService {
             return false;
         }
     }
+
+    public enum Result {CHANGED, NOT_ALLOWED, REAUTH_FAILED, NOT_FOUND, INVALID_AUTH_TYPE}
 }

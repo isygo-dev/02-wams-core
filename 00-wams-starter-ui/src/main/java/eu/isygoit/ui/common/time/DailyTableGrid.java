@@ -77,7 +77,9 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
     }
 
-    /** Blend a hex colour toward white. amount 0 = unchanged, 1 = pure white. */
+    /**
+     * Blend a hex colour toward white. amount 0 = unchanged, 1 = pure white.
+     */
     private static String lighten(String hex, double amount) {
         if (hex == null || !hex.matches(HEX_RE)) return null;
         double k = Math.max(0.0, Math.min(1.0, amount));
@@ -90,7 +92,9 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return String.format("#%02X%02X%02X", r, g, b);
     }
 
-    /** Builds a translated header label, e.g. "lundi 02 octobre" / "Monday 02 October" / "الإثنين 02 أكتوبر". */
+    /**
+     * Builds a translated header label, e.g. "lundi 02 octobre" / "Monday 02 October" / "الإثنين 02 أكتوبر".
+     */
     private String buildDayHeaderLabel() {
         String dayName = I18n.t("timetable.day." + currentDate.getDayOfWeek().name());
         String monthName = I18n.t("timetable.month." + currentDate.getMonth().name());

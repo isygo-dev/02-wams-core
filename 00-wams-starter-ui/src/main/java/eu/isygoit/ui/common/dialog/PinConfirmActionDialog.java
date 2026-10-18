@@ -23,6 +23,7 @@ public class PinConfirmActionDialog extends PinBaseActionDialog {
     private final Texts texts;
     private final Action action;
     private final Consumer<Boolean> loading;
+
     /**
      * @param texts       localised texts
      * @param action      the remote call

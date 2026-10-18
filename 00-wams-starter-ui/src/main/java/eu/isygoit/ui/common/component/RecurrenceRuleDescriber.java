@@ -30,7 +30,9 @@ public final class RecurrenceRuleDescriber {
     private RecurrenceRuleDescriber() {
     }
 
-    /** Full sentence describing the rule, or an explanatory text when empty/invalid. */
+    /**
+     * Full sentence describing the rule, or an explanatory text when empty/invalid.
+     */
     public static String describe(String rule) {
         if (rule == null || rule.isBlank()) {
             return I18n.t("calendar.recurrence.summary.none");

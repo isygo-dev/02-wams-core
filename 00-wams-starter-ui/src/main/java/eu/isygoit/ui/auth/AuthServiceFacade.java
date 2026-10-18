@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 @Component
 public class AuthServiceFacade {
 
+    private static final long MAX_RETRY_AFTER_SECONDS = 3600;
     private final PublicAuthService authService;
     private final Executor authExecutor;
 
@@ -37,8 +38,6 @@ public class AuthServiceFacade {
     private static boolean isSuccessful(ResponseEntity<?> response) {
         return response.getStatusCode().is2xxSuccessful();
     }
-
-    private static final long MAX_RETRY_AFTER_SECONDS = 3600;
 
     /**
      * Reads Retry-After (delta-seconds). Returns 0 when absent or unparsable, so the UI falls back to a generic

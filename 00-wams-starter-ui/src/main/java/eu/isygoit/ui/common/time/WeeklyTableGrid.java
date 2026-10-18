@@ -68,7 +68,9 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
     }
 
-    /** Blend a hex colour toward white. amount 0 = unchanged, 1 = pure white. */
+    /**
+     * Blend a hex colour toward white. amount 0 = unchanged, 1 = pure white.
+     */
     private static String lighten(String hex, double amount) {
         if (hex == null || !hex.matches(HEX_RE)) return null;
         double k = Math.max(0.0, Math.min(1.0, amount));
@@ -81,7 +83,9 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return String.format("#%02X%02X%02X", r, g, b);
     }
 
-    /** The Monday of the week being displayed, used to print dates in the header. */
+    /**
+     * The Monday of the week being displayed, used to print dates in the header.
+     */
     public void setWeekStartDate(LocalDate weekStartDate) {
         this.weekStartDate = weekStartDate;
     }
@@ -170,7 +174,9 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return Math.max(1, (int) Math.round(durationMinutes / (double) config.getStepMinutes()));
     }
 
-    /** Builds a translated header label, e.g. "lun. 02 oct." / "Mon 02 Oct" / "الإثنين 02 أكت". */
+    /**
+     * Builds a translated header label, e.g. "lun. 02 oct." / "Mon 02 Oct" / "الإثنين 02 أكت".
+     */
     private String buildHeaderLabel(DayOfWeek day, int dayIndex) {
         String dayName = config.getDayLabelExtractor() != null
                 ? config.getDayLabelExtractor().apply(day)

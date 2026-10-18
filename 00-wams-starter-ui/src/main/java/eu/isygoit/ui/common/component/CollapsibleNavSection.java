@@ -88,6 +88,43 @@ public class CollapsibleNavSection extends Div {
         flyout = buildFlyout(title, items);
     }
 
+    /**
+     * The group's rail icon: the explicit one if given, otherwise the icon of its first item (so groups are told
+     * apart without every module naming an icon), otherwise a generic list icon.
+     */
+    private static Icon railIconFor(VaadinIcon icon, SideNavItem[] items) {
+        if (icon != null) {
+            return icon.create();
+        }
+        for (SideNavItem item : items) {
+            if (item.getPrefixComponent() instanceof Icon firstIcon) {
+                String iconName = firstIcon.getElement().getAttribute("icon");
+                if (iconName != null && !iconName.isBlank()) {
+                    return new Icon(iconName);
+                }
+            }
+        }
+        return VaadinIcon.LIST.create();
+    }
+
+    /**
+     * A component can have only one parent, so the flyout gets its own copy of each item (same label, route and
+     * icon).
+     */
+    private static SideNavItem copyOf(SideNavItem item) {
+        SideNavItem copy = new SideNavItem(item.getLabel(), item.getPath());
+        Component prefix = item.getPrefixComponent();
+        if (prefix instanceof Icon icon) {
+            String iconName = icon.getElement().getAttribute("icon");
+            if (iconName != null && !iconName.isBlank()) {
+                Icon iconCopy = new Icon(iconName);
+                iconCopy.setSize("20px");
+                copy.setPrefixComponent(iconCopy);
+            }
+        }
+        return copy;
+    }
+
     public List<SideNavItem> getAllNavItems() {
         return new ArrayList<>(navItems);
     }
@@ -147,43 +184,6 @@ public class CollapsibleNavSection extends Div {
         }
         popover.add(flyoutTitle, flyoutNav);
         return popover;
-    }
-
-    /**
-     * The group's rail icon: the explicit one if given, otherwise the icon of its first item (so groups are told
-     * apart without every module naming an icon), otherwise a generic list icon.
-     */
-    private static Icon railIconFor(VaadinIcon icon, SideNavItem[] items) {
-        if (icon != null) {
-            return icon.create();
-        }
-        for (SideNavItem item : items) {
-            if (item.getPrefixComponent() instanceof Icon firstIcon) {
-                String iconName = firstIcon.getElement().getAttribute("icon");
-                if (iconName != null && !iconName.isBlank()) {
-                    return new Icon(iconName);
-                }
-            }
-        }
-        return VaadinIcon.LIST.create();
-    }
-
-    /**
-     * A component can have only one parent, so the flyout gets its own copy of each item (same label, route and
-     * icon).
-     */
-    private static SideNavItem copyOf(SideNavItem item) {
-        SideNavItem copy = new SideNavItem(item.getLabel(), item.getPath());
-        Component prefix = item.getPrefixComponent();
-        if (prefix instanceof Icon icon) {
-            String iconName = icon.getElement().getAttribute("icon");
-            if (iconName != null && !iconName.isBlank()) {
-                Icon iconCopy = new Icon(iconName);
-                iconCopy.setSize("20px");
-                copy.setPrefixComponent(iconCopy);
-            }
-        }
-        return copy;
     }
 
     private void toggle() {

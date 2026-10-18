@@ -136,6 +136,45 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         return row;
     }
 
+    private static String displayNameOf(UserDataResponseDto user) {
+        if (user != null) {
+            String full = ((user.getFirstName() != null ? user.getFirstName() : "") + " "
+                    + (user.getLastName() != null ? user.getLastName() : "")).trim();
+            if (!full.isEmpty()) {
+                return full;
+            }
+            if (user.getUserName() != null && !user.getUserName().isBlank()) {
+                return user.getUserName();
+            }
+            if (user.getEmail() != null && !user.getEmail().isBlank()) {
+                return user.getEmail();
+            }
+        }
+        Object sessionUser = SecurityUtils.getCurrentUser();
+        return sessionUser != null ? sessionUser.toString() : I18n.t("common.layout.avatar.user.default.name");
+    }
+
+    private static void forEachNavSection(Component root, java.util.function.Consumer<CollapsibleNavSection> action) {
+        if (root instanceof CollapsibleNavSection section) {
+            action.accept(section);
+        }
+        root.getChildren().forEach(child -> forEachNavSection(child, action));
+    }
+
+    private static String avatarCacheKey(Long accountId) {
+        return "wams-avatar-" + accountId;
+    }
+
+    /**
+     * Drops the cached avatar so the next layout shows the new image (call after an upload or removal).
+     */
+    public static void invalidateAvatarCache(Long accountId) {
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session != null && accountId != null) {
+            session.setAttribute(avatarCacheKey(accountId), null);
+        }
+    }
+
     protected abstract String getTitle();
 
     /**
@@ -420,24 +459,6 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         return card;
     }
 
-    private static String displayNameOf(UserDataResponseDto user) {
-        if (user != null) {
-            String full = ((user.getFirstName() != null ? user.getFirstName() : "") + " "
-                    + (user.getLastName() != null ? user.getLastName() : "")).trim();
-            if (!full.isEmpty()) {
-                return full;
-            }
-            if (user.getUserName() != null && !user.getUserName().isBlank()) {
-                return user.getUserName();
-            }
-            if (user.getEmail() != null && !user.getEmail().isBlank()) {
-                return user.getEmail();
-            }
-        }
-        Object sessionUser = SecurityUtils.getCurrentUser();
-        return sessionUser != null ? sessionUser.toString() : I18n.t("common.layout.avatar.user.default.name");
-    }
-
     private UserDataResponseDto loadCurrentUser() {
         VaadinSession session = VaadinSession.getCurrent();
         if (session != null) {
@@ -470,13 +491,6 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         }
         boolean rail = sidebarCollapsed && desktopViewport;
         forEachNavSection(drawerRoot, section -> section.setRailMode(rail));
-    }
-
-    private static void forEachNavSection(Component root, java.util.function.Consumer<CollapsibleNavSection> action) {
-        if (root instanceof CollapsibleNavSection section) {
-            action.accept(section);
-        }
-        root.getChildren().forEach(child -> forEachNavSection(child, action));
     }
 
     /**
@@ -567,20 +581,6 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
             session.setAttribute(cacheKey, bytes);
         }
         return bytes;
-    }
-
-    private static String avatarCacheKey(Long accountId) {
-        return "wams-avatar-" + accountId;
-    }
-
-    /**
-     * Drops the cached avatar so the next layout shows the new image (call after an upload or removal).
-     */
-    public static void invalidateAvatarCache(Long accountId) {
-        VaadinSession session = VaadinSession.getCurrent();
-        if (session != null && accountId != null) {
-            session.setAttribute(avatarCacheKey(accountId), null);
-        }
     }
 
     private void logout() {
