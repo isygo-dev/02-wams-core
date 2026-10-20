@@ -132,6 +132,13 @@ public class PasswordService implements IPasswordService {
                 }
                 //Generate OTP code
                 AccessKeyResponseDto accessKeyResponse = this.registerNewPassword(tenant, account, null, authType);
+                log.info("/******* critical ********* to be removed in production mode ***********/");
+                log.info("/* OTP code sent tenant {}", tenant);
+                log.info("/*               username {}", userName);
+                log.info("/*               key {}", accessKeyResponse.getKey());
+                log.info("/*               length {}", accessKeyResponse.getLength());
+                log.info("/*               lifeTime {}", accessKeyResponse.getLifeTime());
+                log.info("/***********************************************************************/");
                 emailSenderService.sendOTPEmail(senderTenant, account, accessKeyResponse.getKey(), accessKeyResponse.getLifeTime());
                 return accessKeyResponse;
             }
