@@ -15,6 +15,7 @@ import eu.isygoit.dto.request.RegisteredUserDto;
 import eu.isygoit.enums.IEnumAccountOrigin;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.auth.AuthServiceFacade.Failure;
+import eu.isygoit.ui.common.component.PhoneField;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,7 @@ public class RegisterView extends BaseLoginView {
     private final TextField firstNameField = new TextField(I18n.t("auth.register.field.firstName.label"));
     private final TextField lastNameField = new TextField(I18n.t("auth.register.field.lastName.label"));
     private final EmailField emailField = new EmailField(I18n.t("auth.register.field.email.label"));
-    private final TextField phoneField = new TextField(I18n.t("auth.register.field.phone.label"));
+    private final PhoneField phoneField = new PhoneField(I18n.t("auth.register.field.phone.label"));
     private final TextField organisationField = new TextField(I18n.t("auth.register.field.organisation.label"));
     private final TextField roleField = new TextField(I18n.t("auth.register.field.role.label"));
     private final Button registerButton = new Button(
@@ -44,10 +45,8 @@ public class RegisterView extends BaseLoginView {
         setAutocomplete(firstNameField, "given-name");
         setAutocomplete(lastNameField, "family-name");
         setAutocomplete(emailField, "email");
-        setAutocomplete(phoneField, "tel");
         setAutocomplete(organisationField, "organization");
         setAutocomplete(roleField, "organization-title");
-        phoneField.getElement().setAttribute("inputmode", "tel");
         describeErrors(firstNameField);
         describeErrors(lastNameField);
         describeErrors(emailField);
@@ -111,8 +110,8 @@ public class RegisterView extends BaseLoginView {
                 .bind(RegisteredUserDto::getEmail, RegisteredUserDto::setEmail);
         binder.forField(phoneField)
                 .asRequired(I18n.t("auth.register.validation.phone.required"))
-                .withValidator(AuthValidators.length(
-                        I18n.t("auth.register.validation.phone.invalid"), 5, 20))
+                .withValidator(AuthValidators.phone(
+                        I18n.t("auth.register.validation.phone.invalid")))
                 .bind(RegisteredUserDto::getPhoneNumber, RegisteredUserDto::setPhoneNumber);
         binder.forField(organisationField)
                 .asRequired(I18n.t("auth.register.validation.organisation.required"))

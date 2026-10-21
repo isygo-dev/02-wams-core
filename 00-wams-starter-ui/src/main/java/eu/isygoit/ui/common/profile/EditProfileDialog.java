@@ -11,7 +11,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import eu.isygoit.api.ProfileServiceApi;
 import eu.isygoit.dto.AddressDto;
@@ -21,8 +20,10 @@ import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.enums.IEnumContact;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PhoneField;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.common.dialog.DialogLayout;
+import eu.isygoit.ui.common.validation.CommonValidators;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
@@ -43,7 +44,6 @@ import java.util.function.Consumer;
  */
 public class EditProfileDialog extends BaseActionDialog {
 
-    private static final String PHONE_PATTERN = "^[+]?[0-9 ().\\-]{6,25}$";
     private static final String EMAIL_PATTERN = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
 
     private final transient ProfileServiceApi profileService;
@@ -124,7 +124,8 @@ public class EditProfileDialog extends BaseActionDialog {
         emailField.setWidthFull();
         emailField.setRequiredIndicatorVisible(true);
 
-        TextField phoneField = text("profile.field.phone", 25);
+        PhoneField phoneField = new PhoneField(I18n.t("profile.field.phone"));
+        phoneField.setWidthFull();
         TextField countryField = text("profile.field.country", 100);
 
         ComboBox<IEnumLanguage.Types> languageCombo = new ComboBox<>(I18n.t("profile.field.language"));
@@ -144,13 +145,12 @@ public class EditProfileDialog extends BaseActionDialog {
 
         binder.forField(emailField)
                 .asRequired(I18n.t("profile.validation.email.invalid"))
-                .withValidator(new EmailValidator(I18n.t("profile.validation.email.invalid")))
+                .withValidator(CommonValidators.email(I18n.t("profile.validation.email.invalid")))
                 .bind(AccountDto::getEmail, AccountDto::setEmail);
 
         binder.forField(phoneField)
                 .withNullRepresentation("")
-                .withValidator(value -> value == null || value.isBlank() || value.matches(PHONE_PATTERN),
-                        I18n.t("profile.validation.phone.invalid"))
+                .withValidator(CommonValidators.phone(I18n.t("profile.validation.phone.invalid")))
                 .bind(AccountDto::getPhoneNumber, AccountDto::setPhoneNumber);
 
         binder.forField(countryField)
@@ -315,6 +315,8 @@ public class EditProfileDialog extends BaseActionDialog {
             valueField.setValue(nvl(value));
             valueField.setMaxLength(100);
             valueField.setWidthFull();
+            applyMaskFor(type);
+            typeCombo.addValueChangeListener(e -> applyMaskFor(e.getValue()));
 
             Button remove = new Button(VaadinIcon.TRASH.create());
             remove.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
@@ -329,6 +331,18 @@ public class EditProfileDialog extends BaseActionDialog {
         }
 
         /**
+         * Restricts the characters the user can type to match the selected contact type:
+         * a phone-like mask for mobile/phone/fax, unrestricted for email.
+         */
+        private void applyMaskFor(IEnumContact.Types type) {
+            if (type == IEnumContact.Types.EMAIL) {
+                valueField.setAllowedCharPattern(null);
+            } else {
+                valueField.setAllowedCharPattern(PhoneField.ALLOWED_CHAR_PATTERN);
+            }
+        }
+
+        /**
          * Valid when empty (the entry is dropped) or when the value fits its type.
          */
         boolean validate() {
@@ -336,7 +350,7 @@ public class EditProfileDialog extends BaseActionDialog {
             boolean ok = value.isEmpty()
                     || (typeCombo.getValue() == IEnumContact.Types.EMAIL
                     ? value.matches(EMAIL_PATTERN)
-                    : value.matches(PHONE_PATTERN));
+                    : value.matches(PhoneField.PATTERN));
             if (typeCombo.getValue() == null && !value.isEmpty()) {
                 ok = false;
             }

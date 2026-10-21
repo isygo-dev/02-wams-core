@@ -1,7 +1,9 @@
 package eu.isygoit.ui.auth;
 
 import com.vaadin.flow.data.validator.EmailValidator;
+import com.vaadin.flow.data.validator.RegexpValidator;
 import com.vaadin.flow.data.validator.StringLengthValidator;
+import eu.isygoit.ui.common.validation.CommonValidators;
 
 public final class AuthValidators {
 
@@ -13,6 +15,10 @@ public final class AuthValidators {
     }
 
     public static EmailValidator email(String message) {
-        return new EmailValidator(message);
+        return CommonValidators.email(message);
+    }
+
+    public static RegexpValidator phone(String message) {
+        return CommonValidators.phone(message);
     }
 }
