@@ -50,7 +50,7 @@ import java.util.function.Function;
 @Slf4j
 public class FilterBar extends Div {
 
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     // ─── Metadata-mode state ───────────────────────────────────────
     private final Map<String, String> criteriaMetadata;

@@ -1,6 +1,5 @@
 package eu.isygoit.ui.common.profile;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.dto.data.AccountStatDto;
 import eu.isygoit.i18n.I18n;
@@ -11,7 +10,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Date;
 import java.util.Locale;
 
@@ -24,25 +22,19 @@ final class ProfileFormatUtils {
     private ProfileFormatUtils() {
     }
 
-    private static Locale locale() {
-        UI ui = UI.getCurrent();
-        return ui != null ? ui.getLocale() : Locale.getDefault();
-    }
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_TIME_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     static String formatDate(LocalDateTime dateTime) {
-        return dateTime == null ? null
-                : dateTime.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale()));
+        return dateTime == null ? null : dateTime.format(DATE_FMT);
     }
 
     static String formatDate(LocalDate date) {
-        return date == null ? null
-                : date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale()));
+        return date == null ? null : date.format(DATE_FMT);
     }
 
     static String formatDateTime(LocalDateTime dateTime) {
-        return dateTime == null ? null
-                : dateTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
-                .withLocale(locale()));
+        return dateTime == null ? null : dateTime.format(DATE_TIME_FMT);
     }
 
     static LocalDate toLocalDate(Date date) {
