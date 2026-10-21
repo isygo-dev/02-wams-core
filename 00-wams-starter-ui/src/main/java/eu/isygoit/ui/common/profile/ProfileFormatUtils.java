@@ -3,6 +3,7 @@ package eu.isygoit.ui.common.profile;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.dto.data.AccountStatDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.BidiLtr;
 import eu.isygoit.ui.common.component.LocaleAwareDateFormat;
 
 import java.time.Duration;
@@ -23,15 +24,15 @@ final class ProfileFormatUtils {
     }
 
     static String formatDate(LocalDateTime dateTime) {
-        return dateTime == null ? null : LocaleAwareDateFormat.format(dateTime.toLocalDate());
+        return dateTime == null ? null : BidiLtr.wrap(LocaleAwareDateFormat.format(dateTime.toLocalDate()));
     }
 
     static String formatDate(LocalDate date) {
-        return LocaleAwareDateFormat.format(date);
+        return BidiLtr.wrap(LocaleAwareDateFormat.format(date));
     }
 
     static String formatDateTime(LocalDateTime dateTime) {
-        return LocaleAwareDateFormat.format(dateTime);
+        return BidiLtr.wrap(LocaleAwareDateFormat.format(dateTime));
     }
 
     static LocalDate toLocalDate(Date date) {

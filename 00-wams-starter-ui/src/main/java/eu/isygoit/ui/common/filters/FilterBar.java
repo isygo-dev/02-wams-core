@@ -15,6 +15,7 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.enums.IEnum;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.BidiLtr;
 import eu.isygoit.ui.common.component.LocaleAwareDateFormat;
 import lombok.extern.slf4j.Slf4j;
 
@@ -118,12 +119,17 @@ public class FilterBar extends Div {
         build();
     }
 
+    /** Formats a date for the chip/badge text, kept left-to-right even on a right-to-left page. */
+    private static String displayDate(LocalDate date) {
+        return BidiLtr.wrap(LocaleAwareDateFormat.format(date));
+    }
+
     private static String formatRange(LocalDate from, LocalDate to) {
         if (from == null && to == null) return null;
         if (from != null && to != null)
-            return LocaleAwareDateFormat.format(from) + " → " + LocaleAwareDateFormat.format(to);
-        if (from != null) return "≥ " + LocaleAwareDateFormat.format(from);
-        return "≤ " + LocaleAwareDateFormat.format(to);
+            return displayDate(from) + " → " + displayDate(to);
+        if (from != null) return "≥ " + displayDate(from);
+        return "≤ " + displayDate(to);
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -232,7 +238,7 @@ public class FilterBar extends Div {
             LocalDate v = e.getValue();
             if (onChange != null) onChange.accept(v);
             trackChip(key, I18n.t(labelKey),
-                    v == null ? null : LocaleAwareDateFormat.format(v), picker::clear);
+                    v == null ? null : displayDate(v), picker::clear);
         });
         registerManualField(picker::clear);
         return picker;
@@ -247,7 +253,7 @@ public class FilterBar extends Div {
         picker.addValueChangeListener(e -> {
             LocalDateTime v = e.getValue();
             if (onChange != null) onChange.accept(v);
-            String formatted = v == null ? null : LocaleAwareDateFormat.format(v.toLocalDate());
+            String formatted = v == null ? null : displayDate(v.toLocalDate());
             trackChip(key, I18n.t(labelKey), formatted, () -> picker.setValue(null));
         });
         registerManualField(() -> picker.setValue(null));
@@ -543,7 +549,7 @@ public class FilterBar extends Div {
                 f.addValueChangeListener(e ->
                         trackChip(key, label,
                                 e.getValue() == null ? null
-                                        : LocaleAwareDateFormat.format(e.getValue().toLocalDate()),
+                                        : displayDate(e.getValue().toLocalDate()),
                                 () -> f.setValue(null)));
                 yield f;
             }

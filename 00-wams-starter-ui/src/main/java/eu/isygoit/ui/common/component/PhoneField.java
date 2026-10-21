@@ -14,8 +14,8 @@ import com.vaadin.flow.component.textfield.TextField;
  * <p>
  * The value is always left-to-right (e.g. {@code +33 6 12 34 56 78}), the same in every
  * locale including Arabic: no locale-specific grouping/inversion is ever applied, and the
- * field forces {@code dir="ltr"} so the browser's bidi algorithm can't visually reorder it
- * in a right-to-left page.
+ * field forces an LTR direction via {@link BidiLtr#apply} so the browser's bidi algorithm
+ * can't visually reorder it in a right-to-left page.
  */
 public class PhoneField extends TextField {
 
@@ -27,22 +27,13 @@ public class PhoneField extends TextField {
 
     public static final String DEFAULT_PLACEHOLDER = "+33 6 12 34 56 78";
 
-    /** Unicode "left-to-right isolate" / "pop directional isolate": forces a value to
-     * render left-to-right as a self-contained run, wherever it ends up (a grid cell, a
-     * card row, a tooltip, a chip) — unlike the {@code dir="ltr"} attribute on the input
-     * field itself, this also covers every READ-ONLY, plain-text display of the same
-     * value, which otherwise gets visually reordered by the browser's bidi algorithm when
-     * shown inside Arabic (right-to-left) text. */
-    private static final String LRI = "⁦";
-    private static final String PDI = "⁩";
-
     /**
      * Wraps a phone number for safe read-only display next to right-to-left text (cards,
      * grids, details dialogs): the digits/{@code +} always render in the same left-to-right
      * order, in every locale including Arabic.
      */
     public static String forDisplay(String phone) {
-        return (phone == null || phone.isBlank()) ? phone : LRI + phone + PDI;
+        return BidiLtr.wrap(phone);
     }
 
     public PhoneField() {
@@ -60,6 +51,6 @@ public class PhoneField extends TextField {
         setMaxLength(20);
         setAutocomplete(Autocomplete.TEL);
         getElement().setAttribute("inputmode", "tel");
-        getElement().setAttribute("dir", "ltr");
+        BidiLtr.apply(getElement());
     }
 }

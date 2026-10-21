@@ -20,6 +20,7 @@ import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.enums.IEnumContact;
 import eu.isygoit.enums.IEnumLanguage;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.BidiLtr;
 import eu.isygoit.ui.common.component.PhoneField;
 import eu.isygoit.ui.common.dialog.BaseActionDialog;
 import eu.isygoit.ui.common.dialog.DialogLayout;
@@ -337,10 +338,10 @@ public class EditProfileDialog extends BaseActionDialog {
         private void applyMaskFor(IEnumContact.Types type) {
             if (type == IEnumContact.Types.EMAIL) {
                 valueField.setAllowedCharPattern(null);
-                valueField.getElement().removeAttribute("dir");
+                BidiLtr.clear(valueField.getElement());
             } else {
                 valueField.setAllowedCharPattern(PhoneField.ALLOWED_CHAR_PATTERN);
-                valueField.getElement().setAttribute("dir", "ltr");
+                BidiLtr.apply(valueField.getElement());
             }
         }
 

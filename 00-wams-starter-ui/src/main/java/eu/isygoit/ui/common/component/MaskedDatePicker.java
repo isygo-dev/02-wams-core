@@ -9,6 +9,11 @@ import com.vaadin.flow.component.datepicker.DatePicker;
  * day/month, {@code -} separators, or ISO {@code yyyy-MM-dd}) as well as pick it from the
  * calendar overlay; the locale's own pattern is always used to display and re-parse the
  * value, so it is never ambiguous with the US {@code MM/dd/yyyy} order.
+ * <p>
+ * The typed/displayed value (just digits and separators, no letters) is forced left-to-right
+ * via {@link BidiLtr#apply}, the same fix as {@link PhoneField}: without it, the Unicode Bidi
+ * Algorithm can reorder the whole value inside a right-to-left (Arabic) page since nothing in
+ * it is a strong-direction character.
  */
 public class MaskedDatePicker extends DatePicker {
 
@@ -35,5 +40,6 @@ public class MaskedDatePicker extends DatePicker {
                 "d/M/yyyy", "dd-MM-yyyy", "d-M-yyyy", "yyyy-MM-dd", "yyyy/MM/dd", "yyyy/M/d");
         datePicker.setI18n(i18n);
         datePicker.setPlaceholder(displayFormat.toLowerCase());
+        BidiLtr.apply(datePicker.getElement());
     }
 }
