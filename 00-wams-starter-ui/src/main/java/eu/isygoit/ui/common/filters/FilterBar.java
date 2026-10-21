@@ -15,11 +15,11 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.enums.IEnum;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.LocaleAwareDateFormat;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -49,8 +49,6 @@ import java.util.function.Function;
  */
 @Slf4j
 public class FilterBar extends Div {
-
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     // ─── Metadata-mode state ───────────────────────────────────────
     private final Map<String, String> criteriaMetadata;
@@ -123,9 +121,9 @@ public class FilterBar extends Div {
     private static String formatRange(LocalDate from, LocalDate to) {
         if (from == null && to == null) return null;
         if (from != null && to != null)
-            return from.format(DATE_FMT) + " → " + to.format(DATE_FMT);
-        if (from != null) return "≥ " + from.format(DATE_FMT);
-        return "≤ " + to.format(DATE_FMT);
+            return LocaleAwareDateFormat.format(from) + " → " + LocaleAwareDateFormat.format(to);
+        if (from != null) return "≥ " + LocaleAwareDateFormat.format(from);
+        return "≤ " + LocaleAwareDateFormat.format(to);
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -234,7 +232,7 @@ public class FilterBar extends Div {
             LocalDate v = e.getValue();
             if (onChange != null) onChange.accept(v);
             trackChip(key, I18n.t(labelKey),
-                    v == null ? null : v.format(DATE_FMT), picker::clear);
+                    v == null ? null : LocaleAwareDateFormat.format(v), picker::clear);
         });
         registerManualField(picker::clear);
         return picker;
@@ -249,7 +247,7 @@ public class FilterBar extends Div {
         picker.addValueChangeListener(e -> {
             LocalDateTime v = e.getValue();
             if (onChange != null) onChange.accept(v);
-            String formatted = v == null ? null : v.toLocalDate().format(DATE_FMT);
+            String formatted = v == null ? null : LocaleAwareDateFormat.format(v.toLocalDate());
             trackChip(key, I18n.t(labelKey), formatted, () -> picker.setValue(null));
         });
         registerManualField(() -> picker.setValue(null));
@@ -545,7 +543,7 @@ public class FilterBar extends Div {
                 f.addValueChangeListener(e ->
                         trackChip(key, label,
                                 e.getValue() == null ? null
-                                        : e.getValue().toLocalDate().format(DATE_FMT),
+                                        : LocaleAwareDateFormat.format(e.getValue().toLocalDate()),
                                 () -> f.setValue(null)));
                 yield f;
             }

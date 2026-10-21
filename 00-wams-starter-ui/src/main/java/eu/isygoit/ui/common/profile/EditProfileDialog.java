@@ -337,8 +337,10 @@ public class EditProfileDialog extends BaseActionDialog {
         private void applyMaskFor(IEnumContact.Types type) {
             if (type == IEnumContact.Types.EMAIL) {
                 valueField.setAllowedCharPattern(null);
+                valueField.getElement().removeAttribute("dir");
             } else {
                 valueField.setAllowedCharPattern(PhoneField.ALLOWED_CHAR_PATTERN);
+                valueField.getElement().setAttribute("dir", "ltr");
             }
         }
 

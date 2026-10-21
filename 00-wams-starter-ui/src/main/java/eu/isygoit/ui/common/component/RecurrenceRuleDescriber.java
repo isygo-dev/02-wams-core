@@ -22,8 +22,6 @@ public final class RecurrenceRuleDescriber {
 
     private static final DateTimeFormatter UNTIL_FMT =
             DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
-    private static final DateTimeFormatter DATE_FMT =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter TIME_FMT =
             DateTimeFormatter.ofPattern("HH:mm");
 
@@ -127,7 +125,7 @@ public final class RecurrenceRuleDescriber {
         try {
             LocalDateTime dt = LocalDateTime.parse(until, UNTIL_FMT);
             return I18n.t("calendar.recurrence.summary.until.format",
-                    dt.toLocalDate().format(DATE_FMT),
+                    LocaleAwareDateFormat.format(dt.toLocalDate()),
                     dt.toLocalTime().format(TIME_FMT));
         } catch (Exception ex) {
             return until;

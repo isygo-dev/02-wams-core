@@ -3,13 +3,13 @@ package eu.isygoit.ui.common.profile;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import eu.isygoit.dto.data.AccountStatDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.LocaleAwareDateFormat;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 
@@ -22,19 +22,16 @@ final class ProfileFormatUtils {
     private ProfileFormatUtils() {
     }
 
-    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final DateTimeFormatter DATE_TIME_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
     static String formatDate(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.format(DATE_FMT);
+        return dateTime == null ? null : LocaleAwareDateFormat.format(dateTime.toLocalDate());
     }
 
     static String formatDate(LocalDate date) {
-        return date == null ? null : date.format(DATE_FMT);
+        return LocaleAwareDateFormat.format(date);
     }
 
     static String formatDateTime(LocalDateTime dateTime) {
-        return dateTime == null ? null : dateTime.format(DATE_TIME_FMT);
+        return LocaleAwareDateFormat.format(dateTime);
     }
 
     static LocalDate toLocalDate(Date date) {
