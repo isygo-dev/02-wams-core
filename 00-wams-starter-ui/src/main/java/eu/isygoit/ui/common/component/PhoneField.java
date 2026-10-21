@@ -27,6 +27,24 @@ public class PhoneField extends TextField {
 
     public static final String DEFAULT_PLACEHOLDER = "+33 6 12 34 56 78";
 
+    /** Unicode "left-to-right isolate" / "pop directional isolate": forces a value to
+     * render left-to-right as a self-contained run, wherever it ends up (a grid cell, a
+     * card row, a tooltip, a chip) — unlike the {@code dir="ltr"} attribute on the input
+     * field itself, this also covers every READ-ONLY, plain-text display of the same
+     * value, which otherwise gets visually reordered by the browser's bidi algorithm when
+     * shown inside Arabic (right-to-left) text. */
+    private static final String LRI = "⁦";
+    private static final String PDI = "⁩";
+
+    /**
+     * Wraps a phone number for safe read-only display next to right-to-left text (cards,
+     * grids, details dialogs): the digits/{@code +} always render in the same left-to-right
+     * order, in every locale including Arabic.
+     */
+    public static String forDisplay(String phone) {
+        return (phone == null || phone.isBlank()) ? phone : LRI + phone + PDI;
+    }
+
     public PhoneField() {
         this(null);
     }
