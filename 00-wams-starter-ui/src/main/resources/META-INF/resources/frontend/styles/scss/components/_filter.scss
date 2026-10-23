@@ -31,11 +31,18 @@
 //         .filter-card__chips-label
 //         .filter-card__chips-list
 //
-// Container queries: every `@container panel (…)` rule requires the
-// panel that wraps this content to declare
+// Container queries: every `@container panel (…)` rule requires the panel
+// that wraps this content to declare
 //     container: panel / inline-size;
-// on itself. If it does not, the responsive rules silently never fire
-// (no error, but no reflow either).
+// on itself. If it does not, the responsive rules silently never fire.
+//
+// Sizing contract
+// ───────────────
+//   Desktop: each field is self-sized, clamped to a comfortable range
+//            (see min-width/max-width on .filter-select and .filter-date).
+//   Narrow : each field fills its row (width: 100%) — the min/max clamps
+//            are removed and min-width: 0 lets the field shrink below its
+//            content width so it never overflows the parent card.
 // ═══════════════════════════════════════════════════════════════════
 
 @use "../abstracts/variables" as *;
@@ -204,6 +211,12 @@ $filter-control-h: 2.5rem; // 40 px
   &--collapsed &__header {
     padding-bottom: 0;
     border-bottom-color: transparent;
+  }
+
+  // Collapse actually hides the body — the toggle button only changed
+  // the header previously, leaving the controls visible.
+  &--collapsed &__body {
+    display: none;
   }
 
   // ══════════════════════════════════════════════════════════════
@@ -388,11 +401,7 @@ $filter-control-h: 2.5rem; // 40 px
 //   Combos + search field → `::part(label)` reaches the shadow label.
 //   Date pickers         → label lives in a nested shadow root;
 //                          only inherited props + Lumo custom props
-//                          cross the boundary, so we rely on
-//                          --lumo-font-size-s + text-transform.
-//                          (See note below — `::part(label)` should
-//                          work too in modern Vaadin versions; kept
-//                          the fallback for safety.)
+//                          cross the boundary reliably.
 // ══════════════════════════════════════════════════════════════════
 
 .toolbar-search::part(label),
@@ -453,8 +462,7 @@ $filter-control-h: 2.5rem; // 40 px
   }
 
   // `focused` is the actual attribute Vaadin sets on the host when the
-  // inner input is focused. `:focus-within` works as a fallback but only
-  // matters in edge cases; the attribute is the reliable contract.
+  // inner input is focused. `:focus-within` is a defensive fallback.
   &[focused]::part(input-field),
   &:focus-within::part(input-field) {
     background: var(--lumo-base-color);
@@ -469,8 +477,10 @@ $filter-control-h: 2.5rem; // 40 px
 }
 
 // ── Numeric variant — narrower footprint (used with .filter-select) ──
+// Uses min/max clamps (no explicit width) so it stays consistent with
+// .filter-select above. Applies after .filter-select in source order, so
+// these values override the wider base range.
 .filter-number {
-  width: 9rem;
   min-width: 130px;
   max-width: 180px;
 }
@@ -555,9 +565,8 @@ $filter-control-h: 2.5rem; // 40 px
   transform $filter-dur-fast $filter-ease;
 
   &:hover {
-    // `--lumo-primary-color-20pct` does NOT exist in Lumo (only -10pct and -50pct
-    // do). Using it directly invalidated the whole background declaration; the
-    // color-mix below preserves the exact intended 20% intensity.
+    // `--lumo-primary-color-20pct` does not exist in Lumo; color-mix
+    // reproduces the same 20% intensity without an undefined variable.
     background: linear-gradient(
                     135deg,
                     color-mix(in srgb, var(--lumo-primary-color) 20%, transparent) 0%,
@@ -580,8 +589,13 @@ $filter-control-h: 2.5rem; // 40 px
   }
 
   &__remove {
-    width: 14px;
-    height: 14px;
+    // box-sizing: border-box keeps the declared 18×18 as the hit target;
+    // the 2px padding then carves out a 14×14 icon area, which matches
+    // the visual expectation. Previously with content-box the element
+    // rendered as 18×18 while the CSS read 14×14 — confusing in DevTools.
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
     margin-left: 0.25rem;
     padding: 2px;
     border-radius: 50%;
@@ -732,6 +746,13 @@ $filter-control-h: 2.5rem; // 40 px
 
 // ══════════════════════════════════════════════════════════════════
 // Responsive — narrow content area
+//
+// The `.filter-select, .filter-number, .filter-date { width: 100% }` rule
+// below is only effective because the wide-viewport rules do not set a
+// `width`, and this block explicitly clears the min/max clamps that would
+// otherwise lock the field to `fit-content` regardless of `width: 100%`.
+// `min-width: 0` allows flex items to shrink below their content width,
+// preventing horizontal overflow at very small viewports.
 // ══════════════════════════════════════════════════════════════════
 
 @container panel (max-width: #{$bp-panel-compact}) {
@@ -770,14 +791,20 @@ $filter-control-h: 2.5rem; // 40 px
     flex: 1 1 100%;
   }
 
+  // Fields fill their row on narrow viewports. `max-width: none` and
+  // `min-width: 0` clear the wide-viewport clamps so `width: 100%` wins.
   .filter-select,
   .filter-number,
   .filter-date {
-    min-width: fit-content;
-    max-width: fit-content;
     width: 100%;
+    min-width: 0;
+    max-width: none;
   }
 
+  // Range children stretch to fill the row. `align-items: stretch` on a
+  // column flex container stretches children horizontally — this now
+  // works because the inner fields no longer have max-width: fit-content
+  // (see rule above).
   .filter-date-range,
   .filter-number-range {
     flex-direction: column;
@@ -793,8 +820,8 @@ $filter-control-h: 2.5rem; // 40 px
 }
 
 // ══════════════════════════════════════════════════════════════════
-// Reduced motion — disable decorative animations for users who
-// asked their OS to respect the preference.
+// Reduced motion — disable decorative animations for users who asked
+// their OS to respect the preference.
 // ══════════════════════════════════════════════════════════════════
 
 @media (prefers-reduced-motion: reduce) {
