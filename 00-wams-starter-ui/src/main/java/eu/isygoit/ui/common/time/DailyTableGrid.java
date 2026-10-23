@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 
 /**
  * Daily timetable grid – one column for the day, time labels on the left.
- * Supports any {@code stepMinutes} (5, 10, 15, 30, 60…): row heights scale
- * proportionally so the day height stays roughly constant.
+ * Overlapping events are laid out side-by-side (each takes
+ * {@code 1/colCount} of the day column, offset by {@code colIndex/colCount}).
  */
 @CssImport("./styles/scss/time-grid.scss")
 public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
@@ -142,27 +142,26 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
         List<LocalTime> bookableStarts = timeSlots.subList(0, timeSlots.size() - 1);
 
-        Map<Integer, E> slotMap = new LinkedHashMap<>();
-        Map<Integer, Integer> spanMap = new HashMap<>();
-        Set<String> coveredRows = new HashSet<>();
+        // ── 1. Compute overlap placements ───────────────────────────
+        Map<E, SlotPlacement> placements = computePlacements(dayEvents,
+                e -> config.getStartTimeExtractor().apply(e),
+                e -> config.getEndTimeExtractor().apply(e));
 
+        // ── 2. Covered rows ────────────────────────────────────────
+        Set<String> coveredRows = new HashSet<>();
         for (E evt : dayEvents) {
             LocalTime start = config.getStartTimeExtractor().apply(evt);
             if (start == null) continue;
-
             int rowIndex = rowIndexContaining(start, bookableStarts);
             if (rowIndex < 0) continue;
-
             LocalTime snappedStart = bookableStarts.get(rowIndex);
             int span = spanFor(evt, snappedStart);
-
-            slotMap.put(rowIndex, evt);
-            spanMap.put(rowIndex, span);
             for (int r = rowIndex; r < rowIndex + span; r++) {
                 coveredRows.add("day-" + r);
             }
         }
 
+        // ── 3. Background cells + time labels ──────────────────────
         int step = config.getStepMinutes();
         for (int rowIndex = 0; rowIndex < bookableStarts.size(); rowIndex++) {
             LocalTime start = bookableStarts.get(rowIndex);
@@ -202,18 +201,93 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             gridContainer.add(cell);
         }
 
-        for (Map.Entry<Integer, E> entry : slotMap.entrySet()) {
-            int rowIndex = entry.getKey();
-            E evt = entry.getValue();
-            int span = spanMap.get(rowIndex);
-            Component chip = buildSlotChip(evt, span);
-            placeInGrid(chip, rowIndex + 2, 2, span, 1);
-            gridContainer.add(chip);
+        // ── 4. Chips — overlap-aware placement ─────────────────────
+        for (E evt : dayEvents) {
+            LocalTime start = config.getStartTimeExtractor().apply(evt);
+            if (start == null) continue;
+            int rowIndex = rowIndexContaining(start, bookableStarts);
+            if (rowIndex < 0) continue;
+            LocalTime snappedStart = bookableStarts.get(rowIndex);
+            int span = spanFor(evt, snappedStart);
+            SlotPlacement p = placements.getOrDefault(evt, new SlotPlacement(0, 1));
+            buildSlotChip(evt, rowIndex, span, p.colIndex(), p.colCount());
         }
 
         if (config.isShowNowIndicator()) {
             installNowIndicator();
         }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Overlap resolution (same algorithm as WeeklyTableGrid)
+     * ══════════════════════════════════════════════════════════════ */
+
+    private record SlotPlacement(int colIndex, int colCount) {
+    }
+
+    private static <E> Map<E, SlotPlacement> computePlacements(
+            List<E> events,
+            Function<E, LocalTime> startOf,
+            Function<E, LocalTime> endOf) {
+
+        Map<E, SlotPlacement> result = new IdentityHashMap<>();
+        if (events == null || events.isEmpty()) return result;
+
+        List<E> sorted = events.stream()
+                .filter(e -> startOf.apply(e) != null && endOf.apply(e) != null)
+                .sorted(Comparator
+                        .comparing(startOf)
+                        .thenComparing(endOf, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+
+        int n = sorted.size();
+        int i = 0;
+        while (i < n) {
+            LocalTime clusterEnd = endOf.apply(sorted.get(i));
+            int j = i + 1;
+            while (j < n && startOf.apply(sorted.get(j)).isBefore(clusterEnd)) {
+                LocalTime e = endOf.apply(sorted.get(j));
+                if (e.isAfter(clusterEnd)) clusterEnd = e;
+                j++;
+            }
+            List<E> cluster = sorted.subList(i, j);
+
+            List<List<E>> columns = new ArrayList<>();
+            for (E evt : cluster) {
+                LocalTime s = startOf.apply(evt);
+                LocalTime e = endOf.apply(evt);
+                int assigned = -1;
+                for (int c = 0; c < columns.size(); c++) {
+                    boolean overlap = false;
+                    for (E other : columns.get(c)) {
+                        if (startOf.apply(other).isBefore(e)
+                                && endOf.apply(other).isAfter(s)) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    if (!overlap) {
+                        assigned = c;
+                        break;
+                    }
+                }
+                if (assigned == -1) {
+                    assigned = columns.size();
+                    columns.add(new ArrayList<>());
+                }
+                columns.get(assigned).add(evt);
+                result.put(evt, new SlotPlacement(assigned, 1));
+            }
+
+            int colCount = columns.size();
+            for (E evt : cluster) {
+                SlotPlacement p = result.get(evt);
+                result.put(evt, new SlotPlacement(p.colIndex(), colCount));
+            }
+
+            i = j;
+        }
+        return result;
     }
 
     private int rowIndexContaining(LocalTime start, List<LocalTime> sortedStarts) {
@@ -232,7 +306,11 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return Math.max(1, (int) Math.ceil(durationMinutes / (double) config.getStepMinutes()));
     }
 
-    private Component buildSlotChip(E evt, int span) {
+    private Component buildSlotChip(E evt, int rowIndex, int span, int colIndex, int colCount) {
+        Div wrapper = new Div();
+        wrapper.addClassName("timetable-slot-wrapper");
+        placeInGrid(wrapper, rowIndex + 2, 2, span, 1);   // daily: day column = 2
+
         VerticalLayout content = new VerticalLayout();
         content.setPadding(false);
         content.setSpacing(false);
@@ -240,6 +318,14 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         content.addClassName("timetable-slot-content");
         content.addClassName("timetable-slot-chip");
         if (span > 1) content.addClassName("timetable-grid-cell--multi-hour");
+
+        double widthPct = 100.0 / colCount;
+        double leftPct = widthPct * colIndex;
+        content.getStyle().set("position", "absolute");
+        content.getStyle().set("top", "1px");
+        content.getStyle().set("bottom", "1px");
+        content.getStyle().set("left", "calc(" + leftPct + "% + 1px)");
+        content.getStyle().set("width", "calc(" + widthPct + "% - 2px)");
 
         String explicit = safeApply(config.getColorExtractor(), evt, null);
         if (explicit != null && explicit.matches(HEX_RE)) {
@@ -278,7 +364,10 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         if (config.getOnEventClick() != null) {
             content.addClickListener(e -> config.getOnEventClick().accept(evt));
         }
-        return content;
+
+        wrapper.add(content);
+        gridContainer.add(wrapper);
+        return wrapper;
     }
 
     private MenuBar buildActionsMenu(E evt) {

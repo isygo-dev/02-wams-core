@@ -23,6 +23,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @CssImport("./styles/scss/time-grid.scss")
 public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
@@ -57,9 +58,6 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
         gridContainer.setWidthFull();
         gridContainer.addClassName("timetable-grid");
-        // Publish the step factor. The actual row height is computed by the SCSS:
-        //   --tt-row-step = calc(--tt-row-step-base * --tt-step-factor)
-        // so the responsive breakpoints stay effective whatever the step.
         gridContainer.getStyle().set("--tt-step-factor",
                 String.valueOf(step / (double) REFERENCE_STEP_MINUTES));
         add(gridContainer);
@@ -113,29 +111,40 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         List<LocalTime> bookableStarts = timeSlots.subList(0, timeSlots.size() - 1);
         LocalTime endMarker = timeSlots.get(timeSlots.size() - 1);
 
-        Map<DayOfWeek, Map<Integer, E>> slotsByDayRow = new HashMap<>();
-        Map<DayOfWeek, Map<Integer, Integer>> spansByDayRow = new HashMap<>();
-        Set<String> coveredRows = new HashSet<>();
-
+        // ── 1. Group slots by day ───────────────────────────────────
+        Map<DayOfWeek, List<E>> slotsByDay = new HashMap<>();
         for (E slot : slots) {
             LocalTime start = config.getStartTimeExtractor().apply(slot);
             if (start == null) continue;
+            if (rowIndexContaining(start, bookableStarts) < 0) continue;
+            DayOfWeek day = config.getDayOfWeekExtractor().apply(slot);
+            slotsByDay.computeIfAbsent(day, d -> new ArrayList<>()).add(slot);
+        }
 
+        // ── 2. Compute overlap placements per day ───────────────────
+        Map<E, SlotPlacement> placements = new IdentityHashMap<>();
+        for (List<E> daySlots : slotsByDay.values()) {
+            placements.putAll(computePlacements(daySlots,
+                    e -> config.getStartTimeExtractor().apply(e),
+                    e -> config.getEndTimeExtractor().apply(e)));
+        }
+
+        // ── 3. Covered rows (hide '+' in background cells) ──────────
+        Set<String> coveredRows = new HashSet<>();
+        for (E slot : slots) {
+            LocalTime start = config.getStartTimeExtractor().apply(slot);
+            if (start == null) continue;
             int rowIndex = rowIndexContaining(start, bookableStarts);
             if (rowIndex < 0) continue;
-
             LocalTime snappedStart = bookableStarts.get(rowIndex);
             int span = spanFor(slot, snappedStart);
-
             DayOfWeek day = config.getDayOfWeekExtractor().apply(slot);
-            slotsByDayRow.computeIfAbsent(day, d -> new HashMap<>()).put(rowIndex, slot);
-            spansByDayRow.computeIfAbsent(day, d -> new HashMap<>()).put(rowIndex, span);
             for (int r = rowIndex; r < rowIndex + span; r++) {
                 coveredRows.add(day.name() + "-" + r);
             }
         }
 
-        // Row template: uniform `--tt-row-step` per row, `--tt-row-end` for the closing slot.
+        // ── 4. Row template ────────────────────────────────────────
         StringBuilder rowTemplate = new StringBuilder("auto ");
         for (int i = 0; i < bookableStarts.size(); i++) {
             rowTemplate.append("var(--tt-row-step) ");
@@ -147,30 +156,127 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
         buildHeader(today);
 
+        // ── 5. Background cells + time labels ──────────────────────
         for (int rowIndex = 0; rowIndex < bookableStarts.size(); rowIndex++) {
             LocalTime start = bookableStarts.get(rowIndex);
             buildTimeLabel(start, rowIndex, false);
 
             for (int dayIndex = 0; dayIndex < days.size(); dayIndex++) {
                 DayOfWeek day = days.get(dayIndex);
-                boolean isStart = slotsByDayRow.containsKey(day) && slotsByDayRow.get(day).containsKey(rowIndex);
                 boolean isCovered = coveredRows.contains(day.name() + "-" + rowIndex);
-
-                buildBackgroundCell(day, dayIndex, rowIndex, start, today, isStart || isCovered);
-
-                if (isStart) {
-                    E slot = slotsByDayRow.get(day).get(rowIndex);
-                    int span = spansByDayRow.get(day).get(rowIndex);
-                    buildSlotChip(slot, dayIndex, rowIndex, span);
-                }
+                buildBackgroundCell(day, dayIndex, rowIndex, start, today, isCovered);
             }
         }
 
         buildTimeLabel(endMarker, bookableStarts.size(), true);
 
+        // ── 6. Chips — placed with overlap-aware columns ───────────
+        for (E slot : slots) {
+            LocalTime start = config.getStartTimeExtractor().apply(slot);
+            if (start == null) continue;
+            int rowIndex = rowIndexContaining(start, bookableStarts);
+            if (rowIndex < 0) continue;
+            LocalTime snappedStart = bookableStarts.get(rowIndex);
+            int span = spanFor(slot, snappedStart);
+            DayOfWeek day = config.getDayOfWeekExtractor().apply(slot);
+            int dayIndex = days.indexOf(day);
+            if (dayIndex < 0) continue;
+
+            SlotPlacement p = placements.getOrDefault(slot, new SlotPlacement(0, 1));
+            buildSlotChip(slot, dayIndex, rowIndex, span, p.colIndex(), p.colCount());
+        }
+
         if (config.isShowNowIndicator()) {
             installNowIndicator();
         }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Overlap resolution — Google Calendar–style column assignment
+     * ══════════════════════════════════════════════════════════════ */
+
+    private record SlotPlacement(int colIndex, int colCount) {
+    }
+
+    /**
+     * Assigns each event to a lane inside its overlap cluster.
+     * <ul>
+     *   <li>Events sorted by start (asc), then end (desc) so longer events
+     *       get the leftmost lane first.</li>
+     *   <li>A <b>cluster</b> ends when a new event starts at-or-after the max
+     *       end time of the cluster so far.</li>
+     *   <li>Within a cluster, each event takes the leftmost lane with no
+     *       time-overlapping event already in it.</li>
+     *   <li>All events in a cluster share {@code colCount = max lanes in cluster}.</li>
+     * </ul>
+     * Uses an {@link IdentityHashMap} so two distinct events that happen to be
+     * {@code equals} are still treated as separate entries.
+     */
+    private static <E> Map<E, SlotPlacement> computePlacements(
+            List<E> events,
+            Function<E, LocalTime> startOf,
+            Function<E, LocalTime> endOf) {
+
+        Map<E, SlotPlacement> result = new IdentityHashMap<>();
+        if (events == null || events.isEmpty()) return result;
+
+        List<E> sorted = events.stream()
+                .filter(e -> startOf.apply(e) != null && endOf.apply(e) != null)
+                .sorted(Comparator
+                        .comparing(startOf)
+                        .thenComparing(endOf, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+
+        int n = sorted.size();
+        int i = 0;
+        while (i < n) {
+            // Find the cluster end — extend until a gap in the chain.
+            LocalTime clusterEnd = endOf.apply(sorted.get(i));
+            int j = i + 1;
+            while (j < n && startOf.apply(sorted.get(j)).isBefore(clusterEnd)) {
+                LocalTime e = endOf.apply(sorted.get(j));
+                if (e.isAfter(clusterEnd)) clusterEnd = e;
+                j++;
+            }
+            List<E> cluster = sorted.subList(i, j);
+
+            // Assign columns within the cluster.
+            List<List<E>> columns = new ArrayList<>();
+            for (E evt : cluster) {
+                LocalTime s = startOf.apply(evt);
+                LocalTime e = endOf.apply(evt);
+                int assigned = -1;
+                for (int c = 0; c < columns.size(); c++) {
+                    boolean overlap = false;
+                    for (E other : columns.get(c)) {
+                        if (startOf.apply(other).isBefore(e)
+                                && endOf.apply(other).isAfter(s)) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    if (!overlap) {
+                        assigned = c;
+                        break;
+                    }
+                }
+                if (assigned == -1) {
+                    assigned = columns.size();
+                    columns.add(new ArrayList<>());
+                }
+                columns.get(assigned).add(evt);
+                result.put(evt, new SlotPlacement(assigned, 1));   // colCount filled below
+            }
+
+            int colCount = columns.size();
+            for (E evt : cluster) {
+                SlotPlacement p = result.get(evt);
+                result.put(evt, new SlotPlacement(p.colIndex(), colCount));
+            }
+
+            i = j;
+        }
+        return result;
     }
 
     private int rowIndexContaining(LocalTime start, List<LocalTime> sortedStarts) {
@@ -258,7 +364,22 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         gridContainer.add(cell);
     }
 
-    private void buildSlotChip(E slot, int dayIndex, int rowIndex, int span) {
+    /**
+     * Renders a chip with overlap-aware horizontal placement.
+     * <ul>
+     *   <li>{@code colCount == 1} → chip fills the whole day column</li>
+     *   <li>{@code colCount > 1}  → chip takes {@code 1/colCount} of the day column
+     *       and is positioned at {@code colIndex/colCount}</li>
+     * </ul>
+     */
+    private void buildSlotChip(E slot, int dayIndex, int rowIndex, int span,
+                               int colIndex, int colCount) {
+        // Wrapper = grid item, spans the full day column for this row range.
+        Div wrapper = new Div();
+        wrapper.addClassName("timetable-slot-wrapper");
+        placeInGrid(wrapper, rowIndex + 2, dayIndex + 2, span, 1);
+
+        // Content = the visible chip, absolutely positioned inside the wrapper.
         VerticalLayout content = new VerticalLayout();
         content.setPadding(false);
         content.setSpacing(false);
@@ -267,6 +388,16 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         content.addClassName("timetable-slot-chip");
         if (span > 1) content.addClassName("timetable-grid-cell--multi-hour");
 
+        // Horizontal placement inside the wrapper
+        double widthPct = 100.0 / colCount;
+        double leftPct = widthPct * colIndex;
+        content.getStyle().set("position", "absolute");
+        content.getStyle().set("top", "1px");
+        content.getStyle().set("bottom", "1px");
+        content.getStyle().set("left", "calc(" + leftPct + "% + 1px)");
+        content.getStyle().set("width", "calc(" + widthPct + "% - 2px)");
+
+        // Colour: prefer the event's own colour, fall back to category palette.
         String explicit = safeApply(config.getColorExtractor(), slot, null);
         if (explicit != null && explicit.matches(HEX_RE)) {
             content.getStyle().set("--slot-accent", explicit);
@@ -288,12 +419,13 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
 
         Tooltip.forComponent(content).setText(buildTooltipText(slot));
-        placeInGrid(content, rowIndex + 2, dayIndex + 2, span, 1);
 
         if (editable && config.getOnEventClick() != null) {
             content.getElement().addEventListener("click", e -> config.getOnEventClick().accept(slot));
         }
-        gridContainer.add(content);
+
+        wrapper.add(content);
+        gridContainer.add(wrapper);
     }
 
     private MenuBar buildActionsMenu(E slot) {
