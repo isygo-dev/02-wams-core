@@ -150,11 +150,25 @@
   background: var(--lumo-contrast-20pct);
 }
 
-/* Weekly timetable grid */
+/* ─── Timetable grid wrapper ──────────────────────────────────── */
+
 .timetable-grid-wrapper {
+  /*
+   * `--tt-row-step-base` is the height of ONE 30-minute row at the current
+   * viewport — the single responsive knob for the entire grid. `--tt-row-step`
+   * (defined below, on `.timetable-grid`) multiplies it by the per-grid step
+   * factor set inline from Java (`stepMinutes / 30`), so a 5-minute grid gets
+   * row height `base / 6` while a 60-minute grid gets `base * 2` — the day
+   * total height stays the same at every step.
+   *
+   * The `--tt-row-full` / `--tt-row-half` variables are kept as legacy aliases
+   * for any external stylesheet that still references them, but the grid
+   * template itself no longer uses them.
+   */
+  --tt-row-step-base: 42px;
+  --tt-row-end: 20px;
   --tt-row-full: 56px;
   --tt-row-half: 28px;
-  --tt-row-end: 20px;
 
   background: var(--lumo-base-color);
   border-radius: var(--lumo-border-radius-l);
@@ -165,6 +179,14 @@
 }
 
 .timetable-grid {
+  /*
+   * `--tt-step-factor` is set inline by the Java grid constructor
+   * (`getStyle().set("--tt-step-factor", stepMinutes / 30)`). The default of
+   * `1` means "this grid uses 30-minute steps" until the inline value lands.
+   */
+  --tt-step-factor: 1;
+  --tt-row-step: calc(var(--tt-row-step-base) * var(--tt-step-factor));
+
   position: relative;
   display: grid;
   min-width: 800px;
@@ -231,6 +253,11 @@
 
 .timetable-bg-cell.hour-half {
   border-top: 1px solid var(--lumo-contrast-10pct);
+}
+
+.timetable-bg-cell.hour-quarter {
+  /* Sub-30-minute boundary: no visible line, the grid would get noisy at step=5. */
+  border-top: none;
 }
 
 .timetable-grid-col-today {
@@ -352,9 +379,10 @@
 
 @media (max-width: 768px) {
   .timetable-grid-wrapper {
+    --tt-row-step-base: 34px;
+    --tt-row-end: 16px;
     --tt-row-full: 46px;
     --tt-row-half: 23px;
-    --tt-row-end: 16px;
   }
 
   .timetable-grid {
@@ -374,9 +402,10 @@
 
 @media (max-width: 480px) {
   .timetable-grid-wrapper {
+    --tt-row-step-base: 28px;
+    --tt-row-end: 14px;
     --tt-row-full: 38px;
     --tt-row-half: 19px;
-    --tt-row-end: 14px;
   }
 
   .timetable-grid {

@@ -18,10 +18,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @CssImport("./styles/scss/time-grid.scss")
 public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
@@ -85,8 +86,14 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         int daysInMonth = yearMonth.lengthOfMonth();
         int totalCells = ((dayOfWeekOffset + daysInMonth + 6) / 7) * 7;
 
-        Map<LocalDate, List<E>> eventsByDate = events.stream()
-                .collect(Collectors.groupingBy(config.getDateExtractor()));
+        // Group events by their date. Defensive: skip events whose dateExtractor returns null
+        // (rather than letting Collectors.groupingBy throw NPE and take the whole grid down).
+        Map<LocalDate, List<E>> eventsByDate = new HashMap<>();
+        for (E evt : events) {
+            LocalDate date = config.getDateExtractor().apply(evt);
+            if (date == null) continue;
+            eventsByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(evt);
+        }
 
         for (int i = 0; i < totalCells; i++) {
             int dayNumber = i - dayOfWeekOffset + 1;
@@ -202,22 +209,18 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
         StringBuilder sb = new StringBuilder();
 
-        // Title
         sb.append(safeApply(config.getTitleExtractor(), evt, ""));
 
-        // Description
         String desc = safeApply(config.getDescriptionExtractor(), evt, null);
         if (desc != null && !desc.isBlank()) {
             sb.append("\n").append(desc);
         }
 
-        // Date
         LocalDate date = safeApply(config.getDateExtractor(), evt, null);
         if (date != null) {
             sb.append("\n").append(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         }
 
-        // Time range
         if (config.getStartTimeExtractor() != null && config.getEndTimeExtractor() != null) {
             LocalTime start = config.getStartTimeExtractor().apply(evt);
             LocalTime end = config.getEndTimeExtractor().apply(evt);
@@ -226,13 +229,11 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
             }
         }
 
-        // Owner
         String owner = safeApply(config.getOwnerExtractor(), evt, null);
         if (owner != null && !owner.isBlank()) {
             sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
         }
 
-        // Location
         String location = safeApply(config.getLocationExtractor(), evt, null);
         if (location != null && !location.isBlank()) {
             sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);

@@ -17,6 +17,7 @@ import eu.isygoit.dto.common.DayTimeSlot;
 import eu.isygoit.i18n.I18n;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +28,7 @@ import java.util.function.Function;
 public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
     private static final String HEX_RE = "^#([A-Fa-f0-9]{6})$";
+    private static final int REFERENCE_STEP_MINUTES = 30;
 
     private final WeeklyTableGridConfig<E> config;
     private final Div gridContainer = new Div();
@@ -55,6 +57,11 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
         gridContainer.setWidthFull();
         gridContainer.addClassName("timetable-grid");
+        // Publish the step factor. The actual row height is computed by the SCSS:
+        //   --tt-row-step = calc(--tt-row-step-base * --tt-step-factor)
+        // so the responsive breakpoints stay effective whatever the step.
+        gridContainer.getStyle().set("--tt-step-factor",
+                String.valueOf(step / (double) REFERENCE_STEP_MINUTES));
         add(gridContainer);
     }
 
@@ -68,9 +75,6 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
     }
 
-    /**
-     * Blend a hex colour toward white. amount 0 = unchanged, 1 = pure white.
-     */
     private static String lighten(String hex, double amount) {
         if (hex == null || !hex.matches(HEX_RE)) return null;
         double k = Math.max(0.0, Math.min(1.0, amount));
@@ -83,9 +87,6 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return String.format("#%02X%02X%02X", r, g, b);
     }
 
-    /**
-     * The Monday of the week being displayed, used to print dates in the header.
-     */
     public void setWeekStartDate(LocalDate weekStartDate) {
         this.weekStartDate = weekStartDate;
     }
@@ -112,28 +113,32 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         List<LocalTime> bookableStarts = timeSlots.subList(0, timeSlots.size() - 1);
         LocalTime endMarker = timeSlots.get(timeSlots.size() - 1);
 
-        Map<LocalTime, Integer> rowIndexByTime = new HashMap<>();
-        for (int i = 0; i < bookableStarts.size(); i++) {
-            rowIndexByTime.put(bookableStarts.get(i), i);
-        }
-
         Map<DayOfWeek, Map<Integer, E>> slotsByDayRow = new HashMap<>();
+        Map<DayOfWeek, Map<Integer, Integer>> spansByDayRow = new HashMap<>();
         Set<String> coveredRows = new HashSet<>();
+
         for (E slot : slots) {
             LocalTime start = config.getStartTimeExtractor().apply(slot);
-            Integer rowIndex = rowIndexByTime.get(start);
-            if (rowIndex == null) continue;
+            if (start == null) continue;
+
+            int rowIndex = rowIndexContaining(start, bookableStarts);
+            if (rowIndex < 0) continue;
+
+            LocalTime snappedStart = bookableStarts.get(rowIndex);
+            int span = spanFor(slot, snappedStart);
+
             DayOfWeek day = config.getDayOfWeekExtractor().apply(slot);
             slotsByDayRow.computeIfAbsent(day, d -> new HashMap<>()).put(rowIndex, slot);
-            int span = spanFor(slot);
+            spansByDayRow.computeIfAbsent(day, d -> new HashMap<>()).put(rowIndex, span);
             for (int r = rowIndex; r < rowIndex + span; r++) {
                 coveredRows.add(day.name() + "-" + r);
             }
         }
 
+        // Row template: uniform `--tt-row-step` per row, `--tt-row-end` for the closing slot.
         StringBuilder rowTemplate = new StringBuilder("auto ");
-        for (LocalTime start : bookableStarts) {
-            rowTemplate.append(start.getMinute() == 0 ? "var(--tt-row-full) " : "var(--tt-row-half) ");
+        for (int i = 0; i < bookableStarts.size(); i++) {
+            rowTemplate.append("var(--tt-row-step) ");
         }
         rowTemplate.append("var(--tt-row-end)");
         gridContainer.getStyle().set("grid-template-columns",
@@ -155,7 +160,8 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
                 if (isStart) {
                     E slot = slotsByDayRow.get(day).get(rowIndex);
-                    buildSlotChip(slot, dayIndex, rowIndex, spanFor(slot));
+                    int span = spansByDayRow.get(day).get(rowIndex);
+                    buildSlotChip(slot, dayIndex, rowIndex, span);
                 }
             }
         }
@@ -167,24 +173,28 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
     }
 
-    private int spanFor(E slot) {
-        LocalTime start = config.getStartTimeExtractor().apply(slot);
-        LocalTime end = config.getEndTimeExtractor().apply(slot);
-        int durationMinutes = (int) java.time.Duration.between(start, end).toMinutes();
-        return Math.max(1, (int) Math.round(durationMinutes / (double) config.getStepMinutes()));
+    private int rowIndexContaining(LocalTime start, List<LocalTime> sortedStarts) {
+        int pos = Collections.binarySearch(sortedStarts, start);
+        if (pos >= 0) return pos;
+        int insertionPoint = -pos - 1;
+        if (insertionPoint == 0) return -1;
+        return insertionPoint - 1;
     }
 
-    /**
-     * Builds a translated header label, e.g. "lun. 02 oct." / "Mon 02 Oct" / "الإثنين 02 أكت".
-     */
+    private int spanFor(E slot, LocalTime snappedStart) {
+        LocalTime end = config.getEndTimeExtractor().apply(slot);
+        if (end == null) return 1;
+        long durationMinutes = Duration.between(snappedStart, end).toMinutes();
+        if (durationMinutes <= 0) return 1;
+        return Math.max(1, (int) Math.ceil(durationMinutes / (double) config.getStepMinutes()));
+    }
+
     private String buildHeaderLabel(DayOfWeek day, int dayIndex) {
         String dayName = config.getDayLabelExtractor() != null
                 ? config.getDayLabelExtractor().apply(day)
                 : day.name();
 
-        if (weekStartDate == null) {
-            return dayName;
-        }
+        if (weekStartDate == null) return dayName;
         LocalDate cellDate = weekStartDate.plusDays(dayIndex);
         String monthName = I18n.t("timetable.month." + cellDate.getMonth().name());
         return dayName + " " + cellDate.getDayOfMonth() + " " + monthName;
@@ -216,9 +226,7 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
     private void buildTimeLabel(LocalTime time, int rowIndex, boolean isClosingLabel) {
         Span timeLabel = new Span(time.getMinute() == 0 ? formatHour(time) : "");
         timeLabel.addClassName("timetable-time-label");
-        if (isClosingLabel) {
-            timeLabel.addClassName("timetable-time-label--end");
-        }
+        if (isClosingLabel) timeLabel.addClassName("timetable-time-label--end");
         timeLabel.addClassName(LumoUtility.FontSize.XSMALL);
         timeLabel.addClassName(LumoUtility.TextColor.SECONDARY);
         placeInGrid(timeLabel, rowIndex + 2, 1, 1, 1);
@@ -229,10 +237,15 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
                                      DayOfWeek today, boolean occupied) {
         Div cell = new Div();
         cell.addClassName("timetable-bg-cell");
-        cell.addClassName(start.getMinute() == 0 ? "hour-full" : "hour-half");
-        if (day == today) {
-            cell.addClassName("timetable-grid-col-today");
+        int step = config.getStepMinutes();
+        if (start.getMinute() == 0) {
+            cell.addClassName("hour-full");
+        } else if (step < 60 && start.getMinute() % 30 == 0) {
+            cell.addClassName("hour-half");
+        } else {
+            cell.addClassName("hour-quarter");
         }
+        if (day == today) cell.addClassName("timetable-grid-col-today");
         placeInGrid(cell, rowIndex + 2, dayIndex + 2, 1, 1);
 
         if (!occupied && editable && config.getOnEmptyCellClick() != null) {
@@ -252,11 +265,8 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         content.setSizeFull();
         content.addClassName("timetable-slot-content");
         content.addClassName("timetable-slot-chip");
-        if (span > 1) {
-            content.addClassName("timetable-grid-cell--multi-hour");
-        }
+        if (span > 1) content.addClassName("timetable-grid-cell--multi-hour");
 
-        // ---- Colour: prefer the event's own colour, fall back to category palette ----
         String explicit = safeApply(config.getColorExtractor(), slot, null);
         if (explicit != null && explicit.matches(HEX_RE)) {
             content.getStyle().set("--slot-accent", explicit);
@@ -278,7 +288,6 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
 
         Tooltip.forComponent(content).setText(buildTooltipText(slot));
-
         placeInGrid(content, rowIndex + 2, dayIndex + 2, span, 1);
 
         if (editable && config.getOnEventClick() != null) {
@@ -313,24 +322,17 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
     private String buildTooltipText(E evt) {
         if (config.getTooltipExtractor() != null) {
             String custom = safeApply(config.getTooltipExtractor(), evt, null);
-            if (custom != null && !custom.isBlank()) {
-                return custom;
-            }
+            if (custom != null && !custom.isBlank()) return custom;
         }
         StringBuilder sb = new StringBuilder();
-
         sb.append(safeApply(config.getTitleExtractor(), evt, ""));
 
         String desc = safeApply(config.getDescriptionExtractor(), evt, null);
-        if (desc != null && !desc.isBlank()) {
-            sb.append("\n").append(desc);
-        }
+        if (desc != null && !desc.isBlank()) sb.append("\n").append(desc);
 
         if (config.getDateExtractor() != null) {
             LocalDate date = config.getDateExtractor().apply(evt);
-            if (date != null) {
-                sb.append("\n").append(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-            }
+            if (date != null) sb.append("\n").append(date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         }
 
         LocalTime start = safeApply(config.getStartTimeExtractor(), evt, LocalTime.MIDNIGHT);
@@ -341,12 +343,10 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         if (owner != null && !owner.isBlank()) {
             sb.append("\n").append(I18n.t("calendar.grid.owner")).append(" ").append(owner);
         }
-
         String location = safeApply(config.getLocationExtractor(), evt, null);
         if (location != null && !location.isBlank()) {
             sb.append("\n").append(I18n.t("calendar.grid.location")).append(" ").append(location);
         }
-
         return sb.toString();
     }
 
@@ -361,6 +361,7 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
 
     private void installNowIndicator() {
         int startMinutes = timeSlots.get(0).getHour() * 60 + timeSlots.get(0).getMinute();
+        int stepMinutes = config.getStepMinutes();
         gridContainer.getElement().executeJs(
                 "const el = this;" +
                         "if (el._nowInterval) { clearInterval(el._nowInterval); }" +
@@ -372,7 +373,7 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
                         "  const now = new Date();" +
                         "  const totalMin = now.getHours() * 60 + now.getMinutes();" +
                         "  const startMin = " + startMinutes + ";" +
-                        "  const endMin = startMin + dayCells.length * 30;" +
+                        "  const endMin = startMin + dayCells.length * " + stepMinutes + ";" +
                         "  const jsDay = now.getDay();" +
                         "  const colIndex = jsDay === 0 ? -1 : jsDay - 1;" +
                         "  if (totalMin < startMin || totalMin > endMin || colIndex < 0) {" +
