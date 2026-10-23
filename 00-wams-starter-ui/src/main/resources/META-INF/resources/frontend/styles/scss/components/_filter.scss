@@ -471,8 +471,8 @@ $filter-control-h-sm: 2.25rem; // 36 px
 
 // ── Date pills ──────────────────────────────────────────────────
 .filter-date {
-  min-width: 150px;
-  max-width: 180px;
+  min-width: fit-content;
+  max-width: fit-content;
 
   &::part(input-field) {
     font-size: 0.875rem;
@@ -754,8 +754,8 @@ $filter-control-h-sm: 2.25rem; // 36 px
   .filter-select,
   .filter-number,
   .filter-date {
-    min-width: 0;
-    max-width: none;
+    min-width: fit-content;
+    max-width: fit-content;
     width: 100%;
   }
 
