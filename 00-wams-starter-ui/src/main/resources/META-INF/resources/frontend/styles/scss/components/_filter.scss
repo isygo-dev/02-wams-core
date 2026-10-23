@@ -5,9 +5,10 @@
 //   .filter-card*            — modern filter bar (card)
 //   .filter-control          — base class on every filter control
 //   .filter-select           — pill dropdowns / text inputs
-//   .filter-number           — narrower numeric variant
+//   .filter-number           — narrower numeric variant (with .filter-select)
 //   .filter-date             — single pill date picker
 //   .filter-date-range       — pair of pill date pickers (from → to)
+//   .filter-number-range     — pair of numeric controls (min → max)
 //   .filter-chip*            — removable active-filter chips
 //   .toggle-switch*          — tri-state boolean filter
 //
@@ -29,6 +30,12 @@
 //       .filter-card__chips            (active chips row)
 //         .filter-card__chips-label
 //         .filter-card__chips-list
+//
+// Container queries: every `@container panel (…)` rule requires the
+// panel that wraps this content to declare
+//     container: panel / inline-size;
+// on itself. If it does not, the responsive rules silently never fire
+// (no error, but no reflow either).
 // ═══════════════════════════════════════════════════════════════════
 
 @use "../abstracts/variables" as *;
@@ -47,7 +54,6 @@ $filter-dur-slow: 320ms;
 $filter-card-radius: 18px;
 $filter-control-radius: 12px;
 $filter-control-h: 2.5rem; // 40 px
-$filter-control-h-sm: 2.25rem; // 36 px
 
 // ══════════════════════════════════════════════════════════════════
 // Toolbar surface — search on the left, add button on the right
@@ -316,7 +322,7 @@ $filter-control-h-sm: 2.25rem; // 36 px
     gap: 0.75rem;
     width: 100%;
     padding-top: 0.875rem;
-    border-top: 1px dashed var(--lumo-contrast-15pct);
+    border-top: 1px dashed color-mix(in srgb, var(--lumo-contrast) 15%, transparent);
     animation: filter-body-in $filter-dur-slow $filter-ease;
   }
 
@@ -384,6 +390,9 @@ $filter-control-h-sm: 2.25rem; // 36 px
 //                          only inherited props + Lumo custom props
 //                          cross the boundary, so we rely on
 //                          --lumo-font-size-s + text-transform.
+//                          (See note below — `::part(label)` should
+//                          work too in modern Vaadin versions; kept
+//                          the fallback for safety.)
 // ══════════════════════════════════════════════════════════════════
 
 .toolbar-search::part(label),
@@ -440,10 +449,14 @@ $filter-control-h-sm: 2.25rem; // 36 px
 
   &:hover::part(input-field) {
     background: var(--lumo-contrast-10pct);
-    border-color: var(--lumo-contrast-15pct);
+    border-color: color-mix(in srgb, var(--lumo-contrast) 15%, transparent);
   }
 
-  &[focus]::part(input-field) {
+  // `focused` is the actual attribute Vaadin sets on the host when the
+  // inner input is focused. `:focus-within` works as a fallback but only
+  // matters in edge cases; the attribute is the reliable contract.
+  &[focused]::part(input-field),
+  &:focus-within::part(input-field) {
     background: var(--lumo-base-color);
     border-color: var(--lumo-primary-color);
     box-shadow: 0 0 0 3px var(--lumo-primary-color-10pct);
@@ -455,14 +468,16 @@ $filter-control-h-sm: 2.25rem; // 36 px
   }
 }
 
-// ── Numeric variant — narrower footprint ────────────────────────
+// ── Numeric variant — narrower footprint (used with .filter-select) ──
 .filter-number {
+  width: 9rem;
   min-width: 130px;
   max-width: 180px;
 }
 
-// ── Date-range pair ─────────────────────────────────────────────
-.filter-date-range {
+// ── Range wrappers — date pair and numeric pair ─────────────────
+.filter-date-range,
+.filter-number-range {
   display: inline-flex;
   align-items: flex-end;
   gap: 0.5rem;
@@ -493,10 +508,11 @@ $filter-control-h-sm: 2.25rem; // 36 px
 
   &:hover::part(input-field) {
     background: var(--lumo-contrast-10pct);
-    border-color: var(--lumo-contrast-15pct);
+    border-color: color-mix(in srgb, var(--lumo-contrast) 15%, transparent);
   }
 
-  &[focus]::part(input-field) {
+  &[focused]::part(input-field),
+  &:focus-within::part(input-field) {
     background: var(--lumo-base-color);
     border-color: var(--lumo-primary-color);
     box-shadow: 0 0 0 3px var(--lumo-primary-color-10pct);
@@ -539,12 +555,15 @@ $filter-control-h-sm: 2.25rem; // 36 px
   transform $filter-dur-fast $filter-ease;
 
   &:hover {
+    // `--lumo-primary-color-20pct` does NOT exist in Lumo (only -10pct and -50pct
+    // do). Using it directly invalidated the whole background declaration; the
+    // color-mix below preserves the exact intended 20% intensity.
     background: linear-gradient(
                     135deg,
-                    var(--lumo-primary-color-20pct) 0%,
-                    color-mix(in srgb, var(--lumo-primary-color-20pct) 60%, transparent) 100%
+                    color-mix(in srgb, var(--lumo-primary-color) 20%, transparent) 0%,
+                    color-mix(in srgb, var(--lumo-primary-color) 12%, transparent) 100%
     );
-    border-color: var(--lumo-primary-color-20pct);
+    border-color: color-mix(in srgb, var(--lumo-primary-color) 20%, transparent);
   }
 
   &__label {
@@ -574,7 +593,7 @@ $filter-control-h-sm: 2.25rem; // 36 px
 
     &:hover {
       opacity: 1;
-      background: var(--lumo-primary-color-20pct);
+      background: color-mix(in srgb, var(--lumo-primary-color) 20%, transparent);
       transform: scale(1.1);
     }
 
@@ -615,7 +634,7 @@ $filter-control-h-sm: 2.25rem; // 36 px
 
   &:hover {
     background: var(--lumo-contrast-10pct);
-    border-color: var(--lumo-contrast-15pct);
+    border-color: color-mix(in srgb, var(--lumo-contrast) 15%, transparent);
   }
 
   &:active {
@@ -759,7 +778,8 @@ $filter-control-h-sm: 2.25rem; // 36 px
     width: 100%;
   }
 
-  .filter-date-range {
+  .filter-date-range,
+  .filter-number-range {
     flex-direction: column;
     align-items: stretch;
     width: 100%;
@@ -772,13 +792,26 @@ $filter-control-h-sm: 2.25rem; // 36 px
   }
 }
 
-.filter-date-range,
-.filter-number-range {
-  display: inline-flex;
-  gap: 0.5rem;
-}
+// ══════════════════════════════════════════════════════════════════
+// Reduced motion — disable decorative animations for users who
+// asked their OS to respect the preference.
+// ══════════════════════════════════════════════════════════════════
 
-.filter-date,
-.filter-number {
-  width: 9rem; // whatever the design uses
+@media (prefers-reduced-motion: reduce) {
+  .filter-card__count,
+  .filter-card__body,
+  .filter-card__chips,
+  .filter-chip {
+    animation: none;
+  }
+
+  .filter-card__collapse,
+  .filter-chip,
+  .filter-chip__remove,
+  .toggle-switch,
+  .toggle-switch__thumb,
+  .filter-select::part(input-field),
+  .filter-date::part(input-field) {
+    transition: none;
+  }
 }
