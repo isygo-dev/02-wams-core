@@ -23,15 +23,19 @@ public final class BidiLtr {
     private BidiLtr() {
     }
 
-    /** Forces left-to-right rendering on an input/editable element. */
+    /**
+     * Forces left-to-right rendering on an input/editable element.
+     */
     public static void apply(Element element) {
         element.setAttribute("dir", "ltr");
         element.getStyle().set("direction", "ltr");
         element.getStyle().set("unicode-bidi", "isolate");
     }
 
-    /** Undoes {@link #apply(Element)}, for an element reused for something else (e.g. a
-     * contact-type picker switching from phone to email). */
+    /**
+     * Undoes {@link #apply(Element)}, for an element reused for something else (e.g. a
+     * contact-type picker switching from phone to email).
+     */
     public static void clear(Element element) {
         element.removeAttribute("dir");
         element.getStyle().remove("direction");

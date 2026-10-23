@@ -21,7 +21,6 @@ import eu.isygoit.exception.handler.ImsExceptionHandler;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.mapper.AccountMapper;
 import eu.isygoit.model.Account;
-import eu.isygoit.model.AccountDetails;
 import eu.isygoit.model.ConnectionTracking;
 import eu.isygoit.service.IAccountService;
 import eu.isygoit.service.impl.AuthTypeChangeService;

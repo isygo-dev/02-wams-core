@@ -88,6 +88,71 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return String.format("#%02X%02X%02X", r, g, b);
     }
 
+    private static <E> Map<E, SlotPlacement> computePlacements(
+            List<E> events,
+            Function<E, LocalTime> startOf,
+            Function<E, LocalTime> endOf) {
+
+        Map<E, SlotPlacement> result = new IdentityHashMap<>();
+        if (events == null || events.isEmpty()) return result;
+
+        List<E> sorted = events.stream()
+                .filter(e -> startOf.apply(e) != null && endOf.apply(e) != null)
+                .sorted(Comparator
+                        .comparing(startOf)
+                        .thenComparing(endOf, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+
+        int n = sorted.size();
+        int i = 0;
+        while (i < n) {
+            LocalTime clusterEnd = endOf.apply(sorted.get(i));
+            int j = i + 1;
+            while (j < n && startOf.apply(sorted.get(j)).isBefore(clusterEnd)) {
+                LocalTime e = endOf.apply(sorted.get(j));
+                if (e.isAfter(clusterEnd)) clusterEnd = e;
+                j++;
+            }
+            List<E> cluster = sorted.subList(i, j);
+
+            List<List<E>> columns = new ArrayList<>();
+            for (E evt : cluster) {
+                LocalTime s = startOf.apply(evt);
+                LocalTime e = endOf.apply(evt);
+                int assigned = -1;
+                for (int c = 0; c < columns.size(); c++) {
+                    boolean overlap = false;
+                    for (E other : columns.get(c)) {
+                        if (startOf.apply(other).isBefore(e)
+                                && endOf.apply(other).isAfter(s)) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    if (!overlap) {
+                        assigned = c;
+                        break;
+                    }
+                }
+                if (assigned == -1) {
+                    assigned = columns.size();
+                    columns.add(new ArrayList<>());
+                }
+                columns.get(assigned).add(evt);
+                result.put(evt, new SlotPlacement(assigned, 1));
+            }
+
+            int colCount = columns.size();
+            for (E evt : cluster) {
+                SlotPlacement p = result.get(evt);
+                result.put(evt, new SlotPlacement(p.colIndex(), colCount));
+            }
+
+            i = j;
+        }
+        return result;
+    }
+
     private String buildDayHeaderLabel() {
         String dayName = I18n.t("timetable.day." + currentDate.getDayOfWeek().name());
         String monthName = I18n.t("timetable.month." + currentDate.getMonth().name());
@@ -99,6 +164,10 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         this.events = (events != null) ? events : Collections.emptyList();
         buildGrid();
     }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Overlap resolution (same algorithm as WeeklyTableGrid)
+     * ══════════════════════════════════════════════════════════════ */
 
     private void buildGrid() {
         gridContainer.removeAll();
@@ -216,78 +285,6 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         if (config.isShowNowIndicator()) {
             installNowIndicator();
         }
-    }
-
-    /* ══════════════════════════════════════════════════════════════
-     * Overlap resolution (same algorithm as WeeklyTableGrid)
-     * ══════════════════════════════════════════════════════════════ */
-
-    private record SlotPlacement(int colIndex, int colCount) {
-    }
-
-    private static <E> Map<E, SlotPlacement> computePlacements(
-            List<E> events,
-            Function<E, LocalTime> startOf,
-            Function<E, LocalTime> endOf) {
-
-        Map<E, SlotPlacement> result = new IdentityHashMap<>();
-        if (events == null || events.isEmpty()) return result;
-
-        List<E> sorted = events.stream()
-                .filter(e -> startOf.apply(e) != null && endOf.apply(e) != null)
-                .sorted(Comparator
-                        .comparing(startOf)
-                        .thenComparing(endOf, Comparator.reverseOrder()))
-                .collect(Collectors.toList());
-
-        int n = sorted.size();
-        int i = 0;
-        while (i < n) {
-            LocalTime clusterEnd = endOf.apply(sorted.get(i));
-            int j = i + 1;
-            while (j < n && startOf.apply(sorted.get(j)).isBefore(clusterEnd)) {
-                LocalTime e = endOf.apply(sorted.get(j));
-                if (e.isAfter(clusterEnd)) clusterEnd = e;
-                j++;
-            }
-            List<E> cluster = sorted.subList(i, j);
-
-            List<List<E>> columns = new ArrayList<>();
-            for (E evt : cluster) {
-                LocalTime s = startOf.apply(evt);
-                LocalTime e = endOf.apply(evt);
-                int assigned = -1;
-                for (int c = 0; c < columns.size(); c++) {
-                    boolean overlap = false;
-                    for (E other : columns.get(c)) {
-                        if (startOf.apply(other).isBefore(e)
-                                && endOf.apply(other).isAfter(s)) {
-                            overlap = true;
-                            break;
-                        }
-                    }
-                    if (!overlap) {
-                        assigned = c;
-                        break;
-                    }
-                }
-                if (assigned == -1) {
-                    assigned = columns.size();
-                    columns.add(new ArrayList<>());
-                }
-                columns.get(assigned).add(evt);
-                result.put(evt, new SlotPlacement(assigned, 1));
-            }
-
-            int colCount = columns.size();
-            for (E evt : cluster) {
-                SlotPlacement p = result.get(evt);
-                result.put(evt, new SlotPlacement(p.colIndex(), colCount));
-            }
-
-            i = j;
-        }
-        return result;
     }
 
     private int rowIndexContaining(LocalTime start, List<LocalTime> sortedStarts) {
@@ -467,5 +464,8 @@ public class DailyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         if (currentDate != null && events != null) {
             buildGrid();
         }
+    }
+
+    private record SlotPlacement(int colIndex, int colCount) {
     }
 }

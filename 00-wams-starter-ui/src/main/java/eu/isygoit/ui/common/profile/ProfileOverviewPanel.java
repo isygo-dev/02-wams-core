@@ -6,11 +6,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import eu.isygoit.dto.data.AccountDetailsDto;
-import eu.isygoit.dto.data.AccountDto;
-import eu.isygoit.dto.data.AccountStatDto;
-import eu.isygoit.dto.data.ApplicationDto;
-import eu.isygoit.dto.data.RoleInfoDto;
+import eu.isygoit.dto.data.*;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.i18n.I18n;
 

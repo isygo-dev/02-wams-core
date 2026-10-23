@@ -2,6 +2,7 @@ package eu.isygoit.ui.auth;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.UIDetachedException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
@@ -11,18 +12,12 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.shared.communication.PushMode;
-import com.vaadin.flow.component.UIDetachedException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.auth.AuthServiceFacade.Failure;
 import eu.isygoit.ui.common.layout.PageEnvironment;
 import eu.isygoit.util.SecurityUtils;
 
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.LongFunction;
 
 @CssImport("./themes/isygo/auth/auth.scss")

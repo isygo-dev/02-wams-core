@@ -19,22 +19,17 @@ import com.vaadin.flow.component.textfield.TextField;
  */
 public class PhoneField extends TextField {
 
-    /** Characters a user is allowed to type at all (client-side input mask). */
+    /**
+     * Characters a user is allowed to type at all (client-side input mask).
+     */
     public static final String ALLOWED_CHAR_PATTERN = "[0-9+ .\\-()]";
 
-    /** Full-value format enforced server-side via {@code CommonValidators.phone(...)}. */
+    /**
+     * Full-value format enforced server-side via {@code CommonValidators.phone(...)}.
+     */
     public static final String PATTERN = "^\\+?[0-9][0-9 .\\-()]{6,17}[0-9]$";
 
     public static final String DEFAULT_PLACEHOLDER = "+33 6 12 34 56 78";
-
-    /**
-     * Wraps a phone number for safe read-only display next to right-to-left text (cards,
-     * grids, details dialogs): the digits/{@code +} always render in the same left-to-right
-     * order, in every locale including Arabic.
-     */
-    public static String forDisplay(String phone) {
-        return BidiLtr.wrap(phone);
-    }
 
     public PhoneField() {
         this(null);
@@ -52,5 +47,14 @@ public class PhoneField extends TextField {
         setAutocomplete(Autocomplete.TEL);
         getElement().setAttribute("inputmode", "tel");
         BidiLtr.apply(getElement());
+    }
+
+    /**
+     * Wraps a phone number for safe read-only display next to right-to-left text (cards,
+     * grids, details dialogs): the digits/{@code +} always render in the same left-to-right
+     * order, in every locale including Arabic.
+     */
+    public static String forDisplay(String phone) {
+        return BidiLtr.wrap(phone);
     }
 }

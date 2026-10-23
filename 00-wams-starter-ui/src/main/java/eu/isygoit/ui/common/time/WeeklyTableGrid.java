@@ -85,6 +85,87 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         return String.format("#%02X%02X%02X", r, g, b);
     }
 
+    /**
+     * Assigns each event to a lane inside its overlap cluster.
+     * <ul>
+     *   <li>Events sorted by start (asc), then end (desc) so longer events
+     *       get the leftmost lane first.</li>
+     *   <li>A <b>cluster</b> ends when a new event starts at-or-after the max
+     *       end time of the cluster so far.</li>
+     *   <li>Within a cluster, each event takes the leftmost lane with no
+     *       time-overlapping event already in it.</li>
+     *   <li>All events in a cluster share {@code colCount = max lanes in cluster}.</li>
+     * </ul>
+     * Uses an {@link IdentityHashMap} so two distinct events that happen to be
+     * {@code equals} are still treated as separate entries.
+     */
+    private static <E> Map<E, SlotPlacement> computePlacements(
+            List<E> events,
+            Function<E, LocalTime> startOf,
+            Function<E, LocalTime> endOf) {
+
+        Map<E, SlotPlacement> result = new IdentityHashMap<>();
+        if (events == null || events.isEmpty()) return result;
+
+        List<E> sorted = events.stream()
+                .filter(e -> startOf.apply(e) != null && endOf.apply(e) != null)
+                .sorted(Comparator
+                        .comparing(startOf)
+                        .thenComparing(endOf, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+
+        int n = sorted.size();
+        int i = 0;
+        while (i < n) {
+            // Find the cluster end — extend until a gap in the chain.
+            LocalTime clusterEnd = endOf.apply(sorted.get(i));
+            int j = i + 1;
+            while (j < n && startOf.apply(sorted.get(j)).isBefore(clusterEnd)) {
+                LocalTime e = endOf.apply(sorted.get(j));
+                if (e.isAfter(clusterEnd)) clusterEnd = e;
+                j++;
+            }
+            List<E> cluster = sorted.subList(i, j);
+
+            // Assign columns within the cluster.
+            List<List<E>> columns = new ArrayList<>();
+            for (E evt : cluster) {
+                LocalTime s = startOf.apply(evt);
+                LocalTime e = endOf.apply(evt);
+                int assigned = -1;
+                for (int c = 0; c < columns.size(); c++) {
+                    boolean overlap = false;
+                    for (E other : columns.get(c)) {
+                        if (startOf.apply(other).isBefore(e)
+                                && endOf.apply(other).isAfter(s)) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    if (!overlap) {
+                        assigned = c;
+                        break;
+                    }
+                }
+                if (assigned == -1) {
+                    assigned = columns.size();
+                    columns.add(new ArrayList<>());
+                }
+                columns.get(assigned).add(evt);
+                result.put(evt, new SlotPlacement(assigned, 1));   // colCount filled below
+            }
+
+            int colCount = columns.size();
+            for (E evt : cluster) {
+                SlotPlacement p = result.get(evt);
+                result.put(evt, new SlotPlacement(p.colIndex(), colCount));
+            }
+
+            i = j;
+        }
+        return result;
+    }
+
     public void setWeekStartDate(LocalDate weekStartDate) {
         this.weekStartDate = weekStartDate;
     }
@@ -94,6 +175,10 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         this.editable = editable;
         buildGrid();
     }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Overlap resolution — Google Calendar–style column assignment
+     * ══════════════════════════════════════════════════════════════ */
 
     private void buildGrid() {
         gridContainer.removeAll();
@@ -189,94 +274,6 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         if (config.isShowNowIndicator()) {
             installNowIndicator();
         }
-    }
-
-    /* ══════════════════════════════════════════════════════════════
-     * Overlap resolution — Google Calendar–style column assignment
-     * ══════════════════════════════════════════════════════════════ */
-
-    private record SlotPlacement(int colIndex, int colCount) {
-    }
-
-    /**
-     * Assigns each event to a lane inside its overlap cluster.
-     * <ul>
-     *   <li>Events sorted by start (asc), then end (desc) so longer events
-     *       get the leftmost lane first.</li>
-     *   <li>A <b>cluster</b> ends when a new event starts at-or-after the max
-     *       end time of the cluster so far.</li>
-     *   <li>Within a cluster, each event takes the leftmost lane with no
-     *       time-overlapping event already in it.</li>
-     *   <li>All events in a cluster share {@code colCount = max lanes in cluster}.</li>
-     * </ul>
-     * Uses an {@link IdentityHashMap} so two distinct events that happen to be
-     * {@code equals} are still treated as separate entries.
-     */
-    private static <E> Map<E, SlotPlacement> computePlacements(
-            List<E> events,
-            Function<E, LocalTime> startOf,
-            Function<E, LocalTime> endOf) {
-
-        Map<E, SlotPlacement> result = new IdentityHashMap<>();
-        if (events == null || events.isEmpty()) return result;
-
-        List<E> sorted = events.stream()
-                .filter(e -> startOf.apply(e) != null && endOf.apply(e) != null)
-                .sorted(Comparator
-                        .comparing(startOf)
-                        .thenComparing(endOf, Comparator.reverseOrder()))
-                .collect(Collectors.toList());
-
-        int n = sorted.size();
-        int i = 0;
-        while (i < n) {
-            // Find the cluster end — extend until a gap in the chain.
-            LocalTime clusterEnd = endOf.apply(sorted.get(i));
-            int j = i + 1;
-            while (j < n && startOf.apply(sorted.get(j)).isBefore(clusterEnd)) {
-                LocalTime e = endOf.apply(sorted.get(j));
-                if (e.isAfter(clusterEnd)) clusterEnd = e;
-                j++;
-            }
-            List<E> cluster = sorted.subList(i, j);
-
-            // Assign columns within the cluster.
-            List<List<E>> columns = new ArrayList<>();
-            for (E evt : cluster) {
-                LocalTime s = startOf.apply(evt);
-                LocalTime e = endOf.apply(evt);
-                int assigned = -1;
-                for (int c = 0; c < columns.size(); c++) {
-                    boolean overlap = false;
-                    for (E other : columns.get(c)) {
-                        if (startOf.apply(other).isBefore(e)
-                                && endOf.apply(other).isAfter(s)) {
-                            overlap = true;
-                            break;
-                        }
-                    }
-                    if (!overlap) {
-                        assigned = c;
-                        break;
-                    }
-                }
-                if (assigned == -1) {
-                    assigned = columns.size();
-                    columns.add(new ArrayList<>());
-                }
-                columns.get(assigned).add(evt);
-                result.put(evt, new SlotPlacement(assigned, 1));   // colCount filled below
-            }
-
-            int colCount = columns.size();
-            for (E evt : cluster) {
-                SlotPlacement p = result.get(evt);
-                result.put(evt, new SlotPlacement(p.colIndex(), colCount));
-            }
-
-            i = j;
-        }
-        return result;
     }
 
     private int rowIndexContaining(LocalTime start, List<LocalTime> sortedStarts) {
@@ -540,5 +537,8 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
     @Override
     protected void onAttach(com.vaadin.flow.component.AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+    }
+
+    private record SlotPlacement(int colIndex, int colCount) {
     }
 }

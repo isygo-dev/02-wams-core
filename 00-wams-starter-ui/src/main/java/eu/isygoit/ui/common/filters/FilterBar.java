@@ -119,7 +119,9 @@ public class FilterBar extends Div {
         build();
     }
 
-    /** Formats a date for the chip/badge text, kept left-to-right even on a right-to-left page. */
+    /**
+     * Formats a date for the chip/badge text, kept left-to-right even on a right-to-left page.
+     */
     private static String displayDate(LocalDate date) {
         return BidiLtr.wrap(LocaleAwareDateFormat.format(date));
     }

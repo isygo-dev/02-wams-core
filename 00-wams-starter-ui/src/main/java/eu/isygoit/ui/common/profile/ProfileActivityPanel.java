@@ -27,6 +27,7 @@ class ProfileActivityPanel extends VerticalLayout {
     private final transient ProfileServiceApi profileService;
     private final Span totalLabel = new Span();
     private final Div body = new Div();
+
     ProfileActivityPanel(ProfileServiceApi profileService) {
         this.profileService = profileService;
 
@@ -48,7 +49,7 @@ class ProfileActivityPanel extends VerticalLayout {
         card.add(header, body, pager);
         add(card);
         loadPage(0);
-    }    private final ProfilePagerBar pager = new ProfilePagerBar(this::loadPage);
+    }
 
     private void loadPage(int page) {
         ConnectionPageDto result = fetch(page);
@@ -82,7 +83,7 @@ class ProfileActivityPanel extends VerticalLayout {
             timeline.add(new ConnectionTimelineItem(connection));
         }
         body.add(timeline);
-    }
+    }    private final ProfilePagerBar pager = new ProfilePagerBar(this::loadPage);
 
     private ConnectionPageDto fetch(int page) {
         try {
@@ -104,6 +105,8 @@ class ProfileActivityPanel extends VerticalLayout {
         error.addClassName("profile-load-error");
         return error;
     }
+
+
 
 
 }

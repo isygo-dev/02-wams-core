@@ -57,7 +57,9 @@ public interface INavRegistry {
             String sectionKey,
             String parentRoute
     ) {
-        /** Backward-compatible constructor: no section, top-level item. */
+        /**
+         * Backward-compatible constructor: no section, top-level item.
+         */
         public NavTarget(String labelKey, String route, VaadinIcon icon, String moduleKey) {
             this(labelKey, route, icon, moduleKey, null, null);
         }

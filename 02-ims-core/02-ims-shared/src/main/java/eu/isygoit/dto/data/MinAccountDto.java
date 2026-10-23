@@ -7,7 +7,6 @@ import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.enums.IEnumWSStatus;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
