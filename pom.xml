@@ -22,8 +22,7 @@
         <!-- Encoding for generated reports (Javadoc, Surefire reports, etc.) -->
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
 
         <!-- Main service stack version -->
         <isygoit.service.stack.version>WS-1.0.261007-T1703</isygoit.service.stack.version>
@@ -178,8 +177,8 @@
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 
