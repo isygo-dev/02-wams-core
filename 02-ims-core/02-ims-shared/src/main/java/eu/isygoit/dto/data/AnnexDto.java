@@ -23,10 +23,14 @@ public class AnnexDto extends AuditableIdAssignableDto<Long> {
     private String tenant;
     @NotEmpty
     private String tableCode;
-    @NotNull
-    private IEnumLanguage.Types language;
+
     @NotEmpty
     private String value;
+
+    @NotNull
+    private IEnumLanguage.Types language;
+
+    private String translated;
 
     private String description;
 

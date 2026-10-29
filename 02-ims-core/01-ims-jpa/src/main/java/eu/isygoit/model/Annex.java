@@ -22,7 +22,8 @@ import org.hibernate.annotations.DynamicUpdate;
 @Entity
 @Table(name = SchemaTableConstantName.T_ANNEX, uniqueConstraints = {
         @UniqueConstraint(name = SchemaUcConstantName.UC_CODE_TABLE_VALUE_AND_LANGUAGE,
-                columnNames = {SchemaColumnConstantName.C_ANNEX_CODE,
+                columnNames = {SchemaColumnConstantName.C_TENANT,
+                        SchemaColumnConstantName.C_ANNEX_CODE,
                         SchemaColumnConstantName.C_VALUE,
                         SchemaColumnConstantName.C_LANGUAGE_CODE})})
 public class Annex extends AnnexModel<Long> {
