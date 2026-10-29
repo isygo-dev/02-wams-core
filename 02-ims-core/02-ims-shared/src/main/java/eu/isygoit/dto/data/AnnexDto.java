@@ -30,6 +30,7 @@ public class AnnexDto extends AuditableIdAssignableDto<Long> {
     @NotNull
     private IEnumLanguage.Types language;
 
+    @NotNull
     private String translated;
 
     private String description;
