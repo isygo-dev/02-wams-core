@@ -66,4 +66,19 @@ public class AnnexController extends MappedCrudTenantController<Long, Annex, Ann
             return getBackExceptionResponse(e);
         }
     }
+
+    @Override
+    public ResponseEntity<List<String>> getDistinctTableCodes() {
+        try {
+            List<String> codes = annexService.findDistinctTableCodes();
+            if (!CollectionUtils.isEmpty(codes)) {
+                return new ResponseEntity<>(codes, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+        } catch (Throwable e) {
+            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
+            return getBackExceptionResponse(e);
+        }
+    }
 }

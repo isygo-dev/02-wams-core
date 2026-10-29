@@ -33,4 +33,9 @@ public class AnnexService extends CrudTenantService<Long, Annex, AnnexRepository
             throw new ObjectNotFoundException("Annex not found with code and reference: " + code + " " + reference);
         }
     }
+
+    @Override
+    public List<String> findDistinctTableCodes() {
+        return repository().findDistinctTableCodes();
+    }
 }

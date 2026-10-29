@@ -26,4 +26,12 @@ public interface IAnnexService extends ICrudTenantServiceOperations<Long, Annex>
      * @return the list
      */
     List<Annex> findAnnexByTableCodeAndRef(String code, String reference);
+
+    /**
+     * Every distinct {@code tableCode} stored for the current tenant, sorted
+     * alphabetically.
+     *
+     * @return the ordered list of distinct table codes (never {@code null})
+     */
+    List<String> findDistinctTableCodes();
 }
