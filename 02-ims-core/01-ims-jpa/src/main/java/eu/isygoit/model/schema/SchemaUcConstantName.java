@@ -55,10 +55,6 @@ public interface SchemaUcConstantName extends ComSchemaUcConstantName {
      * The constant UC_ACCOUNT_AND_TENANT.
      */
     String UC_ACCOUNT_AND_TENANT = "UC_ACCOUNT_AND_TENANT";
-    /**
-     * The constant UC_CODETABLE_VALUE_AND_LANGUAGE.
-     */
-    String UC_CODE_TABLE_VALUE_AND_LANGUAGE = "UC_CODETABLE_VALUE_AND_LANGUAGE";
 
     /**
      * The constant UC_NAME.

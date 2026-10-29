@@ -90,10 +90,6 @@ public interface SchemaTableConstantName extends ComSchemaTableConstantName {
      */
     String T_THEME = "T_THEME";
     /**
-     * The constant T_ANNEX.
-     */
-    String T_ANNEX = "T_ANNEX";
-    /**
      * The constant AUD_ACCOUNT_DETAILS.
      */
     String AUD_ACCOUNT_DETAILS = "AUD_ACCOUNT_DETAILS";
