@@ -73,7 +73,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
                 .filter(d -> d.getDate() != null && !d.getDate().isBefore(from))
                 .mapToLong(DailyLoginCountDto::getCount)
                 .sum();
-    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
+    }
 
     /**
      * Applies LUMO theme variants + aria-pressed so the active window is obvious.
@@ -91,7 +91,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
 
         btn7.getElement().setAttribute("aria-pressed", String.valueOf(seven));
         btn30.getElement().setAttribute("aria-pressed", String.valueOf(!seven));
-    }
+    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
 
     private List<DailyLoginCountDto> loadActivity() {
         try {

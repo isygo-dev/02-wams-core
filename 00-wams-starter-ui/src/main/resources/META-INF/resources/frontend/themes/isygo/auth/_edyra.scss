@@ -169,10 +169,10 @@ auth-layout[data-variant="edyra"] auth-hero {
   object-position: left bottom;
   mix-blend-mode: multiply;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 26%, #000 94%, transparent 100%),
-    linear-gradient(to right, transparent 0, #000 8%, #000 90%, transparent 100%);
+  linear-gradient(to right, transparent 0, #000 8%, #000 90%, transparent 100%);
   -webkit-mask-composite: source-in;
   mask-image: linear-gradient(to bottom, transparent 0, #000 26%, #000 94%, transparent 100%),
-    linear-gradient(to right, transparent 0, #000 8%, #000 90%, transparent 100%);
+  linear-gradient(to right, transparent 0, #000 8%, #000 90%, transparent 100%);
   mask-composite: intersect;
 }
 
@@ -442,24 +442,21 @@ auth-layout[data-variant="edyra"] auth-footer {
 
 // soft light behind the hero and behind the card
 auth-layout[data-variant="edyra"] {
-  background:
-    radial-gradient(48rem 32rem at 10% 0%, rgba($edyra-mint, 0.6), transparent 70%),
-    radial-gradient(40rem 30rem at 100% 100%, rgba($edyra-mint, 0.5), transparent 70%),
-    var(--auth-brand-background, none) center / cover no-repeat,
-    $edyra-ivory;
+  background: radial-gradient(48rem 32rem at 10% 0%, rgba($edyra-mint, 0.6), transparent 70%),
+  radial-gradient(40rem 30rem at 100% 100%, rgba($edyra-mint, 0.5), transparent 70%),
+  var(--auth-brand-background, none) center / cover no-repeat,
+  $edyra-ivory;
 }
 
 // the card: layered shadow, a thin brand accent on top, frosted surface
 auth-layout[data-variant="edyra"] auth-card {
   border-color: rgba(15, 42, 68, 0.08);
   border-radius: 1.25rem;
-  background:
-    linear-gradient(90deg, $edyra-teal, #5fc4b8) top / 100% 4px no-repeat,
-    rgba(255, 255, 255, 0.95);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.7) inset,
-    0 0.5rem 1rem rgba(15, 42, 68, 0.05),
-    0 1.75rem 3.5rem rgba(15, 42, 68, 0.12);
+  background: linear-gradient(90deg, $edyra-teal, #5fc4b8) top / 100% 4px no-repeat,
+  rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7) inset,
+  0 0.5rem 1rem rgba(15, 42, 68, 0.05),
+  0 1.75rem 3.5rem rgba(15, 42, 68, 0.12);
 }
 
 auth-layout[data-variant="edyra"] auth-card vaadin-text-field:hover::part(input-field),

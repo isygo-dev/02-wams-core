@@ -78,9 +78,17 @@
   overflow: hidden;
 }
 
-.timetable-bg-cell.hour-full    { border-top: 1px solid var(--lumo-contrast-20pct); }
-.timetable-bg-cell.hour-half    { border-top: 1px solid var(--lumo-contrast-10pct); }
-.timetable-bg-cell.hour-quarter { border-top: none; }
+.timetable-bg-cell.hour-full {
+  border-top: 1px solid var(--lumo-contrast-20pct);
+}
+
+.timetable-bg-cell.hour-half {
+  border-top: 1px solid var(--lumo-contrast-10pct);
+}
+
+.timetable-bg-cell.hour-quarter {
+  border-top: none;
+}
 
 .timetable-grid-col-today {
   background: var(--lumo-primary-color-10pct);
@@ -151,10 +159,9 @@
   cursor: pointer;
 
   /* Hover animation */
-  transition:
-          transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
-          box-shadow 0.22s ease,
-          filter 0.22s ease;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+  box-shadow 0.22s ease,
+  filter 0.22s ease;
   transform-origin: center center;
 }
 

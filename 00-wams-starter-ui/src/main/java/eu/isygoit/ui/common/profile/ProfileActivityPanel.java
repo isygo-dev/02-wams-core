@@ -83,7 +83,7 @@ class ProfileActivityPanel extends VerticalLayout {
             timeline.add(new ConnectionTimelineItem(connection));
         }
         body.add(timeline);
-    }    private final ProfilePagerBar pager = new ProfilePagerBar(this::loadPage);
+    }
 
     private ConnectionPageDto fetch(int page) {
         try {
@@ -95,7 +95,7 @@ class ProfileActivityPanel extends VerticalLayout {
             log.warn("Failed to load login history page {}", page, e);
         }
         return null;
-    }
+    }    private final ProfilePagerBar pager = new ProfilePagerBar(this::loadPage);
 
     private Div errorState(int page) {
         Button retry = new Button(I18n.t("profile.load.retry"));
