@@ -483,16 +483,29 @@ public class RichTextEditor extends Composite<Div> {
         btn.addClassName("wams-rte__btn");
         btn.addClassName("wams-rte__image-btn");
         btn.getElement().setAttribute("tabindex", "-1");
-        // Client-side click handler — no server roundtrip until a file is
-        // actually chosen. The base64 payload never crosses the network.
+
+        // 1. Force type="button" — dialogs are frequently wrapped in a <form>
+        //    by the base class, and a submit button inside the form would fire
+        //    the dialog's onOk() / close handler.
+        btn.getElement().setAttribute("type", "button");
+
+        // 2. Attach the picker trigger as a CAPTURE-phase click listener and
+        //    fully stop the event. Without this, the click bubbles up to the
+        //    Dialog's close-on-outside-click / OK handler and closes the modal
+        //    before the native file picker even opens.
         btn.getElement().executeJs(
-                "this.addEventListener('mousedown', e => e.preventDefault());" +
+                "this.addEventListener('mousedown', e => {" +
+                        "  e.preventDefault();" +
+                        "  e.stopPropagation();" +
+                        "}, { capture: true });" +
                         "this.addEventListener('click', e => {" +
                         "  e.preventDefault();" +
+                        "  e.stopPropagation();" +
                         "  const root = this.closest('.wams-rte');" +
                         "  if (root && root.__rtePickImage) root.__rtePickImage();" +
-                        "});"
+                        "}, { capture: true });"
         );
+
         btn.setVisible(false);
         String tip = tooltip("rte.image");
         if (!tip.isBlank()) {
