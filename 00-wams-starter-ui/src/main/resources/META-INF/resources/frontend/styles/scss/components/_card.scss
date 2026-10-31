@@ -310,6 +310,77 @@
   flex: 1 1 auto;
 }
 
+/* ── Facts grid (aligned [icon] [label:] [tag] rows inside a card body) ────
+   Generic pattern used by any card that wants to lay out small facts
+   (kind / scope / status / any enum chip) as a multi-row summary.
+
+   Usage — one shared grid container, one flat set of three cells per row:
+
+     <div class="wams-card__facts-grid">
+       <vaadin-icon class="wams-card__fact-icon"></vaadin-icon>
+       <span class="wams-card__fact-label">Type:</span>
+       <span class="wams-card__fact-value">[chip]</span>
+       <vaadin-icon class="wams-card__fact-icon"></vaadin-icon>
+       <span class="wams-card__fact-label">Scope:</span>
+       <span class="wams-card__fact-value">[chip]</span>
+     </div>
+
+   Because all rows participate in the SAME grid, the label column sizes
+   itself to the widest label across all rows ("Type:" / "Scope:" /
+   "Portée:" / "النطاق:"), so the value column starts at the same x on
+   every row — in every language, without hard-coded pixel widths. */
+
+.wams-card__facts-grid {
+  display: grid;
+  grid-template-columns: auto minmax(5rem, max-content) 1fr;
+  column-gap: var(--lumo-space-s);
+  row-gap: var(--lumo-space-xs);
+  align-items: center;
+  width: 100%;
+}
+
+/* Let cells shrink below their content width so long labels / chips
+   ellipsize instead of pushing the grid out of the card. */
+.wams-card__facts-grid > * {
+  min-width: 0;
+}
+
+.wams-card__fact-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--lumo-secondary-text-color);
+}
+
+.wams-card__fact-label {
+  font-weight: 600;
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-secondary-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wams-card__fact-value {
+  /* The chip hugs its own text — do not stretch it to fill the 1fr column. */
+  justify-self: start;
+  min-width: 0;
+  font-size: var(--lumo-font-size-xs);
+  overflow-wrap: break-word;
+}
+
+/* Mobile — collapse to two columns so the tag wraps under its label. */
+@media (max-width: 640px) {
+  .wams-card__facts-grid {
+    grid-template-columns: auto 1fr;
+    row-gap: var(--lumo-space-2xs);
+  }
+
+  .wams-card__fact-value {
+    grid-column: 2;
+  }
+}
+
 /* ── Section title (classifies a group of detail-grid fields by data type) ──
    Shared by every "…DetailsViewDialog" via DetailsViewDialog#createSection();
    the underline is what visually separates one data-type section from the
