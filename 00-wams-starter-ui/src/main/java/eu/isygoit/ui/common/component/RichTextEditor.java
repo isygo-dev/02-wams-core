@@ -1,5 +1,6 @@
 package eu.isygoit.ui.common.component;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -10,92 +11,137 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.dom.Element;
 import eu.isygoit.i18n.I18n;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Lightweight rich-text editor built on a {@code contenteditable} div.
+ * Modern, self-contained rich-text editor built on a {@code contenteditable}
+ * div. Provides a grouped, hover-and-active-aware toolbar with the formatting
+ * operations a message composer needs:
  *
- * <p>Supports the formatting operations a message composer needs:
- * <b>bold</b>, <i>italic</i>, <u>underline</u>, <s>strikethrough</s>, text
- * color, font size, paragraph alignment, bullet / numbered lists, undo /
- * redo, and "clear formatting".
+ * <ul>
+ *   <li>history — undo / redo</li>
+ *   <li>inline format — bold / italic / underline / strikethrough</li>
+ *   <li>block style — font size, text color, highlight</li>
+ *   <li>alignment — left / center / right</li>
+ *   <li>lists — bulleted / numbered</li>
+ *   <li>media — inline images (optional, opt-in via
+ *       {@link #setAllowInlineImages(boolean)})</li>
+ *   <li>clear formatting</li>
+ * </ul>
  *
- * <p>Value is exchanged as <b>HTML</b>. Callers that render the HTML outside
- * this editor must sanitize it — see
- * {@code MessageDetailsDialog#sanitizeHtml(String)} for the defensive
- * baseline used in this project.
+ * <p><b>Active-state highlighting.</b> Bold / italic / underline / etc.
+ * buttons light up when the cursor is inside text carrying that format.
+ * The tracking runs entirely client-side
+ * ({@code document.queryCommandState}) — no server roundtrips.
  *
- * <p>The toolbar buttons carry an i18n tooltip resolved from
- * {@code rte.<action>}; if a key is missing the tooltip is simply omitted
- * rather than showing {@code !key!}.
+ * <p><b>Value</b> is exchanged as <b>HTML</b>. Callers that render it
+ * outside this editor must sanitize it — see
+ * {@code MessageDetailsDialog#sanitizeHtml(String)}.
  *
- * <p>Value-change tracking: the editor forwards every {@code input} and
- * {@code blur} event to the server as a custom {@code rte-change} event
- * carrying the current HTML. That keeps {@link #getValue()} synchronous
- * on the server — a form's save button click sees the latest content.
+ * <p><b>Inline images.</b> When enabled via {@link #setAllowInlineImages}:
+ * picked images are client-side resized to ≤ {@value #MAX_IMAGE_DIMENSION}px
+ * on the longest side, re-encoded as JPEG (q=0.85) and embedded directly as
+ * base64 {@code data:} URLs. Rejected above {@link #setMaxImageBytes} to
+ * keep the message body reasonable.
  *
- * <p>Because {@link Composite} does not implement {@code HasSize}, the
- * sizing methods used by call sites ({@link #setWidthFull()},
- * {@link #setWidth(String)}) are delegated to the root {@link Div}.
+ * <p><b>Selection preservation.</b> Clicking the color swatch or the font
+ * size dropdown would normally steal focus and lose the text selection —
+ * the editor stashes the current range on {@code mousedown} and restores it
+ * before issuing the format command, so the operation always targets what
+ * the user had selected.
+ *
+ * <p><b>Character count.</b> The status bar shows a live character count on
+ * every keystroke. Optional soft-limit via {@link #setMaxCharacters(int)}.
  */
+@Slf4j
 public class RichTextEditor extends Composite<Div> {
 
     private static final String DEFAULT_MIN_HEIGHT = "220px";
-    private static final String[] FONT_SIZES = {"12 px", "14 px", "16 px", "18 px", "24 px", "32 px"};
+    private static final String[] FONT_SIZES = {"12", "14", "16", "18", "20", "24", "32", "48"};
+    private static final String DEFAULT_FONT_SIZE = "14";
 
+    /** Longest side of an inserted image after client-side resize. */
+    private static final int MAX_IMAGE_DIMENSION = 1200;
+
+    /** Default rejection threshold on the base64 payload (~750 KB image). */
+    private static final long DEFAULT_MAX_IMAGE_BYTES = 1_000_000L;
+
+    /* DOM parts */
+    private final Div root;
+    private final Span labelSpan;
+    private final Div toolbar;
     private final Div editor;
+    private final Span charCount;
+    private final Button imageBtn;
+
+    /* State */
+    private final Map<String, Button> formatButtons = new LinkedHashMap<>();
     private final List<Consumer<String>> changeListeners = new ArrayList<>();
     private String value = "";
+    private boolean allowInlineImages = false;
+    private long maxImageBytes = DEFAULT_MAX_IMAGE_BYTES;
+    private int maxCharacters = 0;             // 0 = no limit
 
     public RichTextEditor() {
-        Div root = getContent();
-        root.addClassName("wams-rich-text-editor");
+        root = getContent();
+        root.addClassName("wams-rte");
+
+        labelSpan = new Span();
+        labelSpan.addClassName("wams-rte__label");
+        labelSpan.setVisible(false);
+
+        toolbar = new Div();
+        toolbar.addClassName("wams-rte__toolbar");
 
         editor = buildEditor();
-        Div toolbar = buildToolbar();
+        charCount = new Span();
+        charCount.addClassName("wams-rte__char-count");
 
-        root.add(toolbar, editor);
-        setMinHeight(DEFAULT_MIN_HEIGHT);
+        imageBtn = buildImageButton();
+
+        buildToolbar();
+
+        Div statusBar = new Div();
+        statusBar.addClassName("wams-rte__status");
+        statusBar.add(charCount);
+
+        root.add(labelSpan, toolbar, editor, statusBar);
+        editor.getStyle().set("min-height", DEFAULT_MIN_HEIGHT);
+
+        wireActiveStateTracking();
+        wireImagePicker();
+        updateCharCount();
     }
 
     /* ══════════════════════════════════════════════════════════════
-     * Public API
+     * Public API — value & display
      * ══════════════════════════════════════════════════════════════ */
 
     public void setValue(String html) {
         this.value = html == null ? "" : html;
         editor.getElement().executeJs("this.innerHTML = $0 || ''", this.value);
+        updateCharCount();
     }
 
-    public String getValue() {
-        return value;
-    }
+    public String getValue() { return value; }
 
-    /** Plain text (HTML tags stripped) — useful for validation and search. */
-    public String getPlainText() {
-        return stripTags(value);
-    }
+    public String getPlainText() { return stripTags(value); }
 
-    public boolean isEffectivelyEmpty() {
-        return stripTags(value).isEmpty();
-    }
+    public boolean isEffectivelyEmpty() { return stripTags(value).isEmpty(); }
 
     public void setLabel(String label) {
-        Div root = getContent();
-        // Drop any previous label to avoid duplicates on re-set.
-        root.getChildren()
-                .filter(c -> c.getElement().hasAttribute("data-rte-label"))
-                .findFirst()
-                .ifPresent(root::remove);
-
-        if (label != null && !label.isBlank()) {
-            Span labelSpan = new Span(label);
-            labelSpan.addClassName("wams-rich-text-editor__label");
-            labelSpan.getElement().setAttribute("data-rte-label", "true");
-            root.addComponentAsFirst(labelSpan);
+        if (label == null || label.isBlank()) {
+            labelSpan.setVisible(false);
+            labelSpan.setText("");
+        } else {
+            labelSpan.setText(label);
+            labelSpan.setVisible(true);
         }
     }
 
@@ -107,9 +153,7 @@ public class RichTextEditor extends Composite<Div> {
         }
     }
 
-    public void setMinHeight(String height) {
-        editor.getStyle().set("min-height", height);
-    }
+    public void setMinHeight(String height) { editor.getStyle().set("min-height", height); }
 
     public void setMaxHeight(String height) {
         editor.getStyle().set("max-height", height);
@@ -118,60 +162,66 @@ public class RichTextEditor extends Composite<Div> {
 
     public void setReadOnly(boolean readOnly) {
         editor.getElement().setAttribute("contenteditable", String.valueOf(!readOnly));
+        // Hide toolbar in read-only mode — no formatting actions available.
+        toolbar.setVisible(!readOnly);
     }
 
     public void setRequiredIndicatorVisible(boolean visible) {
-        getContent().getElement().getClassList().set("wams-rich-text-editor--required", visible);
+        // Div is a Component — the class list lives on its underlying Element.
+        root.getElement().getClassList().set("wams-rte--required", visible);
+    }
+
+    public void setMaxCharacters(int max) {
+        this.maxCharacters = Math.max(0, max);
+        updateCharCount();
     }
 
     public void addValueChangeListener(Consumer<String> listener) {
         if (listener != null) changeListeners.add(listener);
     }
 
-    public void focus() {
-        editor.getElement().executeJs("this.focus()");
-    }
+    public void focus() { editor.getElement().executeJs("this.focus()"); }
+
+    /* Sizing delegation — Composite does not implement HasSize. */
+    public void setWidthFull()      { getContent().setWidthFull(); }
+    public void setWidth(String w)  { getContent().setWidth(w); }
+    public void setHeightFull()     { getContent().setHeightFull(); }
+    public void setHeight(String h) { getContent().setHeight(h); }
+    public void setSizeFull()       { getContent().setSizeFull(); }
 
     /* ══════════════════════════════════════════════════════════════
-     * Sizing delegation — mirrors HasSize methods used by call sites.
-     * Composite does not implement HasSize, so we forward to the root.
+     * Inline-image configuration
      * ══════════════════════════════════════════════════════════════ */
 
-    public void setWidthFull() {
-        getContent().setWidthFull();
+    public void setAllowInlineImages(boolean allow) {
+        this.allowInlineImages = allow;
+        imageBtn.setVisible(allow);
+        root.getElement().executeJs("this.__rteAllowInline = $0", allow);
     }
 
-    public void setWidth(String width) {
-        getContent().setWidth(width);
-    }
+    public boolean isAllowInlineImages() { return allowInlineImages; }
 
-    public void setHeightFull() {
-        getContent().setHeightFull();
-    }
-
-    public void setHeight(String height) {
-        getContent().setHeight(height);
-    }
-
-    public void setSizeFull() {
-        getContent().setSizeFull();
+    public void setMaxImageBytes(long bytes) {
+        this.maxImageBytes = bytes > 0 ? bytes : DEFAULT_MAX_IMAGE_BYTES;
+        getContent().getElement().executeJs(
+                "this.__rteMaxImageBytes = $0",
+                (double) this.maxImageBytes);
     }
 
     /* ══════════════════════════════════════════════════════════════
-     * Editor + toolbar construction
+     * DOM construction
      * ══════════════════════════════════════════════════════════════ */
 
     private Div buildEditor() {
         Div ed = new Div();
-        ed.addClassName("wams-rich-text-editor__area");
+        ed.addClassName("wams-rte__editor");
         ed.getElement().setAttribute("contenteditable", "true");
         ed.getElement().setAttribute("spellcheck", "true");
         ed.getElement().setAttribute("role", "textbox");
         ed.getElement().setAttribute("aria-multiline", "true");
 
-        // Client-side: forward every input / blur event as a custom event
-        // carrying the current innerHTML so the server can keep `value` in
-        // sync synchronously.
+        // Client-side: forward every input / blur event carrying innerHTML
+        // so the server value stays in sync.
         ed.getElement().executeJs(
                 "const el = this;" +
                         "if (!el.__rteWired) {" +
@@ -187,55 +237,86 @@ public class RichTextEditor extends Composite<Div> {
                     String html = e.getEventData().getString("event.detail");
                     value = html == null ? "" : html;
                     changeListeners.forEach(l -> l.accept(value));
+                    updateCharCount();
                 })
                 .addEventData("event.detail");
 
         return ed;
     }
 
-    private Div buildToolbar() {
-        Div toolbar = new Div();
-        toolbar.addClassName("wams-rich-text-editor__toolbar");
-
+    private void buildToolbar() {
         toolbar.add(
-                iconButton(VaadinIcon.BOLD, "rte.bold", () -> exec("bold")),
-                iconButton(VaadinIcon.ITALIC, "rte.italic", () -> exec("italic")),
-                iconButton(VaadinIcon.UNDERLINE, "rte.underline", () -> exec("underline")),
-                strikethroughButton(),
-                separator(),
-
-                buildFontSizePicker(),
-                buildColorPicker(),
-                separator(),
-
-                iconButton(VaadinIcon.ALIGN_LEFT, "rte.align.left", () -> exec("justifyLeft")),
-                iconButton(VaadinIcon.ALIGN_CENTER, "rte.align.center", () -> exec("justifyCenter")),
-                iconButton(VaadinIcon.ALIGN_RIGHT, "rte.align.right", () -> exec("justifyRight")),
-                separator(),
-
-                iconButton(VaadinIcon.LIST_UL, "rte.list.bullet", () -> exec("insertUnorderedList")),
-                iconButton(VaadinIcon.LIST_OL, "rte.list.numbered", () -> exec("insertOrderedList")),
-                separator(),
-
-                iconButton(VaadinIcon.ARROW_LEFT, "rte.undo", () -> exec("undo")),
-                iconButton(VaadinIcon.ARROW_RIGHT, "rte.redo", () -> exec("redo")),
-                clearFormattingButton()
+                group(
+                        iconButton(VaadinIcon.ARROW_LEFT, "rte.undo", "undo",
+                                () -> exec("undo")),
+                        iconButton(VaadinIcon.ARROW_RIGHT, "rte.redo", "redo",
+                                () -> exec("redo"))
+                ),
+                group(
+                        iconButton(VaadinIcon.BOLD, "rte.bold", "bold",
+                                () -> exec("bold")),
+                        iconButton(VaadinIcon.ITALIC, "rte.italic", "italic",
+                                () -> exec("italic")),
+                        iconButton(VaadinIcon.UNDERLINE, "rte.underline", "underline",
+                                () -> exec("underline")),
+                        strikethroughButton()
+                ),
+                group(
+                        buildFontSizePicker(),
+                        buildTextColorButton(),
+                        buildHighlightButton()
+                ),
+                group(
+                        iconButton(VaadinIcon.ALIGN_LEFT, "rte.align.left", "justifyLeft",
+                                () -> exec("justifyLeft")),
+                        iconButton(VaadinIcon.ALIGN_CENTER, "rte.align.center", "justifyCenter",
+                                () -> exec("justifyCenter")),
+                        iconButton(VaadinIcon.ALIGN_RIGHT, "rte.align.right", "justifyRight",
+                                () -> exec("justifyRight"))
+                ),
+                group(
+                        iconButton(VaadinIcon.LIST_UL, "rte.list.bullet", "insertUnorderedList",
+                                () -> exec("insertUnorderedList")),
+                        iconButton(VaadinIcon.LIST_OL, "rte.list.numbered", "insertOrderedList",
+                                () -> exec("insertOrderedList"))
+                ),
+                group(imageBtn),
+                group(
+                        iconButton(VaadinIcon.ERASER, "rte.clear", "removeFormat",
+                                () -> editor.getElement().executeJs(
+                                        "document.execCommand('removeFormat', false, null);" +
+                                                "this.dispatchEvent(new CustomEvent('rte-change', { detail: this.innerHTML }));"))
+                )
         );
-
-        return toolbar;
     }
 
-    private Button strikethroughButton() {
-        Span strike = new Span("S");
-        strike.getStyle().set("text-decoration", "line-through");
-        strike.getStyle().set("font-weight", "600");
-        Button btn = new Button(strike);
-        btn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        btn.addClassName("wams-rich-text-editor__btn");
+    private Div group(Component... items) {
+        Div g = new Div();
+        g.addClassName("wams-rte__group");
+        for (Component c : items) {
+            if (c != null) g.add(c);
+        }
+        return g;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Toolbar items
+     * ══════════════════════════════════════════════════════════════ */
+
+    private Button iconButton(VaadinIcon icon, String tooltipKey, String cmd, Runnable onClick) {
+        Button btn = new Button(icon.create());
+        btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        btn.addClassName("wams-rte__btn");
         btn.getElement().setAttribute("tabindex", "-1");
+        if (cmd != null) {
+            btn.getElement().setAttribute("data-cmd", cmd);
+            formatButtons.put(cmd, btn);
+        }
+        // Keep focus inside the editor — clicking a toolbar button must not
+        // collapse the current selection.
         btn.getElement().executeJs("this.addEventListener('mousedown', e => e.preventDefault())");
-        btn.addClickListener(e -> exec("strikeThrough"));
-        String tip = tooltip("rte.strikethrough");
+        btn.addClickListener(e -> onClick.run());
+        String tip = tooltip(tooltipKey);
         if (!tip.isBlank()) {
             Tooltip.forComponent(btn).withText(tip);
             btn.getElement().setAttribute("aria-label", tip);
@@ -243,20 +324,20 @@ public class RichTextEditor extends Composite<Div> {
         return btn;
     }
 
-    private Button clearFormattingButton() {
-        Button btn = new Button(VaadinIcon.ERASER.create());
-        btn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        btn.addClassName("wams-rich-text-editor__btn");
+    private Button strikethroughButton() {
+        Span icon = new Span("S");
+        icon.getStyle().set("text-decoration", "line-through");
+        icon.getStyle().set("font-weight", "700");
+        icon.getStyle().set("font-size", "14px");
+        Button btn = new Button(icon);
+        btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        btn.addClassName("wams-rte__btn");
+        btn.getElement().setAttribute("data-cmd", "strikeThrough");
         btn.getElement().setAttribute("tabindex", "-1");
         btn.getElement().executeJs("this.addEventListener('mousedown', e => e.preventDefault())");
-        btn.addClickListener(e -> {
-            editor.getElement().executeJs(
-                    "const el = this;" +
-                            "document.execCommand('removeFormat', false, null);" +
-                            "el.dispatchEvent(new CustomEvent('rte-change', { detail: el.innerHTML }));"
-            );
-        });
-        String tip = tooltip("rte.clear");
+        btn.addClickListener(e -> exec("strikeThrough"));
+        formatButtons.put("strikeThrough", btn);
+        String tip = tooltip("rte.strikethrough");
         if (!tip.isBlank()) {
             Tooltip.forComponent(btn).withText(tip);
             btn.getElement().setAttribute("aria-label", tip);
@@ -267,68 +348,246 @@ public class RichTextEditor extends Composite<Div> {
     private ComboBox<String> buildFontSizePicker() {
         ComboBox<String> combo = new ComboBox<>();
         combo.setItems(FONT_SIZES);
-        combo.setValue("14 px");
+        combo.setValue(DEFAULT_FONT_SIZE);
         combo.setAllowCustomValue(false);
-        combo.setPlaceholder(tooltipOr("rte.size", "Size"));
-        combo.addClassName("wams-rich-text-editor__font-size");
-        combo.setWidth("100px");
-        combo.getElement().executeJs("this.addEventListener('mousedown', e => e.preventDefault())");
+        combo.setItemLabelGenerator(v -> v + " px");
+        combo.addClassName("wams-rte__font-size");
+        combo.getElement().setAttribute("tabindex", "-1");
+        // Preserve selection when opening the dropdown.
+        combo.getElement().executeJs(
+                "this.addEventListener('mousedown', e => {" +
+                        "  const root = this.closest('.wams-rte');" +
+                        "  const editor = root && root.querySelector('.wams-rte__editor');" +
+                        "  if (!editor) return;" +
+                        "  const sel = window.getSelection();" +
+                        "  if (sel && sel.rangeCount > 0) root.__rteSavedRange = sel.getRangeAt(0).cloneRange();" +
+                        "});"
+        );
         combo.addValueChangeListener(e -> {
             if (e.getValue() == null) return;
             editor.getElement().executeJs(
-                    "const el = this;" +
-                            "const size = $0;" +
+                    "const root = this.closest('.wams-rte');" +
                             "const sel = window.getSelection();" +
-                            "if (!sel || sel.rangeCount === 0) return;" +
-                            "const range = sel.getRangeAt(0);" +
-                            "if (range.collapsed) return;" +
-                            "const span = document.createElement('span');" +
-                            "span.style.fontSize = size;" +
-                            "try { range.surroundContents(span); }" +
-                            "catch (e) {" +
-                            "  const frag = range.extractContents();" +
-                            "  span.appendChild(frag);" +
-                            "  range.insertNode(span);" +
+                            "if (root && root.__rteSavedRange) {" +
+                            "  sel.removeAllRanges();" +
+                            "  sel.addRange(root.__rteSavedRange);" +
                             "}" +
-                            "el.dispatchEvent(new CustomEvent('rte-change', { detail: el.innerHTML }));",
-                    e.getValue().replace(" ", "")
+                            "document.execCommand('styleWithCSS', false, true);" +
+                            "document.execCommand('fontSize', false, '7');" +
+                            "const nodes = this.querySelectorAll('font[size=\"7\"]');" +
+                            "nodes.forEach(f => {" +
+                            "  const span = document.createElement('span');" +
+                            "  span.style.fontSize = $0 + 'px';" +
+                            "  span.innerHTML = f.innerHTML;" +
+                            "  f.parentNode.replaceChild(span, f);" +
+                            "});" +
+                            "this.dispatchEvent(new CustomEvent('rte-change', { detail: this.innerHTML }));",
+                    e.getValue()
             );
         });
+        String tip = tooltip("rte.size");
+        if (!tip.isBlank()) Tooltip.forComponent(combo).withText(tip);
         return combo;
     }
 
-    private Div buildColorPicker() {
+    private Div buildTextColorButton() {
+        return buildColorSwatch("rte.color", "foreColor",
+                VaadinIcon.FONT.create(), "#000000");
+    }
+
+    private Div buildHighlightButton() {
+        Span icon = new Span("A");
+        icon.addClassName("wams-rte__swatch-letter");
+        return buildColorSwatch("rte.highlight", "hiliteColor",
+                icon, "#ffff00");
+    }
+
+    /**
+     * Builds an {@code Aa}-with-colored-underline swatch that opens the
+     * native color picker. The native {@code <input type=color>} is
+     * transparent and fills the swatch, so any click opens the picker.
+     */
+    private Div buildColorSwatch(String tooltipKey, String command,
+                                 Component iconContent, String initialColor) {
         Div wrap = new Div();
-        wrap.addClassName("wams-rich-text-editor__color-wrap");
+        wrap.addClassName("wams-rte__swatch");
+
+        Div iconWrap = new Div(iconContent);
+        iconWrap.addClassName("wams-rte__swatch-icon");
+
+        Div underline = new Div();
+        underline.addClassName("wams-rte__swatch-underline");
+        underline.getStyle().set("background-color", initialColor);
+
+        wrap.add(iconWrap, underline);
 
         Element input = new Element("input");
         input.setAttribute("type", "color");
-        input.setAttribute("value", "#000000");
-        // Element has no addClassName; use the class-list API.
-        input.getClassList().add("wams-rich-text-editor__color-input");
-        String tip = tooltip("rte.color");
-        if (!tip.isBlank()) input.setAttribute("title", tip);
-
+        input.setAttribute("value", initialColor);
+        input.getClassList().add("wams-rte__swatch-input");
         wrap.getElement().appendChild(input);
 
+        String tip = tooltip(tooltipKey);
+        if (!tip.isBlank()) input.setAttribute("title", tip);
+
+        // Preserve selection on focus loss.
+        input.executeJs(
+                "this.addEventListener('mousedown', () => {" +
+                        "  const root = this.closest('.wams-rte');" +
+                        "  const editor = root && root.querySelector('.wams-rte__editor');" +
+                        "  if (!editor) return;" +
+                        "  const sel = window.getSelection();" +
+                        "  if (sel && sel.rangeCount > 0) root.__rteSavedRange = sel.getRangeAt(0).cloneRange();" +
+                        "});"
+        );
+
+        // Client-side: update the underline swatch immediately.
         input.executeJs(
                 "this.addEventListener('input', () => {" +
+                        "  const wrap = this.closest('.wams-rte__swatch');" +
+                        "  const underline = wrap && wrap.querySelector('.wams-rte__swatch-underline');" +
+                        "  if (underline) underline.style.backgroundColor = this.value;" +
                         "  this.dispatchEvent(new CustomEvent('rte-color', { detail: this.value }));" +
                         "});"
         );
 
+        final String cmd = command;
         input.addEventListener("rte-color", e -> {
             String color = e.getEventData().getString("event.detail");
             if (color == null || color.isBlank()) return;
+
+            // "White" or transparent → treat as 'reset'.
+            boolean reset = cmd.equals("hiliteColor") && "#ffffff".equalsIgnoreCase(color);
+            String appliedColor = reset ? "transparent" : color;
+
             editor.getElement().executeJs(
-                    "document.execCommand('styleWithCSS', false, true);" +
-                            "document.execCommand('foreColor', false, $0);" +
+                    "const root = this.closest('.wams-rte');" +
+                            "const sel = window.getSelection();" +
+                            "if (root && root.__rteSavedRange) {" +
+                            "  sel.removeAllRanges();" +
+                            "  sel.addRange(root.__rteSavedRange);" +
+                            "}" +
+                            "document.execCommand('styleWithCSS', false, true);" +
+                            "document.execCommand($0, false, $1);" +
                             "this.dispatchEvent(new CustomEvent('rte-change', { detail: this.innerHTML }));",
-                    color
+                    cmd, appliedColor
             );
         }).addEventData("event.detail");
 
         return wrap;
+    }
+
+    private Button buildImageButton() {
+        Button btn = new Button(VaadinIcon.PICTURE.create());
+        btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+        btn.addClassName("wams-rte__btn");
+        btn.addClassName("wams-rte__image-btn");
+        btn.getElement().setAttribute("tabindex", "-1");
+        // Client-side click handler — no server roundtrip until a file is
+        // actually chosen. The base64 payload never crosses the network.
+        btn.getElement().executeJs(
+                "this.addEventListener('mousedown', e => e.preventDefault());" +
+                        "this.addEventListener('click', e => {" +
+                        "  e.preventDefault();" +
+                        "  const root = this.closest('.wams-rte');" +
+                        "  if (root && root.__rtePickImage) root.__rtePickImage();" +
+                        "});"
+        );
+        btn.setVisible(false);
+        String tip = tooltip("rte.image");
+        if (!tip.isBlank()) {
+            Tooltip.forComponent(btn).withText(tip);
+            btn.getElement().setAttribute("aria-label", tip);
+        }
+        return btn;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Active state tracking — highlight the buttons whose format
+     * applies at the cursor. Entirely client-side.
+     * ══════════════════════════════════════════════════════════════ */
+
+    private void wireActiveStateTracking() {
+        root.getElement().executeJs(
+                "const root = this;" +
+                        "if (root.__rteActiveWired) return;" +
+                        "root.__rteActiveWired = true;" +
+                        "const update = () => {" +
+                        "  const editor = root.querySelector('.wams-rte__editor');" +
+                        "  if (!editor || document.activeElement !== editor) return;" +
+                        "  root.querySelectorAll('[data-cmd]').forEach(btn => {" +
+                        "    const cmd = btn.getAttribute('data-cmd');" +
+                        "    try {" +
+                        "      const on = document.queryCommandState(cmd);" +
+                        "      btn.toggleAttribute('data-active', !!on);" +
+                        "    } catch (e) {}" +
+                        "  });" +
+                        "};" +
+                        "const editor = root.querySelector('.wams-rte__editor');" +
+                        "if (editor) {" +
+                        "  editor.addEventListener('keyup', update);" +
+                        "  editor.addEventListener('mouseup', update);" +
+                        "  editor.addEventListener('focus', update);" +
+                        "}" +
+                        "document.addEventListener('selectionchange', () => {" +
+                        "  const ed = root.querySelector('.wams-rte__editor');" +
+                        "  if (ed && document.activeElement === ed) update();" +
+                        "});"
+        );
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Inline image picker
+     * ══════════════════════════════════════════════════════════════ */
+
+    private void wireImagePicker() {
+        root.getElement().executeJs(
+                "const root = this;" +
+                        "root.__rteMaxImageBytes = root.__rteMaxImageBytes || " + DEFAULT_MAX_IMAGE_BYTES + ";" +
+                        "root.__rtePickImage = () => {" +
+                        "  if (!root.__rteAllowInline) return;" +
+                        "  const input = document.createElement('input');" +
+                        "  input.type = 'file';" +
+                        "  input.accept = 'image/*';" +
+                        "  input.style.display = 'none';" +
+                        "  document.body.appendChild(input);" +
+                        "  input.onchange = () => {" +
+                        "    const file = input.files && input.files[0];" +
+                        "    document.body.removeChild(input);" +
+                        "    if (!file) return;" +
+                        "    const reader = new FileReader();" +
+                        "    reader.onload = () => {" +
+                        "      const probe = new Image();" +
+                        "      probe.onload = () => {" +
+                        "        const maxDim = " + MAX_IMAGE_DIMENSION + ";" +
+                        "        let w = probe.naturalWidth, h = probe.naturalHeight;" +
+                        "        if (w > maxDim || h > maxDim) {" +
+                        "          const ratio = Math.min(maxDim / w, maxDim / h);" +
+                        "          w = Math.round(w * ratio); h = Math.round(h * ratio);" +
+                        "        }" +
+                        "        const canvas = document.createElement('canvas');" +
+                        "        canvas.width = w; canvas.height = h;" +
+                        "        canvas.getContext('2d').drawImage(probe, 0, 0, w, h);" +
+                        "        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);" +
+                        "        const payload = Math.floor((dataUrl.length - dataUrl.indexOf(',') - 1) * 3 / 4);" +
+                        "        if (payload > root.__rteMaxImageBytes) {" +
+                        "          console.warn('Inline image rejected: ' + payload + ' > ' + root.__rteMaxImageBytes);" +
+                        "          return;" +
+                        "        }" +
+                        "        const editor = root.querySelector('.wams-rte__editor');" +
+                        "        if (!editor) return;" +
+                        "        editor.focus();" +
+                        "        document.execCommand('insertImage', false, dataUrl);" +
+                        "        editor.dispatchEvent(new CustomEvent('rte-change', { detail: editor.innerHTML }));" +
+                        "      };" +
+                        "      probe.onerror = () => console.warn('Cannot decode image');" +
+                        "      probe.src = reader.result;" +
+                        "    };" +
+                        "    reader.readAsDataURL(file);" +
+                        "  };" +
+                        "  input.click();" +
+                        "};"
+        );
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -344,26 +603,16 @@ public class RichTextEditor extends Composite<Div> {
         );
     }
 
-    private Button iconButton(VaadinIcon icon, String tooltipKey, Runnable onClick) {
-        Button btn = new Button(icon.create());
-        btn.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
-        btn.addClassName("wams-rich-text-editor__btn");
-        btn.getElement().setAttribute("tabindex", "-1");
-        // Prevent the toolbar button from stealing focus from the editor.
-        btn.getElement().executeJs("this.addEventListener('mousedown', e => e.preventDefault())");
-        btn.addClickListener(e -> onClick.run());
-        String tip = tooltip(tooltipKey);
-        if (!tip.isBlank()) {
-            Tooltip.forComponent(btn).withText(tip);
-            btn.getElement().setAttribute("aria-label", tip);
-        }
-        return btn;
-    }
-
-    private static Span separator() {
-        Span s = new Span();
-        s.addClassName("wams-rich-text-editor__separator");
-        return s;
+    private void updateCharCount() {
+        int n = stripTags(value).length();
+        String text = (maxCharacters > 0)
+                ? n + " / " + maxCharacters + " " + I18n.t("rte.chars")
+                : n + " " + I18n.t("rte.chars");
+        charCount.setText(text);
+        // Span is a Component — class list lives on its underlying Element.
+        charCount.getElement().getClassList().set(
+                "wams-rte__char-count--over",
+                maxCharacters > 0 && n > maxCharacters);
     }
 
     private static String tooltip(String key) {
@@ -373,11 +622,6 @@ public class RichTextEditor extends Composite<Div> {
         } catch (Exception e) {
             return "";
         }
-    }
-
-    private static String tooltipOr(String key, String fallback) {
-        String v = tooltip(key);
-        return v.isBlank() ? fallback : v;
     }
 
     private static String stripTags(String html) {

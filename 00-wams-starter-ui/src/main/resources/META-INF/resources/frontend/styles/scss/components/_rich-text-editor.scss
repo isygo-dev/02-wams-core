@@ -1,0 +1,308 @@
+/* ════════════════════════════════════════════════════════════════════════
+ * Rich text editor (eu.isygoit.ui.common.component.RichTextEditor)
+ *
+ * Modern, compact WYSIWYG composer with a grouped, hover-and-active-aware
+ * toolbar, a status bar (character count), and inline-image support.
+ *
+ * Namespace: `.wams-rte` — self-contained, no dependency on `.wams-card`
+ * or any other module class.
+ * ════════════════════════════════════════════════════════════════════════ */
+
+/* Themed hooks — override per-module if needed. */
+.wams-rte {
+  --wams-rte-radius:         var(--lumo-border-radius-l);
+  --wams-rte-border-color:   var(--lumo-contrast-20pct);
+  --wams-rte-border-focus:   var(--lumo-primary-color);
+  --wams-rte-toolbar-bg:     var(--lumo-contrast-5pct);
+  --wams-rte-toolbar-border: var(--lumo-contrast-10pct);
+  --wams-rte-btn-hover-bg:   var(--lumo-contrast-10pct);
+  --wams-rte-btn-active-bg:  var(--lumo-primary-color-10pct);
+  --wams-rte-btn-active-fg:  var(--lumo-primary-text-color);
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid var(--wams-rte-border-color);
+  border-radius: var(--wams-rte-radius);
+  background: var(--lumo-base-color);
+  overflow: hidden;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+/* Focus ring when the editable area is focused. The class is applied
+ * by CSS (:focus-within), no JS needed. */
+.wams-rte:focus-within {
+  border-color: var(--wams-rte-border-focus);
+  box-shadow: 0 0 0 2px var(--lumo-primary-color-10pct);
+}
+
+/* Required marker — thicker accent on the border. */
+.wams-rte--required {
+  border-left: 3px solid var(--lumo-primary-color);
+}
+
+/* ── Label ──────────────────────────────────────────────────────────── */
+
+.wams-rte__label {
+  padding: var(--lumo-space-xs) var(--lumo-space-m);
+  font-size: var(--lumo-font-size-s);
+  font-weight: 600;
+  color: var(--lumo-secondary-text-color);
+  background: var(--lumo-base-color);
+  border-bottom: 1px solid var(--wams-rte-toolbar-border);
+}
+
+/* ── Toolbar ───────────────────────────────────────────────────────── */
+
+.wams-rte__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: var(--lumo-space-xs) var(--lumo-space-s);
+  background: var(--wams-rte-toolbar-bg);
+  border-bottom: 1px solid var(--wams-rte-toolbar-border);
+}
+
+/* Each group is a compact horizontal strip; a subtle divider separates
+ * groups from one another. */
+.wams-rte__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding-right: var(--lumo-space-xs);
+}
+
+.wams-rte__group + .wams-rte__group {
+  padding-left: var(--lumo-space-xs);
+  border-left: 1px solid var(--wams-rte-toolbar-border);
+}
+
+/* ── Toolbar buttons ───────────────────────────────────────────────── */
+
+.wams-rte__btn {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: var(--lumo-border-radius-s);
+  color: var(--lumo-body-text-color);
+  background: transparent;
+  transition: background-color .12s ease, color .12s ease;
+}
+
+.wams-rte__btn:hover {
+  background: var(--wams-rte-btn-hover-bg);
+}
+
+.wams-rte__btn vaadin-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Active format (cursor is inside bold text, etc.). Applied by JS via
+ * the data-active attribute on the button. */
+.wams-rte__btn[data-active] {
+  background: var(--wams-rte-btn-active-bg);
+  color: var(--wams-rte-btn-active-fg);
+}
+
+.wams-rte__btn[data-active]:hover {
+  background: var(--lumo-primary-color-20pct);
+}
+
+/* ── Font size dropdown ────────────────────────────────────────────── */
+
+.wams-rte__font-size {
+  width: 96px;
+  --vaadin-input-field-height: 32px;
+}
+
+.wams-rte__font-size::part(input-field) {
+  background: transparent;
+  border: none;
+  padding: 0 var(--lumo-space-xs);
+}
+
+.wams-rte__font-size::part(toggle-button) {
+  display: none;
+}
+
+/* ── Color swatches (text color & highlight) ───────────────────────── */
+
+.wams-rte__swatch {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--lumo-border-radius-s);
+  cursor: pointer;
+  transition: background-color .12s ease;
+}
+
+.wams-rte__swatch:hover {
+  background: var(--wams-rte-btn-hover-bg);
+}
+
+.wams-rte__swatch-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--lumo-body-text-color);
+}
+
+.wams-rte__swatch-icon vaadin-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.wams-rte__swatch-letter {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.wams-rte__swatch-underline {
+  width: 16px;
+  height: 3px;
+  margin-top: 1px;
+  border-radius: 1px;
+  transition: background-color .15s ease;
+}
+
+/* The native color input fills the swatch, opacity 0 → any click opens
+ * the browser picker without breaking the visual design. */
+.wams-rte__swatch-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+/* ── Editor area ───────────────────────────────────────────────────── */
+
+.wams-rte__editor {
+  flex: 1 1 auto;
+  padding: var(--lumo-space-m);
+  outline: none;
+  font-size: var(--lumo-font-size-m);
+  line-height: 1.55;
+  color: var(--lumo-body-text-color);
+  overflow-y: auto;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Placeholder — only when the editor is empty. CSS :empty checks only for
+ * child nodes, so `<p><br></p>` keeps the placeholder hidden (correct:
+ * execCommand sometimes leaves an empty paragraph after clearing). */
+.wams-rte__editor:empty:before {
+  content: attr(data-placeholder);
+  color: var(--lumo-disabled-text-color);
+  pointer-events: none;
+  font-style: italic;
+}
+
+.wams-rte__editor p {
+  margin: 0 0 var(--lumo-space-s) 0;
+}
+
+.wams-rte__editor p:last-child {
+  margin-bottom: 0;
+}
+
+.wams-rte__editor ul,
+.wams-rte__editor ol {
+  margin: 0 0 var(--lumo-space-s) 0;
+  padding-left: var(--lumo-space-l);
+}
+
+.wams-rte__editor a {
+  color: var(--lumo-primary-color);
+  text-decoration: underline;
+}
+
+.wams-rte__editor img,
+.wams-rte__editor svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: var(--lumo-space-xs) 0;
+  border-radius: var(--lumo-border-radius-s);
+}
+
+/* ── Status bar ────────────────────────────────────────────────────── */
+
+.wams-rte__status {
+  display: flex;
+  justify-content: flex-end;
+  padding: 2px var(--lumo-space-m);
+  background: var(--lumo-contrast-5pct);
+  border-top: 1px solid var(--wams-rte-toolbar-border);
+  font-size: var(--lumo-font-size-xxs);
+  color: var(--lumo-tertiary-text-color);
+}
+
+.wams-rte__char-count--over {
+  color: var(--lumo-error-text-color);
+  font-weight: 600;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .wams-rte__toolbar {
+    gap: 0;
+  }
+  .wams-rte__group + .wams-rte__group {
+    margin-left: 2px;
+    padding-left: 2px;
+  }
+  .wams-rte__btn {
+    min-width: 30px;
+    min-height: 30px;
+  }
+}
+
+/* ── Rendered content — same visual language in the details dialog ─── */
+
+.detail-content {
+  line-height: 1.55;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.detail-content p {
+  margin: 0 0 var(--lumo-space-s) 0;
+}
+
+.detail-content p:last-child {
+  margin-bottom: 0;
+}
+
+.detail-content ul,
+.detail-content ol {
+  margin: 0 0 var(--lumo-space-s) 0;
+  padding-left: var(--lumo-space-l);
+}
+
+.detail-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: var(--lumo-space-xs) 0;
+  border-radius: var(--lumo-border-radius-s);
+}
+
+.detail-content strong { font-weight: 600; }
+.detail-content u { text-decoration: underline; }
+.detail-content s { text-decoration: line-through; }
