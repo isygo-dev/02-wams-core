@@ -36,6 +36,16 @@ public class LeafletMap extends Div {
     private static final String MARKER_ICON_URL = imageUrl("marker-icon.png");
     private static final String MARKER_ICON_RETINA_URL = imageUrl("marker-icon-2x.png");
     private static final String MARKER_SHADOW_URL = imageUrl("marker-shadow.png");
+
+    public static final String BLUE_MARKER_URL = imageUrl("marker-icon.png");
+    public static final String GREEN_MARKER_URL = imageUrl("marker-icon-green.png");
+    public static final String ORANGE_MARKER_URL = imageUrl("marker-icon-orange.png");
+    public static final String RED_MARKER_URL = imageUrl("marker-icon-red.png");
+    public static final String GOLD_MARKER_URL = imageUrl("marker-icon-gold.png");
+    public static final String VIOLET_MARKER_URL = imageUrl("marker-icon-violet.png");
+    public static final String GREY_MARKER_URL = imageUrl("marker-icon-grey.png");
+    public static final String BLACK_MARKER_URL = imageUrl("marker-icon-black.png");
+
     private static final int MAX_ZOOM = 19;
 
     private final LComponentManagementRegistry registry;
@@ -109,10 +119,17 @@ public class LeafletMap extends Div {
      * Adds a marker with caller-provided HTML popup content.
      */
     public void addMarker(double latitude, double longitude, String popupHtml) {
+        addMarker(latitude, longitude, popupHtml, MARKER_ICON_URL);
+    }
+
+    /**
+     * Adds a marker with caller-provided HTML popup content and custom icon.
+     */
+    public void addMarker(double latitude, double longitude, String popupHtml, String iconUrl) {
         validateCoordinates(latitude, longitude);
         Objects.requireNonNull(popupHtml, "popupHtml must not be null");
         LMarker marker = new LMarker(registry, new LLatLng(registry, latitude, longitude));
-        marker.setIcon(createMarkerIcon());
+        marker.setIcon(createMarkerIcon(iconUrl));
         marker.bindPopup(popupHtml).addTo(map);
         markers.add(marker);
     }
@@ -125,10 +142,10 @@ public class LeafletMap extends Div {
         markers.clear();
     }
 
-    private LIcon createMarkerIcon() {
+    private LIcon createMarkerIcon(String iconUrl) {
         LIconOptions options = new LIconOptions()
-                .withIconUrl(MARKER_ICON_URL)
-                .withIconRetinaUrl(MARKER_ICON_RETINA_URL)
+                .withIconUrl(iconUrl)
+                .withIconRetinaUrl(iconUrl) // Use same for retina if no specialized one
                 .withIconSize(new LPoint(registry, 25, 41))
                 .withIconAnchor(new LPoint(registry, 12, 41))
                 .withPopupAnchor(new LPoint(registry, 1, -34))
