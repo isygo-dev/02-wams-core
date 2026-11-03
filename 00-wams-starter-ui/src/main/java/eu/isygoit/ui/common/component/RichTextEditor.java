@@ -563,10 +563,11 @@ public class RichTextEditor extends Composite<Div> {
                         "  input.type = 'file';" +
                         "  input.accept = 'image/*';" +
                         "  input.style.display = 'none';" +
-                        "  document.body.appendChild(input);" +
+                        "  input.addEventListener('click', e => e.stopPropagation());" +
+                        "  root.appendChild(input);" +
                         "  input.onchange = () => {" +
                         "    const file = input.files && input.files[0];" +
-                        "    document.body.removeChild(input);" +
+                        "    if (input.parentNode) input.parentNode.removeChild(input);" +
                         "    if (!file) return;" +
                         "    const reader = new FileReader();" +
                         "    reader.onload = () => {" +
@@ -598,6 +599,9 @@ public class RichTextEditor extends Composite<Div> {
                         "    };" +
                         "    reader.readAsDataURL(file);" +
                         "  };" +
+                        "  input.addEventListener('cancel', () => {" +
+                        "    if (input.parentNode) input.parentNode.removeChild(input);" +
+                        "  });" +
                         "  input.click();" +
                         "};"
         );
