@@ -205,19 +205,19 @@ public class KmsCustomKeyStore extends AuditableEntity<Long> implements ITenantA
     /**
      * Connection timeout in seconds (overrides global default if set)
      */
-    @Column(name = "CONNECTION_TIMEOUT_SECONDS")
+    @Column(name = SchemaColumnConstantName.C_CONNECTION_TIMEOUT_SECONDS)
     private Integer connectionTimeoutSeconds;
 
     /**
      * Health check interval in seconds (overrides global default if set)
      */
-    @Column(name = "HEALTH_CHECK_INTERVAL_SECONDS")
+    @Column(name = SchemaColumnConstantName.C_HEALTH_CHECK_INTERVAL_SECONDS)
     private Integer healthCheckIntervalSeconds;
 
     /**
      * Whether to auto‑reconnect on failure (overrides global default if set)
      */
-    @Column(name = "AUTO_RECONNECT")
+    @Column(name = SchemaColumnConstantName.C_AUTO_RECONNECT)
     private Boolean autoReconnect;
 
     // ============================================================================

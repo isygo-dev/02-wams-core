@@ -71,7 +71,7 @@ public class PasswordInfo extends AuditableEntity<Long> {
      */
     @Builder.Default
     @ColumnDefault("0")
-    @Column(name = "failed_attempts", nullable = false)
+    @Column(name = SchemaColumnConstantName.C_FAILED_ATTEMPTS, nullable = false)
     private int failedAttempts = 0;
 
     /**
