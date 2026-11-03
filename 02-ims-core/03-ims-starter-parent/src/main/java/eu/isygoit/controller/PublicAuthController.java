@@ -197,7 +197,7 @@ public class PublicAuthController extends ControllerUtils implements PublicAuthS
     }
 
     @Override
-    @PreAuthorize("isAuthenticated()")
+    //@PreAuthorize("isAuthenticated()")
     public ResponseEntity<QrLoginStatusDto> approveQrLogin(QrLoginChallengeRequest request) {
         RequestContextDto context = requestContextService().getCurrentContext();
         if (context == null || context.getSenderTenant() == null || context.getSenderUser() == null

@@ -115,7 +115,7 @@ public class ProfileController extends ControllerUtils implements ProfileService
     }
 
     @Override
-    @PreAuthorize("isAuthenticated()")
+    //@PreAuthorize("isAuthenticated()")
     public ResponseEntity<Boolean> changeAuthType(ChangeAuthTypeRequestDto request) {
         Account caller = getAuthenticatedAccount();
         return switch (authTypeChangeService.changeAuthType(caller.getTenant(), caller.getCode(), request)) {
@@ -128,7 +128,7 @@ public class ProfileController extends ControllerUtils implements ProfileService
     }
 
     @Override
-    @PreAuthorize("isAuthenticated()")
+    //@PreAuthorize("isAuthenticated()")
     public ResponseEntity<Boolean> sendReauthenticationCode() {
         Account caller = getAuthenticatedAccount();
         return ResponseFactory.responseOk(
