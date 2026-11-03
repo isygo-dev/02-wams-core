@@ -57,6 +57,7 @@ public class WeeklyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         timeSlots.add(LocalTime.of(endHour, 0));
 
         gridContainer.setWidthFull();
+        gridContainer.getStyle().set("display", "grid");
         gridContainer.addClassName("timetable-grid");
         gridContainer.getStyle().set("--tt-step-factor",
                 String.valueOf(step / (double) REFERENCE_STEP_MINUTES));
