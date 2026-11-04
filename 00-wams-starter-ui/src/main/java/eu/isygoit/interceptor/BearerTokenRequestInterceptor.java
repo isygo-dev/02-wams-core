@@ -1,5 +1,6 @@
 package eu.isygoit.interceptor;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
@@ -12,10 +13,16 @@ import org.springframework.stereotype.Component;
 public class BearerTokenRequestInterceptor implements RequestInterceptor {
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String ACCEPT_LANGUAGE_HEADER = "Accept-Language";
     private static final String BEARER_PREFIX = "Bearer ";
 
     @Override
     public void apply(RequestTemplate template) {
+        UI ui = UI.getCurrent();
+        if (ui != null) {
+            template.header(ACCEPT_LANGUAGE_HEADER, ui.getLocale().toLanguageTag());
+        }
+
         // Retrieve the token from the current VaadinSession
         VaadinSession session = VaadinSession.getCurrent();
         if (session == null) {
