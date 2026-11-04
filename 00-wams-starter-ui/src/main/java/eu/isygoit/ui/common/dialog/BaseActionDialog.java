@@ -126,7 +126,9 @@ public abstract class BaseActionDialog extends Dialog {
             if (ok) {
                 close();
                 if (onSuccess != null) onSuccess.run();
-                showSuccess(msgBuilder.toString());
+                if (!msgBuilder.isEmpty()) {
+                    showSuccess(msgBuilder.toString());
+                }
             } else {
                 showError(msgBuilder.toString());
             }

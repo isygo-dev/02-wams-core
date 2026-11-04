@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.*;
 import eu.isygoit.exception.KeyValidationException;
@@ -83,6 +84,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * WAMS equivalent: KeyId
      * </p>
      */
+    @Criteria(1)
     @Column(name = SchemaColumnConstantName.C_KEY_ID, updatable = false, nullable = false, length = 255)
     private String keyId;
 
@@ -103,6 +105,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * WAMS equivalent: region
      * </p>
      */
+    @Criteria(2)
     @Column(name = SchemaColumnConstantName.C_REGION, length = 100)
     private String region;
 
@@ -163,6 +166,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * WAMS equivalent: part of Alias API, not part of KeyMetadata.
      * </p>
      */
+    @Criteria(3)
     @Pattern(regexp = "^alias:.*", message = "alias.name.must.start.with.alias")
     @Column(name = SchemaColumnConstantName.C_KEY_ALIAS, length = 255)
     private String primaryKeyAlias;
@@ -173,6 +177,7 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
      * WAMS equivalent: Description.
      * </p>
      */
+    @Criteria(4)
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
 

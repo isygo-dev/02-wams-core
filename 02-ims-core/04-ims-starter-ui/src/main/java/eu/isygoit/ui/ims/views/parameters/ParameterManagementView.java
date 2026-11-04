@@ -49,6 +49,30 @@ public class ParameterManagementView extends AbstractPaginatedView<AppParameterD
     }
 
     @Override
+    protected boolean configureGrid(com.vaadin.flow.component.grid.Grid<AppParameterDto> grid) {
+        grid.addColumn(AppParameterDto::getName).setHeader("Name").setAutoWidth(true);
+        grid.addColumn(AppParameterDto::getDescription).setHeader("Description").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected PaginatedResponseDto<? extends AppParameterDto> fetchFilteredPage(String criteria, int page, int size) {
+        var r = parameterService.findAllFilteredByCriteria(criteria, page, size);
+        return r != null ? r.getBody() : null;
+    }
+
+    @Override
+    protected java.util.Map<String, String> fetchCriteriaMetadata() {
+        var r = parameterService.getAnnotatedCriteria();
+        return r != null && r.getBody() != null
+                ? r.getBody().stream().collect(java.util.stream.Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : java.util.Map.of();
+    }
+
+    @Override
     protected Component renderItem(AppParameterDto item) {
         return new ParameterCard(this, parameterService, item, this::loadPageZero);
     }

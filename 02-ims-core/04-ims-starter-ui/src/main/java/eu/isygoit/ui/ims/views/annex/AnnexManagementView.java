@@ -54,6 +54,32 @@ public class AnnexManagementView extends AbstractPaginatedView<AnnexDto> {
     }
 
     @Override
+    protected boolean configureGrid(com.vaadin.flow.component.grid.Grid<AnnexDto> grid) {
+        grid.addColumn(AnnexDto::getTableCode).setHeader("Table").setAutoWidth(true);
+        grid.addColumn(AnnexDto::getValue).setHeader("Value").setAutoWidth(true);
+        grid.addColumn(AnnexDto::getLanguage).setHeader("Language").setAutoWidth(true);
+        grid.addColumn(AnnexDto::getReference).setHeader("Reference").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected PaginatedResponseDto<? extends AnnexDto> fetchFilteredPage(String criteria, int page, int size) {
+        var r = annexService.findAllFilteredByCriteria(criteria, page, size);
+        return r != null ? r.getBody() : null;
+    }
+
+    @Override
+    protected java.util.Map<String, String> fetchCriteriaMetadata() {
+        var r = annexService.getAnnotatedCriteria();
+        return r != null && r.getBody() != null
+                ? r.getBody().stream().collect(java.util.stream.Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : java.util.Map.of();
+    }
+
+    @Override
     protected Component renderItem(AnnexDto item) {
         return new AnnexCard(this, annexService, item, this::loadPageZero);
     }

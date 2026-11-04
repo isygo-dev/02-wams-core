@@ -4,7 +4,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -503,26 +502,9 @@ public class AdditionalFilesManager<F extends LinkedFileMinDto<Long>> extends Ve
     }
 
     private void confirmDelete(F file) {
-        Dialog confirm = new Dialog();
-        confirm.setHeaderTitle(I18n.t("files.delete.confirm.title"));
-
         String name = file.getOriginalFileName() != null
                 ? file.getOriginalFileName() : "-";
-        confirm.add(new Span(I18n.t("files.delete.confirm.message", name)));
-
-        Button confirmBtn = new Button(I18n.t("files.delete.confirm.ok"), e -> {
-            confirm.close();
-            doDelete(file);
-        });
-        confirmBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY,
-                ButtonVariant.LUMO_ERROR);
-
-        Button cancelBtn = new Button(I18n.t("files.delete.confirm.cancel"),
-                e -> confirm.close());
-        cancelBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-
-        confirm.getFooter().add(cancelBtn, confirmBtn);
-        confirm.open();
+        new FileDeleteConfirmDialog(name, () -> doDelete(file)).open();
     }
 
     private void doDelete(F file) {

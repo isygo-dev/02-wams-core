@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -43,15 +44,18 @@ public class SenderConfig extends AuditableEntity<Long> implements ICodeAssignab
     private String tenant;
 
     //@Convert(converter = LowerCaseConverter.class)
+    @Criteria(1)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
 
+    @Criteria(2)
     @Column(name = SchemaColumnConstantName.C_NAME, nullable = false)
     private String name;
 
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
 
+    @Criteria(3)
     @Column(name = SchemaColumnConstantName.C_HOST, nullable = false)
     private String host;
 

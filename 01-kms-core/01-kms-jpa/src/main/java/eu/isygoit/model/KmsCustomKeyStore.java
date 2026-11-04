@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumCustomKeyStoreStatus;
 import eu.isygoit.enums.IEnumCustomKeyStoreType;
@@ -70,12 +71,14 @@ public class KmsCustomKeyStore extends AuditableEntity<Long> implements ITenantA
     /**
      * Display name of the custom key store
      */
+    @Criteria(1)
     @Column(name = SchemaColumnConstantName.C_STORE_NAME, nullable = false, length = 255)
     private String name;
 
     /**
      * Type of custom key store (WAMS_CLOUDHSM or EXTERNAL_KEY_STORE)
      */
+    @Criteria(2)
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_STORE_TYPE, nullable = false, length = 50)
     private IEnumCustomKeyStoreType.Types type;
@@ -83,6 +86,7 @@ public class KmsCustomKeyStore extends AuditableEntity<Long> implements ITenantA
     /**
      * Current connection status of the custom key store
      */
+    @Criteria(3)
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_STATUS, nullable = false, length = 50)
     private IEnumCustomKeyStoreStatus.Types status;
@@ -124,6 +128,7 @@ public class KmsCustomKeyStore extends AuditableEntity<Long> implements ITenantA
     /**
      * CloudHSM cluster identifier (for CLOUDHSM type)
      */
+    @Criteria(4)
     @Column(name = SchemaColumnConstantName.C_CLOUDHSM_CLUSTER_ID, length = 255)
     private String cloudHsmClusterId;
 
@@ -146,6 +151,7 @@ public class KmsCustomKeyStore extends AuditableEntity<Long> implements ITenantA
     /**
      * XKS proxy URI endpoint (e.g., https://xks.example.com:8080)
      */
+    @Criteria(5)
     @Column(name = SchemaColumnConstantName.C_XKS_PROXY_URI_ENDPOINT, length = 500)
     private String xksProxyUriEndpoint;
 

@@ -65,6 +65,33 @@ public class AccountManagementView extends AbstractPaginatedView<MinAccountDto> 
     }
 
     @Override
+    protected boolean configureGrid(com.vaadin.flow.component.grid.Grid<MinAccountDto> grid) {
+        grid.addColumn(MinAccountDto::getCode).setHeader("Code").setAutoWidth(true);
+        grid.addColumn(MinAccountDto::getFullName).setHeader("Name").setAutoWidth(true);
+        grid.addColumn(MinAccountDto::getEmail).setHeader("Email").setAutoWidth(true);
+        grid.addColumn(MinAccountDto::getAdminStatus).setHeader("Admin status").setAutoWidth(true);
+        grid.addColumn(MinAccountDto::getSystemStatus).setHeader("System status").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected PaginatedResponseDto<? extends MinAccountDto> fetchFilteredPage(String criteria, int page, int size) {
+        var r = accountService.findAllFilteredByCriteria(criteria, page, size);
+        return r != null ? r.getBody() : null;
+    }
+
+    @Override
+    protected java.util.Map<String, String> fetchCriteriaMetadata() {
+        var r = accountService.getAnnotatedCriteria();
+        return r != null && r.getBody() != null
+                ? r.getBody().stream().collect(java.util.stream.Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : java.util.Map.of();
+    }
+
+    @Override
     protected Component renderItem(MinAccountDto item) {
         return new AccountCard(this, accountService, accountImageService, item, this::loadPageZero);
     }

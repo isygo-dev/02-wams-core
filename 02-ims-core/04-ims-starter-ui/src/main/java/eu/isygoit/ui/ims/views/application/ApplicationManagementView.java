@@ -55,6 +55,33 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
     }
 
     @Override
+    protected boolean configureGrid(com.vaadin.flow.component.grid.Grid<ApplicationDto> grid) {
+        grid.addColumn(ApplicationDto::getCode).setHeader("Code").setAutoWidth(true);
+        grid.addColumn(ApplicationDto::getName).setHeader("Name").setAutoWidth(true);
+        grid.addColumn(ApplicationDto::getTitle).setHeader("Title").setAutoWidth(true);
+        grid.addColumn(ApplicationDto::getCategory).setHeader("Category").setAutoWidth(true);
+        grid.addColumn(ApplicationDto::getAdminStatus).setHeader("Status").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected PaginatedResponseDto<? extends ApplicationDto> fetchFilteredPage(String criteria, int page, int size) {
+        var r = applicationService.findAllFilteredByCriteria(criteria, page, size);
+        return r != null ? r.getBody() : null;
+    }
+
+    @Override
+    protected java.util.Map<String, String> fetchCriteriaMetadata() {
+        var r = applicationService.getAnnotatedCriteria();
+        return r != null && r.getBody() != null
+                ? r.getBody().stream().collect(java.util.stream.Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : java.util.Map.of();
+    }
+
+    @Override
     protected Component renderItem(ApplicationDto item) {
         return new ApplicationCard(this, applicationService, applicationImageService,
                 item, this::loadPageZero);

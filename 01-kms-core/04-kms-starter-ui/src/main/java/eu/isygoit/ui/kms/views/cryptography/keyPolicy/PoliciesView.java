@@ -5,11 +5,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Pre;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -30,6 +27,7 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.common.KmsConfirmationDialog;
+import eu.isygoit.ui.kms.views.cryptography.keyPolicy.dialog.PolicyEvaluationDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyPolicy.dialog.PolicyBuilderDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -429,109 +427,16 @@ public class PoliciesView extends ManagementVerticalView {
 
         EvaluationResult result = evaluateAction(action, policyMap, keyArn);
 
-        // Build refined dialog
-        Dialog resultDialog = new Dialog();
-        resultDialog.addClassName("kms-dialog");
-        resultDialog.setHeaderTitle(I18n.t("kms.policy.eval.title", action));
-        resultDialog.setWidth("600px");
-        resultDialog.setResizable(true);
-
-        VerticalLayout content = new VerticalLayout();
-        content.setSpacing(true);
-        content.setPadding(true);
-
-        // Decision icon and text
-        HorizontalLayout decisionLayout = new HorizontalLayout();
-        decisionLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        decisionLayout.setSpacing(true);
-
-        Icon decisionIcon;
-        String decisionText;
-        String decisionModifierClass;
-        if ("ALLOWED".equals(result.decision)) {
-            decisionIcon = VaadinIcon.CHECK_CIRCLE.create();
-            decisionText = I18n.t("kms.policy.eval.decision.allowed");
-            decisionModifierClass = "policy-eval-decision-span--allowed";
-        } else if ("DENIED".equals(result.decision)) {
-            decisionIcon = VaadinIcon.CLOSE_CIRCLE.create();
-            decisionText = I18n.t("kms.policy.eval.decision.denied");
-            decisionModifierClass = "policy-eval-decision-span--denied";
-        } else {
-            decisionIcon = VaadinIcon.EXCLAMATION_CIRCLE.create();
-            decisionText = I18n.t("kms.policy.eval.decision.uncertain");
-            decisionModifierClass = "policy-eval-decision-span--uncertain";
-        }
-        decisionIcon.addClassName(decisionModifierClass);
-
-        Span decisionSpan = new Span(decisionText);
-        decisionSpan.addClassName("policy-eval-decision-span");
-        decisionSpan.addClassName(decisionModifierClass);
-
-        decisionLayout.add(decisionIcon, decisionSpan);
-        content.add(decisionLayout);
-
-        // Reason
-        Span reasonSpan = new Span(I18n.t("kms.policy.eval.reason", result.reason));
-        reasonSpan.addClassName("policy-eval-reason-span");
-        content.add(reasonSpan);
-
-        // Sid and Principal
-        if (result.sid != null && !result.sid.isEmpty()) {
-            HorizontalLayout sidLayout = new HorizontalLayout();
-            sidLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-            sidLayout.setSpacing(true);
-            Span sidLabel = new Span("🆔 " + I18n.t("kms.policy.eval.sid"));
-            sidLabel.addClassName(LumoUtility.FontWeight.BOLD);
-            Span sidValue = new Span(result.sid);
-            sidLayout.add(sidLabel, sidValue);
-            content.add(sidLayout);
-        }
-
-        if (result.principal != null && !result.principal.isEmpty()) {
-            HorizontalLayout principalLayout = new HorizontalLayout();
-            principalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-            principalLayout.setSpacing(true);
-            Span principalLabel = new Span("👤 " + I18n.t("kms.policy.eval.principal"));
-            principalLabel.addClassName(LumoUtility.FontWeight.BOLD);
-            Span principalValue = new Span(result.principal);
-            principalLayout.add(principalLabel, principalValue);
-            content.add(principalLayout);
-        }
-
-        // Key context
-        if (selectedKeyId == null) {
-            Span warningSpan = new Span(I18n.t("kms.policy.eval.no.key.selected"));
-            warningSpan.addClassName("policy-eval-warning-span");
-            content.add(warningSpan);
-        } else {
-            Span resourceSpan = new Span(I18n.t("kms.policy.eval.key.arn", keyArn));
-            resourceSpan.addClassName("policy-eval-muted-span");
-            content.add(resourceSpan);
-        }
-
-        // Matched statement (full JSON)
-        if (result.matchedStatement != null && !result.matchedStatement.isEmpty()) {
-            Span matchedHeader = new Span(I18n.t("kms.policy.eval.matched.statement"));
-            matchedHeader.addClassName("policy-eval-matched-header");
-            content.add(matchedHeader);
-
-            Pre pre = new Pre();
-            pre.setText(result.matchedStatement);
-            pre.addClassName("policy-eval-matched-pre");
-            pre.setWidthFull();
-            content.add(pre);
-        }
-
-        // Help tip
-        Span helpSpan = new Span(I18n.t("kms.policy.eval.tip"));
-        helpSpan.addClassName("policy-eval-help-span");
-        content.add(helpSpan);
-
-        Button closeBtn = new Button(I18n.t("kms.policy.eval.close"), e -> resultDialog.close());
-        closeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        resultDialog.getFooter().add(closeBtn);
-        resultDialog.add(content);
-        resultDialog.open();
+        new PolicyEvaluationDialog(
+                action,
+                result.decision,
+                result.reason,
+                result.sid,
+                result.principal,
+                selectedKeyId,
+                keyArn,
+                result.matchedStatement
+        ).open();
     }
 
     private EvaluationResult evaluateAction(String action, Map<String, Object> policyMap, String keyArn) {

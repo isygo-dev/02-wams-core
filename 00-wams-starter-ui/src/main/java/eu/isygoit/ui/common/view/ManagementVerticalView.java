@@ -17,6 +17,10 @@ import eu.isygoit.util.SecurityUtils;
 @CssImport("./styles/scss/view.scss")
 public class ManagementVerticalView extends VerticalLayout implements BeforeEnterObserver {
 
+    protected ManagementVerticalView() {
+        addClassName("management-view");
+    }
+
     public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
         Button btn = new Button(new Icon(icon));
         btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);

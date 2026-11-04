@@ -48,6 +48,32 @@ public class RoleManagementView extends AbstractPaginatedView<RoleInfoDto> {
     }
 
     @Override
+    protected boolean configureGrid(com.vaadin.flow.component.grid.Grid<RoleInfoDto> grid) {
+        grid.addColumn(RoleInfoDto::getCode).setHeader("Code").setAutoWidth(true);
+        grid.addColumn(RoleInfoDto::getName).setHeader("Name").setAutoWidth(true);
+        grid.addColumn(RoleInfoDto::getLevel).setHeader("Level").setAutoWidth(true);
+        grid.addColumn(RoleInfoDto::getNumberOfUsers).setHeader("Users").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected PaginatedResponseDto<? extends RoleInfoDto> fetchFilteredPage(String criteria, int page, int size) {
+        var r = roleService.findAllFilteredByCriteria(criteria, page, size);
+        return r != null ? r.getBody() : null;
+    }
+
+    @Override
+    protected java.util.Map<String, String> fetchCriteriaMetadata() {
+        var r = roleService.getAnnotatedCriteria();
+        return r != null && r.getBody() != null
+                ? r.getBody().stream().collect(java.util.stream.Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : java.util.Map.of();
+    }
+
+    @Override
     protected Component renderItem(RoleInfoDto item) {
         return new RoleCard(this, roleService, item, this::loadPageZero);
     }

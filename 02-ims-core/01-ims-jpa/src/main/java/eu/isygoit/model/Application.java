@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.model.jakarta.AuditableEntity;
@@ -44,17 +45,21 @@ public class Application extends AuditableEntity<Long> implements ITenantAssigna
     private String tenant;
 
     //@Convert(converter = LowerCaseConverter.class)
+    @Criteria(1)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
 
+    @Criteria(2)
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
 
+    @Criteria(3)
     @Column(name = SchemaColumnConstantName.C_TITLE, length = SchemaConstantSize.S_NAME, nullable = false)
     private String title;
 
     @Builder.Default
     @ColumnDefault("'PRM Store'")
+    @Criteria(4)
     @Column(name = SchemaColumnConstantName.C_CATEGORY, length = SchemaConstantSize.S_NAME, nullable = false)
     private String category = "PRM Store";
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)

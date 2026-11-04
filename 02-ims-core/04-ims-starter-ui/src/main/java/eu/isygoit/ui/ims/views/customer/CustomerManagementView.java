@@ -59,6 +59,31 @@ public class CustomerManagementView extends AbstractPaginatedView<CustomerDto> {
     }
 
     @Override
+    protected boolean configureGrid(com.vaadin.flow.component.grid.Grid<CustomerDto> grid) {
+        grid.addColumn(CustomerDto::getName).setHeader("Name").setAutoWidth(true);
+        grid.addColumn(CustomerDto::getEmail).setHeader("Email").setAutoWidth(true);
+        grid.addColumn(CustomerDto::getAccountCode).setHeader("Account").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected PaginatedResponseDto<? extends CustomerDto> fetchFilteredPage(String criteria, int page, int size) {
+        var r = customerService.findAllFilteredByCriteria(criteria, page, size);
+        return r != null ? r.getBody() : null;
+    }
+
+    @Override
+    protected java.util.Map<String, String> fetchCriteriaMetadata() {
+        var r = customerService.getAnnotatedCriteria();
+        return r != null && r.getBody() != null
+                ? r.getBody().stream().collect(java.util.stream.Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : java.util.Map.of();
+    }
+
+    @Override
     protected Component renderItem(CustomerDto item) {
         return new CustomerCard(this, customerService, customerImageService,
                 accountService, item, this::loadPageZero);

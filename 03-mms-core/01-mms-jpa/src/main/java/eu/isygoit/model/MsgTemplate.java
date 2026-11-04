@@ -1,6 +1,7 @@
 package eu.isygoit.model;
 
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumEmailTemplate;
 import eu.isygoit.enums.IEnumLanguage;
@@ -47,6 +48,7 @@ public class MsgTemplate extends AuditableEntity<Long>
     private Long id;
 
     //@Convert(converter = LowerCaseConverter.class)
+    @Criteria(1)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
 
@@ -55,10 +57,12 @@ public class MsgTemplate extends AuditableEntity<Long>
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
+    @Criteria(2)
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_NAME, length = IEnumEmailTemplate.STR_ENUM_SIZE, nullable = false)
     private IEnumEmailTemplate.Types name;
 
+    @Criteria(3)
     @Column(name = SchemaColumnConstantName.C_DESCRIPTION, length = SchemaConstantSize.DESCRIPTION)
     private String description;
 

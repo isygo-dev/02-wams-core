@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableCancelableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -47,6 +48,7 @@ public class VCalendarEvent extends AuditableCancelableEntity<Long> implements I
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
+    @Criteria(1)
     @Column(name = SchemaColumnConstantName.C_CALENDAR, updatable = false, nullable = false)
     private String calendar;
 
@@ -54,9 +56,11 @@ public class VCalendarEvent extends AuditableCancelableEntity<Long> implements I
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
 
+    @Criteria(2)
     @Column(name = SchemaColumnConstantName.C_TITLE, updatable = false, nullable = false)
     private String title;
 
+    @Criteria(3)
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
 
@@ -67,10 +71,12 @@ public class VCalendarEvent extends AuditableCancelableEntity<Long> implements I
     private String type;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Criteria(4)
     @Column(name = SchemaColumnConstantName.C_START_DATE, nullable = false)
     private Date startDate;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Criteria(5)
     @Column(name = SchemaColumnConstantName.C_END_DATE, nullable = false)
     private Date endDate;
 

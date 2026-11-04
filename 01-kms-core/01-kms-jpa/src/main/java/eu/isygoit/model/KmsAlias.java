@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
@@ -43,10 +44,12 @@ public class KmsAlias extends AuditableEntity<Long> implements ITenantAssignable
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
+    @Criteria(1)
     @Pattern(regexp = "^alias:.*", message = "alias.name.must.start.with.alias")
     @Column(name = SchemaColumnConstantName.C_ALIAS_NAME, nullable = false, length = 256)
     private String aliasName;
 
+    @Criteria(2)
     @Column(name = SchemaColumnConstantName.C_KEY_ID)
     private String targetKeyId;
 

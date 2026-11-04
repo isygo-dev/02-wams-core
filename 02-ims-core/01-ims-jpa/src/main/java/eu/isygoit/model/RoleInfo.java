@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -46,13 +47,16 @@ public class RoleInfo extends AuditableEntity<Long> implements ITenantAssignable
     private String tenant;
 
     //@Convert(converter = LowerCaseConverter.class)
+    @Criteria(1)
     @Column(name = SchemaColumnConstantName.C_CODE, length = SchemaConstantSize.CODE, updatable = false, nullable = false)
     private String code;
 
+    @Criteria(2)
     @Column(name = SchemaColumnConstantName.C_NAME, length = SchemaConstantSize.S_NAME, updatable = false, nullable = false)
     private String name;
 
     @Builder.Default
+    @Criteria(3)
     @ColumnDefault("'0'")
     @Column(name = SchemaColumnConstantName.C_LEVEL, nullable = false)
     private Integer level = 0;

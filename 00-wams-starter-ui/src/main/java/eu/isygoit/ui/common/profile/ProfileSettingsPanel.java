@@ -21,14 +21,11 @@ import eu.isygoit.dto.common.ChangePasswordRequestDto;
 import eu.isygoit.dto.request.ChangeAuthTypeRequestDto;
 import eu.isygoit.enums.IEnumAuth;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.dialog.BaseActionDialog;
-import eu.isygoit.ui.common.dialog.DialogLayout;
 import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Settings tab: change-password form with a live strength indicator, and the authentication method switch.
@@ -336,30 +333,4 @@ class ProfileSettingsPanel extends VerticalLayout {
         return "password-strength-bar--strong";
     }
 
-    /**
-     * Basic confirmation (no form, no tabs) shown before enabling QR login.
-     */
-    private static final class QrModeConfirmDialog extends BaseActionDialog {
-
-        private final transient Supplier<String> action;
-
-        QrModeConfirmDialog(Supplier<String> action, Runnable onSuccess) {
-            super(I18n.t("profile.authmethod.qr.confirm.title"), onSuccess);
-            this.action = action;
-            DialogLayout.size(this, DialogLayout.WIDTH_S);
-            setOkButtonText(I18n.t("profile.authmethod.qr.confirm.ok"));
-            addContent(new Paragraph(I18n.t("profile.authmethod.qr.confirm.message")));
-        }
-
-        @Override
-        protected boolean onOk() {
-            String errorKey = action.get();
-            if (errorKey == null) {
-                append(I18n.t("profile.authmethod.success"));
-                return true;
-            }
-            append(I18n.t(errorKey));
-            return false;
-        }
-    }
 }

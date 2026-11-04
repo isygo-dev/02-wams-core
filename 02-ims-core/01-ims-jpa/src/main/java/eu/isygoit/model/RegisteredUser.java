@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumAccountOrigin;
 import eu.isygoit.enums.IEnumRegistrationStatus;
@@ -42,13 +43,16 @@ public class RegisteredUser extends AuditableEntity<Long> implements ITenantAssi
     private String tenant;
 
     //@Convert(converter = CamelCaseConverter.class)
+    @Criteria(1)
     @Column(name = SchemaColumnConstantName.C_FIRST_NAME, length = SchemaConstantSize.S_NAME, nullable = false)
     private String firstName;
 
     //@Convert(converter = CamelCaseConverter.class)
+    @Criteria(2)
     @Column(name = SchemaColumnConstantName.C_LAST_NAME, length = SchemaConstantSize.S_NAME, nullable = false)
     private String lastName;
 
+    @Criteria(3)
     @Column(name = SchemaColumnConstantName.C_EMAIL, length = SchemaConstantSize.EMAIL, nullable = false, updatable = false)
     private String email;
 

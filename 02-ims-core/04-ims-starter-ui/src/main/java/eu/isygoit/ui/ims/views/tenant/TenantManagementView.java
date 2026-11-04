@@ -54,6 +54,32 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
     }
 
     @Override
+    protected boolean configureGrid(com.vaadin.flow.component.grid.Grid<TenantDto> grid) {
+        grid.addColumn(TenantDto::getCode).setHeader("Code").setAutoWidth(true);
+        grid.addColumn(TenantDto::getName).setHeader("Name").setAutoWidth(true);
+        grid.addColumn(TenantDto::getEmail).setHeader("Email").setAutoWidth(true);
+        grid.addColumn(TenantDto::getIndustry).setHeader("Industry").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected PaginatedResponseDto<? extends TenantDto> fetchFilteredPage(String criteria, int page, int size) {
+        var r = tenantService.findAllFilteredByCriteria(criteria, page, size);
+        return r != null ? r.getBody() : null;
+    }
+
+    @Override
+    protected java.util.Map<String, String> fetchCriteriaMetadata() {
+        var r = tenantService.getAnnotatedCriteria();
+        return r != null && r.getBody() != null
+                ? r.getBody().stream().collect(java.util.stream.Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : java.util.Map.of();
+    }
+
+    @Override
     protected Component renderItem(TenantDto item) {
         return new TenantCard(this, tenantService, tenantImageService, item, this::loadPageZero);
     }

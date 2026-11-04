@@ -9,6 +9,10 @@ import eu.isygoit.util.SecurityUtils;
 
 public class ManagementCompositeVerticalView extends Composite<VerticalLayout> implements BeforeEnterObserver {
 
+    protected ManagementCompositeVerticalView() {
+        getContent().addClassName("management-view");
+    }
+
     @Override
     public final void beforeEnter(BeforeEnterEvent event) {
         String currentPath = event.getLocation().getPathWithQueryParameters(); // Better: includes query params if any

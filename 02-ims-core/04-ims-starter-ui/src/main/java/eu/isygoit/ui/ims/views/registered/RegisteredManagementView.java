@@ -60,6 +60,33 @@ public class RegisteredManagementView extends AbstractPaginatedView<RegisteredUs
     }
 
     @Override
+    protected boolean configureGrid(com.vaadin.flow.component.grid.Grid<RegisteredUserDto> grid) {
+        grid.addColumn(RegisteredUserDto::getFirstName).setHeader("First name").setAutoWidth(true);
+        grid.addColumn(RegisteredUserDto::getLastName).setHeader("Last name").setAutoWidth(true);
+        grid.addColumn(RegisteredUserDto::getEmail).setHeader("Email").setAutoWidth(true);
+        grid.addColumn(RegisteredUserDto::getOrganisation).setHeader("Organisation").setAutoWidth(true);
+        grid.addColumn(RegisteredUserDto::getStatus).setHeader("Status").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected PaginatedResponseDto<? extends RegisteredUserDto> fetchFilteredPage(String criteria, int page, int size) {
+        var r = registeredUserService.findAllFilteredByCriteria(criteria, page, size);
+        return r != null ? r.getBody() : null;
+    }
+
+    @Override
+    protected java.util.Map<String, String> fetchCriteriaMetadata() {
+        var r = registeredUserService.getAnnotatedCriteria();
+        return r != null && r.getBody() != null
+                ? r.getBody().stream().collect(java.util.stream.Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : java.util.Map.of();
+    }
+
+    @Override
     protected Component renderItem(RegisteredUserDto item) {
         return new RegisteredCard(this, registeredUserService, accountService,
                 tenantService, item, this::loadPageZero);

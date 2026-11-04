@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumStorage;
 import eu.isygoit.model.jakarta.AuditableEntity;
@@ -42,6 +43,7 @@ public class StorageConfig extends AuditableEntity<Long> implements ITenantAssig
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
+    @Criteria(1)
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_TYPE, length = IEnumStorage.STR_ENUM_SIZE, nullable = false)
     private IEnumStorage.Types type;
@@ -55,9 +57,11 @@ public class StorageConfig extends AuditableEntity<Long> implements ITenantAssig
     @Column(name = SchemaColumnConstantName.C_URL, nullable = false)
     private String url;
 
+    @Criteria(3)
     @Column(name = SchemaColumnConstantName.C_NAMESPACE)
     private String namespace;
 
+    @Criteria(4)
     @Column(name = SchemaColumnConstantName.C_REGION)
     private String region;
 }

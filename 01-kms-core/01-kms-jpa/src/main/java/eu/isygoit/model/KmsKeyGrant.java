@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumGrantStatus;
 import eu.isygoit.model.jakarta.AuditableEntity;
@@ -49,6 +50,7 @@ public class KmsKeyGrant extends AuditableEntity<Long> implements ITenantAssigna
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
+    @Criteria(1)
     @Column(name = SchemaColumnConstantName.C_KEY_ID, length = 255, updatable = false, nullable = false)
     private String keyId;
 
@@ -69,6 +71,7 @@ public class KmsKeyGrant extends AuditableEntity<Long> implements ITenantAssigna
     @Column(name = SchemaColumnConstantName.C_CONSTRAINTS, columnDefinition = "jsonb")
     private String constraints; // JSON format for encryption context constraints
 
+    @Criteria(2)
     @Column(name = SchemaColumnConstantName.C_NAME, length = 255)
     private String name;
 
@@ -90,4 +93,3 @@ public class KmsKeyGrant extends AuditableEntity<Long> implements ITenantAssigna
         return IEnumGrantStatus.Types.ACTIVE;
     }
 }
-

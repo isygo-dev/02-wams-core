@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
@@ -43,12 +44,15 @@ public class KmsTag extends AuditableEntity<Long> implements ITenantAssignable {
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
+    @Criteria(1)
     @Column(name = SchemaColumnConstantName.C_KEY_ID, nullable = false)
     private String keyId;
 
+    @Criteria(2)
     @Column(name = SchemaColumnConstantName.C_TAG_KEY, nullable = false, length = 128)
     private String tagKey;
 
+    @Criteria(3)
     @Column(name = SchemaColumnConstantName.C_TAG_VALUE, length = 256)
     private String tagValue;
 }

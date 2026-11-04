@@ -18,6 +18,7 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.server.VaadinSession;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.filters.FilterBar;
 import eu.isygoit.ui.common.notification.AppNotifications;
 import lombok.extern.slf4j.Slf4j;
 
@@ -146,7 +147,35 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
      * (for example a {@code FilterBar}). {@code null} means "none".
      */
     protected Component buildAdditionalToolbar() {
-        return null;
+        Map<String, String> criteriaMetadata = fetchCriteriaMetadata();
+        if (criteriaMetadata == null || criteriaMetadata.isEmpty()) {
+            return null;
+        }
+
+        Map<String, String> supportedMetadata = new java.util.LinkedHashMap<>();
+        for (Map.Entry<String, String> field : criteriaMetadata.entrySet()) {
+            if (isSupportedCriteriaType(field.getValue())) {
+                supportedMetadata.put(field.getKey(), field.getValue());
+            }
+        }
+        if (supportedMetadata.isEmpty()) {
+            return null;
+        }
+
+        FilterBar filterBar = new FilterBar(supportedMetadata);
+        filterBar.addClassName("management-filter-bar");
+        filterBar.setOnApply(this::applyCriteria);
+        filterBar.setOnClear(this::clearCriteria);
+        return filterBar;
+    }
+
+    private boolean isSupportedCriteriaType(String type) {
+        return type == null || switch (type) {
+            case "String", "Integer", "int", "Long", "long", "Double", "double", "Float", "float",
+                    "BigDecimal", "Boolean", "boolean", "LocalDate", "Date", "java.sql.Date",
+                    "LocalDateTime", "Instant", "OffsetDateTime" -> true;
+            default -> false;
+        };
     }
 
     /**
