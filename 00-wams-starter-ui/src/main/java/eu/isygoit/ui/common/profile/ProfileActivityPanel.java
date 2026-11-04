@@ -95,7 +95,7 @@ class ProfileActivityPanel extends VerticalLayout {
             log.warn("Failed to load login history page {}", page, e);
         }
         return null;
-    }    private final ProfilePagerBar pager = new ProfilePagerBar(this::loadPage);
+    }
 
     private Div errorState(int page) {
         Button retry = new Button(I18n.t("profile.load.retry"));
@@ -104,7 +104,7 @@ class ProfileActivityPanel extends VerticalLayout {
         Div error = new Div(new Span(I18n.t("profile.activity.load.error")), retry);
         error.addClassName("profile-load-error");
         return error;
-    }
+    }    private final ProfilePagerBar pager = new ProfilePagerBar(this::loadPage);
 
 
 

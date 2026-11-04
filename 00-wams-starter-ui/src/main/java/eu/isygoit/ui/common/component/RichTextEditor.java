@@ -41,8 +41,8 @@ import java.util.function.Consumer;
  * ({@code document.queryCommandState}) — no server roundtrips.
  *
  * <p><b>Value</b> is exchanged as <b>HTML</b>. Callers that render it
- * outside this editor must sanitize it — see
- * {@code MessageDetailsDialog#sanitizeHtml(String)}.
+ * outside this editor should render it with {@link RichTextViewer}, which
+ * sanitizes content before displaying it.
  *
  * <p><b>Inline images.</b> When enabled via {@link #setAllowInlineImages}:
  * picked images are client-side resized to ≤ {@value #MAX_IMAGE_DIMENSION}px
@@ -66,10 +66,14 @@ public class RichTextEditor extends Composite<Div> {
     private static final String[] FONT_SIZES = {"12", "14", "16", "18", "20", "24", "32", "48"};
     private static final String DEFAULT_FONT_SIZE = "14";
 
-    /** Longest side of an inserted image after client-side resize. */
+    /**
+     * Longest side of an inserted image after client-side resize.
+     */
     private static final int MAX_IMAGE_DIMENSION = 1200;
 
-    /** Default rejection threshold on the base64 payload (~750 KB image). */
+    /**
+     * Default rejection threshold on the base64 payload (~750 KB image).
+     */
     private static final long DEFAULT_MAX_IMAGE_BYTES = 1_000_000L;
 
     /* DOM parts */
@@ -123,17 +127,44 @@ public class RichTextEditor extends Composite<Div> {
      * Public API — value & display
      * ══════════════════════════════════════════════════════════════ */
 
+    private static String tooltip(String key) {
+        try {
+            String v = I18n.t(key);
+            return v == null || v.equals(key) ? "" : v;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private static String stripTags(String html) {
+        if (html == null) return "";
+        return html.replaceAll("<[^>]+>", "")
+                .replace("&nbsp;", " ")
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"")
+                .replace("&#39;", "'")
+                .trim();
+    }
+
+    public String getValue() {
+        return value;
+    }
+
     public void setValue(String html) {
         this.value = html == null ? "" : html;
         editor.getElement().executeJs("this.innerHTML = $0 || ''", this.value);
         updateCharCount();
     }
 
-    public String getValue() { return value; }
+    public String getPlainText() {
+        return stripTags(value);
+    }
 
-    public String getPlainText() { return stripTags(value); }
-
-    public boolean isEffectivelyEmpty() { return stripTags(value).isEmpty(); }
+    public boolean isEffectivelyEmpty() {
+        return stripTags(value).isEmpty();
+    }
 
     public void setLabel(String label) {
         if (label == null || label.isBlank()) {
@@ -153,7 +184,9 @@ public class RichTextEditor extends Composite<Div> {
         }
     }
 
-    public void setMinHeight(String height) { editor.getStyle().set("min-height", height); }
+    public void setMinHeight(String height) {
+        editor.getStyle().set("min-height", height);
+    }
 
     public void setMaxHeight(String height) {
         editor.getStyle().set("max-height", height);
@@ -180,17 +213,41 @@ public class RichTextEditor extends Composite<Div> {
         if (listener != null) changeListeners.add(listener);
     }
 
-    public void focus() { editor.getElement().executeJs("this.focus()"); }
+    public void focus() {
+        editor.getElement().executeJs("this.focus()");
+    }
 
     /* Sizing delegation — Composite does not implement HasSize. */
-    public void setWidthFull()      { getContent().setWidthFull(); }
-    public void setWidth(String w)  { getContent().setWidth(w); }
-    public void setHeightFull()     { getContent().setHeightFull(); }
-    public void setHeight(String h) { getContent().setHeight(h); }
-    public void setSizeFull()       { getContent().setSizeFull(); }
+    public void setWidthFull() {
+        getContent().setWidthFull();
+    }
+
+    public void setWidth(String w) {
+        getContent().setWidth(w);
+    }
+
+    public void setHeightFull() {
+        getContent().setHeightFull();
+    }
 
     /* ══════════════════════════════════════════════════════════════
      * Inline-image configuration
+     * ══════════════════════════════════════════════════════════════ */
+
+    public void setHeight(String h) {
+        getContent().setHeight(h);
+    }
+
+    public void setSizeFull() {
+        getContent().setSizeFull();
+    }
+
+    public boolean isAllowInlineImages() {
+        return allowInlineImages;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+     * DOM construction
      * ══════════════════════════════════════════════════════════════ */
 
     public void setAllowInlineImages(boolean allow) {
@@ -199,18 +256,12 @@ public class RichTextEditor extends Composite<Div> {
         root.getElement().executeJs("this.__rteAllowInline = $0", allow);
     }
 
-    public boolean isAllowInlineImages() { return allowInlineImages; }
-
     public void setMaxImageBytes(long bytes) {
         this.maxImageBytes = bytes > 0 ? bytes : DEFAULT_MAX_IMAGE_BYTES;
         getContent().getElement().executeJs(
                 "this.__rteMaxImageBytes = $0",
                 (double) this.maxImageBytes);
     }
-
-    /* ══════════════════════════════════════════════════════════════
-     * DOM construction
-     * ══════════════════════════════════════════════════════════════ */
 
     private Div buildEditor() {
         Div ed = new Div();
@@ -243,6 +294,10 @@ public class RichTextEditor extends Composite<Div> {
 
         return ed;
     }
+
+    /* ══════════════════════════════════════════════════════════════
+     * Toolbar items
+     * ══════════════════════════════════════════════════════════════ */
 
     private void buildToolbar() {
         toolbar.add(
@@ -298,10 +353,6 @@ public class RichTextEditor extends Composite<Div> {
         }
         return g;
     }
-
-    /* ══════════════════════════════════════════════════════════════
-     * Toolbar items
-     * ══════════════════════════════════════════════════════════════ */
 
     private Button iconButton(VaadinIcon icon, String tooltipKey, String cmd, Runnable onClick) {
         Button btn = new Button(icon.create());
@@ -402,6 +453,11 @@ public class RichTextEditor extends Composite<Div> {
                 icon, "#ffff00");
     }
 
+    /* ══════════════════════════════════════════════════════════════
+     * Active state tracking — highlight the buttons whose format
+     * applies at the cursor. Entirely client-side.
+     * ══════════════════════════════════════════════════════════════ */
+
     /**
      * Builds an {@code Aa}-with-colored-underline swatch that opens the
      * native color picker. The native {@code <input type=color>} is
@@ -477,6 +533,10 @@ public class RichTextEditor extends Composite<Div> {
         return wrap;
     }
 
+    /* ══════════════════════════════════════════════════════════════
+     * Inline image picker
+     * ══════════════════════════════════════════════════════════════ */
+
     private Button buildImageButton() {
         Button btn = new Button(VaadinIcon.PICTURE.create());
         btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
@@ -516,8 +576,7 @@ public class RichTextEditor extends Composite<Div> {
     }
 
     /* ══════════════════════════════════════════════════════════════
-     * Active state tracking — highlight the buttons whose format
-     * applies at the cursor. Entirely client-side.
+     * Helpers
      * ══════════════════════════════════════════════════════════════ */
 
     private void wireActiveStateTracking() {
@@ -548,10 +607,6 @@ public class RichTextEditor extends Composite<Div> {
                         "});"
         );
     }
-
-    /* ══════════════════════════════════════════════════════════════
-     * Inline image picker
-     * ══════════════════════════════════════════════════════════════ */
 
     private void wireImagePicker() {
         root.getElement().executeJs(
@@ -607,10 +662,6 @@ public class RichTextEditor extends Composite<Div> {
         );
     }
 
-    /* ══════════════════════════════════════════════════════════════
-     * Helpers
-     * ══════════════════════════════════════════════════════════════ */
-
     private void exec(String command) {
         editor.getElement().executeJs(
                 "document.execCommand('styleWithCSS', false, true);" +
@@ -630,26 +681,5 @@ public class RichTextEditor extends Composite<Div> {
         charCount.getElement().getClassList().set(
                 "wams-rte__char-count--over",
                 maxCharacters > 0 && n > maxCharacters);
-    }
-
-    private static String tooltip(String key) {
-        try {
-            String v = I18n.t(key);
-            return v == null || v.equals(key) ? "" : v;
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    private static String stripTags(String html) {
-        if (html == null) return "";
-        return html.replaceAll("<[^>]+>", "")
-                .replace("&nbsp;", " ")
-                .replace("&amp;", "&")
-                .replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("&quot;", "\"")
-                .replace("&#39;", "'")
-                .trim();
     }
 }

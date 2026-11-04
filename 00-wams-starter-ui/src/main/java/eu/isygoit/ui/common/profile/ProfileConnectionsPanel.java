@@ -91,7 +91,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
 
         btn7.getElement().setAttribute("aria-pressed", String.valueOf(seven));
         btn30.getElement().setAttribute("aria-pressed", String.valueOf(!seven));
-    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
+    }
 
     private List<DailyLoginCountDto> loadActivity() {
         try {
@@ -103,7 +103,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
             log.warn("Failed to load login activity", e);
         }
         return List.of();
-    }
+    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
 
     private Div buildChartCard(List<DailyLoginCountDto> activity) {
         Div chartCard = new Div();

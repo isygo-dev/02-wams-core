@@ -30,13 +30,6 @@ public class LeafletMap extends Div {
             "© <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" "
                     + "rel=\"noopener noreferrer\">OpenStreetMap contributors</a>";
     private static final String MARKER_IMAGES_PATH = "/images/leaflet/";
-    // The marker images are embedded in the page (data URI) instead of being fetched by the
-    // browser: an HTTP fetch can be refused by the host application's security rules, a servlet
-    // context path or a static-resource mapping, and then no marker is drawn.
-    private static final String MARKER_ICON_URL = imageUrl("marker-icon.png");
-    private static final String MARKER_ICON_RETINA_URL = imageUrl("marker-icon-2x.png");
-    private static final String MARKER_SHADOW_URL = imageUrl("marker-shadow.png");
-
     public static final String BLUE_MARKER_URL = imageUrl("marker-icon.png");
     public static final String GREEN_MARKER_URL = imageUrl("marker-icon-green.png");
     public static final String ORANGE_MARKER_URL = imageUrl("marker-icon-orange.png");
@@ -45,7 +38,12 @@ public class LeafletMap extends Div {
     public static final String VIOLET_MARKER_URL = imageUrl("marker-icon-violet.png");
     public static final String GREY_MARKER_URL = imageUrl("marker-icon-grey.png");
     public static final String BLACK_MARKER_URL = imageUrl("marker-icon-black.png");
-
+    // The marker images are embedded in the page (data URI) instead of being fetched by the
+    // browser: an HTTP fetch can be refused by the host application's security rules, a servlet
+    // context path or a static-resource mapping, and then no marker is drawn.
+    private static final String MARKER_ICON_URL = imageUrl("marker-icon.png");
+    private static final String MARKER_ICON_RETINA_URL = imageUrl("marker-icon-2x.png");
+    private static final String MARKER_SHADOW_URL = imageUrl("marker-shadow.png");
     private static final int MAX_ZOOM = 19;
 
     private final LComponentManagementRegistry registry;

@@ -10,14 +10,14 @@
 
 /* Themed hooks — override per-module if needed. */
 .wams-rte {
-  --wams-rte-radius:         var(--lumo-border-radius-l);
-  --wams-rte-border-color:   var(--lumo-contrast-20pct);
-  --wams-rte-border-focus:   var(--lumo-primary-color);
-  --wams-rte-toolbar-bg:     var(--lumo-contrast-5pct);
+  --wams-rte-radius: var(--lumo-border-radius-l);
+  --wams-rte-border-color: var(--lumo-contrast-20pct);
+  --wams-rte-border-focus: var(--lumo-primary-color);
+  --wams-rte-toolbar-bg: var(--lumo-contrast-5pct);
   --wams-rte-toolbar-border: var(--lumo-contrast-10pct);
-  --wams-rte-btn-hover-bg:   var(--lumo-contrast-10pct);
-  --wams-rte-btn-active-bg:  var(--lumo-primary-color-10pct);
-  --wams-rte-btn-active-fg:  var(--lumo-primary-text-color);
+  --wams-rte-btn-hover-bg: var(--lumo-contrast-10pct);
+  --wams-rte-btn-active-bg: var(--lumo-primary-color-10pct);
+  --wams-rte-btn-active-fg: var(--lumo-primary-text-color);
 
   display: flex;
   flex-direction: column;
@@ -273,28 +273,34 @@
   }
 }
 
-/* ── Rendered content — same visual language in the details dialog ─── */
+/* ── Read-only rich-text viewer ────────────────────────────────────── */
 
+.wams-rtv,
 .detail-content {
   line-height: 1.55;
   word-break: break-word;
   overflow-wrap: break-word;
 }
 
+.wams-rtv p,
 .detail-content p {
   margin: 0 0 var(--lumo-space-s) 0;
 }
 
+.wams-rtv p:last-child,
 .detail-content p:last-child {
   margin-bottom: 0;
 }
 
+.wams-rtv ul,
+.wams-rtv ol,
 .detail-content ul,
 .detail-content ol {
   margin: 0 0 var(--lumo-space-s) 0;
   padding-left: var(--lumo-space-l);
 }
 
+.wams-rtv img,
 .detail-content img {
   max-width: 100%;
   height: auto;
@@ -303,6 +309,17 @@
   border-radius: var(--lumo-border-radius-s);
 }
 
-.detail-content strong { font-weight: 600; }
-.detail-content u { text-decoration: underline; }
-.detail-content s { text-decoration: line-through; }
+.wams-rtv strong,
+.detail-content strong {
+  font-weight: 600;
+}
+
+.wams-rtv u,
+.detail-content u {
+  text-decoration: underline;
+}
+
+.wams-rtv s,
+.detail-content s {
+  text-decoration: line-through;
+}
