@@ -11,9 +11,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 
 
 /**
@@ -36,7 +36,12 @@ public interface MailMessageServiceApi {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = IdAssignableDto.class))})
     })
-    @PostMapping(path = "/send/{senderTenantName}/{template}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(path = "/send/{template}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     ResponseEntity<?> sendMail(@PathVariable(name = RestApiConstants.TEMPLATE) IEnumEmailTemplate.Types template,
-                               @RequestPart(name = RestApiConstants.mailMessage) MailMessageDto mailMessage);
+                               @ModelAttribute MailMessageDto mailMessage);
+
+    @PostMapping(path = "/send/{senderTenantName}/{template}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    ResponseEntity<?> sendMail(@PathVariable(name = "senderTenantName") String senderTenantName,
+                               @PathVariable(name = RestApiConstants.TEMPLATE) IEnumEmailTemplate.Types template,
+                               @ModelAttribute MailMessageDto mailMessage);
 }

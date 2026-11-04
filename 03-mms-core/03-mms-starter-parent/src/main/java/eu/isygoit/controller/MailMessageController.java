@@ -5,6 +5,7 @@ import eu.isygoit.api.MailMessageServiceApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.tenancy.MappedCrudTenantController;
+import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.data.MailOptionsDto;
 import eu.isygoit.dto.data.MessageCompositionDto;
@@ -16,9 +17,13 @@ import eu.isygoit.service.IMsgTemplateService;
 import eu.isygoit.service.impl.MailMessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,7 +52,8 @@ public class MailMessageController extends MappedCrudTenantController<UUID, Mail
     @Autowired
     private IMsgTemplateService templateService;
 
-    public ResponseEntity<?> sendMail(IEnumEmailTemplate.Types templateType, MailMessageDto mailMessage) {
+    public ResponseEntity<?> sendMail(IEnumEmailTemplate.Types templateType,
+                                      @ModelAttribute MailMessageDto mailMessage) {
         try {
             // Get tenant once and reuse
             var senderTenant = mailMessage.getSenderTenant() != null
@@ -72,7 +78,7 @@ public class MailMessageController extends MappedCrudTenantController<UUID, Mail
                 mailMessage.setBody(mailMessage.getVariables());
             }
 
-            mailMessageService.sendMail(
+            boolean sent = mailMessageService.sendMail(
                     senderTenant,
                     templateType,
                     mailMessageMapper.dtoToEntity(mailMessage)
@@ -85,11 +91,23 @@ public class MailMessageController extends MappedCrudTenantController<UUID, Mail
                             senderTenant,
                             mailMessage.getResources())
             );
+            if (!sent) {
+                throw new IllegalStateException("Mail service reported delivery failure.");
+            }
 
             return ResponseFactory.responseOk();
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
         }
+    }
+
+    @Override
+    public ResponseEntity<?> sendMail(
+            @PathVariable(name = "senderTenantName") String senderTenantName,
+            @PathVariable(name = RestApiConstants.TEMPLATE) IEnumEmailTemplate.Types template,
+            @ModelAttribute MailMessageDto mailMessage) {
+        mailMessage.setSenderTenant(senderTenantName);
+        return sendMail(template, mailMessage);
     }
 }

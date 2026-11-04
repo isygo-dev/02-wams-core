@@ -34,11 +34,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * The type Mail message service.
@@ -169,22 +170,48 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
         if (CollectionUtils.isEmpty(resources)) {
             return null;
         }
+        if (!StringUtils.hasText(senderTenant)) {
+            throw new StoreFileException("Sender tenant is required to store resources");
+        }
 
-        return resources.stream().map(multipartFile -> {
-            File file = new File(Path.of(appProperties.getUploadDirectory())
-                    .resolve(senderTenant)
-                    .resolve("resources")
-                    .resolve(multipartFile.getOriginalFilename()).toUri());
-            try {
-                multipartFile.transferTo(file);
-                return multipartFile;
-            } catch (IOException e) {
-                throw new StoreFileException("Resource to file");
+        Path uploadRoot = Path.of(appProperties.getUploadDirectory()).toAbsolutePath().normalize();
+        Path resourceDirectory = uploadRoot.resolve(senderTenant).resolve("resources").normalize();
+        if (!resourceDirectory.startsWith(uploadRoot)) {
+            throw new StoreFileException("Invalid sender tenant for resource storage: " + senderTenant);
+        }
+
+        try {
+            Files.createDirectories(resourceDirectory);
+        } catch (IOException e) {
+            throw new StoreFileException("Unable to create resource directory: " + resourceDirectory, e);
+        }
+
+        Map<String, File> storedResources = new HashMap<>();
+        for (MultipartFile multipartFile : resources) {
+            String originalFilename = multipartFile.getOriginalFilename();
+            if (!StringUtils.hasText(originalFilename)) {
+                throw new StoreFileException("Uploaded resource has no filename");
             }
-        }).collect(Collectors.toMap(multipartFile -> multipartFile.getOriginalFilename(), multipartFile
-                -> new File(Path.of(appProperties.getUploadDirectory())
-                .resolve(senderTenant)
-                .resolve("resources")
-                .resolve(multipartFile.getOriginalFilename()).toUri())));
+            String normalizedFilename = originalFilename.replace('\\', '/');
+            String filename = normalizedFilename.substring(normalizedFilename.lastIndexOf('/') + 1);
+            if (!StringUtils.hasText(filename) || ".".equals(filename) || "..".equals(filename)) {
+                throw new StoreFileException("Invalid uploaded resource filename: " + originalFilename);
+            }
+            if (storedResources.containsKey(filename)) {
+                throw new StoreFileException("Duplicate uploaded resource filename: " + filename);
+            }
+
+            Path destination = resourceDirectory.resolve(filename).normalize();
+            if (!destination.startsWith(resourceDirectory)) {
+                throw new StoreFileException("Invalid uploaded resource filename: " + originalFilename);
+            }
+            try {
+                multipartFile.transferTo(destination.toFile());
+                storedResources.put(filename, destination.toFile());
+            } catch (IOException e) {
+                throw new StoreFileException("Unable to store resource: " + filename, e);
+            }
+        }
+        return storedResources;
     }
 }
