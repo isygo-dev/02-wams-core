@@ -19,6 +19,7 @@ import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
 import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
+import jakarta.mail.Part;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
@@ -108,22 +109,20 @@ public class MailMessageService extends CassandraCrudTenantService<UUID, MailMes
             mail.setSubject(mailMessageData.getSubject(), "UTF-8");
 
             if (resources != null && resources.size() > 0) {
-                MimeMultipart multipart = new MimeMultipart("related");
+                MimeMultipart multipart = new MimeMultipart("mixed");
                 BodyPart messageBodyPart = new MimeBodyPart();
                 messageBodyPart.setContent(mailMessageData.getBody(), "text/html");
                 multipart.addBodyPart(messageBodyPart);
 
                 for (String key : resources.keySet()) {
                     DataSource fds = new FileDataSource(resources.get(key));
-
                     messageBodyPart = new MimeBodyPart();
                     messageBodyPart.setDataHandler(new DataHandler(fds));
-                    messageBodyPart.setHeader("Content-ID", "<" + key + ">");
-
-                    // Set the file name as the attachment's name
-                    messageBodyPart.setFileName(key);  // Add this line
-
-                    // add image to the multipart
+                    messageBodyPart.setFileName(key);
+                    messageBodyPart.setDisposition(Part.ATTACHMENT);
+                    if ("pdf".equalsIgnoreCase(StringUtils.getFilenameExtension(key))) {
+                        messageBodyPart.setHeader("Content-Type", "application/pdf");
+                    }
                     multipart.addBodyPart(messageBodyPart);
                 }
 
