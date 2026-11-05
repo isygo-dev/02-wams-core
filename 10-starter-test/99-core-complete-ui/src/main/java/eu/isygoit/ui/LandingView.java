@@ -3,6 +3,7 @@ package eu.isygoit.ui;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.landing.BaseLandingView;
 import jakarta.annotation.security.PermitAll;
 
@@ -35,7 +36,7 @@ import java.util.List;
 public class LandingView extends BaseLandingView implements BeforeEnterObserver {
     @Override
     public String getPageTitle() {
-        return "Platform - Choose Your Area";
+        return I18n.t("common.landing.page.title");
     }
 
 

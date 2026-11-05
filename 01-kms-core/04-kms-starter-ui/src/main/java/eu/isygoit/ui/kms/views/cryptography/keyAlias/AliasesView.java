@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 public class AliasesView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Key Aliases";
+        return I18n.t("kms.aliases.view.title");
     }
 
 

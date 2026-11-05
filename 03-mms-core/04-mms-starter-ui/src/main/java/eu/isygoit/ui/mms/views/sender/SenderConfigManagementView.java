@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 public class SenderConfigManagementView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Sender Configuration Management";
+        return I18n.t("mms.sender.view.title");
     }
 
 

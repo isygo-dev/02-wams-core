@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 public class TagsView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Key Tagging";
+        return I18n.t("kms.tags.view.title");
     }
 
 

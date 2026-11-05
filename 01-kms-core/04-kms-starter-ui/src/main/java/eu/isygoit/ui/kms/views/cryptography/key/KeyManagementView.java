@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 public class KeyManagementView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Key Management";
+        return I18n.t("kms.key.view.title");
     }
 
 

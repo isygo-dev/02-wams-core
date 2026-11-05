@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public class CryptoOperationsView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Cryptographic Operations";
+        return I18n.t("kms.crypto.view.title");
     }
 
 

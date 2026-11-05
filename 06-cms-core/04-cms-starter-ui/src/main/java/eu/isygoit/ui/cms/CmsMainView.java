@@ -39,7 +39,7 @@ import java.util.List;
 public class CmsMainView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "CMS Dashboard";
+        return I18n.t("cms.dashboard.title");
     }
 
 

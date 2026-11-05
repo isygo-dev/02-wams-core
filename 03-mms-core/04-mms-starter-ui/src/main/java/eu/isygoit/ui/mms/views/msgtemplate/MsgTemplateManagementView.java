@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 public class MsgTemplateManagementView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Template Management";
+        return I18n.t("mms.msgtemplate.view.title");
     }
 
 

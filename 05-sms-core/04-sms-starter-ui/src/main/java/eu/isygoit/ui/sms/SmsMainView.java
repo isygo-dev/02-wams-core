@@ -41,7 +41,7 @@ import java.util.TreeMap;
 public class SmsMainView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Storage Management Dashboard";
+        return I18n.t("sms.dashboard.title");
     }
 
 

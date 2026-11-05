@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 public class RandomKeyView extends ManagementCompositeVerticalView {
     @Override
     public String getPageTitle() {
-        return "Random Keys";
+        return I18n.t("kms.random.key.title");
     }
 
 

@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 public class GrantsView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Grants";
+        return I18n.t("kms.grants.view.title");
     }
 
 

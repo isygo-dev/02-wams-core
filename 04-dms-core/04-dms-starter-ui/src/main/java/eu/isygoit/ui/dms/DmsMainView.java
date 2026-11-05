@@ -40,7 +40,7 @@ import java.util.Map;
 public class DmsMainView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Document Dashboard";
+        return I18n.t("dms.dashboard.title");
     }
 
 

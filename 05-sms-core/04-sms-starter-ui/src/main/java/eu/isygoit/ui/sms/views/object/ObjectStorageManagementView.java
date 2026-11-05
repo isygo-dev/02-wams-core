@@ -67,7 +67,7 @@ import java.util.stream.Collectors;
 public class ObjectStorageManagementView extends ManagementVerticalView implements HasUrlParameter<String> {
     @Override
     public String getPageTitle() {
-        return "Object Storage - File Management";
+        return I18n.t("sms.objects.view.title");
     }
 
 

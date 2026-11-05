@@ -57,6 +57,11 @@ public class ImsMainView extends ManagementVerticalView {
     private StatCard rolesCard;
     private StatCard registeredUsersCard;
 
+    @Override
+    public String getPageTitle() {
+        return I18n.t("ims.dashboard.title");
+    }
+
     @Autowired
     public ImsMainView(AccountService accountService,
                        TenantService tenantService,

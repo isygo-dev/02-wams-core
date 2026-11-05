@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public class KmsMainView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "KMS Dashboard";
+        return I18n.t("kms.dashboard.title");
     }
 
 

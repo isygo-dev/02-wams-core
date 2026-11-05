@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public class PoliciesView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Key Policies";
+        return I18n.t("kms.policy.view.title");
     }
 
 

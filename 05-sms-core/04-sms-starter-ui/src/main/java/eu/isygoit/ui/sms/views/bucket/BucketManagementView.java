@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 public class BucketManagementView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Bucket Management";
+        return I18n.t("sms.buckets.view.title");
     }
 
 

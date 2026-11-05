@@ -38,7 +38,7 @@ import java.util.TreeMap;
 public class MmsMainView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "MMS Dashboard";
+        return I18n.t("mms.dashboard.title");
     }
 
 

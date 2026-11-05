@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 public class LinkedFileManagementView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Linked File Management";
+        return I18n.t("dms.linkedfile.view.title");
     }
 
 

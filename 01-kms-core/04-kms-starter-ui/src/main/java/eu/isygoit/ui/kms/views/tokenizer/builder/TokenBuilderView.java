@@ -51,7 +51,7 @@ import java.util.Set;
 public class TokenBuilderView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Tokenizer – JWT Management";
+        return I18n.t("kms.token.builder.title");
     }
 
 

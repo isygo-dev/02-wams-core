@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 public class CustomKeyStoresView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "Custom Key Stores";
+        return I18n.t("kms.keystore.view.title");
     }
 
 

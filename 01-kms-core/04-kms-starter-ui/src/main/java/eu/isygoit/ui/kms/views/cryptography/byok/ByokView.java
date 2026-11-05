@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
 public class ByokView extends ManagementVerticalView {
     @Override
     public String getPageTitle() {
-        return "BYOK - Bring Your Own Key";
+        return I18n.t("kms.byok.view.title");
     }
 
 
