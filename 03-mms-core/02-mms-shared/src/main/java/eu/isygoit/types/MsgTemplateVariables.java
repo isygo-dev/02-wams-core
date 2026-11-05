@@ -41,6 +41,10 @@ public interface MsgTemplateVariables {
      * The constant V_ITEM_TITLE.
      */
     String V_ITEM_TITLE = "V_ITEM_TITLE";
+    /**
+     * The constant V_MESSAGE_CONTENT.
+     */
+    String V_MESSAGE_CONTENT = "V_MESSAGE_CONTENT";
 
     /**
      * The constant V_FULLNAME.

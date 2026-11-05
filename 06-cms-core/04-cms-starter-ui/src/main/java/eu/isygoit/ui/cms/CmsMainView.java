@@ -83,7 +83,7 @@ public class CmsMainView extends ManagementVerticalView {
                         () -> ui.navigate("cms/calendars")),
                 new DashboardShortcutsBar.Shortcut(VaadinIcon.CLOCK,
                         I18n.t("cms.dashboard.quick.actions.view.schedule"),
-                        () -> ui.navigate("cms/calendars"))
+                        () -> ui.navigate("cms/calendar"))
         );
         return new DashboardShortcutsBar(I18n.t("cms.dashboard.quick.actions"), shortcuts);
     }

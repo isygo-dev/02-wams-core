@@ -170,7 +170,8 @@ public class MonthlyTableGrid<E extends DayTimeSlot> extends VerticalLayout {
         }
 
         // Context menu with Edit and Delete
-        if (config.getOnEventDelete() != null || config.getOnEventEdit() != null) {
+        if (config.getIsEditable().test(evt)
+                && (config.getOnEventDelete() != null || config.getOnEventEdit() != null)) {
             MenuBar menuBar = new MenuBar();
             menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE,
                     MenuBarVariant.LUMO_ICON, MenuBarVariant.LUMO_SMALL);

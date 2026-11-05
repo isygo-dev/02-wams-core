@@ -25,11 +25,8 @@ public class CmsMainLayout extends BaseMainLayout {
     protected Component createDrawerContent() {
         SideNav nav = new SideNav();
         nav.addItem(navItem(I18n.t("cms.nav.dashboard"), "cms", VaadinIcon.HOME));
-        // Calendars is the only CMS entity implemented today; standalone event
-        // and schedule browsing have no backing view/route yet, so they're
-        // intentionally left off the sidebar rather than pointing at a page
-        // that 404s.
         nav.addItem(navItem(I18n.t("cms.nav.calendars"), "cms/calendars", VaadinIcon.CALENDAR));
+        nav.addItem(navItem(I18n.t("cms.nav.calendar.view"), "cms/calendar", VaadinIcon.CALENDAR_CLOCK));
 
         return new Scroller(nav);
     }

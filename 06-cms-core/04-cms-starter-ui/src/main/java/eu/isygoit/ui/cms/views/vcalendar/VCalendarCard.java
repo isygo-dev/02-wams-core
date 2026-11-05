@@ -2,6 +2,7 @@ package eu.isygoit.ui.cms.views.vcalendar;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -72,6 +73,11 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
 
     @Override
     protected List<Button> buildActionButtons() {
+        Button calendarBtn = createIconButton(VaadinIcon.CALENDAR_CLOCK,
+                I18n.t("cms.calendar.card.view.tooltip"));
+        calendarBtn.addClickListener(event ->
+                UI.getCurrent().navigate("cms/calendar?calendarId=" + calendar.getId()));
+
         Button detailsBtn = createDetailsButton(I18n.t("cms.calendar.card.details.tooltip"),
                 () -> new VCalendarDetailsViewDialog(parentView, objectService, calendar.getId()).open());
 
@@ -91,7 +97,7 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
                     if (onRefresh != null) onRefresh.run();
                 }).open());
 
-        return List.of(detailsBtn, editBtn, toggleLockBtn, deleteBtn);
+        return List.of(calendarBtn, detailsBtn, editBtn, toggleLockBtn, deleteBtn);
     }
 
     private void openToggleLockDialog() {

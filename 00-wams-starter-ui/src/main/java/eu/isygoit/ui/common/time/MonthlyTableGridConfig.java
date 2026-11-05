@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Configuration for a monthly calendar grid.
@@ -32,6 +33,7 @@ public class MonthlyTableGridConfig<E extends DayTimeSlot> {
     private Consumer<E> onEventClick;
     private Consumer<E> onEventDelete;
     private Consumer<E> onEventEdit;
+    private Predicate<E> isEditable;
 
     // ---- Rendering ----
     private BiConsumer<Component, E> eventDotPopulator;
@@ -113,6 +115,11 @@ public class MonthlyTableGridConfig<E extends DayTimeSlot> {
         return this;
     }
 
+    public MonthlyTableGridConfig<E> withIsEditable(Predicate<E> predicate) {
+        this.isEditable = predicate;
+        return this;
+    }
+
     public MonthlyTableGridConfig<E> withEventDotPopulator(BiConsumer<Component, E> populator) {
         this.eventDotPopulator = populator;
         return this;
@@ -140,6 +147,7 @@ public class MonthlyTableGridConfig<E extends DayTimeSlot> {
         };
         if (onEventEdit == null) onEventEdit = e -> {
         };
+        if (isEditable == null) isEditable = e -> true;
         if (eventDotPopulator == null) eventDotPopulator = (comp, e) -> {
         };
 
@@ -197,6 +205,10 @@ public class MonthlyTableGridConfig<E extends DayTimeSlot> {
 
     public Consumer<E> getOnEventEdit() {
         return onEventEdit;
+    }
+
+    public Predicate<E> getIsEditable() {
+        return isEditable;
     }
 
     public BiConsumer<Component, E> getEventDotPopulator() {
