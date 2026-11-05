@@ -1,18 +1,20 @@
 package eu.isygoit.ui.dms;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.PaginatedResponseDto;
+import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
+import eu.isygoit.remote.dms.LinkedFileService;
+import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
 import eu.isygoit.ui.common.component.DashboardShortcutsBar;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
@@ -22,11 +24,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Dashboard view for DMS, displaying key statistics, enrichment insights,
- * and a quick-shortcuts bar. Accessible at "/dms" and "/dms/home".
+ * Dashboard view for DMS with live category/file totals and a document-library
+ * overview. Accessible at "/dms" and "/dms/home".
  */
 @RouteAlias(value = "dms/home", layout = DmsMainLayout.class)
 @VaadinSessionScope
@@ -37,13 +41,17 @@ public class DmsMainView extends ManagementVerticalView {
     private static final Logger log = LoggerFactory.getLogger(DmsMainView.class);
 
     private final CategoryService categoryService;
+    private final LinkedFileService linkedFileService;
     private final UI ui;
 
     private StatCard categoriesCard;
+    private StatCard filesCard;
+    private DashboardBreakdownPanel inventoryPanel;
 
     @Autowired
-    public DmsMainView(CategoryService categoryService) {
+    public DmsMainView(CategoryService categoryService, LinkedFileService linkedFileService) {
         this.categoryService = categoryService;
+        this.linkedFileService = linkedFileService;
         this.ui = UI.getCurrent();
 
         ui.getPushConfiguration().setPushMode(com.vaadin.flow.shared.communication.PushMode.AUTOMATIC);
@@ -53,10 +61,12 @@ public class DmsMainView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("dms-dashboard");
 
-        add(buildShortcutsBar());
         add(buildHeader());
+        add(buildShortcutsBar());
         add(buildStatsGrid());
-        add(buildRecentActivityPanel());
+        inventoryPanel = new DashboardBreakdownPanel(I18n.t("dms.dashboard.inventory"));
+        inventoryPanel.setRefreshAction(this::loadStatistics);
+        add(inventoryPanel);
 
         loadStatistics();
     }
@@ -86,60 +96,67 @@ public class DmsMainView extends ManagementVerticalView {
         return title;
     }
 
-    /**
-     * The 3 core totals and 2 enrichment insights, unified into one
-     * {@link StatCardGrid} (4 columns desktop / 3 tablet / 1 mobile).
-     */
+    /** The real category and linked-file totals in a responsive shared grid. */
     private StatCardGrid buildStatsGrid() {
         categoriesCard = new StatCard(VaadinIcon.FOLDER, StatCard.Variant.PRIMARY,
                 I18n.t("dms.dashboard.total.categories"), null)
                 .withNavigation(() -> ui.navigate("dms/categories"));
-
-        // "Total Files" / "Total Tags": no File/Tag entity or service exists yet in
-        // this codebase (Category is the only implemented DMS entity), so these
-        // remain illustrative placeholder figures rather than "0" dead values.
-        StatCard filesCard = new StatCard(VaadinIcon.FILE, StatCard.Variant.PRIMARY,
-                I18n.t("dms.dashboard.total.files"), "248")
-                .withNavigation(() -> ui.navigate("dms/categories"));
-        StatCard tagsCard = new StatCard(VaadinIcon.TAGS, StatCard.Variant.PRIMARY,
-                I18n.t("dms.dashboard.total.tags"), "37")
-                .withNavigation(() -> ui.navigate("dms/categories"));
-
-        // Enrichment insights: Categories is the only DMS entity with a real
-        // backing service today, so these remain plausible illustrative figures.
-        StatCard newDocumentsCard = new StatCard(VaadinIcon.TRENDING_UP, StatCard.Variant.SUCCESS,
-                I18n.t("dms.dashboard.stats.new.documents"), "+32")
-                .withChange("+9%", StatCard.Trend.UP);
-        StatCard topCategoryCard = new StatCard(VaadinIcon.STAR, StatCard.Variant.PRIMARY,
-                I18n.t("dms.dashboard.stats.top.category"), I18n.t("dms.dashboard.stats.top.category.value"))
-                .withChange("38%", StatCard.Trend.UP);
-
-        return new StatCardGrid(categoriesCard, filesCard, tagsCard, newDocumentsCard, topCategoryCard);
-    }
-
-    private VerticalLayout buildRecentActivityPanel() {
-        VerticalLayout panel = new VerticalLayout();
-        panel.setSpacing(true);
-        panel.addClassName("wams-recent-activity-panel");
-        H2 title = new H2(I18n.t("dms.dashboard.recent.activity"));
-        title.addClassName(LumoUtility.FontSize.MEDIUM);
-        Div content = new Div();
-        content.setText(I18n.t("dms.dashboard.recent.activity.description"));
-        content.addClassName("wams-recent-activity-content");
-        panel.add(title, content);
-        return panel;
+        filesCard = new StatCard(VaadinIcon.FILE, StatCard.Variant.PRIMARY,
+                I18n.t("dms.dashboard.total.files"), null)
+                .withNavigation(() -> ui.navigate("dms/linked-files"));
+        return new StatCardGrid(categoriesCard, filesCard);
     }
 
     private void loadStatistics() {
-        ui.access(() -> {
-            try {
-                PaginatedResponseDto<?> body = categoryService.findAll(0, 1).getBody();
-                categoriesCard.setValue(body != null ? String.valueOf(body.getTotalElements()) : "0");
+        inventoryPanel.setLoading(true);
+        ContextAwareAsync.supplyAsync(this::fetchDashboardData)
+                .whenComplete((data, failure) -> ui.access(() -> {
+                    if (failure != null) {
+                        log.error("Error fetching DMS dashboard statistics", failure);
+                        inventoryPanel.setError(I18n.t("common.stats.load.error"));
+                        ui.push();
+                        return;
+                    }
 
-                ui.push();
-            } catch (Exception e) {
-                log.error("Error fetching DMS dashboard statistics", e);
+                    categoriesCard.setValue(String.valueOf(data.categories()));
+                    filesCard.setValue(String.valueOf(data.files()));
+                    inventoryPanel.setItems(List.of(
+                            new DashboardBreakdownPanel.Item(
+                                    I18n.t("dms.dashboard.total.categories"), data.categories()),
+                            new DashboardBreakdownPanel.Item(
+                                    I18n.t("dms.dashboard.total.files"), data.files())
+                    ));
+                    ui.push();
+                }));
+    }
+
+    private DashboardData fetchDashboardData() {
+        long categories = count(categoryService.findAll(0, 1).getBody());
+        Map<String, LinkedFileResponseDto> linkedFiles = new LinkedHashMap<>();
+        addFiles(linkedFiles, linkedFileService.searchByCategories(List.of("")).getBody());
+        addFiles(linkedFiles, linkedFileService.searchByTags(List.of("")).getBody());
+        return new DashboardData(categories, linkedFiles.size());
+    }
+
+    private void addFiles(Map<String, LinkedFileResponseDto> files, List<LinkedFileResponseDto> results) {
+        if (results == null) {
+            throw new IllegalStateException("Linked-file search did not return a result list");
+        }
+        for (LinkedFileResponseDto file : results) {
+            if (file.getCode() == null || file.getCode().isBlank()) {
+                throw new IllegalStateException("Linked-file result did not include a business code");
             }
-        });
+            files.putIfAbsent(file.getCode(), file);
+        }
+    }
+
+    private long count(PaginatedResponseDto<?> body) {
+        if (body == null) {
+            throw new IllegalStateException("DMS category response did not contain data");
+        }
+        return body.getTotalElements();
+    }
+
+    private record DashboardData(long categories, long files) {
     }
 }

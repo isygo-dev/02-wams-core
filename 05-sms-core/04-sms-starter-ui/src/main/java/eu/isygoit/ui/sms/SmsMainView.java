@@ -1,19 +1,19 @@
 package eu.isygoit.ui.sms;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
+import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
 import eu.isygoit.ui.common.component.DashboardShortcutsBar;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
@@ -24,10 +24,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
- * Dashboard view for SMS, displaying key statistics, a favorites/shortcuts
- * quick-action bar and recent activity.
+ * Dashboard view for SMS, displaying live storage configuration totals and
+ * a provider-type breakdown.
  * Accessible at "/sms" and "/sms/home".
  */
 @Slf4j
@@ -37,10 +39,13 @@ import java.util.List;
 @PageTitle("Storage Management Dashboard")
 public class SmsMainView extends ManagementVerticalView {
 
+    private static final int PAGE_SIZE = 500;
+
     private final StorageConfigService storageConfigService;
     private final UI ui;
 
     private StatCard totalConfigsCard;
+    private DashboardBreakdownPanel storageTypesPanel;
 
     @Autowired
     public SmsMainView(StorageConfigService storageConfigService) {
@@ -54,10 +59,13 @@ public class SmsMainView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("sms-dashboard");
 
-        add(buildShortcutsBar());
         add(buildHeader());
+        add(buildShortcutsBar());
         add(buildStatsGrid());
-        add(buildRecentActivityPanel());
+        storageTypesPanel = new DashboardBreakdownPanel(
+                I18n.t("sms.dashboard.configurations.by.type"));
+        storageTypesPanel.setRefreshAction(this::loadStatistics);
+        add(storageTypesPanel);
 
         loadStatistics();
     }
@@ -87,61 +95,66 @@ public class SmsMainView extends ManagementVerticalView {
         return title;
     }
 
-    /**
-     * The 3 core totals and 3 enrichment insights, unified into one
-     * {@link StatCardGrid} (4 columns desktop / 3 tablet / 1 mobile).
-     */
+    /** The one live total, with its provider breakdown shown below. */
     private StatCardGrid buildStatsGrid() {
         totalConfigsCard = new StatCard(VaadinIcon.DATABASE, StatCard.Variant.PRIMARY,
                 I18n.t("sms.dashboard.total.configs"), null)
                 .withNavigation(() -> ui.navigate("sms/storageconfigs"));
-
-        // "Total Buckets" / "Total Storage Used": no bucket/file entity exists
-        // yet in this codebase (storage config is the only implemented entity),
-        // so these remain illustrative placeholder figures.
-        StatCard bucketsCard = new StatCard(VaadinIcon.FOLDER_O, StatCard.Variant.PRIMARY,
-                I18n.t("sms.dashboard.total.buckets"), "18")
-                .withNavigation(() -> ui.navigate("sms/storageconfigs"));
-        StatCard storageUsedCard = new StatCard(VaadinIcon.HARDDRIVE, StatCard.Variant.PRIMARY,
-                I18n.t("sms.dashboard.total.storage.used"), "2.4 TB")
-                .withNavigation(() -> ui.navigate("sms/storageconfigs"));
-
-        StatCard s3ConfigsCard = new StatCard(VaadinIcon.CLOUD, StatCard.Variant.SUCCESS,
-                I18n.t("sms.dashboard.stats.s3.configs"), "11")
-                .withChange("+2", StatCard.Trend.UP);
-        StatCard localConfigsCard = new StatCard(VaadinIcon.HARDDRIVE, StatCard.Variant.SUCCESS,
-                I18n.t("sms.dashboard.stats.local.configs"), "7")
-                .withChange("+1", StatCard.Trend.UP);
-        StatCard connectionHealthCard = new StatCard(VaadinIcon.HEART, StatCard.Variant.SUCCESS,
-                I18n.t("sms.dashboard.stats.connection.health"), "98.2%")
-                .withChange("+0.4%", StatCard.Trend.UP);
-
-        return new StatCardGrid(totalConfigsCard, bucketsCard, storageUsedCard,
-                s3ConfigsCard, localConfigsCard, connectionHealthCard);
-    }
-
-    private VerticalLayout buildRecentActivityPanel() {
-        VerticalLayout panel = new VerticalLayout();
-        panel.setSpacing(true);
-        panel.addClassName("wams-recent-activity-panel");
-        H2 title = new H2(I18n.t("sms.dashboard.recent.activity"));
-        title.addClassName(LumoUtility.FontSize.MEDIUM);
-        Div content = new Div();
-        content.setText(I18n.t("sms.dashboard.recent.activity.description"));
-        content.addClassName("wams-recent-activity-content");
-        panel.add(title, content);
-        return panel;
+        return new StatCardGrid(totalConfigsCard);
     }
 
     private void loadStatistics() {
-        try {
-            ResponseEntity<PaginatedResponseDto<StorageConfigDto>> response = storageConfigService.findAll(0, 1);
-            PaginatedResponseDto<StorageConfigDto> body = response.getBody();
-            long total = body != null ? body.getTotalElements() : 0;
-            ui.access(() -> totalConfigsCard.setValue(String.valueOf(total)));
-        } catch (Exception e) {
-            log.error("Failed to load storage configuration statistics", e);
-            ui.access(() -> totalConfigsCard.setValue("0"));
+        storageTypesPanel.setLoading(true);
+        ContextAwareAsync.supplyAsync(this::fetchDashboardData)
+                .whenComplete((data, failure) -> ui.access(() -> {
+                    if (failure != null) {
+                        log.error("Failed to load storage configuration statistics", failure);
+                        storageTypesPanel.setError(I18n.t("common.stats.load.error"));
+                        ui.push();
+                        return;
+                    }
+
+                    totalConfigsCard.setValue(String.valueOf(data.total()));
+                    storageTypesPanel.setItems(data.countsByType().entrySet().stream()
+                            .map(entry -> new DashboardBreakdownPanel.Item(entry.getKey(), entry.getValue()))
+                            .toList());
+                    ui.push();
+                }));
+    }
+
+    private DashboardData fetchDashboardData() {
+        ResponseEntity<PaginatedResponseDto<StorageConfigDto>> response =
+                storageConfigService.findAll(0, PAGE_SIZE);
+        PaginatedResponseDto<StorageConfigDto> body = response.getBody();
+        if (body == null) {
+            throw new IllegalStateException("Storage configuration response did not contain data");
         }
+
+        long total = body.getTotalElements();
+        Map<String, Long> countsByType = new TreeMap<>();
+        addTypeCounts(countsByType, body.getContent());
+        long pageCount = (total + PAGE_SIZE - 1) / PAGE_SIZE;
+        for (int page = 1; page < pageCount; page++) {
+            PaginatedResponseDto<StorageConfigDto> nextPage =
+                    storageConfigService.findAll(page, PAGE_SIZE).getBody();
+            if (nextPage == null || nextPage.getContent() == null) {
+                throw new IllegalStateException("Storage configuration page " + page + " was empty");
+            }
+            addTypeCounts(countsByType, nextPage.getContent());
+        }
+        return new DashboardData(total, Map.copyOf(countsByType));
+    }
+
+    private void addTypeCounts(Map<String, Long> countsByType, List<StorageConfigDto> configs) {
+        if (configs == null) {
+            return;
+        }
+        configs.stream()
+                .map(StorageConfigDto::getType)
+                .filter(type -> type != null)
+                .forEach(type -> countsByType.merge(I18n.enumLabel(type), 1L, Long::sum));
+    }
+
+    private record DashboardData(long total, Map<String, Long> countsByType) {
     }
 }

@@ -65,8 +65,8 @@ public class KmsMainView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-dashboard");
 
-        add(buildShortcutsBar());
         add(buildHeader());
+        add(buildShortcutsBar());
         keyStatsPanel = new KeyStatisticsPanel(kmsApiService, nextCodeService, randomKeyService, ui);
         add(keyStatsPanel);
         tokenStatsPanel = new TokenStatisticsPanel(tokenConfigService, ui);
@@ -101,6 +101,7 @@ public class KmsMainView extends ManagementVerticalView {
     private H2 buildHeader() {
         H2 title = new H2(I18n.t("kms.dashboard.title"));
         title.addClassName(LumoUtility.FontSize.XXLARGE);
+        title.addClassName("wams-dashboard-header");
         title.addClassName("kms-parta-dashboard-title");
         return title;
     }

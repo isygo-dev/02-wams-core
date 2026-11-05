@@ -1,17 +1,19 @@
 package eu.isygoit.ui.ims;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.PaginatedResponseDto;
+import eu.isygoit.dto.data.AccountGlobalStatDto;
+import eu.isygoit.enums.IEnumSharedStatType;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.*;
+import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
 import eu.isygoit.ui.common.component.DashboardShortcutsBar;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
@@ -22,10 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Dashboard view for IMS, displaying key statistics, enrichment insights,
- * and a quick-shortcuts bar. Accessible at "/ims" and "/ims/home".
+ * Dashboard view for IMS with live entity totals, account-status metrics,
+ * and quick shortcuts. Accessible at "/ims" and "/ims/home".
  */
 @RouteAlias(value = "ims/home", layout = ImsMainLayout.class)
 @VaadinSessionScope
@@ -41,8 +44,11 @@ public class ImsMainView extends ManagementVerticalView {
     private final CustomerService customerService;
     private final RoleInfoService roleInfoService;
     private final RegisteredUserService registeredUserService;
+    private final AccountStatisticsService accountStatisticsService;
     private final UI ui;
+    private final AtomicLong loadGeneration = new AtomicLong();
 
+    private final DashboardBreakdownPanel accountSnapshotPanel;
     private StatCard accountsCard;
     private StatCard tenantsCard;
     private StatCard applicationsCard;
@@ -56,13 +62,15 @@ public class ImsMainView extends ManagementVerticalView {
                        ApplicationService applicationService,
                        CustomerService customerService,
                        RoleInfoService roleInfoService,
-                       RegisteredUserService registeredUserService) {
+                       RegisteredUserService registeredUserService,
+                       AccountStatisticsService accountStatisticsService) {
         this.accountService = accountService;
         this.tenantService = tenantService;
         this.applicationService = applicationService;
         this.customerService = customerService;
         this.roleInfoService = roleInfoService;
         this.registeredUserService = registeredUserService;
+        this.accountStatisticsService = accountStatisticsService;
         this.ui = UI.getCurrent();
 
         ui.getPushConfiguration().setPushMode(com.vaadin.flow.shared.communication.PushMode.AUTOMATIC);
@@ -72,10 +80,12 @@ public class ImsMainView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("ims-dashboard");
 
-        add(buildShortcutsBar());
         add(buildHeader());
+        add(buildShortcutsBar());
         add(buildStatsGrid());
-        add(buildRecentActivityPanel());
+        accountSnapshotPanel = new DashboardBreakdownPanel(I18n.t("ims.dashboard.accounts.snapshot"));
+        accountSnapshotPanel.setRefreshAction(this::loadStatistics);
+        add(accountSnapshotPanel);
 
         loadStatistics();
     }
@@ -106,17 +116,12 @@ public class ImsMainView extends ManagementVerticalView {
 
     private H2 buildHeader() {
         H2 title = new H2(I18n.t("ims.dashboard.title"));
-        title.addClassName("dashboard-title");
+        title.addClassName("wams-dashboard-header");
         title.addClassName(LumoUtility.FontSize.XXLARGE);
         return title;
     }
 
-    /**
-     * The 6 real entity totals and 3 enrichment insights, unified into one
-     * unbroken {@link StatCardGrid} (4 columns desktop / 3 tablet / 1 mobile)
-     * instead of two visually different rows — this is the module's
-     * 9-tile stat-card showcase.
-     */
+    /** The six live entity totals in a responsive shared grid. */
     private StatCardGrid buildStatsGrid() {
         accountsCard = new StatCard(VaadinIcon.USER, StatCard.Variant.PRIMARY,
                 I18n.t("ims.dashboard.total.accounts"), null)
@@ -137,54 +142,76 @@ public class ImsMainView extends ManagementVerticalView {
                 I18n.t("ims.dashboard.total.registeredUsers"), null)
                 .withNavigation(() -> ui.navigate("ims/registered-users"));
 
-        // Enrichment insights: no cheap real data source exists yet for
-        // month-over-month account growth, enabled/disabled ratios, or tenant
-        // onboarding status, so these are plausible illustrative figures.
-        StatCard newAccountsCard = new StatCard(VaadinIcon.TRENDING_UP, StatCard.Variant.SUCCESS,
-                I18n.t("ims.dashboard.stats.new.accounts"), "+18")
-                .withChange("+12%", StatCard.Trend.UP);
-        StatCard activeRatioCard = new StatCard(VaadinIcon.CHECK_CIRCLE, StatCard.Variant.SUCCESS,
-                I18n.t("ims.dashboard.stats.active.ratio"), "92%")
-                .withChange("+3%", StatCard.Trend.UP);
-        StatCard pendingTenantsCard = new StatCard(VaadinIcon.HOURGLASS, StatCard.Variant.WARNING,
-                I18n.t("ims.dashboard.stats.pending.tenants"), "4")
-                .withChange("-2%", StatCard.Trend.DOWN);
-
         return new StatCardGrid(accountsCard, tenantsCard, applicationsCard, customersCard, rolesCard,
-                registeredUsersCard, newAccountsCard, activeRatioCard, pendingTenantsCard);
-    }
-
-    private VerticalLayout buildRecentActivityPanel() {
-        VerticalLayout panel = new VerticalLayout();
-        panel.setSpacing(true);
-        panel.addClassName("activity-panel");
-        H2 title = new H2(I18n.t("ims.dashboard.recent.activity"));
-        title.addClassName(LumoUtility.FontSize.MEDIUM);
-        Div content = new Div();
-        content.setText(I18n.t("ims.dashboard.recent.activity.description"));
-        content.addClassName("activity-panel-content");
-        panel.add(title, content);
-        return panel;
+                registeredUsersCard);
     }
 
     private void loadStatistics() {
-        ui.access(() -> {
-            try {
-                setCount(accountsCard, accountService.findAll(0, 1).getBody());
-                setCount(tenantsCard, tenantService.findAll(0, 1).getBody());
-                setCount(applicationsCard, applicationService.findAll(0, 1).getBody());
-                setCount(customersCard, customerService.findAll(0, 1).getBody());
-                setCount(rolesCard, roleInfoService.findAll(0, 1).getBody());
-                setCount(registeredUsersCard, registeredUserService.findAll(0, 1).getBody());
-
-                ui.push();
-            } catch (Exception e) {
-                log.error("Error fetching IMS dashboard statistics", e);
+        long generation = loadGeneration.incrementAndGet();
+        accountSnapshotPanel.setLoading(true);
+        ContextAwareAsync.supplyAsync(() -> new DashboardCounts(
+                count(accountService.findAll(0, 1).getBody()),
+                count(tenantService.findAll(0, 1).getBody()),
+                count(applicationService.findAll(0, 1).getBody()),
+                count(customerService.findAll(0, 1).getBody()),
+                count(roleInfoService.findAll(0, 1).getBody()),
+                count(registeredUserService.findAll(0, 1).getBody())
+        )).whenComplete((data, failure) -> ui.access(() -> {
+            if (generation != loadGeneration.get()) {
+                return;
             }
-        });
+            if (failure != null) {
+                log.error("Error fetching IMS dashboard statistics", failure);
+                ui.push();
+                return;
+            }
+
+            accountsCard.setValue(String.valueOf(data.accounts()));
+            tenantsCard.setValue(String.valueOf(data.tenants()));
+            applicationsCard.setValue(String.valueOf(data.applications()));
+            customersCard.setValue(String.valueOf(data.customers()));
+            rolesCard.setValue(String.valueOf(data.roles()));
+            registeredUsersCard.setValue(String.valueOf(data.registeredUsers()));
+            ui.push();
+        }));
+
+        ContextAwareAsync.supplyAsync(() ->
+                        accountStatisticsService.getGlobalStatistics(IEnumSharedStatType.Types.TOTAL_COUNT))
+                .whenComplete((accountStats, failure) -> ui.access(() -> {
+                    if (generation != loadGeneration.get()) {
+                        return;
+                    }
+                    if (failure != null) {
+                        log.error("Error fetching IMS account overview statistics", failure);
+                        accountSnapshotPanel.setError(I18n.t("common.stats.load.error"));
+                    } else if (accountStats == null) {
+                        accountSnapshotPanel.setError(I18n.t("common.stats.load.error"));
+                    } else {
+                        accountSnapshotPanel.setItems(List.of(
+                                new DashboardBreakdownPanel.Item(I18n.t("ims.dashboard.accounts.active"),
+                                        valueOrZero(accountStats.getActiveCount())),
+                                new DashboardBreakdownPanel.Item(I18n.t("ims.dashboard.accounts.confirmed"),
+                                        valueOrZero(accountStats.getConfirmedCount())),
+                                new DashboardBreakdownPanel.Item(I18n.t("ims.dashboard.accounts.admins"),
+                                        valueOrZero(accountStats.getAdminsCount()))
+                        ));
+                    }
+                    ui.push();
+                }));
     }
 
-    private void setCount(StatCard target, PaginatedResponseDto<?> body) {
-        target.setValue(body != null ? String.valueOf(body.getTotalElements()) : "0");
+    private long count(PaginatedResponseDto<?> body) {
+        if (body == null) {
+            throw new IllegalStateException("IMS dashboard count response did not contain data");
+        }
+        return body.getTotalElements();
+    }
+
+    private long valueOrZero(Long value) {
+        return value != null ? value : 0;
+    }
+
+    private record DashboardCounts(long accounts, long tenants, long applications,
+                                   long customers, long roles, long registeredUsers) {
     }
 }
