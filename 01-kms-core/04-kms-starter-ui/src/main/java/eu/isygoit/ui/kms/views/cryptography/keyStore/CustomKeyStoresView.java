@@ -18,7 +18,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeCustomKeyStoreResponse;
 import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponse;
@@ -42,7 +43,8 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Slf4j
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "kms/custom-key-stores", layout = KmsMainLayout.class)
 @PermitAll
 public class CustomKeyStoresView extends ManagementVerticalView {

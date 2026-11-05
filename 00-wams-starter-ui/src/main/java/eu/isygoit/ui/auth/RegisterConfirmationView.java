@@ -12,11 +12,13 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import eu.isygoit.i18n.I18n;
 import jakarta.annotation.security.PermitAll;
 
 @org.springframework.stereotype.Component
+@SpringComponent
 @UIScope
 @Route(value = AuthRoutes.REGISTRATION_CONFIRMATION)
 @PermitAll

@@ -9,6 +9,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.request.RegisteredUserDto;
@@ -17,9 +18,8 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.auth.AuthServiceFacade.Failure;
 import eu.isygoit.ui.common.component.PhoneField;
 import jakarta.annotation.security.PermitAll;
-import org.springframework.stereotype.Component;
 
-@Component
+@SpringComponent
 @UIScope
 @Route(value = AuthRoutes.REGISTER)
 @PermitAll

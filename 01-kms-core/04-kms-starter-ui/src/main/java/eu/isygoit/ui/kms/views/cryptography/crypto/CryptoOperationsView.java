@@ -14,7 +14,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeySpec;
@@ -39,7 +40,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "kms/crypto", layout = KmsMainLayout.class)
 @PermitAll
 public class CryptoOperationsView extends ManagementVerticalView {

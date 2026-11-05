@@ -5,7 +5,8 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -31,7 +32,8 @@ import java.util.List;
  */
 @Slf4j
 @RouteAlias(value = "cms/home", layout = CmsMainLayout.class)
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "cms", layout = CmsMainLayout.class)
 
 public class CmsMainView extends ManagementVerticalView {

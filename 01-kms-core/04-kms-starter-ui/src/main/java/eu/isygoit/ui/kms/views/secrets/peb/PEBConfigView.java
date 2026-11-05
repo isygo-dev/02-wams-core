@@ -7,7 +7,8 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.PEBConfigDto;
 import eu.isygoit.i18n.I18n;
@@ -23,7 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "kms/peb-configs", layout = KmsMainLayout.class)
 @PermitAll
 public class PEBConfigView extends AbstractPaginatedView<PEBConfigDto> {

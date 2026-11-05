@@ -10,7 +10,8 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.MinAccountDto;
 import eu.isygoit.enums.IEnumAccountSystemStatus;
@@ -33,7 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 @Slf4j
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "ims/accounts", layout = ImsMainLayout.class)
 @PermitAll
 public class AccountManagementView extends AbstractPaginatedView<MinAccountDto> {

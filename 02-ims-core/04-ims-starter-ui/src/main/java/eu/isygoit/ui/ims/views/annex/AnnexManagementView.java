@@ -7,7 +7,8 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.AnnexDto;
 import eu.isygoit.enums.IEnumLanguage;
@@ -26,7 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 @Slf4j
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "ims/annexes", layout = ImsMainLayout.class)
 @PermitAll
 public class AnnexManagementView extends AbstractPaginatedView<AnnexDto> {

@@ -17,7 +17,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.MsgTemplateDto;
 import eu.isygoit.enums.IEnumLanguage;
@@ -43,7 +44,8 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Slf4j
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "mms/templates", layout = MmsMainLayout.class)
 @PermitAll
 public class MsgTemplateManagementView extends ManagementVerticalView {

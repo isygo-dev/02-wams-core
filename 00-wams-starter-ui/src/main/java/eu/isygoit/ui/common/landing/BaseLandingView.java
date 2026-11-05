@@ -20,6 +20,7 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
+import eu.isygoit.ui.common.view.ViewTitleUtils;
 
 import java.util.ArrayList;
 import java.util.List;

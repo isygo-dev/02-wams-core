@@ -16,7 +16,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
@@ -37,7 +38,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "kms/aliases", layout = KmsMainLayout.class)
 @PermitAll
 public class AliasesView extends ManagementVerticalView {

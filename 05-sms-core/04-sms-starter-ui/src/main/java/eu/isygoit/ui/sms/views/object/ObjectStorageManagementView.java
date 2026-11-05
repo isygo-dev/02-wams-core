@@ -16,7 +16,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.data.FileStorageDto;
@@ -59,7 +60,8 @@ import java.util.stream.Collectors;
  * tenant/bucket selection.
  */
 @Slf4j
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "sms/objectstorage", layout = SmsMainLayout.class)
 @PermitAll
 public class ObjectStorageManagementView extends ManagementVerticalView implements HasUrlParameter<String> {
@@ -137,11 +139,9 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     }
 
     /**
-     * Called by the router on every navigation to this view — including
-     * subsequent ones, since the view is {@code @VaadinSessionScope} and thus
-     * reused across navigations within the same session. Owns the initial
-     * data load so a plain {@code /sms/objectstorage} visit and a deep link
-     * with a bucket segment both go through the same path.
+     * Called by the router on navigation to this view. Owns the initial data
+     * load so a plain {@code /sms/objectstorage} visit and a deep link with a
+     * bucket segment both go through the same path.
      */
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String bucketName) {

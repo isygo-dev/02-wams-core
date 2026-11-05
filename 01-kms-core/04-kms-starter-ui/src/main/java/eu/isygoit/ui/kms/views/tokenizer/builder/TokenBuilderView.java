@@ -21,7 +21,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
@@ -43,7 +44,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "kms/token-builder", layout = KmsMainLayout.class)
 @PermitAll
 public class TokenBuilderView extends ManagementVerticalView {

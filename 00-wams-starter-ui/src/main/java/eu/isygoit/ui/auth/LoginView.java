@@ -9,6 +9,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.response.UserContext;
@@ -17,13 +18,12 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.auth.AuthServiceFacade.Failure;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
-import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 
-@Component
+@SpringComponent
 @UIScope
 @Route(value = AuthRoutes.LOGIN)
 @PermitAll

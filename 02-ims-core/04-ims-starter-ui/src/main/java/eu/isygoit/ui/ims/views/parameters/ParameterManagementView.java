@@ -6,7 +6,8 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.AppParameterDto;
 import eu.isygoit.i18n.I18n;
@@ -23,7 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 @Slf4j
-@VaadinSessionScope
+@SpringComponent
+@RouteScope
 @Route(value = "ims/parameters", layout = ImsMainLayout.class)
 @PermitAll
 public class ParameterManagementView extends AbstractPaginatedView<AppParameterDto> {
