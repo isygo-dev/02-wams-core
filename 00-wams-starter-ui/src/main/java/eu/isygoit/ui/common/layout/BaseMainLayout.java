@@ -3,6 +3,7 @@ package eu.isygoit.ui.common.layout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -23,6 +24,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.popover.Popover;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.server.StreamResource;
@@ -34,7 +37,10 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.component.AppSearchBar;
+import eu.isygoit.ui.common.component.Breadcrumbs;
 import eu.isygoit.ui.common.component.CollapsibleNavSection;
+import eu.isygoit.ui.common.component.INavRegistry;
+import eu.isygoit.ui.common.component.INavRegistry.NavTarget;
 import eu.isygoit.ui.common.component.LanguageSelectorComponent;
 import eu.isygoit.ui.common.component.ThemeToggleButton;
 import eu.isygoit.ui.common.nav.NavRegistryProvider;
@@ -50,6 +56,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * All shared CSS for the application is imported once here, since every view
@@ -65,7 +75,7 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @CssImport("./styles/scss/common.scss")
 @CssImport("./themes/isygo/styles.css")
-public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver {
+public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver, AfterNavigationObserver {
 
     private static final String SIDEBAR_COLLAPSED_SESSION_KEY = "wams-sidebar-collapsed";
     /**
@@ -77,6 +87,8 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
     private final AccountService accountService;
     private final AccountImageService accountImageService;
     private Div rightSlot; // container for search/notifications/settings/language/profile
+    private Breadcrumbs breadcrumbs;
+    private Div contentHost;
     private Button sidebarCollapseToggle;
     private boolean sidebarCollapsed;
     private Div drawerRoot;
@@ -590,6 +602,86 @@ public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObs
         }
         SecurityContextHolder.clearContext();
         UI.getCurrent().getPage().setLocation("login");
+    }
+
+    @Override
+    public void showRouterLayoutContent(HasElement content) {
+        Component view = content == null ? null : content.getElement().getComponent().orElse(null);
+        if (view == null) {
+            setContent(null);
+            return;
+        }
+        if (breadcrumbs == null) {
+            breadcrumbs = new Breadcrumbs();
+            contentHost = new Div();
+            contentHost.addClassName("wams-content-host");
+        }
+        contentHost.removeAll();
+        contentHost.add(breadcrumbs, view);
+        setContent(contentHost);
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent event) {
+        if (breadcrumbs != null) {
+            breadcrumbs.setItems(breadcrumbTrail(event.getLocation().getPath()));
+        }
+    }
+
+    private List<Breadcrumbs.Item> breadcrumbTrail(String path) {
+        INavRegistry registry = navRegistryProvider.getNavRegistry();
+        if (registry == null) {
+            return List.of();
+        }
+
+        List<NavTarget> targets = registry.getAll();
+        Optional<NavTarget> current = targets.stream()
+                .filter(target -> getModuleKey().equals(target.moduleKey()))
+                .filter(target -> path.equals(target.route()) || path.startsWith(target.route() + "/"))
+                .max(Comparator.comparingInt(target -> target.route().length()));
+        if (current.isEmpty()) {
+            return List.of();
+        }
+
+        List<NavTarget> moduleTargets = targets.stream()
+                .filter(target -> getModuleKey().equals(target.moduleKey()))
+                .toList();
+        Optional<NavTarget> dashboard = moduleTargets.stream()
+                .min(Comparator.comparingInt(target -> target.route().length()));
+        if (dashboard.isEmpty()) {
+            return List.of();
+        }
+
+        List<Breadcrumbs.Item> trail = new ArrayList<>();
+        trail.add(Breadcrumbs.Item.link(
+                I18n.t("common.landing.title"), "landing", VaadinIcon.HOME.create()));
+        NavTarget dashboardTarget = dashboard.get();
+        if (!dashboardTarget.route().equals(current.get().route())) {
+            String moduleLabelKey = registry.moduleLabelKey(getModuleKey());
+            String moduleLabel = moduleLabelKey == null || moduleLabelKey.isBlank()
+                    ? I18n.t(dashboardTarget.labelKey())
+                    : I18n.t(moduleLabelKey);
+            trail.add(Breadcrumbs.Item.link(moduleLabel, dashboardTarget.route()));
+        }
+
+        List<NavTarget> parents = new ArrayList<>();
+        NavTarget parent = current.get();
+        while (parent.parentRoute() != null) {
+            String parentRoute = parent.parentRoute();
+            Optional<NavTarget> parentTarget = moduleTargets.stream()
+                    .filter(target -> parentRoute.equals(target.route()))
+                    .findFirst();
+            if (parentTarget.isEmpty()) {
+                break;
+            }
+            parent = parentTarget.get();
+            parents.add(0, parent);
+        }
+        for (NavTarget parentTarget : parents) {
+            trail.add(Breadcrumbs.Item.link(I18n.t(parentTarget.labelKey()), parentTarget.route()));
+        }
+        trail.add(Breadcrumbs.Item.current(I18n.t(current.get().labelKey())));
+        return trail;
     }
 
     @Override

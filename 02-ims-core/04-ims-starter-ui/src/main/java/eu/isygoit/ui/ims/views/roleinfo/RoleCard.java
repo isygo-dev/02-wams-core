@@ -41,13 +41,18 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
     }
 
     @Override
+    protected String businessCode() {
+        return role.getCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         titleLayout.setSpacing(true);
         titleLayout.addClassName("card-title-group");
 
-        Span titleSpan = buildTitleSpan(role.getName(), role.getCode());
+        Span titleSpan = buildTitleSpan(role.getName(), role.getName());
         titleSpan.addClassName(LumoUtility.FontWeight.BOLD);
 
         Span levelChip = new Span(I18n.t("ims.role.card.level", role.getLevel()));
@@ -82,7 +87,6 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
         body.setPadding(false);
         body.addClassName("card-row--spaced");
 
-        body.add(createInfoRow(VaadinIcon.CODE, I18n.t("ims.role.card.code"), role.getCode()));
         body.add(createInfoRow(VaadinIcon.USERS, I18n.t("ims.role.card.users"), String.valueOf(role.getNumberOfUsers())));
 
         add(body);

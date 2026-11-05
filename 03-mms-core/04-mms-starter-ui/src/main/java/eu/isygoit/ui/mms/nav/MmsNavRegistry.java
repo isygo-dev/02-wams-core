@@ -23,7 +23,7 @@ public final class MmsNavRegistry implements INavRegistry {
 
     private static final List<NavTarget> ALL = List.of(
             // MMS
-            new NavTarget("mms.nav.dashboard", "mms/home", VaadinIcon.HOME, "mms"),
+            new NavTarget("mms.nav.dashboard", "mms", VaadinIcon.HOME, "mms"),
             new NavTarget("mms.nav.sender.config", "mms/sender-config", VaadinIcon.MAILBOX, "mms"),
             new NavTarget("mms.nav.templates", "mms/templates", VaadinIcon.FILE_TEXT, "mms")
     );

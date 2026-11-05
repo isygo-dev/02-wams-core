@@ -65,6 +65,16 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
                            SenderConfigService senderConfigService,
                            MsgTemplateDto template,
                            Runnable onRefresh) {
+        this(parentView, templateService, templateFileService, senderConfigService, template, onRefresh, true);
+    }
+
+    MsgTemplateCard(MsgTemplateManagementView parentView,
+                    MsgTemplateService templateService,
+                    MsgTemplateFileService templateFileService,
+                    SenderConfigService senderConfigService,
+                    MsgTemplateDto template,
+                    Runnable onRefresh,
+                    boolean loadSenderConfig) {
         super(parentView, templateService);
         this.template = template;
         this.templateFileService = templateFileService;
@@ -78,7 +88,9 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         add(bodyContainer);
 
         initCard();
-        loadSenderConfigDetails();
+        if (loadSenderConfig) {
+            loadSenderConfigDetails();
+        }
     }
 
     // ─── Public Accessors ─────────────────────────────────────────────────────
@@ -187,6 +199,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     }
 
     private void updateDisplay() {
+        refreshBusinessCode();
         // Null check for all span components
         if (titleSpan == null) {
             titleSpan = buildTitleSpan("", "");
@@ -253,6 +266,11 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     }
 
     @Override
+    protected String businessCode() {
+        return template.getCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -279,12 +297,15 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         }
         left.add(titleSpan);
 
+        return left;
+    }
+
+    @Override
+    protected Component buildEnumTags() {
         languageChip = MmsEnumTag.ofOrUnknown(template.getLanguage(), "mms.msgtemplate.view.language");
         languageChip.getElement().setAttribute("title",
                 I18n.t("mms.msgtemplate.card.language.tooltip", languageChip.getText()));
-        left.add(languageChip);
-
-        return left;
+        return languageChip;
     }
 
     @Override
@@ -326,13 +347,6 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
         // Essential fields only – quick-scan card. Everything else (tenant,
         // default sender, original file name, storage path, ...) lives in
         // MsgTemplateDetailsViewDialog, which shows every MsgTemplateDto field.
-
-        bodyContainer.add(createDetailRowWithCopy(
-                VaadinIcon.CODE,
-                I18n.t("mms.msgtemplate.card.code"),
-                template.getCode() != null ? template.getCode() : I18n.t("mms.common.value.notAvailable"),
-                template.getCode() != null ? template.getCode() : ""
-        ));
 
         // Sender Config row with tooltip and view button
         String senderConfigDisplay = getSenderConfigDisplayName();

@@ -50,6 +50,11 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
     }
 
     @Override
+    protected String businessCode() {
+        return dto.getCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -72,9 +77,12 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.COG, I18n.t("kms.digest.card.algorithm"),
-                KmsEnumTag.ofOrUnknown(dto.getAlgorithm(), "kms.enum")));
         add(createIconRow(VaadinIcon.ROTATE_RIGHT, I18n.t("kms.digest.card.iterations"), String.valueOf(dto.getIterations())));
+    }
+
+    @Override
+    protected Component buildEnumTags() {
+        return KmsEnumTag.ofOrUnknown(dto.getAlgorithm(), "kms.enum");
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
@@ -106,6 +114,7 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
     }
 
     private void refreshDisplay() {
+        refreshBusinessCode();
         titleSpan.setText(dto.getCode());
         titleSpan.getElement().setAttribute("title", dto.getCode());
         getUI().ifPresent(ui -> ui.access(() -> {

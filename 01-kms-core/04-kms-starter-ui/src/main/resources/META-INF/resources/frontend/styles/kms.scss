@@ -1,77 +1,37 @@
-/* Pilot/IMS-aligned design tokens and Vaadin theme values. */
+/* KMS aliases use the shared WAMS/Lumo theme tokens. */
 :root {
-  --kms-color-primary: #0c66e4;
-  --kms-color-primary-soft: rgba(12, 102, 228, 0.1);
-  --kms-color-success: #1f845a;
-  --kms-color-warning: #a54800;
-  --kms-color-danger: #c9372c;
-  --kms-color-info: #0055cc;
-  --kms-color-text: #172b4d;
-  --kms-color-text-muted: #44546f;
-  --kms-color-text-soft: #626f86;
-  --kms-color-surface: #ffffff;
-  --kms-color-surface-alt: #f7f8f9;
-  --kms-color-border: rgba(9, 30, 66, 0.14);
-  --kms-color-shadow: rgba(9, 30, 66, 0.13);
-  --kms-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --kms-color-primary: var(--lumo-primary-color);
+  --kms-color-primary-soft: var(--lumo-primary-color-10pct);
+  --kms-color-success: var(--lumo-success-color);
+  --kms-color-warning: var(--lumo-warning-color);
+  --kms-color-danger: var(--lumo-error-color);
+  --kms-color-info: var(--lumo-primary-text-color);
+  --kms-color-text: var(--lumo-body-text-color);
+  --kms-color-text-muted: var(--lumo-secondary-text-color);
+  --kms-color-text-soft: var(--lumo-tertiary-text-color);
+  --kms-color-surface: var(--lumo-base-color);
+  --kms-color-surface-alt: var(--lumo-contrast-5pct);
+  --kms-color-border: var(--wams-surface-line);
+  --kms-color-shadow: var(--wams-shadow-hover);
+  --kms-font-family: var(--lumo-font-family);
   --kms-font-size-xxs: 0.625rem;
-  --kms-font-size-xs: 0.75rem;
-  --kms-font-size-sm: 0.875rem;
-  --kms-font-size-md: 1rem;
-  --kms-font-size-lg: 1.125rem;
-  --kms-font-size-xl: 1.5rem;
-  --kms-space-1: 0.25rem;
-  --kms-space-2: 0.5rem;
-  --kms-space-3: 0.75rem;
-  --kms-space-4: 1rem;
-  --kms-space-6: 1.5rem;
-  --kms-space-8: 2rem;
-  --kms-radius-sm: 3px;
-  --kms-radius-md: 6px;
-  --kms-radius-lg: 9px;
-  --kms-radius-xl: 12px;
-  --kms-shadow-sm: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
-  --kms-shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
-
-  --lumo-primary-color: var(--kms-color-primary);
-  --lumo-primary-text-color: var(--kms-color-primary);
-  --lumo-primary-color-10pct: var(--kms-color-primary-soft);
-  --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
-  --lumo-success-color: var(--kms-color-success);
-  --lumo-success-text-color: var(--kms-color-success);
-  --lumo-success-color-10pct: rgba(31, 132, 90, 0.1);
-  --lumo-warning-color: var(--kms-color-warning);
-  --lumo-warning-text-color: var(--kms-color-warning);
-  --lumo-warning-color-10pct: rgba(165, 72, 0, 0.12);
-  --lumo-error-color: var(--kms-color-danger);
-  --lumo-error-text-color: var(--kms-color-danger);
-  --lumo-error-color-10pct: rgba(201, 55, 44, 0.1);
-  --lumo-body-text-color: var(--kms-color-text);
-  --lumo-secondary-text-color: var(--kms-color-text-muted);
-  --lumo-tertiary-text-color: var(--kms-color-text-soft);
-  --lumo-base-color: var(--kms-color-surface);
-  --lumo-contrast-5pct: rgba(9, 30, 66, 0.04);
-  --lumo-contrast-10pct: rgba(9, 30, 66, 0.08);
-  --lumo-contrast-20pct: var(--kms-color-border);
-  --lumo-font-family: var(--kms-font-family);
-  --lumo-font-size-xxs: var(--kms-font-size-xxs);
-  --lumo-font-size-xs: var(--kms-font-size-xs);
-  --lumo-font-size-s: var(--kms-font-size-sm);
-  --lumo-font-size-m: var(--kms-font-size-md);
-  --lumo-font-size-l: var(--kms-font-size-lg);
-  --lumo-font-size-xl: var(--kms-font-size-xl);
-  --lumo-space-xs: var(--kms-space-1);
-  --lumo-space-s: var(--kms-space-2);
-  --lumo-space-m: var(--kms-space-4);
-  --lumo-space-l: var(--kms-space-6);
-  --lumo-space-xl: var(--kms-space-8);
-  --lumo-border-radius-s: var(--kms-radius-sm);
-  --lumo-border-radius-m: var(--kms-radius-md);
-  --lumo-border-radius: var(--kms-radius-lg);
-  --lumo-border-radius-l: var(--kms-radius-lg);
-  --lumo-box-shadow-xs: var(--kms-shadow-sm);
-  --lumo-box-shadow-s: var(--kms-shadow-sm);
-  --lumo-box-shadow-m: var(--kms-shadow-md);
+  --kms-font-size-xs: var(--lumo-font-size-xs);
+  --kms-font-size-sm: var(--lumo-font-size-s);
+  --kms-font-size-md: var(--lumo-font-size-m);
+  --kms-font-size-lg: var(--lumo-font-size-l);
+  --kms-font-size-xl: var(--lumo-font-size-xl);
+  --kms-space-1: var(--lumo-space-xs);
+  --kms-space-2: var(--lumo-space-s);
+  --kms-space-3: var(--lumo-space-m);
+  --kms-space-4: var(--lumo-space-m);
+  --kms-space-6: var(--lumo-space-l);
+  --kms-space-8: var(--lumo-space-xl);
+  --kms-radius-sm: var(--lumo-border-radius-s);
+  --kms-radius-md: var(--lumo-border-radius-m);
+  --kms-radius-lg: var(--lumo-border-radius-l);
+  --kms-radius-xl: var(--lumo-border-radius-l);
+  --kms-shadow-sm: var(--lumo-box-shadow-xs);
+  --kms-shadow-md: var(--lumo-box-shadow-m);
 }
 
 .kms-enum-tag {
@@ -295,12 +255,6 @@
 
 /* ── ByokView ─────────────────────────────────────────────────────────────── */
 
-.kms-byok-view {
-  background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-  min-height: 100vh;
-  animation: kms-parta-fade-in 0.5s ease-out;
-}
-
 .kms-parta-step-card {
   margin-bottom: var(--lumo-space-s);
   background-color: var(--lumo-base-color);
@@ -322,12 +276,6 @@
 }
 
 /* ── CryptoOperationsView / crypto panels ─────────────────────────────────── */
-
-.kms-crypto-view {
-  background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-  min-height: 100vh;
-  animation: kms-parta-fade-in 0.5s ease-out;
-}
 
 .kms-parta-crypto-tabs {
   overflow-x: auto;
@@ -389,12 +337,6 @@
 }
 
 /* ── RandomKeyView / RandomKeyCard ────────────────────────────────────────── */
-
-.random-keys-view {
-  background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-  min-height: 100vh;
-  animation: kms-parta-fade-in 0.5s ease-out;
-}
 
 @keyframes kms-parta-fade-in {
   from {
@@ -641,14 +583,6 @@
    card-grid layout that used to be injected at runtime via
    injectResponsiveStyles(). ─────────────────────────────────────────────── */
 
-.kms-keys-view,
-.kms-aliases-view,
-.kms-tags-view {
-  background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-  min-height: 100vh;
-  animation: kms-partb-fade-in 0.5s ease-out;
-}
-
 @keyframes kms-partb-fade-in {
   from {
     opacity: 0;
@@ -861,15 +795,6 @@
 /* ── Shared "gradient + fade-in" page background used by several KMS views ── */
 /* (GrantsView, PoliciesView, CustomKeyStoresView, IncrementalKeyView all used
    to inject this identical block via UI.getCurrent().getPage().executeJs.)   */
-
-.kms-grants-view,
-.policies-view,
-.kms-custom-stores-view,
-.incremental-keys-view {
-  background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-  min-height: 100vh;
-  animation: kms-partc-fade-in 0.5s ease-out;
-}
 
 @keyframes kms-partc-fade-in {
   from {
@@ -1334,14 +1259,7 @@
    TokenConfigView — shared page background, toolbar and card-grid layout that
    used to be injected at runtime via injectResponsiveStyles(). ─────────────── */
 
-.digest-config-view,
-.password-config-view,
-.peb-config-view,
-.token-config-view {
-  background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-  min-height: 100vh;
-  animation: wams-kms-fade-in 0.5s ease-out;
-}
+
 
 @keyframes wams-kms-fade-in {
   from {
@@ -1502,12 +1420,6 @@
 
 /* ── TokenBuilderView — build/validate cards, result panel, audience chips.
    Previously injected via attachResponsiveStyles(). ─────────────────────────── */
-
-.tokenizer-view {
-  background: linear-gradient(145deg, var(--lumo-primary-color-10pct), var(--lumo-base-color) 70%);
-  min-height: 100vh;
-  animation: wams-kms-fade-in 0.5s ease-out;
-}
 
 .tokenizer-view .cards-row {
   flex-wrap: wrap;

@@ -29,7 +29,8 @@ import org.hibernate.annotations.DynamicUpdate;
         @UniqueConstraint(columnNames = {SchemaColumnConstantName.C_EMAIL}),
         @UniqueConstraint(columnNames = {SchemaColumnConstantName.C_TENANT})
 })
-public class RegisteredUser extends AuditableEntity<Long> implements ITenantAssignable {
+public class RegisteredUser extends AuditableEntity<Long>
+        implements ITenantAssignable, IStatusAssignable<IEnumRegistrationStatus.Types> {
 
     @Id
     @SequenceGenerator(name = "registred_user_sequence_generator", sequenceName = "registred_user_sequence", allocationSize = 1)

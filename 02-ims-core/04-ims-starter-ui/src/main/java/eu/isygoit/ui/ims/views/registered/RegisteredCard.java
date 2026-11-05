@@ -63,20 +63,18 @@ public class RegisteredCard extends BaseCard<RegisteredManagementView, Registere
                 " " + (registeredUser.getLastName() != null ? registeredUser.getLastName() : "");
         Span titleSpan = buildTitleSpan(fullName.trim(), registeredUser.getEmail());
 
-        // Origin chip
-        Span originChip = ImsEnumTag.ofOrUnknown(registeredUser.getOrigin(), "ims.enum.origin");
-
-        // Status chip
-        Span statusChip = buildStatusChip();
-
-        titleLayout.add(titleSpan, originChip, statusChip);
+        titleLayout.add(titleSpan);
         return titleLayout;
     }
 
-    private Span buildStatusChip() {
-        IEnumRegistrationStatus.Types status = registeredUser.getStatus();
+    @Override
+    protected Span buildStatusTag() {
+        return ImsEnumTag.ofOrUnknown(registeredUser.getStatus(), "ims.registered.card.status");
+    }
 
-        return ImsEnumTag.ofOrUnknown(status, "ims.registered.card.status");
+    @Override
+    protected Component buildEnumTags() {
+        return ImsEnumTag.ofOrUnknown(registeredUser.getOrigin(), "ims.enum.origin");
     }
 
     @Override

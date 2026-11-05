@@ -23,7 +23,7 @@ import java.util.Date;
 @Table(name = SchemaTableConstantName.T_QR_LOGIN_CHALLENGE,
         uniqueConstraints = @UniqueConstraint(columnNames = SchemaColumnConstantName.C_QR_CHALLENGE_ID),
         indexes = @Index(name = "IDX_QR_CHALLENGE_EXPIRES", columnList = SchemaColumnConstantName.C_QR_EXPIRES_AT))
-public class QrLoginChallenge extends AbstractEntity<Long> {
+public class QrLoginChallenge extends AbstractEntity<Long> implements IStatusAssignable<QrLoginStatus> {
 
     @Id
     @SequenceGenerator(name = "qr_login_challenge_sequence_generator",

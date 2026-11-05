@@ -59,6 +59,11 @@ public class AccountCard extends ProfileCard<AccountManagementView, AccountServi
         return "account-card";
     }
 
+    @Override
+    protected String businessCode() {
+        return profile.getCode();
+    }
+
     /* ══════════════════════════════════════════════════════════════
      * Profile accessors
      * ══════════════════════════════════════════════════════════════ */

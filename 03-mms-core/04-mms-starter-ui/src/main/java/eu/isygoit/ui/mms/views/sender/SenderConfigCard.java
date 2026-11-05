@@ -121,6 +121,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     }
 
     private void updateDisplay() {
+        refreshBusinessCode();
         // Null check for all span components
         if (titleSpan == null) {
             titleSpan = buildTitleSpan("", "");
@@ -173,22 +174,16 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     }
 
     @Override
+    protected String businessCode() {
+        return config.getCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
         left.setSpacing(true);
         left.addClassName("wams-title-row");
-
-        // Code badge
-        if (config.getCode() != null) {
-            Span codeBadge = new Span(config.getCode());
-            codeBadge.addClassName(LumoUtility.Background.CONTRAST_10);
-            codeBadge.addClassName(LumoUtility.Padding.XSMALL);
-            codeBadge.addClassName(LumoUtility.BorderRadius.SMALL);
-            codeBadge.addClassName(LumoUtility.FontSize.XSMALL);
-            codeBadge.addClassName("wams-code-badge");
-            left.add(codeBadge);
-        }
 
         // Tenant badge
         if (config.getTenant() != null) {
@@ -207,13 +202,15 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         titleSpan = buildTitleSpan(displayName, displayName);
         left.add(titleSpan);
 
-        // Status chip
+        return left;
+    }
+
+    @Override
+    protected Span buildStatusTag() {
         String statusText = isActive() ? I18n.t("mms.sender.card.status.active") : I18n.t("mms.sender.card.status.inactive");
         statusChip = buildStatusChip(statusText, statusText);
         applyChipColor(statusChip, isActive() ? ChipColor.SUCCESS : ChipColor.WARNING);
-        left.add(statusChip);
-
-        return left;
+        return statusChip;
     }
 
     @Override
@@ -253,14 +250,6 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
         // (description, tenant, port, username, transport protocol, smtp
         // auth, starttls enabled/required, debug) live in SenderConfigDetailsViewDialog,
         // which shows every SenderConfigDto field.
-
-        // Code
-        bodyContainer.add(createDetailRowWithCopy(
-                VaadinIcon.CODE,
-                I18n.t("mms.sender.card.code"),
-                config.getCode() != null ? config.getCode() : I18n.t("mms.common.value.notAvailable"),
-                config.getCode() != null ? config.getCode() : ""
-        ));
 
         // Name
         bodyContainer.add(createDetailRow(

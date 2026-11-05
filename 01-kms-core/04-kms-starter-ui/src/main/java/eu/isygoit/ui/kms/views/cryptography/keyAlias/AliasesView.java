@@ -4,8 +4,10 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -19,8 +21,11 @@ import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
+import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.component.ManagementGridSupport;
+import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.CreateAliasDialog;
@@ -41,6 +46,8 @@ public class AliasesView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
     private final Div cardsContainer = new Div();
+    private final Grid<KmsDtos.ListAliasesResponse.AliasEntry> grid = new Grid<>();
+    private ManagementViewModeSwitch viewModeSwitch;
     private final Button createButton = new Button(I18n.t("kms.aliases.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
@@ -81,6 +88,8 @@ public class AliasesView extends ManagementVerticalView {
         cardsContainer.setWidthFull();
         cardsContainer.addClassName("aliases-grid");
         add(cardsContainer);
+        configureGrid();
+        add(grid);
 
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
@@ -132,6 +141,7 @@ public class AliasesView extends ManagementVerticalView {
         pageInfoLabel.getElement().setAttribute("title", I18n.t("kms.aliases.view.page.info.title"));
         totalCountLabel.getElement().setAttribute("title", I18n.t("kms.aliases.view.total.count.title"));
 
+        setTableMode(viewModeSwitch.isTableMode());
         resetPaginationAndLoad();
     }
 
@@ -205,6 +215,7 @@ public class AliasesView extends ManagementVerticalView {
                             card.getTargetKeyId().toLowerCase().contains(searchLower);
                 })
                 .collect(Collectors.toList());
+        grid.setItems(filtered.stream().map(AliasCard::getEntry).toList());
 
         if (filtered.isEmpty()) {
             Div emptyState = new Div();
@@ -255,7 +266,8 @@ public class AliasesView extends ManagementVerticalView {
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.setTooltipText(I18n.t("kms.aliases.view.refresh.tooltip"));
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        rightGroup.add(refreshButton, createButton);
+        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
+        rightGroup.add(viewModeSwitch, refreshButton, createButton);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
@@ -263,9 +275,28 @@ public class AliasesView extends ManagementVerticalView {
 
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
+        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
+        grid.setVisible(!show && viewModeSwitch.isTableMode());
         refreshButton.setEnabled(!show);
         createButton.setEnabled(!show);
+    }
+
+    private void configureGrid() {
+        grid.addClassName("management-grid");
+        grid.addColumn(KmsDtos.ListAliasesResponse.AliasEntry::getAliasName)
+                .setHeader(I18n.t("kms.alias.table.name")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(KmsDtos.ListAliasesResponse.AliasEntry::getTargetKeyId)
+                .setHeader(I18n.t("kms.alias.card.target.key")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(KmsDtos.ListAliasesResponse.AliasEntry::getCreateDate)
+                .setHeader(I18n.t("kms.alias.card.created")).setAutoWidth(true);
+        ManagementGridSupport.addCardActionsColumn(grid,
+                entry -> new AliasCard(this, kmsApiService, entry));
+    }
+
+    private void setTableMode(boolean tableMode) {
+        boolean loading = loadingBar.isVisible();
+        cardsContainer.setVisible(!loading && !tableMode);
+        grid.setVisible(!loading && tableMode);
     }
 
     private void createAlias() {

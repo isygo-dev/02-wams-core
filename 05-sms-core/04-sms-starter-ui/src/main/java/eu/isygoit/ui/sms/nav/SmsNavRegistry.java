@@ -24,7 +24,9 @@ public final class SmsNavRegistry implements INavRegistry {
     private static final List<NavTarget> ALL = List.of(
             // SMS
             new NavTarget("sms.nav.dashboard", "sms", VaadinIcon.HOME, "sms"),
-            new NavTarget("sms.nav.storage.configs", "sms/storageconfigs", VaadinIcon.DATABASE, "sms")
+            new NavTarget("sms.nav.storage.configs", "sms/storageconfigs", VaadinIcon.DATABASE, "sms"),
+            new NavTarget("sms.nav.buckets", "sms/buckets", VaadinIcon.FOLDER, "sms"),
+            new NavTarget("sms.nav.objects", "sms/objectstorage", VaadinIcon.FILE, "sms")
     );
 
     public SmsNavRegistry() {

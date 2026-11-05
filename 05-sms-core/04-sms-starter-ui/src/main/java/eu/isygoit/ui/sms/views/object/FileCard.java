@@ -64,12 +64,17 @@ public class FileCard extends BaseCard<ObjectStorageManagementView, ObjectStorag
         // the card's headline, same convention as every other file-bearing
         // card in the app (e.g. LinkedFileCard).
         Span titleSpan = buildTitleSpan(file.getFileName(), file.getName());
-        Span typeChip = buildStatusChip(
-                file.getType() != null && !file.getType().isBlank() ? file.getType().toUpperCase() : I18n.t("sms.objects.card.type.unknown"),
+        titleLayout.add(titleSpan);
+        return titleLayout;
+    }
+
+    @Override
+    protected Component buildEnumTags() {
+        return buildStatusChip(
+                file.getType() != null && !file.getType().isBlank()
+                        ? file.getType().toUpperCase() : I18n.t("sms.objects.card.type.unknown"),
                 BaseCard.ChipColor.INFO
         );
-        titleLayout.add(titleSpan, typeChip);
-        return titleLayout;
     }
 
     @Override

@@ -42,6 +42,11 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
     }
 
     @Override
+    protected String businessCode() {
+        return calendar.getCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -52,21 +57,17 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
         Span titleSpan = buildTitleSpan(displayName, displayName);
         titleLayout.add(titleSpan);
 
-        // Short code badge — how users commonly search/identify calendars (see search field)
-        if (calendar.getCode() != null && !calendar.getCode().isBlank()) {
-            Span codeChip = buildStatusChip(calendar.getCode(), "info");
-            titleLayout.add(codeChip);
-        }
+        return titleLayout;
+    }
 
-        // Locked status chip
+    @Override
+    protected Span buildStatusTag() {
         boolean locked = calendar.getLocked() != null && calendar.getLocked();
         lockStatusChip = buildStatusChip(
                 locked ? I18n.t("cms.calendar.card.status.locked") : I18n.t("cms.calendar.card.status.unlocked"),
                 locked ? ChipColor.WARNING : ChipColor.SUCCESS
         );
-        titleLayout.add(lockStatusChip);
-
-        return titleLayout;
+        return lockStatusChip;
     }
 
     @Override

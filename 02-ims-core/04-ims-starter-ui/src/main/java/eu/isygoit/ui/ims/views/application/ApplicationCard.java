@@ -59,6 +59,11 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
     }
 
     @Override
+    protected String businessCode() {
+        return application.getCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         VerticalLayout titleLayout = new VerticalLayout();
         titleLayout.setPadding(false);
@@ -82,7 +87,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
 
         row1.add(appImage);
 
-        // Row 2: name + status chip
+        // Row 2: name
         HorizontalLayout row2 = new HorizontalLayout();
         row2.setAlignItems(FlexComponent.Alignment.CENTER);
         row2.setSpacing(true);
@@ -90,11 +95,16 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
         row2.addClassName("card-row--spaced");
 
         Span titleSpan = buildTitleSpan(application.getName(), application.getTitle());
-        adminStatusChip = ImsEnumTag.ofOrUnknown(application.getAdminStatus(), null);
-        row2.add(titleSpan, adminStatusChip);
+        row2.add(titleSpan);
 
         titleLayout.add(row1, row2);
         return titleLayout;
+    }
+
+    @Override
+    protected Span buildStatusTag() {
+        adminStatusChip = ImsEnumTag.ofOrUnknown(application.getAdminStatus(), null);
+        return adminStatusChip;
     }
 
     @Override

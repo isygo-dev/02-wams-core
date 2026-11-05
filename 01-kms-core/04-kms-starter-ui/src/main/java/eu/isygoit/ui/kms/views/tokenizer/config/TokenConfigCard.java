@@ -55,6 +55,11 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
     }
 
     @Override
+    protected String businessCode() {
+        return dto.getCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -63,12 +68,16 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
         titleSpan = buildTitleSpan(dto.getCode(), dto.getCode());
 
+        left.add(titleSpan);
+        return left;
+    }
+
+    @Override
+    protected Component buildEnumTags() {
         typeChip = dto.getTokenType() != null
                 ? KmsEnumTag.of(dto.getTokenType(), "kms.enum")
                 : KmsEnumTag.ofLabel(I18n.t("kms.token.config.type.unknown"), "UNKNOWN");
-
-        left.add(titleSpan, typeChip);
-        return left;
+        return typeChip;
     }
 
     @Override
@@ -127,6 +136,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
     }
 
     private void refreshDisplay() {
+        refreshBusinessCode();
         titleSpan.setText(dto.getCode());
         titleSpan.getElement().setAttribute("title", dto.getCode());
         KmsEnumTag.update(typeChip, dto.getTokenType(), "kms.enum");

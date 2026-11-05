@@ -50,6 +50,11 @@ public class PEBConfigCard extends BaseCard<PEBConfigView, PEBConfigService> {
     }
 
     @Override
+    protected String businessCode() {
+        return dto.getCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -72,8 +77,11 @@ public class PEBConfigCard extends BaseCard<PEBConfigView, PEBConfigService> {
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.COG, I18n.t("kms.peb.card.algorithm"),
-                KmsEnumTag.ofOrUnknown(dto.getAlgorithm(), "kms.enum")));
+    }
+
+    @Override
+    protected Component buildEnumTags() {
+        return KmsEnumTag.ofOrUnknown(dto.getAlgorithm(), "kms.enum");
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
@@ -105,6 +113,7 @@ public class PEBConfigCard extends BaseCard<PEBConfigView, PEBConfigService> {
     }
 
     private void refreshDisplay() {
+        refreshBusinessCode();
         titleSpan.setText(dto.getCode());
         titleSpan.getElement().setAttribute("title", dto.getCode());
         getUI().ifPresent(ui -> ui.access(() -> {

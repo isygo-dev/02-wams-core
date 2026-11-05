@@ -66,6 +66,11 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
     }
 
     @Override
+    protected Span buildStatusTag() {
+        return KmsEnumTag.ofValue(storeStatus, "kms.enum");
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -73,12 +78,23 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         left.addClassName("kms-partc-title-wrap");
 
         Span titleSpan = buildTitleSpan(storeName, storeName);
-        Span typeChip = KmsEnumTag.ofValue(storeType, "kms.enum");
-        String statusDisplay = connectionState != null ? connectionState : storeStatus;
-        Span statusChip = KmsEnumTag.ofValue(statusDisplay, "kms.enum");
-
-        left.add(titleSpan, typeChip, statusChip);
+        left.add(titleSpan);
         return left;
+    }
+
+    @Override
+    protected Component buildEnumTags() {
+        HorizontalLayout tags = new HorizontalLayout();
+        tags.setSpacing(true);
+        tags.setPadding(false);
+        tags.add(KmsEnumTag.ofValue(storeType, "kms.enum"));
+        if (StringUtils.hasText(connectionState)) {
+            tags.add(KmsEnumTag.ofValue(connectionState, "kms.enum"));
+        }
+        if (!StringUtils.hasText(errorCode) && StringUtils.hasText(store.getHealthStatus())) {
+            tags.add(KmsEnumTag.ofValue(store.getHealthStatus(), "kms.enum"));
+        }
+        return tags.getComponentCount() == 0 ? null : tags;
     }
 
     @Override
@@ -109,9 +125,6 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
         // Health status / connection error — a broken connection must stay visible on the card
         if (StringUtils.hasText(errorCode)) {
             add(createIconRow(VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("kms.keystore.card.error"), errorCode));
-        } else if (StringUtils.hasText(store.getHealthStatus())) {
-            add(createTagRow(VaadinIcon.HEART, I18n.t("kms.keystore.card.health"),
-                    KmsEnumTag.ofValue(store.getHealthStatus(), "kms.enum")));
         }
     }
 
@@ -139,26 +152,6 @@ public class StoreCard extends BaseCard<CustomKeyStoresView, KmsApiService> {
 
         row.add(iconComponent, labelSpan, valueSpan);
         row.expand(valueSpan);
-        return row;
-    }
-
-    private HorizontalLayout createTagRow(VaadinIcon icon, String label, Component tag) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("meta-row");
-
-        Icon iconComponent = icon.create();
-        iconComponent.setSize("16px");
-        iconComponent.addClassName("kms-partc-row-icon");
-
-        Span labelSpan = new Span(label + ":");
-        labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
-        labelSpan.addClassName(LumoUtility.FontSize.XSMALL);
-        labelSpan.addClassName("kms-partc-row-label");
-
-        row.add(iconComponent, labelSpan, tag);
         return row;
     }
 

@@ -7,6 +7,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -24,6 +25,8 @@ import eu.isygoit.dto.KmsDtos.DescribeCustomKeyStoreResponse;
 import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponse;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.component.ManagementGridSupport;
+import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.CreateCustomKeyStoreDialog;
@@ -48,6 +51,8 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
     private final KmsApiService kmsApiService;
     private final Div cardsContainer = new Div();
+    private final Grid<DescribeCustomKeyStoreResponse.CustomKeyStore> grid = new Grid<>();
+    private ManagementViewModeSwitch viewModeSwitch;
     private final Button createButton = new Button(I18n.t("kms.keystore.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
@@ -91,6 +96,8 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         cardsContainer.setWidthFull();
         cardsContainer.addClassName("stores-grid");
         add(cardsContainer);
+        configureGrid();
+        add(grid);
 
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
@@ -144,6 +151,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
             }
         });
 
+        setTableMode(viewModeSwitch.isTableMode());
         resetPaginationAndLoad();
     }
 
@@ -229,6 +237,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
                     return true;
                 })
                 .collect(Collectors.toList());
+        grid.setItems(filtered);
 
         clearFilterButton.setEnabled(StringUtils.hasText(currentFilter));
 
@@ -281,7 +290,8 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         refreshButton.setTooltipText(I18n.t("kms.keystore.view.refresh.stores"));
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         createButton.setTooltipText(I18n.t("kms.keystore.view.create.tooltip"));
-        rightGroup.add(refreshButton, createButton);
+        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
+        rightGroup.add(viewModeSwitch, refreshButton, createButton);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
@@ -293,7 +303,8 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
+        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
+        grid.setVisible(!show && viewModeSwitch.isTableMode());
         createButton.setEnabled(!show);
         refreshButton.setEnabled(!show);
         filterField.setEnabled(!show);
@@ -304,5 +315,24 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
     public void loadStores() {
         resetPaginationAndLoad();
+    }
+
+    private void configureGrid() {
+        grid.addClassName("management-grid");
+        grid.addColumn(DescribeCustomKeyStoreResponse.CustomKeyStore::getName)
+                .setHeader(I18n.t("kms.keystore.table.name")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(DescribeCustomKeyStoreResponse.CustomKeyStore::getCustomKeyStoreType)
+                .setHeader(I18n.t("kms.keystore.table.type")).setAutoWidth(true);
+        grid.addColumn(store -> store.getStatus() != null ? store.getStatus().name() : "UNKNOWN")
+                .setHeader(I18n.t("kms.keystore.table.status")).setAutoWidth(true);
+        grid.addColumn(DescribeCustomKeyStoreResponse.CustomKeyStore::getConnectionState)
+                .setHeader(I18n.t("kms.keystore.table.connection")).setAutoWidth(true);
+        ManagementGridSupport.addCardActionsColumn(grid, store -> new StoreCard(this, kmsApiService, store));
+    }
+
+    private void setTableMode(boolean tableMode) {
+        boolean loading = loadingBar.isVisible();
+        cardsContainer.setVisible(!loading && !tableMode);
+        grid.setVisible(!loading && tableMode);
     }
 }

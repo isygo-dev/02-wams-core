@@ -1,270 +1,229 @@
 package eu.isygoit.ui.kms.views.secrets.password;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.PasswordConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PasswordConfigService;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.secrets.password.dialog.CreatePasswordConfigDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @VaadinSessionScope
 @Route(value = "kms/password-configs", layout = KmsMainLayout.class)
 @PageTitle("Password Configurations")
 @PermitAll
-public class PasswordConfigView extends ManagementVerticalView {
+public class PasswordConfigView extends AbstractPaginatedView<PasswordConfigDto> {
 
     private final PasswordConfigService configService;
-    private final Div cardsContainer = new Div();
-    private final TextField searchField = new TextField();
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button createButton = new Button(I18n.t("kms.password.config.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
-    private final ProgressBar loadingBar = new ProgressBar();
-
+    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
-    private final Span totalCountLabel = new Span();
-
-    private int currentPage = 0;
-    private int pageSize = 10;
-    private int totalPages = 0;
-    private long totalElements = 0;
-    private List<PasswordConfigDto> currentPageContent = new ArrayList<>();
-    private String currentSearch = "";
+    private final com.vaadin.flow.component.html.Span totalCountLabel =
+            new com.vaadin.flow.component.html.Span();
 
     @Autowired
     public PasswordConfigView(PasswordConfigService configService) {
         this.configService = configService;
-        buildUI();
-        loadConfigs();
-    }
-
-    private void buildUI() {
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        addClassName("password-config-view");
-
-        H2 header = new H2(I18n.t("kms.password.config.header"));
-        header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE);
-        add(header);
-
-        HorizontalLayout toolbar = buildToolbar();
-        add(toolbar);
-
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("password-configs-grid");
-        add(cardsContainer);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
-
-        refreshButton.addClickListener(e -> {
-            currentPage = 0;
-            loadConfigs();
-        });
+        pageSize = 10;
+        initPaginatedView();
         refreshButton.setTooltipText(I18n.t("kms.password.config.refresh.tooltip"));
-
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        createButton.addClickListener(e -> openCreateDialog());
-
-        searchField.setPlaceholder(I18n.t("kms.password.config.search.placeholder"));
-        searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.addValueChangeListener(e -> {
-            currentSearch = e.getValue();
-            currentPage = 0;
-            loadConfigs();
-        });
-
-        pageSizeSelect.setItems(5, 10, 20, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                currentPage = 0;
-                loadConfigs();
-            }
-        });
-
-        prevButton.addClickListener(e -> {
-            if (currentPage > 0) {
-                currentPage--;
-                loadConfigs();
-            }
-        });
-        nextButton.addClickListener(e -> {
-            if (currentPage + 1 < totalPages) {
-                currentPage++;
-                loadConfigs();
-            }
-        });
     }
 
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("password-toolbar");
+    @Override
+    protected PaginatedResponseDto<PasswordConfigDto> fetchPage(int page, int size) {
+        String searchCriteria = searchCriteria(searchField.getValue());
+        var response = searchCriteria.isBlank()
+                ? configService.findAll(page, size)
+                : configService.findAllFilteredByCriteria(searchCriteria, page, size);
+        return response != null ? response.getBody() : null;
+    }
 
-        HorizontalLayout leftGroup = new HorizontalLayout(searchField);
-        searchField.setWidth("250px");
+    @Override
+    protected PaginatedResponseDto<? extends PasswordConfigDto> fetchFilteredPage(
+            String criteria, int page, int size) {
+        String mergedCriteria = mergeCriteria(criteria, searchCriteria(searchField.getValue()));
+        var response = configService.findAllFilteredByCriteria(mergedCriteria, page, size);
+        return response != null ? response.getBody() : null;
+    }
 
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        pageSizeSelect.setWidth("100px");
-        pageInfoLabel.addClassName("page-info-label");
-        totalCountLabel.addClassName("total-count-label");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
+    @Override
+    protected Map<String, String> fetchCriteriaMetadata() {
+        var response = configService.getAnnotatedCriteria();
+        return response != null && response.getBody() != null
+                ? response.getBody().stream().collect(Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : Map.of();
+    }
 
-        HorizontalLayout rightGroup = new HorizontalLayout(refreshButton, createButton);
-        rightGroup.setSpacing(true);
+    @Override
+    protected boolean configureGrid(Grid<PasswordConfigDto> grid) {
+        grid.addColumn(PasswordConfigDto::getCode).setHeader("Code").setAutoWidth(true);
+        grid.addColumn(PasswordConfigDto::getType).setHeader("Type").setAutoWidth(true);
+        grid.addColumn(PasswordConfigDto::getMinLength).setHeader("Minimum length").setAutoWidth(true);
+        grid.addColumn(PasswordConfigDto::getMaxLength).setHeader("Maximum length").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected Component renderItem(PasswordConfigDto item) {
+        return new PasswordConfigCard(this, configService, item, this::loadConfigs);
+    }
+
+    @Override
+    protected boolean matchesSearch(PasswordConfigDto item, String search) {
+        return true;
+    }
+
+    @Override
+    protected void openCreateDialog() {
+        new CreatePasswordConfigDialog(configService, this::loadConfigs).open();
+    }
+
+    @Override
+    protected void onSearchChanged() {
+        loadPageZero();
+    }
+
+    @Override
+    protected List<Component> buildToolbarActions() {
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
+        refreshButton.addClickListener(event -> loadPageZero());
+        pageSizeSelect.setItems(5, 10, 20, 50);
+        pageSizeSelect.setValue(pageSize);
+        pageSizeSelect.setWidth("100px");
+        pageSizeSelect.addValueChangeListener(event -> {
+            if (event.getValue() != null && event.getValue() != pageSize) {
+                pageSize = event.getValue();
+                loadPageZero();
+            }
+        });
+        totalCountLabel.addClassName("management-total-count");
+        return List.of(refreshButton, pageSizeSelect, totalCountLabel);
     }
 
-    private void loadConfigs() {
-        showLoading(true);
-        try {
-            ResponseEntity<PaginatedResponseDto<PasswordConfigDto>> response;
-            if (currentSearch == null || currentSearch.isBlank()) {
-                response = configService.findAll(currentPage, pageSize);
-            } else {
-                String criteria = "code~" + currentSearch;
-                response = configService.findAllFilteredByCriteria(criteria, currentPage, pageSize);
-            }
-
-            PaginatedResponseDto<PasswordConfigDto> body = response.getBody();
-            if (body != null) {
-                currentPageContent = body.getContent() != null ? body.getContent() : new ArrayList<>();
-                totalPages = body.getTotalPages();
-                totalElements = body.getTotalElements();
-                if (currentPage >= totalPages && totalPages > 0) {
-                    currentPage = totalPages - 1;
-                    loadConfigs();
-                    return;
-                }
-            } else {
-                currentPageContent = new ArrayList<>();
-                totalPages = 0;
-                totalElements = 0;
-            }
-            updatePaginationDisplay();
-            renderCards();
-        } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showError(I18n.t("kms.password.config.load.error", errorMsg));
-        } catch (Exception e) {
-            showError(I18n.t("kms.password.config.load.error", e.getMessage()));
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    private void updatePaginationDisplay() {
-        if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("kms.password.config.page.info", currentPage + 1, totalPages));
-        } else {
-            pageInfoLabel.setText(I18n.t("kms.password.config.page.info", 0, 0));
-        }
+    @Override
+    protected void onPageLoaded() {
         totalCountLabel.setText(I18n.t("kms.password.config.total.count", totalElements));
-        prevButton.setEnabled(currentPage > 0);
-        nextButton.setEnabled(currentPage + 1 < totalPages);
     }
 
-    private void renderCards() {
-        cardsContainer.removeAll();
-        if (currentPageContent.isEmpty()) {
-            Div emptyState = new Div();
-            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-            emptyState.addClassName(LumoUtility.Padding.XLARGE);
-            Icon emptyIcon = VaadinIcon.USER.create();
-            emptyIcon.setSize("48px");
-            emptyIcon.addClassName("empty-state-icon");
-            H4 emptyTitle = new H4(I18n.t("kms.password.config.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("kms.password.config.empty.description"));
-            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-            cardsContainer.add(emptyState);
-            return;
-        }
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"password-config-view"};
+    }
 
-        for (PasswordConfigDto dto : currentPageContent) {
-            PasswordConfigCard card = new PasswordConfigCard(this, configService, dto, () -> loadConfigs());
-            cardsContainer.add(card);
+    @Override
+    protected String extractErrorMessage(Exception exception) {
+        if (exception instanceof FeignException feignException
+                && (feignException.status() == 400 || feignException.status() == 500)
+                && feignException.contentUTF8() != null && !feignException.contentUTF8().isBlank()) {
+            return feignException.contentUTF8();
         }
+        return exception.getMessage();
+    }
+
+    @Override
+    protected String getTitleKey() {
+        return "kms.password.config.header";
+    }
+
+    @Override
+    protected String getSubtitleKey() {
+        return null;
+    }
+
+    @Override
+    protected String getCreateButtonKey() {
+        return "kms.password.config.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "kms.password.config.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "kms.password.config.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "kms.password.config.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.USER;
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "kms.password.config.load.error";
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t(getTitleKey());
+    }
+
+    public void loadConfigs() {
+        loadPage(currentPage);
+    }
+
+    public void loadPageZero() {
+        loadPage(0);
     }
 
     public void refreshCard(PasswordConfigCard card) {
         try {
-            ResponseEntity<PasswordConfigDto> response = configService.findById(card.getDto().getId());
+            var response = configService.findById(card.getDto().getId());
             PasswordConfigDto updated = response.getBody();
-            if (updated != null) {
-                card.updateDto(updated);
-                for (int i = 0; i < currentPageContent.size(); i++) {
-                    if (currentPageContent.get(i).getId().equals(updated.getId())) {
-                        currentPageContent.set(i, updated);
-                        break;
-                    }
-                }
-            } else {
-                cardsContainer.remove(card);
+            if (updated == null) {
                 loadConfigs();
+                return;
             }
-        } catch (Exception e) {
-            showError(I18n.t("kms.password.config.refresh.card.error", e.getMessage()));
+            card.updateDto(updated);
+            for (int i = 0; i < currentItems.size(); i++) {
+                if (currentItems.get(i).getId().equals(updated.getId())) {
+                    currentItems.set(i, updated);
+                    applyLocalFilter();
+                    return;
+                }
+            }
+        } catch (Exception exception) {
+            eu.isygoit.ui.common.notification.AppNotifications.error(
+                    I18n.t("kms.password.config.refresh.card.error", exception.getMessage()));
         }
     }
 
-    private void openCreateDialog() {
-        new CreatePasswordConfigDialog(configService, this::loadConfigs).open();
+    private String searchCriteria(String search) {
+        if (search == null || search.isBlank()) {
+            return "";
+        }
+        return "code ~ '" + search.replace("'", "''") + "'";
     }
 
-    private void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
-        refreshButton.setEnabled(!show);
-        createButton.setEnabled(!show);
-    }
-
-    private void showError(String msg) {
-        Notification.show(msg, 5000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_ERROR);
+    private String mergeCriteria(String criteria, String search) {
+        if (search.isBlank()) {
+            return criteria;
+        }
+        return criteria == null || criteria.isBlank() ? search : "(" + criteria + ") & (" + search + ")";
     }
 }

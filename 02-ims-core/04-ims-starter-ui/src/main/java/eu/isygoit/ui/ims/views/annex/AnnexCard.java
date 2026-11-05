@@ -42,17 +42,24 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
     }
 
     @Override
+    protected String businessCode() {
+        return annex.getTableCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         titleLayout.setSpacing(true);
         titleLayout.addClassName("card-title-group");
 
-        Span titleSpan = buildTitleSpan(annex.getTableCode(), annex.getValue());
-        Span langChip = ImsEnumTag.ofOrUnknown(annex.getLanguage(), "ims.enum.language");
-
-        titleLayout.add(titleSpan, langChip);
+        titleLayout.add(buildTitleSpan(annex.getTranslated(), annex.getTranslated()));
         return titleLayout;
+    }
+
+    @Override
+    protected Component buildEnumTags() {
+        return ImsEnumTag.ofOrUnknown(annex.getLanguage(), "ims.enum.language");
     }
 
     @Override

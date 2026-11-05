@@ -53,6 +53,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
      * Row of enum tags, added at the bottom of the body (above the footer).
      */
     protected HorizontalLayout enumTagsRow;
+    protected VerticalLayout businessCodeStack;
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
@@ -108,6 +109,24 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
      */
     protected abstract void buildBodyRows();
 
+    /**
+     * Optional business code displayed above the title.
+     */
+    protected String businessCode() {
+        return null;
+    }
+
+    protected final void refreshBusinessCode() {
+        BusinessCodeBadge.update(businessCodeStack, businessCode());
+    }
+
+    /**
+     * Optional status tag displayed at the left side of the footer.
+     */
+    protected Span buildStatusTag() {
+        return null;
+    }
+
     // ── Enum-tags hook ────────────────────────────────────────────────────────
 
     /**
@@ -153,6 +172,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         headerRow.setAlignItems(FlexComponent.Alignment.CENTER);
         headerRow.setSpacing(true);
         headerRow.addClassName("wams-card__header-row");
+        businessCodeStack = BusinessCodeBadge.prepend(headerLeft, businessCode());
     }
 
     // ── Enum-tags assembly ────────────────────────────────────────────────────
@@ -183,25 +203,36 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     // ── Footer assembly ───────────────────────────────────────────────────────
 
     protected void buildFooter() {
+        Span statusTag = buildStatusTag();
         List<Button> buttons = buildActionButtons();
-        if (buttons == null || buttons.isEmpty()) {
+        if (statusTag == null && (buttons == null || buttons.isEmpty())) {
             footerRow = null;
             return;
         }
 
-        buttonBar = new HorizontalLayout();
-        buttonBar.setSpacing(true);
-        buttonBar.setPadding(false);
-        buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-        buttonBar.addClassName("wams-card__button-bar");
-        buttons.forEach(buttonBar::add);
+        if (buttons != null && !buttons.isEmpty()) {
+            buttonBar = new HorizontalLayout();
+            buttonBar.setSpacing(true);
+            buttonBar.setPadding(false);
+            buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+            buttonBar.addClassName("wams-card__button-bar");
+            buttons.forEach(buttonBar::add);
+        }
 
-        footerRow = new HorizontalLayout(buttonBar);
+        footerRow = new HorizontalLayout();
         footerRow.setWidthFull();
-        footerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        footerRow.setSpacing(true);
+        footerRow.setJustifyContentMode(statusTag == null
+                ? FlexComponent.JustifyContentMode.END : FlexComponent.JustifyContentMode.BETWEEN);
         footerRow.setAlignItems(FlexComponent.Alignment.CENTER);
         footerRow.setPadding(true);
         footerRow.addClassName("wams-card__footer-row");
+        if (statusTag != null) {
+            footerRow.add(statusTag);
+        }
+        if (buttonBar != null) {
+            footerRow.add(buttonBar);
+        }
     }
 
     // ── Rearrangement into header / body / enum-tags / footer ────────────────

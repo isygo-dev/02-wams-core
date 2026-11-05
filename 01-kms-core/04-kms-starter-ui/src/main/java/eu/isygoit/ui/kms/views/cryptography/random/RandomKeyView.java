@@ -6,6 +6,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -22,6 +23,8 @@ import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.RandomKeyService;
+import eu.isygoit.ui.common.component.ManagementGridSupport;
+import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.common.view.ManagementCompositeVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.random.dialog.CreateRandomKeyDialog;
@@ -42,6 +45,8 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
     private final RandomKeyService keyService;
 
     private final Div cardsContainer = new Div();
+    private final Grid<RandomKeyDto> grid = new Grid<>();
+    private ManagementViewModeSwitch viewModeSwitch;
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createButton = new Button(I18n.t("kms.random.key.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
@@ -64,6 +69,7 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
     public RandomKeyView(RandomKeyService keyService) {
         this.keyService = keyService;
         buildUI();
+        setTableMode(viewModeSwitch.isTableMode());
         loadKeys();
     }
 
@@ -85,6 +91,8 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
         cardsContainer.setWidthFull();
         cardsContainer.addClassName("random-keys-grid");
         layout.add(cardsContainer);
+        configureGrid();
+        layout.add(grid);
 
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
@@ -158,7 +166,9 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
         rightGroup.setSpacing(true);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
 
+        rightGroup.addComponentAtIndex(0, viewModeSwitch);
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
     }
@@ -224,6 +234,7 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
 
     private void renderCards(List<RandomKeyDto> keys) {
         cardsContainer.removeAll();
+        grid.setItems(keys);
         if (keys.isEmpty()) {
             Div emptyState = new Div();
             emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
@@ -255,9 +266,27 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
 
     private void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
+        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
+        grid.setVisible(!show && viewModeSwitch.isTableMode());
         refreshButton.setEnabled(!show);
         createButton.setEnabled(!show);
+    }
+
+    private void configureGrid() {
+        grid.addClassName("management-grid");
+        grid.addColumn(RandomKeyDto::getName)
+                .setHeader(I18n.t("kms.random.key.table.name")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(dto -> dto.getValue() == null ? 0 : dto.getValue().length())
+                .setHeader(I18n.t("kms.random.key.card.key.value")).setAutoWidth(true);
+        grid.addColumn(dto -> dto.getCreateDate() != null ? eu.isygoit.helper.DateHelper.formatToHumanReadable(dto.getCreateDate()) : "")
+                .setHeader(I18n.t("kms.random.key.card.created")).setAutoWidth(true);
+        ManagementGridSupport.addCardActionsColumn(grid, dto -> new RandomKeyCard(this, keyService, dto));
+    }
+
+    private void setTableMode(boolean tableMode) {
+        boolean loading = loadingBar.isVisible();
+        cardsContainer.setVisible(!loading && !tableMode);
+        grid.setVisible(!loading && tableMode);
     }
 
 }

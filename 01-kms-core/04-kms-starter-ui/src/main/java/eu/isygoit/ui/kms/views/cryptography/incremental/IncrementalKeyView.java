@@ -1,309 +1,262 @@
 package eu.isygoit.ui.kms.views.cryptography.incremental;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.exception.GenerationFailedException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
-import eu.isygoit.ui.common.view.ManagementCompositeVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
+import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.DeleteNextCodeConfigDialog;
+import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.NextCodeDetailsViewDialog;
 import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.SubscribeNextCodeConfigDialog;
+import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @VaadinSessionScope
 @Route(value = "kms/incremental-key", layout = KmsMainLayout.class)
 @PageTitle("Incremental Key Configurations")
 @PermitAll
-public class IncrementalKeyView extends ManagementCompositeVerticalView {
+public class IncrementalKeyView extends AbstractPaginatedView<NextCodeDto> {
 
     @Getter
     private final KmsIncrementalKeyService incrementalKeyService;
     @Getter
     private final KmsAppNextCodeService nextCodeService;
-
-    private final Div cardsContainer = new Div();
-    private final TextField searchField = new TextField();
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button subscribeButton = new Button(I18n.t("kms.incremental.key.subscribe.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
-    private final ProgressBar loadingBar = new ProgressBar();
-
+    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
-    private final Span totalCountLabel = new Span();
-
-    private int currentPage = 0;
-    private int pageSize = 10;
-    private int totalPages = 0;
-    private long totalElements = 0;
-    private List<NextCodeDto> currentPageContent = new ArrayList<>();
-    private String currentSearch = "";
+    private final com.vaadin.flow.component.html.Span totalCountLabel =
+            new com.vaadin.flow.component.html.Span();
 
     @Autowired
     public IncrementalKeyView(KmsIncrementalKeyService incrementalKeyService,
                               KmsAppNextCodeService nextCodeService) {
         this.incrementalKeyService = incrementalKeyService;
         this.nextCodeService = nextCodeService;
-        buildUI();
-        loadNextCodes();
-    }
-
-    private void buildUI() {
-        VerticalLayout layout = getContent();
-        layout.setSizeFull();
-        layout.setPadding(true);
-        layout.setSpacing(true);
-        layout.addClassName("incremental-keys-view");
-
-        H2 header = new H2(I18n.t("kms.incremental.key.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-        layout.add(header);
-
-        HorizontalLayout toolbar = buildToolbar();
-        layout.add(toolbar);
-
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("incremental-keys-grid");
-        layout.add(cardsContainer);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        layout.add(loadingBar);
-
-        refreshButton.addClickListener(e -> {
-            currentPage = 0;
-            loadNextCodes();
-        });
+        pageSize = 10;
+        initPaginatedView();
         refreshButton.setTooltipText(I18n.t("kms.incremental.key.refresh.tooltip"));
-
-        subscribeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        subscribeButton.addClickListener(e -> openSubscribeDialog());
-
-        searchField.setPlaceholder(I18n.t("kms.incremental.key.search.placeholder"));
-        searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.addValueChangeListener(e -> {
-            currentSearch = e.getValue();
-            currentPage = 0;
-            loadNextCodes();
-        });
-
-        pageSizeSelect.setItems(5, 10, 20, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                currentPage = 0;
-                loadNextCodes();
-            }
-        });
-
-        prevButton.addClickListener(e -> {
-            if (currentPage > 0) {
-                currentPage--;
-                loadNextCodes();
-            }
-        });
-        nextButton.addClickListener(e -> {
-            if (currentPage + 1 < totalPages) {
-                currentPage++;
-                loadNextCodes();
-            }
-        });
     }
 
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("incremental-toolbar");
+    @Override
+    protected PaginatedResponseDto<NextCodeDto> fetchPage(int page, int size) {
+        String criteria = searchCriteria(searchField.getValue());
+        var response = criteria.isBlank()
+                ? nextCodeService.findAll(page, size)
+                : nextCodeService.findAllFilteredByCriteria(criteria, page, size);
+        return response != null ? response.getBody() : null;
+    }
 
-        HorizontalLayout leftGroup = new HorizontalLayout(searchField);
-        searchField.setWidth("250px");
+    @Override
+    protected PaginatedResponseDto<? extends NextCodeDto> fetchFilteredPage(
+            String criteria, int page, int size) {
+        String searchCriteria = searchCriteria(searchField.getValue());
+        String mergedCriteria = searchCriteria.isBlank()
+                ? criteria
+                : criteria == null || criteria.isBlank()
+                    ? searchCriteria
+                    : "(" + criteria + ") & " + searchCriteria;
+        var response = nextCodeService.findAllFilteredByCriteria(mergedCriteria, page, size);
+        return response != null ? response.getBody() : null;
+    }
 
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        pageSizeSelect.setWidth("100px");
-        pageInfoLabel.addClassName("kms-partc-inline-label");
-        totalCountLabel.addClassName("kms-partc-inline-label");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
+    @Override
+    protected Map<String, String> fetchCriteriaMetadata() {
+        var response = nextCodeService.getAnnotatedCriteria();
+        return response != null && response.getBody() != null
+                ? response.getBody().stream().collect(Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : Map.of();
+    }
 
-        HorizontalLayout rightGroup = new HorizontalLayout(refreshButton, subscribeButton);
-        rightGroup.setSpacing(true);
+    @Override
+    protected boolean configureGrid(Grid<NextCodeDto> grid) {
+        grid.addColumn(NextCodeDto::getEntity).setHeader("Entity").setAutoWidth(true);
+        grid.addColumn(NextCodeDto::getAttribute).setHeader("Attribute").setAutoWidth(true);
+        grid.addColumn(NextCodeDto::getPrefix).setHeader("Prefix").setAutoWidth(true);
+        grid.addColumn(NextCodeDto::getSuffix).setHeader("Suffix").setAutoWidth(true);
+        grid.addColumn(NextCodeDto::getIncrement).setHeader("Increment").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected Component renderItem(NextCodeDto item) {
+        return new NextCodeCard(this, nextCodeService, item,
+                () -> deleteConfig(item.getId()), this::generateCodeForConfig);
+    }
+
+    @Override
+    protected boolean matchesSearch(NextCodeDto item, String search) {
+        return true;
+    }
+
+    @Override
+    protected void openCreateDialog() {
+        new SubscribeNextCodeConfigDialog(nextCodeService, this::loadPageZero).open();
+    }
+
+    @Override
+    protected void onSearchChanged() {
+        loadPageZero();
+    }
+
+    @Override
+    protected List<Component> buildToolbarActions() {
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        subscribeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        refreshButton.addClickListener(event -> loadPageZero());
+        pageSizeSelect.setItems(5, 10, 20, 50);
+        pageSizeSelect.setValue(pageSize);
+        pageSizeSelect.setWidth("100px");
+        pageSizeSelect.addValueChangeListener(event -> {
+            if (event.getValue() != null && event.getValue() != pageSize) {
+                pageSize = event.getValue();
+                loadPageZero();
+            }
+        });
+        totalCountLabel.addClassName("management-total-count");
+        return List.of(refreshButton, totalCountLabel, pageSizeSelect);
+    }
 
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
+    @Override
+    protected void onPageLoaded() {
+        totalCountLabel.setText(I18n.t("kms.incremental.key.total.count", totalElements));
+        if (totalPages > 0 && currentPage >= totalPages) {
+            loadPage(totalPages - 1);
+        }
+    }
+
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"incremental-keys-view"};
+    }
+
+    @Override
+    protected String extractErrorMessage(Exception exception) {
+        if (exception instanceof FeignException feignException
+                && feignException.contentUTF8() != null && !feignException.contentUTF8().isBlank()) {
+            return feignException.contentUTF8();
+        }
+        return exception.getMessage();
+    }
+
+    @Override
+    protected String getTitleKey() {
+        return "kms.incremental.key.title";
+    }
+
+    @Override
+    protected String getSubtitleKey() {
+        return null;
+    }
+
+    @Override
+    protected String getCreateButtonKey() {
+        return "kms.incremental.key.subscribe.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "kms.incremental.key.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "kms.incremental.key.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "kms.incremental.key.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.KEY;
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "kms.incremental.key.load.error";
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t(getTitleKey());
     }
 
     public void loadNextCodes() {
-        showLoading(true);
-        try {
-            ResponseEntity<PaginatedResponseDto<NextCodeDto>> response;
-            if (currentSearch == null || currentSearch.isBlank()) {
-                response = nextCodeService.findAll(currentPage, pageSize);
-            } else {
-                String criteria = "entity ~ '" + currentSearch + "' | attribute ~ '" + currentSearch + "'";
-                response = nextCodeService.findAllFilteredByCriteria(criteria, currentPage, pageSize);
-            }
-
-            PaginatedResponseDto<NextCodeDto> body = response.getBody();
-            if (body != null) {
-                currentPageContent = body.getContent() != null ? body.getContent() : new ArrayList<>();
-                totalPages = body.getTotalPages();
-                totalElements = body.getTotalElements();
-                if (currentPage >= totalPages && totalPages > 0) {
-                    currentPage = totalPages - 1;
-                    loadNextCodes();
-                    return;
-                }
-            } else {
-                currentPageContent = new ArrayList<>();
-                totalPages = 0;
-                totalElements = 0;
-            }
-            updatePaginationDisplay();
-            renderCards();
-        } catch (Exception e) {
-            Notification.show(I18n.t("kms.incremental.key.load.error", e.getMessage()), 5000,
-                            Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        } finally {
-            showLoading(false);
-        }
+        loadPage(currentPage);
     }
 
-    private void updatePaginationDisplay() {
-        if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("kms.incremental.key.page.info", currentPage + 1, totalPages));
-        } else {
-            pageInfoLabel.setText(I18n.t("kms.incremental.key.page.info", 0, 0));
-        }
-        totalCountLabel.setText(I18n.t("kms.incremental.key.total.count", totalElements));
-        prevButton.setEnabled(currentPage > 0);
-        nextButton.setEnabled(currentPage + 1 < totalPages);
-    }
-
-    private void renderCards() {
-        cardsContainer.removeAll();
-        if (currentPageContent.isEmpty()) {
-            Div emptyState = new Div();
-            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-            emptyState.addClassName(LumoUtility.Padding.XLARGE);
-            Icon emptyIcon = VaadinIcon.KEY.create();
-            emptyIcon.setSize("48px");
-            emptyIcon.addClassName("kms-partc-empty-icon");
-            H4 emptyTitle = new H4(I18n.t("kms.incremental.key.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("kms.incremental.key.empty.description"));
-            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-            cardsContainer.add(emptyState);
-            return;
-        }
-
-        for (NextCodeDto dto : currentPageContent) {
-            NextCodeCard card = new NextCodeCard(
-                    this,
-                    nextCodeService,
-                    dto,
-                    () -> deleteConfig(dto.getId()),
-                    this::generateCodeForConfig
-            );
-            cardsContainer.add(card);
-        }
+    public void loadPageZero() {
+        loadPage(0);
     }
 
     public void refreshCard(NextCodeCard card) {
         try {
-            ResponseEntity<NextCodeDto> response = nextCodeService.findById(card.getDto().getId());
+            var response = nextCodeService.findById(card.getDto().getId());
             NextCodeDto updated = response.getBody();
-            if (updated != null) {
-                card.updateDto(updated);
-                for (int i = 0; i < currentPageContent.size(); i++) {
-                    if (currentPageContent.get(i).getId().equals(updated.getId())) {
-                        currentPageContent.set(i, updated);
-                        break;
-                    }
-                }
-            } else {
-                cardsContainer.remove(card);
+            if (updated == null) {
                 loadNextCodes();
+                return;
             }
-        } catch (Exception e) {
-            Notification.show(I18n.t("kms.incremental.key.refresh.card.error", e.getMessage()), 3000,
-                            Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            card.updateDto(updated);
+            for (int i = 0; i < currentItems.size(); i++) {
+                if (currentItems.get(i).getId().equals(updated.getId())) {
+                    currentItems.set(i, updated);
+                    applyLocalFilter();
+                    return;
+                }
+            }
+        } catch (Exception exception) {
+            eu.isygoit.ui.common.notification.AppNotifications.error(
+                    I18n.t("kms.incremental.key.refresh.card.error", exception.getMessage()));
         }
     }
 
     private void deleteConfig(Long id) {
         try {
             nextCodeService.delete(id);
-            Notification.show(I18n.t("kms.incremental.key.delete.success"), 3000,
-                            Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+            eu.isygoit.ui.common.notification.AppNotifications.success(
+                    I18n.t("kms.incremental.key.delete.success"));
             loadNextCodes();
-        } catch (Exception e) {
-            Notification.show(I18n.t("kms.incremental.key.delete.failed", e.getMessage()), 5000,
-                            Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        } catch (Exception exception) {
+            eu.isygoit.ui.common.notification.AppNotifications.error(
+                    I18n.t("kms.incremental.key.delete.failed", exception.getMessage()));
         }
     }
 
     private String generateCodeForConfig(String entity, String attribute) {
-        ResponseEntity<String> response = incrementalKeyService.generateNextCode(entity, attribute);
+        var response = incrementalKeyService.generateNextCode(entity, attribute);
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             return response.getBody();
         }
         throw new GenerationFailedException("Generation failed with status: " + response.getStatusCode());
     }
 
-    private void openSubscribeDialog() {
-        new SubscribeNextCodeConfigDialog(nextCodeService, () -> {
-            currentPage = 0;
-            loadNextCodes();
-        }).open();
+    private String searchCriteria(String search) {
+        if (search == null || search.isBlank()) {
+            return "";
+        }
+        String escaped = search.replace("'", "''");
+        return "(entity ~ '" + escaped + "' | attribute ~ '" + escaped + "')";
     }
-
-    private void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
-        refreshButton.setEnabled(!show);
-        subscribeButton.setEnabled(!show);
-    }
-
 }

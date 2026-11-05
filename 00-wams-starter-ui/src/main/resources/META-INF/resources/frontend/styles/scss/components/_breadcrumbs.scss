@@ -1,5 +1,15 @@
 // Generic breadcrumb trail (see eu.isygoit.ui.common.component.Breadcrumbs). Lumo tokens only.
 
+.wams-content-host {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.wams-content-host > .wams-breadcrumbs {
+  padding: var(--lumo-space-s) var(--lumo-space-l) 0;
+}
+
 .wams-breadcrumbs {
   display: block;
   min-width: 0;

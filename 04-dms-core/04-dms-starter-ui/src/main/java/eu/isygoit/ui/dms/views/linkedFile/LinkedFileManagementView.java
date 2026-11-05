@@ -6,6 +6,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -24,6 +25,8 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
 import eu.isygoit.remote.dms.LinkedFileService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.component.ManagementGridSupport;
+import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.dms.layout.DmsMainLayout;
 import eu.isygoit.ui.dms.views.linkedFile.dialog.UploadLinkedFileDialog;
 import feign.FeignException;
@@ -46,6 +49,8 @@ public class LinkedFileManagementView extends ManagementVerticalView {
     private final CategoryService categoryService;
 
     private final Div cardsContainer = new Div();
+    private final Grid<LinkedFileResponseDto> grid = new Grid<>();
+    private ManagementViewModeSwitch viewModeSwitch;
     private final Button uploadButton = new Button(I18n.t("dms.linkedfile.view.upload.button"), new Icon(VaadinIcon.UPLOAD));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button clearFiltersButton = new Button(I18n.t("dms.linkedfile.view.clear.filters"), new Icon(VaadinIcon.ERASER));
@@ -96,6 +101,8 @@ public class LinkedFileManagementView extends ManagementVerticalView {
         cardsContainer.setWidthFull();
         cardsContainer.addClassName("linked-file-cards-grid");
         add(cardsContainer);
+        configureGrid();
+        add(grid);
 
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
@@ -103,6 +110,7 @@ public class LinkedFileManagementView extends ManagementVerticalView {
         add(loadingBar);
 
         initEventHandlers();
+        setTableMode(viewModeSwitch.isTableMode());
         loadCategories();
         loadAllFiles();
     }
@@ -309,6 +317,7 @@ public class LinkedFileManagementView extends ManagementVerticalView {
         updatePaginationDisplay(totalElements);
 
         if (filteredFiles.isEmpty()) {
+            grid.setItems(List.of());
             Div emptyState = new Div();
             emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
             emptyState.addClassName(LumoUtility.Padding.XLARGE);
@@ -323,7 +332,9 @@ public class LinkedFileManagementView extends ManagementVerticalView {
         } else {
             int start = currentPage * pageSize;
             int end = Math.min(start + pageSize, totalElements);
-            for (LinkedFileResponseDto file : filteredFiles.subList(start, end)) {
+            List<LinkedFileResponseDto> pageFiles = filteredFiles.subList(start, end);
+            grid.setItems(pageFiles);
+            for (LinkedFileResponseDto file : pageFiles) {
                 cardsContainer.add(new LinkedFileCard(this, linkedFileService, file, this::loadAllFiles));
             }
         }
@@ -372,7 +383,8 @@ public class LinkedFileManagementView extends ManagementVerticalView {
 
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         uploadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        rightGroup.add(refreshButton, uploadButton);
+        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
+        rightGroup.add(viewModeSwitch, refreshButton, uploadButton);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
@@ -384,12 +396,33 @@ public class LinkedFileManagementView extends ManagementVerticalView {
 
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
+        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
+        grid.setVisible(!show && viewModeSwitch.isTableMode());
         refreshButton.setEnabled(!show);
         uploadButton.setEnabled(!show);
     }
 
     public String getTenant() {
         return currentTenant != null ? currentTenant : "default";
+    }
+
+    private void configureGrid() {
+        grid.addClassName("management-grid");
+        grid.addColumn(LinkedFileResponseDto::getOriginalFileName)
+                .setHeader(I18n.t("dms.linkedfile.table.name")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(LinkedFileResponseDto::getCode)
+                .setHeader(I18n.t("dms.linkedfile.table.code")).setAutoWidth(true);
+        grid.addColumn(LinkedFileResponseDto::getPath)
+                .setHeader(I18n.t("dms.linkedfile.card.path")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(file -> file.getCategoryNames() == null ? "" : String.join(", ", file.getCategoryNames()))
+                .setHeader(I18n.t("dms.linkedfile.card.categories")).setAutoWidth(true);
+        ManagementGridSupport.addCardActionsColumn(grid,
+                file -> new LinkedFileCard(this, linkedFileService, file, this::loadAllFiles));
+    }
+
+    private void setTableMode(boolean tableMode) {
+        boolean loading = loadingBar.isVisible();
+        cardsContainer.setVisible(!loading && !tableMode);
+        grid.setVisible(!loading && tableMode);
     }
 }

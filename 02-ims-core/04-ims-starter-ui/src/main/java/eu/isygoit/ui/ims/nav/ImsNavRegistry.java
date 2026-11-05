@@ -31,7 +31,8 @@ public final class ImsNavRegistry implements INavRegistry {
             new NavTarget("ims.nav.applications", "ims/applications", VaadinIcon.PAPERCLIP, "ims"),
             new NavTarget("ims.nav.roles", "ims/roles", VaadinIcon.SHIELD, "ims"),
             new NavTarget("ims.nav.parameters", "ims/parameters", VaadinIcon.KEYBOARD, "ims"),
-            new NavTarget("ims.nav.annexes", "ims/annexes", VaadinIcon.FOLDER_OPEN, "ims")
+            new NavTarget("ims.nav.annexes", "ims/annexes", VaadinIcon.FOLDER_OPEN, "ims"),
+            new NavTarget("common.layout.avatar.profile", "profile", VaadinIcon.USER, "ims")
     );
 
     public ImsNavRegistry() {

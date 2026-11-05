@@ -7,6 +7,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -25,6 +26,8 @@ import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.component.ManagementGridSupport;
+import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.key.dialog.CreateKeyDialog;
@@ -50,6 +53,8 @@ public class KeyManagementView extends ManagementVerticalView {
     private final ObjectMapper objectMapper;
 
     private final Div cardsContainer = new Div();
+    private final Grid<KeyCard> grid = new Grid<>();
+    private ManagementViewModeSwitch viewModeSwitch;
     private final Button createButton = new Button(I18n.t("kms.key.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
@@ -93,6 +98,8 @@ public class KeyManagementView extends ManagementVerticalView {
         cardsContainer.setWidthFull();
         cardsContainer.addClassName("keys-grid");
         add(cardsContainer);
+        configureGrid();
+        add(grid);
 
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
@@ -159,6 +166,7 @@ public class KeyManagementView extends ManagementVerticalView {
         });
         nextButton.setTooltipText(I18n.t("kms.key.view.next.page.tooltip"));
 
+        setTableMode(viewModeSwitch.isTableMode());
         resetKeyPaginationAndLoad();
     }
 
@@ -252,6 +260,7 @@ public class KeyManagementView extends ManagementVerticalView {
                     return true;
                 })
                 .collect(Collectors.toList());
+        grid.setItems(filtered);
 
         if (filtered.isEmpty()) {
             Div emptyState = new Div();
@@ -308,7 +317,8 @@ public class KeyManagementView extends ManagementVerticalView {
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.setTooltipText(I18n.t("kms.key.view.refresh.tooltip"));
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        rightGroup.add(refreshButton, createButton);
+        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
+        rightGroup.add(viewModeSwitch, refreshButton, createButton);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
@@ -316,7 +326,8 @@ public class KeyManagementView extends ManagementVerticalView {
 
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
+        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
+        grid.setVisible(!show && viewModeSwitch.isTableMode());
         refreshButton.setEnabled(!show);
         createButton.setEnabled(!show);
     }
@@ -326,5 +337,23 @@ public class KeyManagementView extends ManagementVerticalView {
     }
 
     public record KeyStatusOption(String label, IEnumKeyStatus.Types value) {
+    }
+
+    private void configureGrid() {
+        grid.addClassName("management-grid");
+        grid.addColumn(KeyCard::getAliasOrId)
+                .setHeader(I18n.t("kms.key.table.name")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(KeyCard::getKeyId)
+                .setHeader(I18n.t("kms.key.card.key.id")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(card -> card.getStatus() != null ? card.getStatus().name() : I18n.t("kms.key.card.status.unknown"))
+                .setHeader(I18n.t("kms.key.view.status.label")).setAutoWidth(true);
+        ManagementGridSupport.addCardActionsColumn(grid, card -> new KeyCard(
+                this, kmsApiService, objectMapper, card.getKeyId(), card.getMetadata(), false));
+    }
+
+    private void setTableMode(boolean tableMode) {
+        boolean loading = loadingBar.isVisible();
+        cardsContainer.setVisible(!loading && !tableMode);
+        grid.setVisible(!loading && tableMode);
     }
 }

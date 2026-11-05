@@ -6,6 +6,8 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -24,6 +26,8 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.remote.mms.SenderConfigService;
+import eu.isygoit.ui.common.component.ManagementGridSupport;
+import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.mms.layout.MmsMainLayout;
 import eu.isygoit.ui.mms.views.common.MmsEnumTag;
@@ -51,6 +55,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
     private final SenderConfigService senderConfigService;
 
     private final Div cardsContainer = new Div();
+    private final Grid<MsgTemplateCard> grid = new Grid<>();
     private final Button createButton = new Button(I18n.t("mms.msgtemplate.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
@@ -62,6 +67,8 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
+    private ManagementViewModeSwitch viewModeSwitch;
+    private boolean tableMode;
 
     private final Stack<String> previousTokens = new Stack<>();
     private int pageSize = 10;
@@ -92,6 +99,10 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("template-view");
 
+        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
+        tableMode = viewModeSwitch.isTableMode();
+        configureGrid();
+
         H2 header = new H2(I18n.t("mms.msgtemplate.view.title"));
         header.addClassName(LumoUtility.FontSize.XXLARGE);
         header.addClassName(LumoUtility.Margin.Bottom.NONE);
@@ -103,6 +114,12 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         cardsContainer.setWidthFull();
         cardsContainer.addClassName("template-grid");
         add(cardsContainer);
+        grid.setAllRowsVisible(true);
+        grid.setWidthFull();
+        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_NO_BORDER);
+        grid.addClassName("management-grid");
+        grid.setVisible(false);
+        add(grid);
 
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
@@ -314,6 +331,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
 
     private void displayCards() {
         cardsContainer.removeAll();
+        grid.setItems(currentPageCards);
 
         if (currentPageCards.isEmpty()) {
             Div emptyState = new Div();
@@ -330,6 +348,33 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         } else {
             currentPageCards.forEach(cardsContainer::add);
         }
+        updateDisplayMode(false);
+    }
+
+    private void configureGrid() {
+        grid.addColumn(card -> card.getTemplate().getName())
+                .setHeader(I18n.t("mms.msgtemplate.view.name.label")).setAutoWidth(true);
+        grid.addColumn(card -> card.getTemplate().getCode())
+                .setHeader(I18n.t("mms.msgtemplate.card.code")).setAutoWidth(true);
+        grid.addColumn(card -> card.getTemplate().getLanguage() == null
+                        ? "" : MmsEnumTag.label(card.getTemplate().getLanguage(), "mms.msgtemplate.view.language"))
+                .setHeader(I18n.t("mms.msgtemplate.card.language")).setAutoWidth(true);
+        grid.addColumn(card -> card.getTemplate().getTenant())
+                .setHeader(I18n.t("mms.msgtemplate.card.tenant")).setAutoWidth(true);
+        ManagementGridSupport.addCardActionsColumn(grid, card -> new MsgTemplateCard(
+                this, templateService, templateFileService, senderConfigService,
+                card.getTemplate(), this::resetPaginationAndLoad, false));
+    }
+
+    private void setTableMode(boolean table) {
+        tableMode = table;
+        updateDisplayMode(false);
+    }
+
+    private void updateDisplayMode(boolean loading) {
+        boolean hasItems = !currentPageCards.isEmpty();
+        cardsContainer.setVisible(!loading && (!tableMode || !hasItems));
+        grid.setVisible(!loading && tableMode && hasItems);
     }
 
     private HorizontalLayout buildToolbar() {
@@ -384,6 +429,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         refreshButton.setTooltipText(I18n.t("mms.msgtemplate.view.refresh.tooltip"));
         createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         rightGroup.add(refreshButton, createButton);
+        rightGroup.add(viewModeSwitch);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
@@ -391,7 +437,7 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
 
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
+        updateDisplayMode(show);
         refreshButton.setEnabled(!show);
         createButton.setEnabled(!show);
     }

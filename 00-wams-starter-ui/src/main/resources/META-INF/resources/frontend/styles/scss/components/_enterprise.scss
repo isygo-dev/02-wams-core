@@ -182,6 +182,12 @@ vaadin-app-layout::part(content) {
   font-weight: 600;
 }
 
+.management-total-count {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-s);
+  white-space: nowrap;
+}
+
 /* ── Cards: flat at rest, one elevation step on hover ─────────────────── */
 
 .wams-card-shell,

@@ -50,7 +50,8 @@ import java.util.List;
                 @Index(name = SchemaIndexConstantName.IDX_CUSTOM_KEY_STORE_STATUS, columnList = SchemaColumnConstantName.C_STATUS),
                 @Index(name = SchemaIndexConstantName.IDX_CUSTOM_KEY_STORE_TYPE, columnList = SchemaColumnConstantName.C_STORE_TYPE)
         })
-public class KmsCustomKeyStore extends AuditableEntity<Long> implements ITenantAssignable {
+public class KmsCustomKeyStore extends AuditableEntity<Long>
+        implements ITenantAssignable, IStatusAssignable<IEnumCustomKeyStoreStatus.Types> {
 
     /**
      * Unique identifier for the custom key store

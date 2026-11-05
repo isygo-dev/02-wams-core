@@ -1,280 +1,232 @@
 package eu.isygoit.ui.kms.views.tokenizer.config;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.CreateTokenConfigDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @VaadinSessionScope
 @Route(value = "kms/token-configs", layout = KmsMainLayout.class)
 @PageTitle("Token Configurations")
 @PermitAll
-public class TokenConfigView extends ManagementVerticalView {
+public class TokenConfigView extends AbstractPaginatedView<TokenConfigDto> {
 
     private final KmsTokenConfigService tokenConfigService;
     private final KmsApiService kmsApiService;
-
-    private final Div cardsContainer = new Div();
-    private final TextField searchField = new TextField();
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button createButton = new Button(I18n.t("kms.token.config.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
-    private final ProgressBar loadingBar = new ProgressBar();
-
+    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
-    private final Span totalCountLabel = new Span();
-
-    private int currentPage = 0;
-    private int pageSize = 10;
-    private int totalPages = 0;
-    private long totalElements = 0;
-    private List<TokenConfigDto> currentPageContent = new ArrayList<>();
-    private String currentSearch = "";
+    private final com.vaadin.flow.component.html.Span totalCountLabel =
+            new com.vaadin.flow.component.html.Span();
 
     @Autowired
     public TokenConfigView(KmsTokenConfigService tokenConfigService, KmsApiService kmsApiService) {
         this.tokenConfigService = tokenConfigService;
         this.kmsApiService = kmsApiService;
-        buildUI();
-        loadConfigs();
-    }
-
-    private void buildUI() {
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        addClassName("token-config-view");
-
-        H2 header = new H2(I18n.t("kms.token.config.header"));
-        header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE);
-        add(header);
-
-        HorizontalLayout toolbar = buildToolbar();
-        add(toolbar);
-
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("token-configs-grid");
-        add(cardsContainer);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
-
-        refreshButton.addClickListener(e -> {
-            currentPage = 0;
-            loadConfigs();
-        });
+        pageSize = 10;
+        initPaginatedView();
         refreshButton.setTooltipText(I18n.t("tooltip.refresh"));
-
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        createButton.addClickListener(e -> openCreateDialog());
-
-        searchField.setPlaceholder(I18n.t("kms.token.config.search.placeholder"));
-        searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.addValueChangeListener(e -> {
-            currentSearch = e.getValue();
-            currentPage = 0;
-            loadConfigs();
-        });
-
-        pageSizeSelect.setItems(5, 10, 20, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                currentPage = 0;
-                loadConfigs();
-            }
-        });
-
-        prevButton.addClickListener(e -> {
-            if (currentPage > 0) {
-                currentPage--;
-                loadConfigs();
-            }
-        });
-        nextButton.addClickListener(e -> {
-            if (currentPage + 1 < totalPages) {
-                currentPage++;
-                loadConfigs();
-            }
-        });
     }
 
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("token-config-toolbar");
+    @Override
+    protected PaginatedResponseDto<TokenConfigDto> fetchPage(int page, int size) {
+        String searchCriteria = searchCriteria(searchField.getValue());
+        var response = searchCriteria.isBlank()
+                ? tokenConfigService.findAll(page, size)
+                : tokenConfigService.findAllFilteredByCriteria(searchCriteria, page, size);
+        return response != null ? response.getBody() : null;
+    }
 
-        HorizontalLayout leftGroup = new HorizontalLayout(searchField);
-        searchField.setWidth("250px");
+    @Override
+    protected PaginatedResponseDto<? extends TokenConfigDto> fetchFilteredPage(
+            String criteria, int page, int size) {
+        String mergedCriteria = mergeCriteria(criteria, searchCriteria(searchField.getValue()));
+        var response = tokenConfigService.findAllFilteredByCriteria(mergedCriteria, page, size);
+        return response != null ? response.getBody() : null;
+    }
 
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        pageSizeSelect.setWidth("100px");
-        pageInfoLabel.addClassName("page-info-label");
-        totalCountLabel.addClassName("total-count-label");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
+    @Override
+    protected Map<String, String> fetchCriteriaMetadata() {
+        var response = tokenConfigService.getAnnotatedCriteria();
+        return response != null && response.getBody() != null
+                ? response.getBody().stream().collect(Collectors.toMap(
+                field -> field.name(), field -> field.type(), (first, second) -> second,
+                java.util.LinkedHashMap::new))
+                : Map.of();
+    }
 
-        HorizontalLayout rightGroup = new HorizontalLayout(refreshButton, createButton);
-        rightGroup.setSpacing(true);
+    @Override
+    protected boolean configureGrid(Grid<TokenConfigDto> grid) {
+        grid.addColumn(TokenConfigDto::getCode).setHeader("Code").setAutoWidth(true);
+        grid.addColumn(TokenConfigDto::getTokenType).setHeader("Token type").setAutoWidth(true);
+        grid.addColumn(TokenConfigDto::getLifeTimeInMs).setHeader("Lifetime (ms)").setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected Component renderItem(TokenConfigDto item) {
+        return new TokenConfigCard(this, tokenConfigService, kmsApiService, item, this::loadConfigs);
+    }
+
+    @Override
+    protected boolean matchesSearch(TokenConfigDto item, String search) {
+        return true;
+    }
+
+    @Override
+    protected void openCreateDialog() {
+        new CreateTokenConfigDialog(tokenConfigService, kmsApiService, this::loadConfigs).open();
+    }
+
+    @Override
+    protected void onSearchChanged() {
+        loadPageZero();
+    }
+
+    @Override
+    protected List<Component> buildToolbarActions() {
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
+        refreshButton.addClickListener(event -> loadPageZero());
+        pageSizeSelect.setItems(5, 10, 20, 50);
+        pageSizeSelect.setValue(pageSize);
+        pageSizeSelect.setWidth("100px");
+        pageSizeSelect.addValueChangeListener(event -> {
+            if (event.getValue() != null && event.getValue() != pageSize) {
+                pageSize = event.getValue();
+                loadPageZero();
+            }
+        });
+        totalCountLabel.addClassName("management-total-count");
+        return List.of(refreshButton, pageSizeSelect, totalCountLabel);
     }
 
-    private void loadConfigs() {
-        showLoading(true);
-        try {
-            ResponseEntity<PaginatedResponseDto<TokenConfigDto>> response;
-            if (currentSearch == null || currentSearch.isBlank()) {
-                response = tokenConfigService.findAll(currentPage, pageSize);
-            } else {
-                String criteria = "code~" + currentSearch + ",OR tokenType~" + currentSearch;
-                response = tokenConfigService.findAllFilteredByCriteria(criteria, currentPage, pageSize);
-            }
-
-            PaginatedResponseDto<TokenConfigDto> body = response.getBody();
-            if (body != null) {
-                currentPageContent = body.getContent() != null ? body.getContent() : new ArrayList<>();
-                totalPages = body.getTotalPages();
-                totalElements = body.getTotalElements();
-                if (currentPage >= totalPages && totalPages > 0) {
-                    currentPage = totalPages - 1;
-                    loadConfigs();
-                    return;
-                }
-            } else {
-                currentPageContent = new ArrayList<>();
-                totalPages = 0;
-                totalElements = 0;
-            }
-            updatePaginationDisplay();
-            renderCards();
-        } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            showError(I18n.t("notification.error.load") + ": " + errorMsg);
-        } catch (Exception e) {
-            showError(I18n.t("notification.error.load") + ": " + e.getMessage());
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    private void updatePaginationDisplay() {
-        if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("kms.token.config.page.info", currentPage + 1, totalPages));
-        } else {
-            pageInfoLabel.setText(I18n.t("kms.token.config.page.info", 0, 0));
-        }
+    @Override
+    protected void onPageLoaded() {
         totalCountLabel.setText(I18n.t("kms.token.config.total.count", totalElements));
-        prevButton.setEnabled(currentPage > 0);
-        nextButton.setEnabled(currentPage + 1 < totalPages);
     }
 
-    private void renderCards() {
-        cardsContainer.removeAll();
-        if (currentPageContent.isEmpty()) {
-            Div emptyState = new Div();
-            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-            emptyState.addClassName(LumoUtility.Padding.XLARGE);
-            Icon emptyIcon = VaadinIcon.CODE.create();
-            emptyIcon.setSize("48px");
-            emptyIcon.addClassName("empty-state-icon");
-            H4 emptyTitle = new H4(I18n.t("kms.token.config.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("kms.token.config.empty.description"));
-            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-            cardsContainer.add(emptyState);
-            return;
-        }
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"token-config-view"};
+    }
 
-        for (TokenConfigDto dto : currentPageContent) {
-            TokenConfigCard card = new TokenConfigCard(
-                    this,
-                    tokenConfigService,
-                    kmsApiService,
-                    dto,
-                    () -> loadConfigs()
-            );
-            cardsContainer.add(card);
+    @Override
+    protected String extractErrorMessage(Exception exception) {
+        if (exception instanceof FeignException feignException
+                && (feignException.status() == 400 || feignException.status() == 500)
+                && feignException.contentUTF8() != null && !feignException.contentUTF8().isBlank()) {
+            return feignException.contentUTF8();
         }
+        return exception.getMessage();
+    }
+
+    @Override
+    protected String getTitleKey() {
+        return "kms.token.config.header";
+    }
+
+    @Override
+    protected String getSubtitleKey() {
+        return null;
+    }
+
+    @Override
+    protected String getCreateButtonKey() {
+        return "kms.token.config.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "kms.token.config.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "kms.token.config.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "kms.token.config.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.CODE;
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "notification.error.load";
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t(getTitleKey());
+    }
+
+    public void loadConfigs() {
+        loadPage(currentPage);
+    }
+
+    public void loadPageZero() {
+        loadPage(0);
     }
 
     public void refreshCard(TokenConfigCard card) {
         try {
-            ResponseEntity<TokenConfigDto> response = tokenConfigService.findById(card.getDto().getId());
+            var response = tokenConfigService.findById(card.getDto().getId());
             TokenConfigDto updated = response.getBody();
-            if (updated != null) {
-                card.updateDto(updated);
-                for (int i = 0; i < currentPageContent.size(); i++) {
-                    if (currentPageContent.get(i).getId().equals(updated.getId())) {
-                        currentPageContent.set(i, updated);
-                        break;
-                    }
-                }
-            } else {
-                cardsContainer.remove(card);
+            if (updated == null) {
                 loadConfigs();
+                return;
             }
-        } catch (Exception e) {
-            showError(I18n.t("notification.error.load") + ": " + e.getMessage());
+            card.updateDto(updated);
+            for (int i = 0; i < currentItems.size(); i++) {
+                if (currentItems.get(i).getId().equals(updated.getId())) {
+                    currentItems.set(i, updated);
+                    applyLocalFilter();
+                    return;
+                }
+            }
+        } catch (Exception exception) {
+            eu.isygoit.ui.common.notification.AppNotifications.error(
+                    I18n.t("notification.error.load") + ": " + exception.getMessage());
         }
     }
 
-    private void openCreateDialog() {
-        new CreateTokenConfigDialog(tokenConfigService, kmsApiService, this::loadConfigs).open();
+    private String searchCriteria(String search) {
+        if (search == null || search.isBlank()) {
+            return "";
+        }
+        String escaped = search.replace("'", "''");
+        return "(code ~ '" + escaped + "' | tokenType ~ '" + escaped + "')";
     }
 
-    private void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
-        refreshButton.setEnabled(!show);
-        createButton.setEnabled(!show);
-    }
-
-    private void showError(String msg) {
-        Notification.show(msg, 5000, Notification.Position.BOTTOM_END)
-                .addThemeVariants(NotificationVariant.LUMO_ERROR);
+    private String mergeCriteria(String criteria, String search) {
+        if (search.isBlank()) {
+            return criteria;
+        }
+        return criteria == null || criteria.isBlank() ? search : "(" + criteria + ") & " + search;
     }
 }

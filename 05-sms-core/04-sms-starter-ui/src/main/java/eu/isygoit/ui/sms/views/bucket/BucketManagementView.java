@@ -6,6 +6,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -25,6 +26,8 @@ import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.remote.sms.StorageConfigService;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
+import eu.isygoit.ui.common.component.ManagementGridSupport;
+import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
 import eu.isygoit.ui.sms.views.bucket.dialog.CreateBucketDialog;
@@ -51,6 +54,8 @@ public class BucketManagementView extends ManagementVerticalView {
     private final StorageConfigService storageConfigService;
 
     private final Div cardsContainer = new Div();
+    private final Grid<BucketDto> grid = new Grid<>();
+    private ManagementViewModeSwitch viewModeSwitch;
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createBucketButton = new Button(I18n.t("sms.buckets.view.create.bucket"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final TextField searchField = new TextField();
@@ -94,12 +99,15 @@ public class BucketManagementView extends ManagementVerticalView {
         cardsContainer.setWidthFull();
         cardsContainer.addClassName("buckets-cards-grid");
         add(cardsContainer);
+        configureGrid();
+        add(grid);
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
         add(loadingBar);
 
         initEventHandlers();
+        setTableMode(viewModeSwitch.isTableMode());
         loadStorageConfigs();
     }
 
@@ -218,6 +226,7 @@ public class BucketManagementView extends ManagementVerticalView {
         currentPageBuckets = filtered.subList(start, end);
 
         updatePaginationDisplay();
+        grid.setItems(currentPageBuckets);
         displayCards();
     }
 
@@ -257,6 +266,7 @@ public class BucketManagementView extends ManagementVerticalView {
     private void clearBuckets() {
         allBuckets.clear();
         currentPageBuckets.clear();
+        grid.setItems(List.of());
         cardsContainer.removeAll();
         updateStats();
         updatePaginationDisplay();
@@ -305,7 +315,8 @@ public class BucketManagementView extends ManagementVerticalView {
         rightGroup.setAlignItems(FlexComponent.Alignment.END);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         createBucketButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        rightGroup.add(refreshButton, createBucketButton);
+        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
+        rightGroup.add(viewModeSwitch, refreshButton, createBucketButton);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
@@ -321,7 +332,8 @@ public class BucketManagementView extends ManagementVerticalView {
 
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
+        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
+        grid.setVisible(!show && viewModeSwitch.isTableMode());
         refreshButton.setEnabled(!show);
         createBucketButton.setEnabled(!show);
         tenantSelector.setEnabled(!show);
@@ -345,5 +357,22 @@ public class BucketManagementView extends ManagementVerticalView {
         } catch (Exception ignored) {
         }
         return ex.getMessage() != null ? ex.getMessage() : "Unknown error";
+    }
+
+    private void configureGrid() {
+        grid.addClassName("management-grid");
+        grid.addColumn(BucketDto::getName)
+                .setHeader(I18n.t("sms.buckets.card.name")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(bucket -> bucket.getCreationDate() != null
+                        ? bucket.getCreationDate().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "")
+                .setHeader(I18n.t("sms.buckets.card.created")).setAutoWidth(true);
+        ManagementGridSupport.addCardActionsColumn(grid,
+                bucket -> new BucketCard(this, objectStorageService, bucket, this::refreshAll));
+    }
+
+    private void setTableMode(boolean tableMode) {
+        boolean loading = loadingBar.isVisible();
+        cardsContainer.setVisible(!loading && !tableMode);
+        grid.setVisible(!loading && tableMode);
     }
 }

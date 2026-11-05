@@ -30,7 +30,8 @@ import java.util.concurrent.TimeUnit;
 @DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_PASSWORD_INFO)
-public class PasswordInfo extends AuditableEntity<Long> {
+public class PasswordInfo extends AuditableEntity<Long>
+        implements IStatusAssignable<IEnumPasswordStatus.Types> {
 
     @Id
     @SequenceGenerator(name = "password_info_sequence_generator", sequenceName = "password_info_sequence", allocationSize = 1)

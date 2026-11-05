@@ -51,6 +51,10 @@ class AliasCard extends BaseCard<AliasesView, KmsApiService> {
         return targetKeyId;
     }
 
+    KmsDtos.ListAliasesResponse.AliasEntry getEntry() {
+        return entry;
+    }
+
     // ── BaseCard implementation ───────────────────────────────────────────────
     @Override
     protected String cardCssClassName() {

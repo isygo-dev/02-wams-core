@@ -23,7 +23,7 @@ public final class KmsNavRegistry implements INavRegistry {
 
     private static final List<NavTarget> ALL = List.of(
             // KMS
-            new NavTarget("kms.nav.dashboard", "kms/home", VaadinIcon.HOME, "kms"),
+            new NavTarget("kms.nav.dashboard", "kms", VaadinIcon.HOME, "kms"),
             new NavTarget("kms.nav.keys", "kms/keys", VaadinIcon.KEY, "kms"),
             new NavTarget("kms.nav.aliases", "kms/aliases", VaadinIcon.LINK, "kms"),
             new NavTarget("kms.nav.tags", "kms/tags", VaadinIcon.TAGS, "kms"),

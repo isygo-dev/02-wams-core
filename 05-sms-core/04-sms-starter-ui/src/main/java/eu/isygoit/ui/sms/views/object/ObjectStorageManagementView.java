@@ -7,6 +7,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -25,6 +26,8 @@ import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.remote.sms.StorageConfigService;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
+import eu.isygoit.ui.common.component.ManagementGridSupport;
+import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
 import eu.isygoit.ui.sms.views.common.SmsEnumTag;
@@ -66,6 +69,8 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     private final StorageConfigService storageConfigService;
 
     private final Div cardsContainer = new Div();
+    private final Grid<FileItem> grid = new Grid<>();
+    private ManagementViewModeSwitch viewModeSwitch;
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createBucketButton = new Button(new Icon(VaadinIcon.PLUS));
     private final Button uploadFileButton = new Button(I18n.t("sms.objects.view.upload.file"), new Icon(VaadinIcon.UPLOAD));
@@ -115,6 +120,8 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         cardsContainer.setWidthFull();
         cardsContainer.addClassName("objects-cards-grid");
         add(cardsContainer);
+        configureGrid();
+        add(grid);
 
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
@@ -122,6 +129,7 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         add(loadingBar);
 
         initEventHandlers();
+        setTableMode(viewModeSwitch.isTableMode());
     }
 
     /**
@@ -375,12 +383,14 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         currentPageFiles = filtered.subList(start, end);
 
         updatePaginationDisplay();
+        grid.setItems(currentPageFiles);
         displayCards();
     }
 
     private void displayCards() {
         cardsContainer.removeAll();
         if (currentPageFiles.isEmpty()) {
+            grid.setItems(List.of());
             Div emptyState = new Div();
             emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
             emptyState.addClassName(LumoUtility.Padding.XLARGE);
@@ -426,6 +436,7 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     private void clearFiles() {
         allFiles.clear();
         currentPageFiles.clear();
+        grid.setItems(List.of());
         cardsContainer.removeAll();
         updateStats();
         updatePaginationDisplay();
@@ -472,7 +483,8 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         uploadFileButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         uploadFileButton.setEnabled(false);
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        rightGroup.add(refreshButton, createBucketButton, uploadFileButton);
+        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
+        rightGroup.add(viewModeSwitch, refreshButton, createBucketButton, uploadFileButton);
 
         toolbar.add(leftGroup, centerGroup, rightGroup);
         return toolbar;
@@ -498,7 +510,8 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
 
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show);
+        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
+        grid.setVisible(!show && viewModeSwitch.isTableMode());
         refreshButton.setEnabled(!show);
         createBucketButton.setEnabled(!show && selectedStorageConfig != null);
         uploadFileButton.setEnabled(!show && selectedBucket != null);
@@ -532,6 +545,29 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         } catch (Exception ignored) {
         }
         return ex.getMessage() != null ? ex.getMessage() : "Unknown error";
+    }
+
+    private void configureGrid() {
+        grid.addClassName("management-grid");
+        grid.addColumn(FileItem::getFileName)
+                .setHeader(I18n.t("sms.objects.card.name")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(file -> file.getPath().isBlank()
+                        ? I18n.t("sms.objects.card.path.root") : file.getPath())
+                .setHeader(I18n.t("sms.objects.card.path")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(FileItem::getType)
+                .setHeader(I18n.t("sms.objects.card.type")).setAutoWidth(true);
+        grid.addColumn(FileItem::getSizeDisplay)
+                .setHeader(I18n.t("sms.objects.card.size")).setAutoWidth(true);
+        grid.addColumn(file -> file.getTags() == null ? "" : String.join(", ", file.getTags()))
+                .setHeader(I18n.t("sms.objects.card.tags")).setAutoWidth(true);
+        ManagementGridSupport.addCardActionsColumn(grid, file -> new FileCard(this, objectStorageService,
+                file, getSelectedTenant(), selectedBucket.getName(), this::refreshAll));
+    }
+
+    private void setTableMode(boolean tableMode) {
+        boolean loading = loadingBar.isVisible();
+        cardsContainer.setVisible(!loading && !tableMode);
+        grid.setVisible(!loading && tableMode);
     }
 
     // ----- Inner FileItem with all fields -----

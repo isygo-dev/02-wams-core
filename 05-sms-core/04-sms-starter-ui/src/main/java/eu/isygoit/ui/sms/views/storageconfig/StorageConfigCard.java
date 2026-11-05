@@ -49,10 +49,13 @@ public class StorageConfigCard extends BaseCard<StorageConfigManagementView, Sto
         String displayName = config.getUserName() != null ? config.getUserName() : I18n.t("sms.storageconfig.card.default.name", config.getId());
         Span titleSpan = buildTitleSpan(displayName, config.getUrl());
 
-        Span typeChip = SmsEnumTag.ofOrUnknown(config.getType(), "sms.enum.storage");
-
-        titleLayout.add(titleSpan, typeChip);
+        titleLayout.add(titleSpan);
         return titleLayout;
+    }
+
+    @Override
+    protected Component buildEnumTags() {
+        return SmsEnumTag.ofOrUnknown(config.getType(), "sms.enum.storage");
     }
 
     @Override

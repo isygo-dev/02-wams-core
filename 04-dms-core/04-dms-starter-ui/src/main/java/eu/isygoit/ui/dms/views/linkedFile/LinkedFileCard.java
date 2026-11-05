@@ -54,6 +54,11 @@ public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFil
     }
 
     @Override
+    protected String businessCode() {
+        return file.getCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout titleLayout = new HorizontalLayout();
         titleLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -76,13 +81,7 @@ public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFil
 
         nameLayout.add(iconComponent, titleSpan);
 
-        // Add code chip
-        Span codeChip = buildStatusChip(
-                I18n.t("dms.linkedfile.card.code.chip", file.getCode()),
-                BaseCard.ChipColor.INFO
-        );
-
-        titleLayout.add(nameLayout, codeChip);
+        titleLayout.add(nameLayout);
         return titleLayout;
     }
 
@@ -113,6 +112,7 @@ public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFil
         Button renameBtn = createEditButton(I18n.t("dms.linkedfile.card.rename.tooltip"),
                 () -> new RenameLinkedFileDialog(parentView, objectService, file, renamed -> {
                     file = renamed;
+                    refreshBusinessCode();
                     if (onRefresh != null) onRefresh.run();
                 }).open());
 

@@ -55,16 +55,27 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     private Span deletionWarningSpan;
     private ContextMenu currentContextMenu;
     private int versionCount = 0;
+    private final boolean loadVersionCountOnAttach;
 
     public KeyCard(KeyManagementView parentView,
                    KmsApiService kmsApiService,
                    ObjectMapper objectMapper,
                    String keyId,
                    DescribeKeyResponse.KeyMetadata metadata) {
+        this(parentView, kmsApiService, objectMapper, keyId, metadata, true);
+    }
+
+    KeyCard(KeyManagementView parentView,
+            KmsApiService kmsApiService,
+            ObjectMapper objectMapper,
+            String keyId,
+            DescribeKeyResponse.KeyMetadata metadata,
+            boolean loadVersionCountOnAttach) {
         super(parentView, kmsApiService);
         this.objectMapper = objectMapper;
         this.keyId = keyId;
         this.metadata = metadata;
+        this.loadVersionCountOnAttach = loadVersionCountOnAttach;
         updateDerivedFields();
 
         // Setup body container
@@ -90,6 +101,10 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     public IEnumKeyStatus.Types getStatus() {
         return metadata != null ? metadata.getKeyStatus() : null;
+    }
+
+    DescribeKeyResponse.KeyMetadata getMetadata() {
+        return metadata;
     }
 
     // ─── Refresh – fully reloads the card and context menu ──────────────────
@@ -137,6 +152,11 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     }
 
     @Override
+    protected String businessCode() {
+        return keyId;
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -144,9 +164,6 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         left.addClassName("key-card__title-row");
 
         titleSpan = buildTitleSpan(aliasOrId, aliasOrId);
-        statusChip = metadata != null && metadata.getKeyStatus() != null
-                ? KmsEnumTag.of(metadata.getKeyStatus(), "kms.enum")
-                : KmsEnumTag.ofLabel(I18n.t("kms.key.card.status.unknown"), "UNKNOWN");
 
         versionSpan = new Span();
         updateVersionDisplay();
@@ -159,8 +176,16 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
         versionLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         versionLayout.setSpacing(false);
 
-        left.add(titleSpan, statusChip, versionLayout);
+        left.add(titleSpan, versionLayout);
         return left;
+    }
+
+    @Override
+    protected Span buildStatusTag() {
+        statusChip = metadata != null && metadata.getKeyStatus() != null
+                ? KmsEnumTag.of(metadata.getKeyStatus(), "kms.enum")
+                : KmsEnumTag.ofLabel(I18n.t("kms.key.card.status.unknown"), "UNKNOWN");
+        return statusChip;
     }
 
     @Override
@@ -427,7 +452,9 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     @Override
     protected void onCardAttach(AttachEvent event) {
-        loadVersionCount();
+        if (loadVersionCountOnAttach) {
+            loadVersionCount();
+        }
     }
 
     private void loadVersionCount() {

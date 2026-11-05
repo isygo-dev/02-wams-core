@@ -15,9 +15,10 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.HasDynamicTitle;
-import com.vaadin.flow.server.VaadinSession;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.ManagementGridSupport;
+import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.common.filters.FilterBar;
 import eu.isygoit.ui.common.notification.AppNotifications;
 import lombok.extern.slf4j.Slf4j;
@@ -76,25 +77,11 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     private int renderedCount;
 
     // ─── Criteria state ────────────────────────────────────────────
-    private Button cardsModeButton;
-    private Button tableModeButton;
+    private ManagementViewModeSwitch viewModeSwitch;
 
     // ══════════════════════════════════════════════════════════════
     //  Abstract contract — subclasses must implement
     // ══════════════════════════════════════════════════════════════
-
-    private static Component findByClass(Component root, String cssClass) {
-        if (root.getElement().getClassList().contains(cssClass)) {
-            return root;
-        }
-        for (Component child : root.getChildren().toList()) {
-            Component found = findByClass(child, cssClass);
-            if (found != null) {
-                return found;
-            }
-        }
-        return null;
-    }
 
     /**
      * Fetch one page from the backend. Return {@code null} for an empty page.
@@ -193,16 +180,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
      * attached: only its button bar is moved into the cell.
      */
     protected Grid.Column<T> addCardActionsColumn(Grid<T> grid) {
-        return grid.addComponentColumn(item -> {
-            Div cell = new Div();
-            cell.addClassName("management-grid__actions");
-            Component bar = findByClass(renderItem(item), "wams-card__button-bar");
-            if (bar != null) {
-                bar.getElement().removeFromParent();
-                cell.add(bar);
-            }
-            return cell;
-        }).setHeader("").setAutoWidth(true).setFlexGrow(0);
+        return ManagementGridSupport.addCardActionsColumn(grid, this::renderItem);
     }
 
     /**
@@ -280,13 +258,20 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         Div headerBlock = new Div();
         headerBlock.addClassName("administration-header");
         H2 header = new H2(I18n.t(getTitleKey()));
-        Paragraph subtitle = new Paragraph(I18n.t(getSubtitleKey()));
-        subtitle.addClassName("administration-subtitle");
-        headerBlock.add(header, subtitle);
+        headerBlock.add(header);
+        String subtitleKey = getSubtitleKey();
+        if (subtitleKey != null && !subtitleKey.isBlank()) {
+            Paragraph subtitle = new Paragraph(I18n.t(subtitleKey));
+            subtitle.addClassName("administration-subtitle");
+            headerBlock.add(subtitle);
+        }
         add(headerBlock);
 
         gridSupported = configureGrid(grid);
-        gridMode = gridSupported && "table".equals(modeAttribute());
+        if (gridSupported) {
+            viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setGridMode);
+            gridMode = viewModeSwitch.isTableMode();
+        }
 
         // ─── Panel shell ───────────────────────────────────────────
         VerticalLayout panel = new VerticalLayout();
@@ -378,7 +363,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
             right.add(c);
         }
         if (gridSupported) {
-            right.add(buildModeSwitch());
+            right.add(viewModeSwitch);
         }
         right.add(createButton);
 
@@ -479,48 +464,12 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         return gridSupported && gridMode && renderedCount > 0;
     }
 
-    private String modeAttribute() {
-        Object value = VaadinSession.getCurrent() == null ? null
-                : VaadinSession.getCurrent().getAttribute("view-mode:" + getClass().getName());
-        return value == null ? "cards" : value.toString();
-    }
-
-    private Component buildModeSwitch() {
-        cardsModeButton = modeButton(VaadinIcon.GRID_BIG_O, "common.view.cards", false);
-        tableModeButton = modeButton(VaadinIcon.LIST, "common.view.table", true);
-        Div group = new Div(cardsModeButton, tableModeButton);
-        group.addClassName("view-mode-switch");
-        updateModeButtons();
-        return group;
-    }
-
-    private Button modeButton(VaadinIcon icon, String labelKey, boolean table) {
-        Button button = new Button(icon.create());
-        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        button.addClassName("view-mode-switch__button");
-        button.setTooltipText(I18n.t(labelKey));
-        button.setAriaLabel(I18n.t(labelKey));
-        button.addClickListener(e -> setGridMode(table));
-        return button;
-    }
-
     private void setGridMode(boolean table) {
         if (gridMode == table) {
             return;
         }
         gridMode = table;
-        if (VaadinSession.getCurrent() != null) {
-            VaadinSession.getCurrent().setAttribute("view-mode:" + getClass().getName(), table ? "table" : "cards");
-        }
-        updateModeButtons();
         applyLocalFilter();
-    }
-
-    private void updateModeButtons() {
-        cardsModeButton.getElement().setAttribute("aria-pressed", String.valueOf(!gridMode));
-        tableModeButton.getElement().setAttribute("aria-pressed", String.valueOf(gridMode));
-        cardsModeButton.setClassName("view-mode-switch__button--active", !gridMode);
-        tableModeButton.setClassName("view-mode-switch__button--active", gridMode);
     }
 
     protected Component buildEmptyState() {

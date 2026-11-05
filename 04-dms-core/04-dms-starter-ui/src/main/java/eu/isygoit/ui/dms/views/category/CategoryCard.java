@@ -49,13 +49,7 @@ public class CategoryCard extends BaseCard<CategoryManagementView, CategoryServi
 
         Span titleSpan = buildTitleSpan(category.getName(), null);
 
-        // Add ID chip
-        Span idChip = buildStatusChip(
-                I18n.t("dms.category.card.id.chip", category.getId()),
-                "info"
-        );
-
-        titleLayout.add(titleSpan, idChip);
+        titleLayout.add(titleSpan);
         return titleLayout;
     }
 

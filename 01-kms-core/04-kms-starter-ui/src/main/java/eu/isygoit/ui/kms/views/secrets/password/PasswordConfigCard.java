@@ -50,6 +50,11 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
     }
 
     @Override
+    protected String businessCode() {
+        return dto.getCode();
+    }
+
+    @Override
     protected Component buildTitle() {
         HorizontalLayout left = new HorizontalLayout();
         left.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -72,10 +77,13 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
 
     @Override
     protected void buildBodyRows() {
-        add(createIconRow(VaadinIcon.USER, I18n.t("kms.password.card.type"),
-                KmsEnumTag.ofOrUnknown(dto.getType(), "kms.enum")));
         add(createIconRow(VaadinIcon.ARROW_DOWN, I18n.t("kms.password.card.min.length"), String.valueOf(dto.getMinLength())));
         add(createIconRow(VaadinIcon.ARROW_UP, I18n.t("kms.password.card.max.length"), String.valueOf(dto.getMaxLength())));
+    }
+
+    @Override
+    protected Component buildEnumTags() {
+        return KmsEnumTag.ofOrUnknown(dto.getType(), "kms.enum");
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {
@@ -107,6 +115,7 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
     }
 
     private void refreshDisplay() {
+        refreshBusinessCode();
         titleSpan.setText(dto.getCode());
         titleSpan.getElement().setAttribute("title", dto.getCode());
         getUI().ifPresent(ui -> ui.access(() -> {
