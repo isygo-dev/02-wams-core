@@ -30,7 +30,6 @@ import java.util.List;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "ims/registered-users", layout = ImsMainLayout.class)
-//@PageTitle("Registered User Management")
 @PermitAll
 public class RegisteredManagementView extends AbstractPaginatedView<RegisteredUserDto> {
 

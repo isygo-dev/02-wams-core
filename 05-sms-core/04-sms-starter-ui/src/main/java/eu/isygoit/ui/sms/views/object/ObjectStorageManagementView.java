@@ -61,9 +61,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "sms/objectstorage", layout = SmsMainLayout.class)
-@PageTitle("Object Storage - File Management")
 @PermitAll
 public class ObjectStorageManagementView extends ManagementVerticalView implements HasUrlParameter<String> {
+    @Override
+    public String getPageTitle() {
+        return "Object Storage - File Management";
+    }
+
 
     private final ObjectStorageService objectStorageService;
     private final StorageConfigService storageConfigService;

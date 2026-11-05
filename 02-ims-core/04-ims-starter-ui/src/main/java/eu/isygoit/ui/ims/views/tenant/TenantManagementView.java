@@ -28,7 +28,6 @@ import java.util.List;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "ims/tenants", layout = ImsMainLayout.class)
-//@PageTitle("Tenant Management")
 @PermitAll
 public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
 

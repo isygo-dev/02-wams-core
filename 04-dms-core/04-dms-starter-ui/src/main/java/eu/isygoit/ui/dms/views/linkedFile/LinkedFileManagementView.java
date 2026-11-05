@@ -14,7 +14,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -41,9 +40,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "dms/linked-files", layout = DmsMainLayout.class)
-@PageTitle("Linked File Management")
 @PermitAll
 public class LinkedFileManagementView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Linked File Management";
+    }
+
 
     private final LinkedFileService linkedFileService;
     private final CategoryService categoryService;

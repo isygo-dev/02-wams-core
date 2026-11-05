@@ -16,7 +16,6 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -46,9 +45,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "mms/templates", layout = MmsMainLayout.class)
-@PageTitle("Template Management")
 @PermitAll
 public class MsgTemplateManagementView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Template Management";
+    }
+
 
     private final MsgTemplateService templateService;
     private final MsgTemplateFileService templateFileService;

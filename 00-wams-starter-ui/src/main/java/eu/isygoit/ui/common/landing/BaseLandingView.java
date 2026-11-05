@@ -16,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
@@ -41,7 +42,7 @@ import java.util.List;
  *
  * @see ModuleInfo
  */
-public abstract class BaseLandingView extends BaseMainLayout {
+public abstract class BaseLandingView extends BaseMainLayout implements HasDynamicTitle {
 
     private final transient UI ui;
     private final List<CardEntry> cardEntries = new ArrayList<>();
@@ -88,6 +89,11 @@ public abstract class BaseLandingView extends BaseMainLayout {
     protected String getModuleKey() {
         // Landing page has no module accent
         return "";
+    }
+
+    @Override
+    public String getPageTitle() {
+        return ViewTitleUtils.humanize(getClass());
     }
 
     /**

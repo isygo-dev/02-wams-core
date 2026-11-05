@@ -16,7 +16,6 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -45,9 +44,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "kms/keys", layout = KmsMainLayout.class)
-@PageTitle("Key Management")
 @PermitAll
 public class KeyManagementView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Key Management";
+    }
+
 
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;

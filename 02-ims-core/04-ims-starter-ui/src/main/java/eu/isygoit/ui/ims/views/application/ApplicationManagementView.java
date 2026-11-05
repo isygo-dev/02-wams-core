@@ -28,7 +28,6 @@ import java.util.List;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "ims/applications", layout = ImsMainLayout.class)
-//@PageTitle("Application Management")
 @PermitAll
 public class ApplicationManagementView extends AbstractPaginatedView<ApplicationDto> {
 

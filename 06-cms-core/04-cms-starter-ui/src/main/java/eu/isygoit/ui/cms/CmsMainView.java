@@ -3,7 +3,6 @@ package eu.isygoit.ui.cms;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
@@ -34,8 +33,13 @@ import java.util.List;
 @RouteAlias(value = "cms/home", layout = CmsMainLayout.class)
 @VaadinSessionScope
 @Route(value = "cms", layout = CmsMainLayout.class)
-@PageTitle("CMS Dashboard")
+
 public class CmsMainView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "CMS Dashboard";
+    }
+
 
     private static final int PAGE_SIZE = 500;
 

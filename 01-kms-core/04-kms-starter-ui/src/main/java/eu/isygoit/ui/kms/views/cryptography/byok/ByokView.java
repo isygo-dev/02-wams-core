@@ -18,7 +18,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -49,9 +48,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "kms/byok", layout = KmsMainLayout.class)
-@PageTitle("BYOK - Bring Your Own Key")
 @PermitAll
 public class ByokView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "BYOK - Bring Your Own Key";
+    }
+
 
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.byok.view.select.key"));

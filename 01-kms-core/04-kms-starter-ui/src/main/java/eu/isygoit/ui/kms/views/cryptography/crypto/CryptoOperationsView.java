@@ -13,7 +13,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -42,9 +41,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "kms/crypto", layout = KmsMainLayout.class)
-@PageTitle("Cryptographic Operations")
 @PermitAll
 public class CryptoOperationsView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Cryptographic Operations";
+    }
+
 
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.crypto.view.select.key"));

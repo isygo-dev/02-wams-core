@@ -15,7 +15,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -40,9 +39,13 @@ import java.util.stream.Collectors;
 
 @VaadinSessionScope
 @Route(value = "kms/aliases", layout = KmsMainLayout.class)
-@PageTitle("Key Aliases")
 @PermitAll
 public class AliasesView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Key Aliases";
+    }
+
 
     private final KmsApiService kmsApiService;
     private final Div cardsContainer = new Div();

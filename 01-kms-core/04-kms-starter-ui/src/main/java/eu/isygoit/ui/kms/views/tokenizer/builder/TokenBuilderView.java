@@ -20,7 +20,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -46,9 +45,13 @@ import java.util.Set;
 
 @VaadinSessionScope
 @Route(value = "kms/token-builder", layout = KmsMainLayout.class)
-@PageTitle("Tokenizer – JWT Management")
 @PermitAll
 public class TokenBuilderView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Tokenizer – JWT Management";
+    }
+
 
     private final KmsTokenService tokenService;
     private final ObjectMapper objectMapper;

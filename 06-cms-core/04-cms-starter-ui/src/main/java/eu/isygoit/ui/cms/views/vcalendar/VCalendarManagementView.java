@@ -7,7 +7,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -28,7 +27,6 @@ import java.util.stream.Collectors;
 
 @VaadinSessionScope
 @Route(value = "cms/calendars", layout = CmsMainLayout.class)
-@PageTitle("Calendar Management")
 @PermitAll
 public class VCalendarManagementView extends AbstractPaginatedView<VCalendarDto> {
 

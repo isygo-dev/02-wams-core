@@ -25,7 +25,6 @@ import java.util.List;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "ims/parameters", layout = ImsMainLayout.class)
-//@PageTitle("Parameter Management")
 @PermitAll
 public class ParameterManagementView extends AbstractPaginatedView<AppParameterDto> {
 

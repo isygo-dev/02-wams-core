@@ -3,13 +3,20 @@ package eu.isygoit.ui;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
+import eu.isygoit.ui.common.view.ViewTitleUtils;
 import eu.isygoit.util.SecurityUtils;
 import jakarta.annotation.security.PermitAll;
 
 @Route("")
 @PermitAll
-public class IndexView extends Div implements BeforeEnterObserver {
+public class IndexView extends Div implements BeforeEnterObserver, HasDynamicTitle {
+
+    @Override
+    public String getPageTitle() {
+        return ViewTitleUtils.humanize(getClass());
+    }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {

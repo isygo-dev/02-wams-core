@@ -25,7 +25,6 @@ import java.util.List;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "ims/roles", layout = ImsMainLayout.class)
-//@PageTitle("Role Management")
 @PermitAll
 public class RoleManagementView extends AbstractPaginatedView<RoleInfoDto> {
 

@@ -6,7 +6,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 
 @VaadinSessionScope
 @Route(value = "kms/password-configs", layout = KmsMainLayout.class)
-@PageTitle("Password Configurations")
 @PermitAll
 public class PasswordConfigView extends AbstractPaginatedView<PasswordConfigDto> {
 

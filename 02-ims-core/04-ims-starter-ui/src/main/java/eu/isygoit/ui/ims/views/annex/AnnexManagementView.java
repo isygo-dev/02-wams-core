@@ -28,7 +28,6 @@ import java.util.List;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "ims/annexes", layout = ImsMainLayout.class)
-//@PageTitle("Annex Management")
 @PermitAll
 public class AnnexManagementView extends AbstractPaginatedView<AnnexDto> {
 

@@ -8,7 +8,6 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
@@ -33,8 +32,13 @@ import java.util.stream.Collectors;
 @RouteAlias(value = "kms/home", layout = KmsMainLayout.class)
 @VaadinSessionScope
 @Route(value = "kms", layout = KmsMainLayout.class)
-@PageTitle("KMS Dashboard")
+
 public class KmsMainView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "KMS Dashboard";
+    }
+
 
     private final KmsApiService kmsApiService;
     private final KmsTokenConfigService tokenConfigService;

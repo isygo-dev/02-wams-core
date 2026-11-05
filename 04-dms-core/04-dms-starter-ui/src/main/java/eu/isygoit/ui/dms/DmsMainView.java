@@ -3,7 +3,6 @@ package eu.isygoit.ui.dms;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
@@ -35,8 +34,13 @@ import java.util.Map;
 @RouteAlias(value = "dms/home", layout = DmsMainLayout.class)
 @VaadinSessionScope
 @Route(value = "dms", layout = DmsMainLayout.class)
-@PageTitle("Document Dashboard")
+
 public class DmsMainView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Document Dashboard";
+    }
+
 
     private static final Logger log = LoggerFactory.getLogger(DmsMainView.class);
 

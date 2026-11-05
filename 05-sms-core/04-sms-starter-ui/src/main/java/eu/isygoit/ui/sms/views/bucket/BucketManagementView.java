@@ -14,7 +14,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
@@ -46,9 +45,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "sms/buckets", layout = SmsMainLayout.class)
-@PageTitle("Bucket Management")
 @PermitAll
 public class BucketManagementView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Bucket Management";
+    }
+
 
     private final ObjectStorageService objectStorageService;
     private final StorageConfigService storageConfigService;

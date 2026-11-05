@@ -15,7 +15,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -41,9 +40,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @VaadinSessionScope
 @Route(value = "mms/sender-config", layout = MmsMainLayout.class)
-@PageTitle("Sender Configuration Management")
 @PermitAll
 public class SenderConfigManagementView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Sender Configuration Management";
+    }
+
 
     private final SenderConfigService senderConfigService;
 

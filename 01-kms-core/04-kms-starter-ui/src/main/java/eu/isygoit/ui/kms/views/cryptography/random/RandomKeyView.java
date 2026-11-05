@@ -15,7 +15,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
@@ -38,9 +37,13 @@ import java.util.stream.Collectors;
 
 @VaadinSessionScope
 @Route(value = "kms/random-keys", layout = KmsMainLayout.class)
-@PageTitle("Random Keys")
 @PermitAll
 public class RandomKeyView extends ManagementCompositeVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Random Keys";
+    }
+
 
     private final RandomKeyService keyService;
 

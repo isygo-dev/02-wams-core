@@ -33,7 +33,6 @@ import java.util.concurrent.atomic.AtomicLong;
 @RouteAlias(value = "ims/home", layout = ImsMainLayout.class)
 @VaadinSessionScope
 @Route(value = "ims", layout = ImsMainLayout.class)
-//@PageTitle("Identity management Dashboard")
 public class ImsMainView extends ManagementVerticalView {
 
     private static final Logger log = LoggerFactory.getLogger(ImsMainView.class);

@@ -3,7 +3,6 @@ package eu.isygoit.ui.sms;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
@@ -36,8 +35,13 @@ import java.util.TreeMap;
 @RouteAlias(value = "sms/home", layout = SmsMainLayout.class)
 @VaadinSessionScope
 @Route(value = "sms", layout = SmsMainLayout.class)
-@PageTitle("Storage Management Dashboard")
+
 public class SmsMainView extends ManagementVerticalView {
+    @Override
+    public String getPageTitle() {
+        return "Storage Management Dashboard";
+    }
+
 
     private static final int PAGE_SIZE = 500;
 

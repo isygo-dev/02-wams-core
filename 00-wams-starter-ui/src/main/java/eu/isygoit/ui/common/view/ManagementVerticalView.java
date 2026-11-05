@@ -11,14 +11,20 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.HasDynamicTitle;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.util.SecurityUtils;
 
 @CssImport("./styles/scss/view.scss")
-public class ManagementVerticalView extends VerticalLayout implements BeforeEnterObserver {
+public class ManagementVerticalView extends VerticalLayout implements BeforeEnterObserver, HasDynamicTitle {
 
     protected ManagementVerticalView() {
         addClassName("management-view");
+    }
+
+    @Override
+    public String getPageTitle() {
+        return ViewTitleUtils.humanize(getClass());
     }
 
     public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
