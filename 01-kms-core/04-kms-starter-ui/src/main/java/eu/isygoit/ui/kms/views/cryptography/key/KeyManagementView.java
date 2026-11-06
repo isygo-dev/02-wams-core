@@ -2,12 +2,9 @@ package eu.isygoit.ui.kms.views.cryptography.key;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
@@ -41,7 +38,6 @@ import java.util.List;
 public class KeyManagementView extends AbstractPaginatedView<KeyManagementView.KeyRow> {
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ComboBox<KeyStatusOption> statusFilter = new ComboBox<>();
     private final Span totalCountLabel = new Span();
     private IEnumKeyStatus.Types currentStatus = null;
@@ -52,9 +48,6 @@ public class KeyManagementView extends AbstractPaginatedView<KeyManagementView.K
         this.objectMapper = objectMapper;
         this.pageSize = 10;
 
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.addClickListener(e -> loadPage(0));
-        refreshButton.setTooltipText(I18n.t("kms.key.view.refresh.tooltip"));
         totalCountLabel.addClassName("management-total-count");
 
         statusFilter.setItems(
@@ -168,7 +161,7 @@ public class KeyManagementView extends AbstractPaginatedView<KeyManagementView.K
 
     @Override
     protected List<Component> buildToolbarActions() {
-        return List.of(refreshButton, totalCountLabel);
+        return List.of(totalCountLabel);
     }
 
     @Override

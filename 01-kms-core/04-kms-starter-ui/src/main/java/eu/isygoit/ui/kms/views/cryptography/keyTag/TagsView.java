@@ -18,6 +18,7 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.RowCard;
@@ -47,7 +48,6 @@ public class TagsView extends ManagementVerticalView {
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>();
     private final RowCardList<KmsDtos.ListResourceTagsResponse.Tag> tagsList = new RowCardList<>();
     private final Button addTagButton = new Button(I18n.t("kms.tags.view.add.tag.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ProgressBar loadingBar = new ProgressBar();
     private List<KeyOption> keyOptions = new ArrayList<>();
@@ -85,6 +85,12 @@ public class TagsView extends ManagementVerticalView {
         loadingBar.setWidth("200px");
         loadingBar.addClassName(LumoUtility.Margin.Top.MEDIUM);
         add(loadingBar);
+
+        // Floating refresh button (keeps selected key and search filter)
+        add(new FloatingRefreshButton(() -> {
+            loadKeyOptions();
+            if (selectedKeyId != null) loadTags();
+        }));
 
         loadKeyOptions();
     }
@@ -139,18 +145,11 @@ public class TagsView extends ManagementVerticalView {
         centerGroup.setVisible(false);
 
         // Right group
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("kms.tags.view.refresh.tooltip"));
-        refreshButton.addClickListener(e -> {
-            loadKeyOptions();
-            if (selectedKeyId != null) loadTags();
-        });
-
         addTagButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addTagButton.setTooltipText(I18n.t("kms.tags.view.add.tag.tooltip"));
         addTagButton.addClickListener(e -> openAddTagDialog());
 
-        HorizontalLayout rightGroup = new HorizontalLayout(refreshButton, addTagButton);
+        HorizontalLayout rightGroup = new HorizontalLayout(addTagButton);
         rightGroup.setAlignItems(FlexComponent.Alignment.CENTER);
         rightGroup.setSpacing(true);
 
@@ -262,7 +261,6 @@ public class TagsView extends ManagementVerticalView {
         loadingBar.setVisible(show);
         addTagButton.setEnabled(!show);
         keyCombo.setEnabled(!show);
-        refreshButton.setEnabled(!show);
         if (!show && selectedKeyId == null) {
             searchField.setEnabled(false);
         } else if (!show && selectedKeyId != null) {

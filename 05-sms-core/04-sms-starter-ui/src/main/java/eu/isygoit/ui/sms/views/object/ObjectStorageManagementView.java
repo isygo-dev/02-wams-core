@@ -61,7 +61,6 @@ public class ObjectStorageManagementView extends AbstractPaginatedView<ObjectSto
         implements HasUrlParameter<String> {
     private final ObjectStorageService objectStorageService;
     private final StorageConfigService storageConfigService;
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createBucketButton = new Button(new Icon(VaadinIcon.PLUS));
     private final ComboBox<StorageConfigDto> tenantSelector = new ComboBox<>();
     private final ComboBox<BucketDto> bucketSelector = new ComboBox<>();
@@ -377,15 +376,21 @@ public class ObjectStorageManagementView extends AbstractPaginatedView<ObjectSto
 
     @Override
     protected List<Component> buildToolbarActions() {
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("sms.objects.view.refresh.tooltip"));
-        refreshButton.addClickListener(e -> refreshAll());
-
         createBucketButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         createBucketButton.setTooltipText(I18n.t("sms.objects.view.create.bucket.tooltip"));
         createBucketButton.setEnabled(false);
         createBucketButton.addClickListener(e -> openCreateBucketDialog());
-        return List.of(refreshButton, createBucketButton);
+        return List.of(createBucketButton);
+    }
+
+    /**
+     * Floating refresh: re-query the objects of the selected bucket from the backend while keeping
+     * the selected tenant/bucket, search text, current page and page size.
+     */
+    @Override
+    protected void onRefreshRequested() {
+        remoteReloadNeeded = true;
+        super.onRefreshRequested();
     }
 
     /**
@@ -413,7 +418,6 @@ public class ObjectStorageManagementView extends AbstractPaginatedView<ObjectSto
     @Override
     public void showLoading(boolean show) {
         super.showLoading(show);
-        refreshButton.setEnabled(!show);
         createBucketButton.setEnabled(!show && selectedStorageConfig != null);
         createButton.setEnabled(!show && selectedBucket != null);
         tenantSelector.setEnabled(!show);

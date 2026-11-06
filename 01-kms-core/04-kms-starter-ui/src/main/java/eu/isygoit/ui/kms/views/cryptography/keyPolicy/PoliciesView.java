@@ -20,6 +20,7 @@ import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
@@ -107,13 +108,11 @@ public class PoliciesView extends ManagementVerticalView {
             updateButtonsState();
         });
 
-        Button refreshBtn = new Button(new Icon(VaadinIcon.REFRESH));
-        refreshBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshBtn.setTooltipText(I18n.t("kms.policy.view.refresh.tooltip"));
-        refreshBtn.addClickListener(e -> loadKeyOptions());
-
-        keyLayout.add(keyCombo, refreshBtn);
+        keyLayout.add(keyCombo);
         add(keyLayout);
+
+        // Floating refresh button (reloads key list; keeps selected key and editor content)
+        add(new FloatingRefreshButton(this::loadKeyOptions));
     }
 
     private void buildActionBar() {

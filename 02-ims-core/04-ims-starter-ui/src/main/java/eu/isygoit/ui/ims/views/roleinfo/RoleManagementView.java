@@ -1,8 +1,6 @@
 package eu.isygoit.ui.ims.views.roleinfo;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
@@ -21,7 +19,6 @@ import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
 
 @Slf4j
 @SpringComponent
@@ -33,7 +30,6 @@ public class RoleManagementView extends AbstractPaginatedView<RoleInfoDto> {
     private final RoleInfoService roleService;
     private final ApplicationService applicationService;
 
-    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
 
     @Autowired
     public RoleManagementView(RoleInfoService roleService, ApplicationService applicationService) {
@@ -102,13 +98,6 @@ public class RoleManagementView extends AbstractPaginatedView<RoleInfoDto> {
         return new String[]{"role-management-view"};
     }
 
-    @Override
-    protected List<Component> buildToolbarActions() {
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("ims.role.view.refresh.tooltip"));
-        refreshButton.addClickListener(e -> loadPageZero());
-        return List.of(refreshButton);
-    }
 
     @Override
     protected String extractErrorMessage(Exception e) {

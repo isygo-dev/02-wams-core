@@ -1,11 +1,8 @@
 package eu.isygoit.ui.kms.views.cryptography.keyStore;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
@@ -32,7 +29,6 @@ import java.util.List;
 @PermitAll
 public class CustomKeyStoresView extends AbstractPaginatedView<DescribeCustomKeyStoreResponse.CustomKeyStore> {
     private final KmsApiService kmsApiService;
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Span totalCountLabel = new Span();
     /**
      * The backend uses opaque cursor tokens (not page indexes): pageTokens.get(p) is the token that
@@ -45,9 +41,6 @@ public class CustomKeyStoresView extends AbstractPaginatedView<DescribeCustomKey
         this.kmsApiService = kmsApiService;
         this.pageSize = 10;
 
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.addClickListener(e -> loadStores());
-        refreshButton.setTooltipText(I18n.t("kms.keystore.view.refresh.stores"));
         totalCountLabel.addClassName("management-total-count");
 
         initPaginatedView();
@@ -148,7 +141,7 @@ public class CustomKeyStoresView extends AbstractPaginatedView<DescribeCustomKey
 
     @Override
     protected List<Component> buildToolbarActions() {
-        return List.of(refreshButton, totalCountLabel);
+        return List.of(totalCountLabel);
     }
 
     @Override

@@ -1,8 +1,6 @@
 package eu.isygoit.ui.mms.views.sender;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -33,7 +31,6 @@ import java.util.stream.Collectors;
 @PermitAll
 public class SenderConfigManagementView extends AbstractPaginatedView<SenderConfigDto> {
     private final SenderConfigService senderConfigService;
-    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
     private final ComboBox<SenderStatusOption> statusFilter = new ComboBox<>();
     private Boolean currentActiveFilter = null;
 
@@ -171,14 +168,6 @@ public class SenderConfigManagementView extends AbstractPaginatedView<SenderConf
             loadPage(0);
         });
         return List.of(statusFilter);
-    }
-
-    @Override
-    protected List<Component> buildToolbarActions() {
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("mms.sender.view.refresh.tooltip"));
-        refreshButton.addClickListener(e -> loadPage(0));
-        return List.of(refreshButton);
     }
 
     // ─── Shell hooks ─────────────────────────────────────────────────────────

@@ -40,7 +40,6 @@ import java.util.stream.Collectors;
 public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileResponseDto> {
     private final LinkedFileService linkedFileService;
     private final CategoryService categoryService;
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button clearFiltersButton = new Button(I18n.t("dms.linkedfile.view.clear.filters"), new Icon(VaadinIcon.ERASER));
     private final TextField tagsField = new TextField();
     private final ComboBox<String> categoryFilterComboBox = new ComboBox<>();
@@ -228,6 +227,18 @@ public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileRe
         loadPage(0);
     }
 
+    /**
+     * Floating refresh button: re-query the backend, keeping current page and filters.
+     */
+    @Override
+    protected void onRefreshRequested() {
+        if (suppressFilterEvents) {
+            return;
+        }
+        remoteReloadNeeded = true;
+        refresh();
+    }
+
     private void clearFilters() {
         suppressFilterEvents = true;
         try {
@@ -295,11 +306,7 @@ public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileRe
         clearFiltersButton.setTooltipText(I18n.t("dms.linkedfile.view.clear.filters.tooltip"));
         clearFiltersButton.addClickListener(e -> clearFilters());
 
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("dms.linkedfile.view.refresh.tooltip"));
-        refreshButton.addClickListener(e -> reloadFromBackend());
-
-        return List.of(clearFiltersButton, refreshButton);
+        return List.of(clearFiltersButton);
     }
 
     private void loadCategories() {

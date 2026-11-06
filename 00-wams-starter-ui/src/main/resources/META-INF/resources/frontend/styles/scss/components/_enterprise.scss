@@ -360,3 +360,75 @@ vaadin-dialog-overlay::part(header) {
 .management-grid__photo {
   flex: none;
 }
+
+/* ── Floating refresh button (AbstractPaginatedView) ──────────────────────
+   Pinned bottom-right; reloads the list in place, keeping filters and page. */
+
+.wams-refresh-fab {
+  position: fixed;
+  inset-block-end: var(--lumo-space-l);
+  inset-inline-end: var(--lumo-space-l);
+  z-index: 20;
+  width: 3.25rem;
+  min-width: 0;
+  height: 3.25rem;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--lumo-primary-text-color);
+  color: var(--lumo-primary-contrast-color);
+  box-shadow: var(--lumo-box-shadow-l);
+  cursor: pointer;
+  transition:
+    transform var(--wams-motion-duration) var(--wams-motion-ease),
+    box-shadow var(--wams-motion-duration) var(--wams-motion-ease),
+    opacity var(--wams-motion-duration) var(--wams-motion-ease);
+
+  vaadin-icon {
+    width: var(--lumo-icon-size-m);
+    height: var(--lumo-icon-size-m);
+  }
+
+  &:hover:not([disabled]) {
+    transform: translateY(-2px);
+    box-shadow: var(--lumo-box-shadow-xl);
+  }
+
+  &:active:not([disabled]) {
+    transform: scale(0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lumo-primary-color);
+    outline-offset: 3px;
+  }
+
+  &[disabled] {
+    opacity: 0.85;
+  }
+
+  &--loading vaadin-icon {
+    animation: wams-refresh-spin 0.9s linear infinite;
+  }
+}
+
+@keyframes wams-refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .wams-refresh-fab {
+    inset-block-end: var(--lumo-space-m);
+    inset-inline-end: var(--lumo-space-m);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wams-refresh-fab,
+  .wams-refresh-fab--loading vaadin-icon {
+    transition: none;
+    animation-duration: 2.4s;
+  }
+}

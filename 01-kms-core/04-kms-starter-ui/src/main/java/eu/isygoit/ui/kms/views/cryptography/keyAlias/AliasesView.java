@@ -1,11 +1,8 @@
 package eu.isygoit.ui.kms.views.cryptography.keyAlias;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -34,7 +31,6 @@ import java.util.stream.Collectors;
 @PermitAll
 public class AliasesView extends AbstractPaginatedView<ListAliasesResponse.AliasEntry> {
     private final KmsApiService kmsApiService;
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Span totalCountLabel = new Span();
 
     @Autowired
@@ -42,9 +38,6 @@ public class AliasesView extends AbstractPaginatedView<ListAliasesResponse.Alias
         this.kmsApiService = kmsApiService;
         this.pageSize = 10;
 
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.addClickListener(e -> resetPaginationAndLoad());
-        refreshButton.setTooltipText(I18n.t("kms.aliases.view.refresh.tooltip"));
         totalCountLabel.addClassName("management-total-count");
         totalCountLabel.getElement().setAttribute("title", I18n.t("kms.aliases.view.total.count.title"));
 
@@ -120,7 +113,7 @@ public class AliasesView extends AbstractPaginatedView<ListAliasesResponse.Alias
 
     @Override
     protected List<Component> buildToolbarActions() {
-        return List.of(refreshButton, totalCountLabel);
+        return List.of(totalCountLabel);
     }
 
     public List<String> fetchKeyIds() {

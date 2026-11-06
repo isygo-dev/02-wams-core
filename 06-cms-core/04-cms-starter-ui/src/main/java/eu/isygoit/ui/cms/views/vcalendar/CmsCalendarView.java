@@ -34,6 +34,7 @@ import eu.isygoit.ui.cms.views.vcalendar.calendar.CmsCalendarEventSlot;
 import eu.isygoit.ui.cms.views.vcalendar.calendar.DailyCalendarView;
 import eu.isygoit.ui.cms.views.vcalendar.calendar.MonthlyCalendarView;
 import eu.isygoit.ui.cms.views.vcalendar.calendar.WeeklyCalendarView;
+import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.ui.common.component.MaskedDatePicker;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import jakarta.annotation.security.PermitAll;
@@ -68,7 +69,7 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
     private final Button previousButton = new Button(VaadinIcon.CHEVRON_LEFT.create());
     private final Button nextButton = new Button(VaadinIcon.CHEVRON_RIGHT.create());
     private final Button todayButton = new Button(I18n.t("cms.calendar.view.today"));
-    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
+    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::refresh);
     private final Span navigationTitle = new Span();
     private final Span navigationSubtitle = new Span();
     private final Span feedback = new Span();
@@ -106,7 +107,7 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
         viewContainer.add(monthlyView, weeklyView, dailyView);
 
         configureControls();
-        add(buildHeader(), buildNavigationBar(), viewTabs, viewContainer, loadingBar, feedback, eventCount);
+        add(buildHeader(), buildNavigationBar(), viewTabs, viewContainer, loadingBar, feedback, eventCount, refreshFab);
 
         datePicker.setValue(currentDate);
         updateVisibleView();
@@ -159,18 +160,6 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
             currentDate = LocalDate.now();
             datePicker.setValue(currentDate);
             updateVisibleView();
-        });
-
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.addClassName("cms-calendar-nav__refresh");
-        refreshButton.setTooltipText(I18n.t("cms.calendar.view.refresh.tooltip"));
-        refreshButton.addClickListener(event -> {
-            VCalendarDto selected = calendarSelector.getValue();
-            if (selected == null) {
-                loadCalendars(null);
-            } else {
-                loadEvents(selected);
-            }
         });
 
         datePicker.setWidth("180px");
@@ -227,7 +216,7 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
         center.setSpacing(true);
         center.setAlignItems(Alignment.CENTER);
 
-        HorizontalLayout actions = new HorizontalLayout(datePicker, todayButton, refreshButton);
+        HorizontalLayout actions = new HorizontalLayout(datePicker, todayButton);
         actions.setPadding(false);
         actions.setSpacing(true);
         actions.setAlignItems(Alignment.CENTER);
@@ -410,7 +399,16 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
         loadingBar.setVisible(loading);
         loadingBar.setWidthFull();
         calendarSelector.setEnabled(!loading);
-        refreshButton.setEnabled(!loading);
+        refreshFab.setLoading(loading);
+    }
+
+    private void refresh() {
+        VCalendarDto selected = calendarSelector.getValue();
+        if (selected == null) {
+            loadCalendars(null);
+        } else {
+            loadEvents(selected);
+        }
     }
 
     private void showError(String message) {

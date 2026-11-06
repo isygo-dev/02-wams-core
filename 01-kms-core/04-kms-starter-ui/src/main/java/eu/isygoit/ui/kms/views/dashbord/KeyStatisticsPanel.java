@@ -1,8 +1,6 @@
 package eu.isygoit.ui.kms.views.dashbord;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -23,6 +21,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.RandomKeyService;
+import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.ui.common.component.StatCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,7 @@ public class KeyStatisticsPanel extends VerticalLayout {
     private final RandomKeyService randomKeyService;
     private final UI ui;
     private final ProgressBar loadingBar = new ProgressBar();
-    private final Button refreshButton = new Button(I18n.t("kms.stats.key.refresh.button"), VaadinIcon.REFRESH.create());
+    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::loadStatistics);
 
     // Status group
     private StatCard totalCard;
@@ -80,13 +79,11 @@ public class KeyStatisticsPanel extends VerticalLayout {
         titleRow.setWidthFull();
         titleRow.setAlignItems(FlexComponent.Alignment.CENTER);
         H3 statsTitle = new H3(I18n.t("kms.stats.key.title"));
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.addClickListener(e -> loadStatistics());
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.setWidth("200px");
-        titleRow.add(statsTitle, refreshButton, loadingBar);
-        add(titleRow);
+        titleRow.add(statsTitle, loadingBar);
+        add(titleRow, refreshFab);
 
         totalCard = new StatCard(VaadinIcon.KEY, StatCard.Variant.PRIMARY, I18n.t("kms.stats.key.total"), null, I18n.t("kms.stats.key.total.tooltip"));
         activeCard = new StatCard(VaadinIcon.CHECK_CIRCLE, StatCard.Variant.SUCCESS, I18n.t("kms.stats.key.active"), null, I18n.t("kms.stats.key.active.tooltip"));
@@ -149,7 +146,7 @@ public class KeyStatisticsPanel extends VerticalLayout {
     public void loadStatistics() {
         ui.access(() -> {
             loadingBar.setVisible(true);
-            refreshButton.setEnabled(false);
+            refreshFab.setLoading(true);
 
             try {
                 log.info("Starting KMS statistics collection...");
@@ -243,13 +240,13 @@ public class KeyStatisticsPanel extends VerticalLayout {
                 randomKeysCard.setValue(String.valueOf(stats.randomKeysTotal));
 
                 loadingBar.setVisible(false);
-                refreshButton.setEnabled(true);
+                refreshFab.setLoading(false);
                 ui.push();
 
             } catch (Exception ex) {
                 log.error("Error in statistics collection", ex);
                 loadingBar.setVisible(false);
-                refreshButton.setEnabled(true);
+                refreshFab.setLoading(false);
                 Notification.show(I18n.t("kms.stats.key.load.error"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
             }

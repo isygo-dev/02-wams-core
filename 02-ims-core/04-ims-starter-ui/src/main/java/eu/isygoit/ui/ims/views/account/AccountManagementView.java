@@ -1,8 +1,6 @@
 package eu.isygoit.ui.ims.views.account;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -44,7 +42,6 @@ public class AccountManagementView extends AbstractPaginatedView<MinAccountDto> 
     private final AccountImageService accountImageService;
     private final TenantService tenantService;
 
-    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
     private final ComboBox<StatusFilterOption> statusFilter = new ComboBox<>();
 
     private IEnumEnabledBinaryStatus.Types currentAdminStatus;
@@ -195,13 +192,6 @@ public class AccountManagementView extends AbstractPaginatedView<MinAccountDto> 
         return List.of(statusFilter);
     }
 
-    @Override
-    protected List<Component> buildToolbarActions() {
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("ims.account.view.refresh.tooltip"));
-        refreshButton.addClickListener(e -> loadPageZero());
-        return List.of(refreshButton);
-    }
 
     @Override
     protected String extractErrorMessage(Exception e) {

@@ -18,6 +18,7 @@ import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.RowCard;
@@ -53,7 +54,6 @@ public class GrantsView extends ManagementVerticalView {
     private final TextField filterField = new TextField();
     private final Button clearFilterButton = new Button(new Icon(VaadinIcon.CLOSE));
     private final RowCardList<KmsDtos.ListGrantsResponse.Grant> grantsList = new RowCardList<>();
-    private final Button refreshButton = new Button(I18n.t("kms.grants.view.refresh.button"), new Icon(VaadinIcon.REFRESH));
     private final Button createGrantButton = new Button(I18n.t("kms.grants.view.create.grant.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
     private String selectedKeyId = null;
@@ -76,7 +76,12 @@ public class GrantsView extends ManagementVerticalView {
         buildGrantsGrid();
         buildLoadingIndicator();
 
-        refreshButton.addClickListener(e -> loadGrants());
+        // Floating refresh button (keeps selected key and filter)
+        add(new FloatingRefreshButton(() -> {
+            loadKeyOptions();
+            if (selectedKeyId != null) loadGrants();
+        }));
+
         createGrantButton.addClickListener(e -> openCreateGrantDialog());
 
         filterField.addValueChangeListener(e -> applyFilter());
@@ -121,12 +126,7 @@ public class GrantsView extends ManagementVerticalView {
             }
         });
 
-        Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
-        refreshKeysButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshKeysButton.setTooltipText(I18n.t("kms.grants.view.refresh.tooltip"));
-        refreshKeysButton.addClickListener(e -> loadKeyOptions());
-
-        keyLayout.add(keyCombo, refreshKeysButton);
+        keyLayout.add(keyCombo);
         add(keyLayout);
     }
 
@@ -152,13 +152,10 @@ public class GrantsView extends ManagementVerticalView {
     }
 
     private void buildActionBar() {
-        HorizontalLayout actionBar = new HorizontalLayout(refreshButton, createGrantButton);
+        HorizontalLayout actionBar = new HorizontalLayout(createGrantButton);
         actionBar.setSpacing(true);
         actionBar.addClassName("grants-action-bar");
 
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.addClassName("wams-action-btn");
-        refreshButton.setTooltipText(I18n.t("kms.grants.view.refresh.grants.tooltip"));
         createGrantButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         createGrantButton.setTooltipText(I18n.t("kms.grants.view.create.grant.tooltip"));
 
@@ -318,7 +315,6 @@ public class GrantsView extends ManagementVerticalView {
     private void showLoading(boolean show) {
         loadingBar.setVisible(show);
         grantsList.setVisible(!show);
-        refreshButton.setEnabled(!show);
         createGrantButton.setEnabled(!show);
         keyCombo.setEnabled(!show);
         filterField.setEnabled(!show);

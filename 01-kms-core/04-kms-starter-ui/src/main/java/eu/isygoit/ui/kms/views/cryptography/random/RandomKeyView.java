@@ -1,11 +1,8 @@
 package eu.isygoit.ui.kms.views.cryptography.random;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
@@ -31,7 +28,6 @@ import java.util.stream.Collectors;
 @PermitAll
 public class RandomKeyView extends AbstractPaginatedView<RandomKeyDto> {
     private final RandomKeyService keyService;
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Span totalCountLabel = new Span();
 
     @Autowired
@@ -39,9 +35,6 @@ public class RandomKeyView extends AbstractPaginatedView<RandomKeyDto> {
         this.keyService = keyService;
         this.pageSize = 10;
 
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.addClickListener(e -> loadPage(0));
-        refreshButton.setTooltipText(I18n.t("kms.random.key.refresh.tooltip"));
         totalCountLabel.addClassName("management-total-count");
 
         initPaginatedView();
@@ -125,7 +118,7 @@ public class RandomKeyView extends AbstractPaginatedView<RandomKeyDto> {
 
     @Override
     protected List<Component> buildToolbarActions() {
-        return List.of(refreshButton, totalCountLabel);
+        return List.of(totalCountLabel);
     }
 
     public void refreshCard(RandomKeyCard card) {

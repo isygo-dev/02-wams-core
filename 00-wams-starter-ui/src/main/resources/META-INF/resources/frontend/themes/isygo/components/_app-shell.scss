@@ -59,6 +59,19 @@ vaadin-drawer-toggle,
 vaadin-app-layout::part(drawer) {
     border-inline-end: 1px solid var(--lumo-contrast-10pct);
     background: var(--lumo-base-color);
+    /* One scrollbar only: the drawer itself never scrolls, the navigation list inside it does
+       (.wams-drawer-scroll-area), so the user card and collapse toggle stay pinned at the bottom. */
+    overflow: hidden;
+}
+
+.wams-drawer-wrapper {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.wams-drawer-scroll-area {
+    overflow-x: hidden;
+    overscroll-behavior: contain;
 }
 
 vaadin-app-layout::part(content) {

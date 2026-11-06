@@ -1,8 +1,6 @@
 package eu.isygoit.ui.sms.views.storageconfig;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -34,7 +32,6 @@ import java.util.stream.Collectors;
 public class StorageConfigManagementView extends AbstractPaginatedView<StorageConfigDto> {
 
     private final StorageConfigService storageConfigService;
-    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final ComboBox<IEnumStorage.Types> typeFilter = new ComboBox<>();
     private final com.vaadin.flow.component.html.Span totalCountLabel =
@@ -46,7 +43,6 @@ public class StorageConfigManagementView extends AbstractPaginatedView<StorageCo
         this.storageConfigService = storageConfigService;
         pageSize = 10;
         initPaginatedView();
-        refreshButton.setTooltipText(I18n.t("sms.storageconfig.view.refresh.tooltip"));
     }
 
     @Override
@@ -128,8 +124,6 @@ public class StorageConfigManagementView extends AbstractPaginatedView<StorageCo
 
     @Override
     protected List<Component> buildToolbarActions() {
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.addClickListener(event -> loadPageZero());
         pageSizeSelect.setItems(5, 10, 20, 50);
         pageSizeSelect.setValue(pageSize);
         pageSizeSelect.setWidth("100px");
@@ -140,7 +134,7 @@ public class StorageConfigManagementView extends AbstractPaginatedView<StorageCo
             }
         });
         totalCountLabel.addClassName("management-total-count");
-        return List.of(refreshButton, pageSizeSelect, totalCountLabel);
+        return List.of(pageSizeSelect, totalCountLabel);
     }
 
     @Override

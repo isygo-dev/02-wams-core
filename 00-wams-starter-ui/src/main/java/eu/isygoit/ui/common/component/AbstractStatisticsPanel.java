@@ -1,11 +1,8 @@
 package eu.isygoit.ui.common.component;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -17,6 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Classe abstraite pour un panneau de statistiques.
  * Gère l'en-tête commun (titre, rafraîchissement, chargement) et délègue
@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
  * Toutes les dimensions (gap, padding, marges, largeurs) sont pilotées par
  * les classes CSS déclarées dans common.scss :
  * .wams-stats-panel, .wams-stats-header, .wams-stats-actions,
- * .wams-stats-title, .wams-stats-refresh, .wams-stats-loader
+ * .wams-stats-title, .wams-stats-loader
  */
 @CssImport("./styles/scss/common.scss")
 public abstract class AbstractStatisticsPanel extends VerticalLayout {
@@ -34,7 +34,8 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
 
     protected final UI ui;
     protected final ProgressBar loadingBar = new ProgressBar();
-    protected final Button refreshButton = new Button(I18n.t("common.stats.refresh.button"), VaadinIcon.REFRESH.create());
+    private final List<Runnable> extraRefreshActions = new ArrayList<>();
+    protected final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
 
     public AbstractStatisticsPanel(UI ui) {
         this.ui = ui;
@@ -60,14 +61,10 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
         actionsLayout.setSpacing(false);
         actionsLayout.addClassName("wams-stats-actions");
 
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.addClassName("wams-stats-refresh");
-        refreshButton.addClickListener(e -> loadStatistics());
-
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.addClassName("wams-stats-loader");
-        actionsLayout.add(refreshButton, loadingBar);
+        actionsLayout.add(loadingBar);
 
         if (StringUtils.hasText(getTitleKey())) {
             headerLayout.addClassName("has-title");
@@ -80,7 +77,20 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
             headerLayout.add(actionsLayout);
         }
 
-        add(headerLayout);
+        add(headerLayout, refreshFab);
+    }
+
+    /**
+     * Registers another reload to run when the page's single floating refresh button is clicked
+     * (for a sibling panel on the same page that has no refresh button of its own).
+     */
+    public void addRefreshAction(Runnable action) {
+        extraRefreshActions.add(action);
+    }
+
+    private void onRefreshRequested() {
+        loadStatistics();
+        extraRefreshActions.forEach(Runnable::run);
     }
 
     /**
@@ -89,13 +99,13 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
     public void loadStatistics() {
         ui.access(() -> {
             loadingBar.setVisible(true);
-            refreshButton.setEnabled(false);
+            refreshFab.setLoading(true);
 
             try {
                 log.info("Chargement des statistiques pour {}", getClass().getSimpleName());
                 doLoadStatistics();
                 loadingBar.setVisible(false);
-                refreshButton.setEnabled(true);
+                refreshFab.setLoading(false);
                 ui.push();
             } catch (Exception ex) {
                 log.error("Erreur lors du chargement des statistiques", ex);
@@ -121,7 +131,7 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
 
     private void handleError() {
         loadingBar.setVisible(false);
-        refreshButton.setEnabled(true);
+        refreshFab.setLoading(false);
         Notification.show(I18n.t("common.stats.load.error"), 3000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }

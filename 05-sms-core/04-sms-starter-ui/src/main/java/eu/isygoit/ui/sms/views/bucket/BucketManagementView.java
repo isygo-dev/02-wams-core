@@ -1,11 +1,8 @@
 package eu.isygoit.ui.sms.views.bucket;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -44,7 +41,6 @@ import java.util.stream.Collectors;
 public class BucketManagementView extends AbstractPaginatedView<BucketDto> {
     private final ObjectStorageService objectStorageService;
     private final StorageConfigService storageConfigService;
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ComboBox<StorageConfigDto> tenantSelector = new ComboBox<>();
     private List<BucketDto> allBuckets = new ArrayList<>();
     // True when the next fetchPage() must query the backend (tenant change, refresh, create/delete...).
@@ -224,18 +220,19 @@ public class BucketManagementView extends AbstractPaginatedView<BucketDto> {
         return List.of(tenantSelector);
     }
 
+    /**
+     * Floating refresh: re-query the buckets of the selected tenant from the backend while keeping
+     * the selected tenant, search text, current page and page size.
+     */
     @Override
-    protected List<Component> buildToolbarActions() {
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("sms.buckets.view.refresh.tooltip"));
-        refreshButton.addClickListener(e -> refreshAll());
-        return List.of(refreshButton);
+    protected void onRefreshRequested() {
+        remoteReloadNeeded = true;
+        super.onRefreshRequested();
     }
 
     @Override
     public void showLoading(boolean show) {
         super.showLoading(show);
-        refreshButton.setEnabled(!show);
         tenantSelector.setEnabled(!show);
         searchField.setEnabled(!show);
     }

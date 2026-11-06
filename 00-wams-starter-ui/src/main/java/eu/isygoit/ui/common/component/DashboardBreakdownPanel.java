@@ -1,18 +1,14 @@
 package eu.isygoit.ui.common.component;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import eu.isygoit.exception.BadArgumentException;
-import eu.isygoit.i18n.I18n;
 
 import java.util.List;
 
@@ -24,7 +20,7 @@ public class DashboardBreakdownPanel extends VerticalLayout {
 
     private final Div chart = new Div();
     private final Span error = new Span();
-    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
+    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::refresh);
     private final ProgressBar loadingBar = new ProgressBar();
     private Runnable refreshAction;
 
@@ -36,7 +32,7 @@ public class DashboardBreakdownPanel extends VerticalLayout {
 
         H3 heading = new H3(title);
         heading.addClassName("wams-dashboard-breakdown__title");
-        HorizontalLayout actions = new HorizontalLayout(refreshButton, loadingBar);
+        HorizontalLayout actions = new HorizontalLayout(loadingBar);
         actions.setSpacing(false);
         actions.setAlignItems(FlexComponent.Alignment.CENTER);
         actions.addClassName("wams-dashboard-breakdown__actions");
@@ -46,15 +42,7 @@ public class DashboardBreakdownPanel extends VerticalLayout {
         header.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
         header.addClassName("wams-dashboard-breakdown__header");
 
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("common.stats.refresh.button"));
-        refreshButton.setAriaLabel(I18n.t("common.stats.refresh.button"));
         refreshButton.setEnabled(false);
-        refreshButton.addClickListener(event -> {
-            if (refreshAction != null) {
-                refreshAction.run();
-            }
-        });
         loadingBar.setIndeterminate(true);
         loadingBar.setVisible(false);
         loadingBar.addClassName("wams-dashboard-breakdown__loader");
@@ -62,7 +50,13 @@ public class DashboardBreakdownPanel extends VerticalLayout {
         chart.addClassName("wams-dashboard-breakdown__chart");
         error.addClassName("wams-dashboard-breakdown__error");
         error.setVisible(false);
-        add(header, chart, error);
+        add(header, chart, error, refreshButton);
+    }
+
+    private void refresh() {
+        if (refreshAction != null) {
+            refreshAction.run();
+        }
     }
 
     public void setRefreshAction(Runnable action) {
@@ -75,7 +69,7 @@ public class DashboardBreakdownPanel extends VerticalLayout {
 
     public void setLoading(boolean loading) {
         loadingBar.setVisible(loading);
-        refreshButton.setEnabled(!loading);
+        refreshButton.setLoading(loading);
     }
 
     public void setItems(List<Item> items) {

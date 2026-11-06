@@ -1,8 +1,6 @@
 package eu.isygoit.ui.ims.views.tenant;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
@@ -36,7 +34,6 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
     private final TenantService tenantService;
     private final TenantImageService tenantImageService;
 
-    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
     private final ComboBox<IEnumEnabledBinaryStatus.Types> statusFilter = new ComboBox<>();
 
     private IEnumEnabledBinaryStatus.Types currentAdminStatus;
@@ -156,13 +153,6 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
         return List.of(statusFilter);
     }
 
-    @Override
-    protected List<Component> buildToolbarActions() {
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("ims.tenant.view.refresh.tooltip"));
-        refreshButton.addClickListener(e -> loadPageZero());
-        return List.of(refreshButton);
-    }
 
     @Override
     protected String extractErrorMessage(Exception e) {

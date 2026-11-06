@@ -20,6 +20,7 @@ import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.component.PageHeader;
+import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
@@ -46,7 +47,6 @@ import java.util.stream.Collectors;
 public class CryptoOperationsView extends ManagementVerticalView {
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.crypto.view.select.key"));
-    private final Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
     private final Tabs tabs;
     private final Tab encryptDecryptTabHeader;
@@ -118,6 +118,7 @@ public class CryptoOperationsView extends ManagementVerticalView {
 
         add(tabs, encryptDecryptPanel, signVerifyPanel, dataKeyPanel, macPanel);
 
+        add(new FloatingRefreshButton(this::loadKeyOptions));
         loadKeyOptions();
     }
 
@@ -149,11 +150,8 @@ public class CryptoOperationsView extends ManagementVerticalView {
             }
         });
 
-        refreshKeysButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshKeysButton.setTooltipText(I18n.t("kms.crypto.view.refresh.tooltip"));
-        refreshKeysButton.addClickListener(e -> loadKeyOptions());
 
-        keyLayout.add(keyCombo, refreshKeysButton);
+        keyLayout.add(keyCombo);
         return keyLayout;
     }
 
@@ -274,7 +272,6 @@ public class CryptoOperationsView extends ManagementVerticalView {
     private void showLoading(boolean show) {
         loadingBar.setVisible(show);
         keyCombo.setEnabled(!show);
-        refreshKeysButton.setEnabled(!show);
     }
 
     private String getSelectedKeyId() {

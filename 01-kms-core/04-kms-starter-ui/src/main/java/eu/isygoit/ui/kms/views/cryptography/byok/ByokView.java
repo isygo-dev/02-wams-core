@@ -28,6 +28,7 @@ import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.component.PageHeader;
+import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
@@ -54,7 +55,6 @@ import java.util.stream.Collectors;
 public class ByokView extends ManagementVerticalView {
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.byok.view.select.key"));
-    private final Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button getParamsButton = new Button(I18n.t("kms.byok.view.generate.params.button"), new Icon(VaadinIcon.DOWNLOAD));
     private final TextArea wrappedKeyDisplay = new TextArea();
     private final TextArea importTokenDisplay = new TextArea();
@@ -134,7 +134,6 @@ public class ByokView extends ManagementVerticalView {
         encryptNowButton.addClickListener(e -> encryptWithPublicKey());
         importButton.addClickListener(e -> importKeyMaterial());
         deleteMaterialButton.addClickListener(e -> deleteImportedMaterial());
-        refreshKeysButton.addClickListener(e -> loadKeyOptions());
         keyCombo.addValueChangeListener(e -> {
             selectedKeyId = e.getValue() != null ? e.getValue().getKeyId() : null;
             clearParameters();
@@ -142,6 +141,7 @@ public class ByokView extends ManagementVerticalView {
         });
 
         configureComponents();
+        add(new FloatingRefreshButton(this::loadKeyOptions));
         loadKeyOptions();
     }
 
@@ -193,10 +193,8 @@ public class ByokView extends ManagementVerticalView {
         keyCombo.setWidth("400px");
         keyCombo.setTooltipText(I18n.t("kms.byok.view.select.key.tooltip"));
 
-        refreshKeysButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshKeysButton.setTooltipText(I18n.t("kms.byok.view.refresh.tooltip"));
 
-        keyLayout.add(keyCombo, refreshKeysButton);
+        keyLayout.add(keyCombo);
         return keyLayout;
     }
 
@@ -622,7 +620,6 @@ public class ByokView extends ManagementVerticalView {
     private void showLoading(boolean show) {
         loadingBar.setVisible(show);
         keyCombo.setEnabled(!show);
-        refreshKeysButton.setEnabled(!show);
         getParamsButton.setEnabled(!show);
         encryptNowButton.setEnabled(!show);
         importButton.setEnabled(!show);

@@ -1,8 +1,6 @@
 package eu.isygoit.ui.ims.views.application;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
@@ -36,7 +34,6 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
     private final ApplicationService applicationService;
     private final ApplicationImageService applicationImageService;
 
-    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
     private final ComboBox<IEnumEnabledBinaryStatus.Types> statusFilter = new ComboBox<>();
 
     private IEnumEnabledBinaryStatus.Types currentAdminStatus;
@@ -160,13 +157,6 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
         return List.of(statusFilter);
     }
 
-    @Override
-    protected List<Component> buildToolbarActions() {
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("ims.app.view.refresh.tooltip"));
-        refreshButton.addClickListener(e -> loadPageZero());
-        return List.of(refreshButton);
-    }
 
     @Override
     protected String extractErrorMessage(Exception e) {

@@ -19,6 +19,7 @@ import eu.isygoit.dto.IImageUploadDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.model.IImageEntity;
+import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.common.filters.FilterBar;
@@ -79,6 +80,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     private boolean gridMode;
     private int renderedCount;
     private boolean imageColumnChecked;
+    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
     private final Map<String, byte[]> imageCache = new ConcurrentHashMap<>();
 
     // ─── Criteria state ────────────────────────────────────────────
@@ -319,8 +321,18 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         panel.add(paginationBar);
 
         add(panel);
+        add(refreshFab);
 
         loadPage(0);
+    }
+
+    /**
+     * Called when the user clicks the floating refresh button. Default: reload the current page with the
+     * current criteria and page size. Override when the view caches data that must be re-queried first,
+     * then call {@link #refresh()}.
+     */
+    protected void onRefreshRequested() {
+        refresh();
     }
 
     /**
@@ -431,6 +443,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         cardsContainer.setVisible(!show && !showingGrid());
         grid.setVisible(!show && showingGrid());
         createButton.setEnabled(!show);
+        refreshFab.setLoading(show);
         paginationBar.setVisible(!show && totalPages > 0);
     }
 
