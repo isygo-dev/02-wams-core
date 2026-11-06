@@ -351,12 +351,12 @@ vaadin-side-nav-item[current]::part(link) {
   background-color: var(--lumo-primary-color-10pct);
   color: var(--lumo-primary-text-color);
   font-weight: 600;
-  box-shadow: inset 3px 0 0 0 var(--lumo-primary-color);
+  box-shadow: none; /* indicator: see themes/isygo/components/_app-shell.scss */
 }
 
 /* The active bar sits on the inline-start edge: the right edge in Arabic. */
 [dir='rtl'] vaadin-side-nav-item[current]::part(link) {
-  box-shadow: inset -3px 0 0 0 var(--lumo-primary-color);
+  box-shadow: none; /* indicator: see themes/isygo/components/_app-shell.scss */
 }
 
 vaadin-side-nav-item[current]::part(link) vaadin-icon,

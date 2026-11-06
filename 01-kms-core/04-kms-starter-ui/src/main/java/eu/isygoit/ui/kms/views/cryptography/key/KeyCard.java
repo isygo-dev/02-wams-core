@@ -20,7 +20,7 @@ import eu.isygoit.dto.KmsDtos.ListResourceTagsResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.kms.KmsMainView;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.key.dialog.*;
@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
+class KeyCard extends BaseCodeAssignableCard<KeyManagementView, KmsApiService, String> {
 
     private final String keyId;
     private final ObjectMapper objectMapper;
@@ -69,7 +69,7 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
             String keyId,
             DescribeKeyResponse.KeyMetadata metadata,
             boolean loadVersionCountOnAttach) {
-        super(parentView, kmsApiService);
+        super(parentView, kmsApiService, keyId);
         this.objectMapper = objectMapper;
         this.keyId = keyId;
         this.metadata = metadata;
@@ -150,8 +150,8 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     }
 
     @Override
-    protected String businessCode() {
-        return keyId;
+    protected String codeOf(String object) {
+        return object;
     }
 
     @Override

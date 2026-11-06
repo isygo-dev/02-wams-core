@@ -19,7 +19,11 @@ import java.util.List;
  *
  * @param <V> the parent view type
  * @param <S> the service type used by this card
+ * @deprecated {@link BaseCard} already supports a footer status tag through {@code buildStatusTag()}, so a
+ *             status card is simply a {@link BaseCard} (or {@link BaseCodeAssignableCard} when it also shows a
+ *             code) overriding that hook; this class is kept for compatibility only.
  */
+@Deprecated
 public abstract class BaseStatusCard<V extends Component, S> extends BaseCard<V, S> {
 
     protected BaseStatusCard(V parentView, S objectService) {

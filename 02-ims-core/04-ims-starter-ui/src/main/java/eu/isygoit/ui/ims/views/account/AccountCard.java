@@ -60,8 +60,8 @@ public class AccountCard extends ProfileCard<AccountManagementView, AccountServi
     }
 
     @Override
-    protected String businessCode() {
-        return profile.getCode();
+    protected String codeOf(MinAccountDto object) {
+        return object.getCode();
     }
 
     /* ══════════════════════════════════════════════════════════════

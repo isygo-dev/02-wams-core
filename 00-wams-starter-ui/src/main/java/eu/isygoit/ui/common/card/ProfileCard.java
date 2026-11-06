@@ -22,7 +22,7 @@ import java.io.ByteArrayInputStream;
  * <ul>
  *   <li>an avatar / image</li>
  *   <li>a full display name and an optional subtitle (e.g. email)</li>
- *   <li>a status tag (rendered at the footer's left by {@link BaseStatusCard})</li>
+ *   <li>a status tag (rendered at the footer's left by {@link BaseCard}; the business code comes from {@link BaseCodeAssignableCard})</li>
  *   <li>a set of enum tags (rendered at the bottom of the body via
  *       {@link BaseCard#buildEnumTags()})</li>
  * </ul>
@@ -48,7 +48,7 @@ import java.io.ByteArrayInputStream;
  * @param <S> service type
  * @param <D> DTO type displayed by the card
  */
-public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusCard<V, S> {
+public abstract class ProfileCard<V extends Component, S, D> extends BaseCodeAssignableCard<V, S, D> {
 
     /**
      * Default data-URI SVG placeholder (generic user silhouette) shown when
@@ -80,7 +80,7 @@ public abstract class ProfileCard<V extends Component, S, D> extends BaseStatusC
     protected Div profileAvatarOverlay;
 
     protected ProfileCard(V parentView, S objectService, D profile) {
-        super(parentView, objectService);
+        super(parentView, objectService, profile);
         this.profile = profile;
     }
 

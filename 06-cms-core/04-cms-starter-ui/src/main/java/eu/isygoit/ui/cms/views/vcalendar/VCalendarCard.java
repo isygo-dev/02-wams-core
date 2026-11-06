@@ -13,13 +13,13 @@ import eu.isygoit.remote.cms.VCalendarService;
 import eu.isygoit.ui.cms.views.vcalendar.dialog.DeleteVCalendarDialog;
 import eu.isygoit.ui.cms.views.vcalendar.dialog.ToggleVCalendarLockDialog;
 import eu.isygoit.ui.cms.views.vcalendar.dialog.VCalendarDetailsViewDialog;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 @Slf4j
-public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarService> {
+public class VCalendarCard extends BaseCodeAssignableCard<VCalendarManagementView, VCalendarService, VCalendarDto> {
 
     private final VCalendarDto calendar;
     private final Runnable onRefresh;
@@ -31,7 +31,7 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
                          VCalendarService calendarService,
                          VCalendarDto calendar,
                          Runnable onRefresh) {
-        super(parentView, calendarService);
+        super(parentView, calendarService, calendar);
         this.calendar = calendar;
         this.onRefresh = onRefresh;
         initCard();
@@ -43,8 +43,8 @@ public class VCalendarCard extends BaseCard<VCalendarManagementView, VCalendarSe
     }
 
     @Override
-    protected String businessCode() {
-        return calendar.getCode();
+    protected String codeOf(VCalendarDto object) {
+        return object.getCode();
     }
 
     @Override

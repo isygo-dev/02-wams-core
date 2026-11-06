@@ -144,31 +144,28 @@
  */
 
 .timetable-slot-content {
-  padding: 3px 6px;
+  padding: var(--lumo-space-xs) var(--lumo-space-s);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
   background: var(--slot-bg, var(--lumo-primary-color-10pct));
-  border-left: 3px solid var(--slot-accent, var(--lumo-primary-color));
+  border-inline-start: 4px solid var(--slot-accent, var(--lumo-primary-color));
   border-radius: var(--lumo-border-radius-s);
   box-shadow: none;
   overflow: hidden;
   pointer-events: auto;
   cursor: pointer;
 
-  /* Hover animation */
-  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
-  box-shadow 0.22s ease,
-  filter 0.22s ease;
-  transform-origin: center center;
+  /* Hover: elevation only (no scaling, so neighbouring events never overlap) */
+  transition: box-shadow var(--wams-motion-duration) var(--wams-motion-ease),
+  filter var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .timetable-slot-content:hover {
-  transform: translateY(-2px) scale(1.03);
   box-shadow: var(--lumo-box-shadow-m);
-  filter: brightness(1.06);
+  filter: brightness(1.04);
   z-index: 10;
 }
 
@@ -176,9 +173,6 @@
 @media (prefers-reduced-motion: reduce) {
   .timetable-slot-content {
     transition: none;
-  }
-  .timetable-slot-content:hover {
-    transform: none;
   }
 }
 

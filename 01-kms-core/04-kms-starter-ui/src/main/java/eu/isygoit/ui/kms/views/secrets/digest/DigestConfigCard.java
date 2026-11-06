@@ -11,7 +11,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.DigestConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.DigestConfigService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.secrets.digest.dialog.DeleteDigestConfigDialog;
 import eu.isygoit.ui.kms.views.secrets.digest.dialog.DigestConfigDetailsViewDialog;
@@ -19,7 +19,7 @@ import eu.isygoit.ui.kms.views.secrets.digest.dialog.UpdateDigestConfigDialog;
 
 import java.util.List;
 
-public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigService> {
+public class DigestConfigCard extends BaseCodeAssignableCard<DigestConfigView, DigestConfigService, DigestConfigDto> {
 
     private final Runnable onDeleteRefresh;
     private DigestConfigDto dto;
@@ -29,7 +29,7 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
                             DigestConfigService configService,
                             DigestConfigDto dto,
                             Runnable onDeleteRefresh) {
-        super(parentView, configService);
+        super(parentView, configService, dto);
         this.dto = dto;
         this.onDeleteRefresh = onDeleteRefresh;
         initCard();
@@ -41,6 +41,7 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
 
     public void updateDto(DigestConfigDto newDto) {
         this.dto = newDto;
+        this.item = newDto;
         refreshDisplay();
     }
 
@@ -50,8 +51,8 @@ public class DigestConfigCard extends BaseCard<DigestConfigView, DigestConfigSer
     }
 
     @Override
-    protected String businessCode() {
-        return dto.getCode();
+    protected String codeOf(DigestConfigDto object) {
+        return object.getCode();
     }
 
     @Override

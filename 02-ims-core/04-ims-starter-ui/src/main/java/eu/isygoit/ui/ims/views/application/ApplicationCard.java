@@ -16,7 +16,7 @@ import eu.isygoit.enums.IEnumEnabledBinaryStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.ApplicationImageService;
 import eu.isygoit.remote.ims.ApplicationService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.ims.views.application.dialog.ApplicationDetailsViewDialog;
 import eu.isygoit.ui.ims.views.application.dialog.DeleteApplicationDialog;
 import eu.isygoit.ui.ims.views.application.dialog.ToggleApplicationStatusDialog;
@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Slf4j
-public class ApplicationCard extends BaseCard<ApplicationManagementView, ApplicationService> {
+public class ApplicationCard extends BaseCodeAssignableCard<ApplicationManagementView, ApplicationService, ApplicationDto> {
 
     private final ApplicationDto application;
     private final ApplicationImageService applicationImageService;
@@ -46,7 +46,7 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
                            ApplicationImageService applicationImageService,
                            ApplicationDto application,
                            Runnable onRefresh) {
-        super(parentView, applicationService);
+        super(parentView, applicationService, application);
         this.application = application;
         this.applicationImageService = applicationImageService;
         this.onRefresh = onRefresh;
@@ -59,8 +59,8 @@ public class ApplicationCard extends BaseCard<ApplicationManagementView, Applica
     }
 
     @Override
-    protected String businessCode() {
-        return application.getCode();
+    protected String codeOf(ApplicationDto object) {
+        return object.getCode();
     }
 
     @Override

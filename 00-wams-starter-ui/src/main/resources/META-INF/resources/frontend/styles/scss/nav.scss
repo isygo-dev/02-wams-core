@@ -11,7 +11,8 @@
 
 .wams-collapsible-nav-section {
   width: 100%;
-  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding: 0 var(--lumo-space-xs);
+  margin-top: var(--lumo-space-xs);
 }
 
 /* ── Header (click target) ───────────────────────────────────────────── */
@@ -22,14 +23,16 @@
   justify-content: space-between;
   cursor: pointer;
   user-select: none;
-  padding: var(--lumo-space-s) var(--lumo-space-m);
-  color: var(--lumo-secondary-text-color);
+  padding: var(--lumo-space-s);
+  border-radius: var(--wams-radius-control);
+  color: var(--lumo-tertiary-text-color);
   background: transparent;
   transition: background-color var(--wams-motion-duration) var(--wams-motion-ease), color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .wams-collapsible-nav-section__header:hover {
   background-color: var(--lumo-contrast-5pct);
+  color: var(--lumo-body-text-color);
 }
 
 .wams-collapsible-nav-section--expanded > .wams-collapsible-nav-section__header {
@@ -38,10 +41,10 @@
 
 .wams-collapsible-nav-section__title {
   flex: 1;
-  font-size: var(--lumo-font-size-s);
-  font-weight: 500;
+  font-size: var(--lumo-font-size-xxs);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 /* The group icon is only shown on the icon rail, where it opens the flyout. */
@@ -53,6 +56,8 @@
 
 .wams-collapsible-nav-section__toggle-icon {
   flex-shrink: 0;
+  width: var(--lumo-icon-size-xs);
+  height: var(--lumo-icon-size-xs);
   transition: transform var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
@@ -81,12 +86,15 @@
   max-height: 600px;
 }
 
+/* Tree guide: the items of an open group hang off a thin vertical line. */
 .wams-collapsible-nav-section__items {
-  padding: 0;
+  margin-inline-start: var(--lumo-space-m);
+  padding: 0 0 var(--lumo-space-xs) var(--lumo-space-xs);
+  border-inline-start: 1px solid var(--lumo-contrast-10pct);
 }
 
-.wams-collapsible-nav-section__items vaadin-side-nav-item {
-  padding-inline-start: var(--lumo-space-l);
+[dir="rtl"] .wams-collapsible-nav-section__items {
+  padding: 0 var(--lumo-space-xs) var(--lumo-space-xs) 0;
 }
 
 /* ── Icon rail (desktop only) ────────────────────────────────────────────

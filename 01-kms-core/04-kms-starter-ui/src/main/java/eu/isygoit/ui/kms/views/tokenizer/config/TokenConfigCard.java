@@ -12,7 +12,7 @@ import eu.isygoit.dto.data.TokenConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.DeleteTokenConfigDialog;
 import eu.isygoit.ui.kms.views.tokenizer.config.dialog.TokenConfigDetailsViewDialog;
@@ -20,7 +20,7 @@ import eu.isygoit.ui.kms.views.tokenizer.config.dialog.UpdateTokenConfigDialog;
 
 import java.util.List;
 
-public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigService> {
+public class TokenConfigCard extends BaseCodeAssignableCard<TokenConfigView, KmsTokenConfigService, TokenConfigDto> {
 
     private final KmsApiService kmsApiService;
     private final Runnable onDeleteRefresh;
@@ -33,7 +33,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
                            KmsApiService kmsApiService,
                            TokenConfigDto dto,
                            Runnable onDeleteRefresh) {
-        super(parentView, tokenConfigService);
+        super(parentView, tokenConfigService, dto);
         this.kmsApiService = kmsApiService;
         this.dto = dto;
         this.onDeleteRefresh = onDeleteRefresh;
@@ -46,6 +46,7 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
 
     public void updateDto(TokenConfigDto newDto) {
         this.dto = newDto;
+        this.item = newDto;
         refreshDisplay();
     }
 
@@ -55,8 +56,8 @@ public class TokenConfigCard extends BaseCard<TokenConfigView, KmsTokenConfigSer
     }
 
     @Override
-    protected String businessCode() {
-        return dto.getCode();
+    protected String codeOf(TokenConfigDto object) {
+        return object.getCode();
     }
 
     @Override

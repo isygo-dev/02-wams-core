@@ -12,7 +12,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.RoleInfoDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.RoleInfoService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.ims.views.roleinfo.dialog.DeleteRoleDialog;
 import eu.isygoit.ui.ims.views.roleinfo.dialog.RoleDetailsViewDialog;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
+public class RoleCard extends BaseCodeAssignableCard<RoleManagementView, RoleInfoService, RoleInfoDto> {
 
     private final RoleInfoDto role;
     private final Runnable onRefresh;
@@ -29,7 +29,7 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
                     RoleInfoService roleService,
                     RoleInfoDto role,
                     Runnable onRefresh) {
-        super(parentView, roleService);
+        super(parentView, roleService, role);
         this.role = role;
         this.onRefresh = onRefresh;
         initCard();
@@ -41,8 +41,8 @@ public class RoleCard extends BaseCard<RoleManagementView, RoleInfoService> {
     }
 
     @Override
-    protected String businessCode() {
-        return role.getCode();
+    protected String codeOf(RoleInfoDto object) {
+        return object.getCode();
     }
 
     @Override

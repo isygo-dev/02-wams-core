@@ -65,14 +65,22 @@ vaadin-app-layout::part(content) {
     min-width: 0;
 }
 
+/* ── Sidebar navigation ─────────────────────────────────────────────────────
+   Calm rows: secondary text and icons at rest, a soft tint on hover, and for the
+   current page a light primary tint with a short rounded indicator on the leading
+   edge. One colour (the shared primary) for every module. */
+
 vaadin-side-nav-item::part(link) {
+    gap: var(--lumo-space-s);
     min-height: var(--wams-control-height);
+    padding-inline: var(--lumo-space-s);
     border-radius: var(--wams-radius-control);
+    color: var(--lumo-secondary-text-color);
+    font-size: var(--lumo-font-size-m);
+    font-weight: 500;
     transition:
         background-color var(--wams-motion-duration) var(--wams-motion-ease),
         color var(--wams-motion-duration) var(--wams-motion-ease);
-    color: var(--lumo-secondary-text-color);
-    font-weight: 500;
 }
 
 vaadin-side-nav-item::part(link):hover {
@@ -80,10 +88,34 @@ vaadin-side-nav-item::part(link):hover {
     color: var(--lumo-body-text-color);
 }
 
+vaadin-side-nav-item [slot="prefix"],
+vaadin-side-nav-item::part(link) vaadin-icon {
+    flex: none;
+    width: var(--lumo-icon-size-s);
+    height: var(--lumo-icon-size-s);
+    color: var(--lumo-tertiary-text-color);
+    transition: color var(--wams-motion-duration) var(--wams-motion-ease);
+}
+
+vaadin-side-nav-item::part(link):hover vaadin-icon,
+vaadin-side-nav-item::part(link):hover [slot="prefix"] {
+    color: var(--lumo-body-text-color);
+}
+
 vaadin-side-nav-item[current]::part(link) {
-    background: var(--lumo-primary-color-10pct);
+    background:
+        linear-gradient(var(--lumo-primary-color), var(--lumo-primary-color)) left center / 3px 55% no-repeat,
+        var(--lumo-primary-color-10pct);
+    box-shadow: none;
     color: var(--lumo-primary-text-color);
     font-weight: 600;
+}
+
+html[dir="rtl"] vaadin-side-nav-item[current]::part(link) {
+    background:
+        linear-gradient(var(--lumo-primary-color), var(--lumo-primary-color)) right center / 3px 55% no-repeat,
+        var(--lumo-primary-color-10pct);
+    box-shadow: none;
 }
 
 vaadin-side-nav-item[current]::part(link) vaadin-icon,
@@ -92,9 +124,32 @@ vaadin-side-nav-item[current]::part(link) [slot="prefix"] {
 }
 
 .wams-drawer-scroll-area [slot="label"] {
-    color: var(--lumo-secondary-text-color);
-    font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-tertiary-text-color);
+    font-size: var(--lumo-font-size-xxs);
     letter-spacing: 0.08em;
+}
+
+/* User card pinned under the navigation. */
+.wams-drawer-footer {
+    padding: var(--lumo-space-s);
+}
+
+.wams-user-card {
+    margin: 0;
+    padding: var(--lumo-space-s);
+    border: 1px solid var(--lumo-contrast-10pct);
+    border-radius: var(--wams-radius-card);
+    background: var(--lumo-contrast-5pct);
+}
+
+.wams-user-card:hover {
+    background: var(--lumo-base-color);
+    box-shadow: var(--wams-shadow-card);
+}
+
+.wams-sidebar-collapsed .wams-user-card {
+    border-color: transparent;
+    background: transparent;
 }
 
 .wams-header-popover,

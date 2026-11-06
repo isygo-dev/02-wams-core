@@ -14,7 +14,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.mms.views.sender.dialog.DeleteSenderConfigDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.EditSenderConfigDialog;
 import eu.isygoit.ui.mms.views.sender.dialog.SenderConfigDetailsViewDialog;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfigService> {
+class SenderConfigCard extends BaseCodeAssignableCard<SenderConfigManagementView, SenderConfigService, SenderConfigDto> {
 
     private final SenderConfigDto config;
     private final Runnable onRefresh;
@@ -49,7 +49,7 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
                             SenderConfigService senderConfigService,
                             SenderConfigDto config,
                             Runnable onRefresh) {
-        super(parentView, senderConfigService);
+        super(parentView, senderConfigService, config);
         this.config = config;
         this.onRefresh = onRefresh;
 
@@ -174,8 +174,8 @@ class SenderConfigCard extends BaseCard<SenderConfigManagementView, SenderConfig
     }
 
     @Override
-    protected String businessCode() {
-        return config.getCode();
+    protected String codeOf(SenderConfigDto object) {
+        return object.getCode();
     }
 
     @Override

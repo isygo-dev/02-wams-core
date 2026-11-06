@@ -70,8 +70,8 @@ public class TenantCard extends ProfileCard<TenantManagementView, TenantService,
     }
 
     @Override
-    protected String businessCode() {
-        return profile.getCode();
+    protected String codeOf(TenantDto object) {
+        return object.getCode();
     }
 
     /* ══════════════════════════════════════════════════════════════

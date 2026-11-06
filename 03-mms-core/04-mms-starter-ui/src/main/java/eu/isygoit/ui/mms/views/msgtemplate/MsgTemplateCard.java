@@ -19,7 +19,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateFileService;
 import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.mms.views.common.MmsEnumTag;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.DeleteMsgTemplateDialog;
 import eu.isygoit.ui.mms.views.msgtemplate.dialog.EditMsgTemplateDialog;
@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateService> {
+class MsgTemplateCard extends BaseCodeAssignableCard<MsgTemplateManagementView, MsgTemplateService, MsgTemplateDto> {
 
     private final MsgTemplateDto template;
     private final MsgTemplateFileService templateFileService;
@@ -75,7 +75,7 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
                     MsgTemplateDto template,
                     Runnable onRefresh,
                     boolean loadSenderConfig) {
-        super(parentView, templateService);
+        super(parentView, templateService, template);
         this.template = template;
         this.templateFileService = templateFileService;
         this.senderConfigService = senderConfigService;
@@ -266,8 +266,8 @@ class MsgTemplateCard extends BaseCard<MsgTemplateManagementView, MsgTemplateSer
     }
 
     @Override
-    protected String businessCode() {
-        return template.getCode();
+    protected String codeOf(MsgTemplateDto object) {
+        return object.getCode();
     }
 
     @Override

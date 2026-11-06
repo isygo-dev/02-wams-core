@@ -214,6 +214,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
             buttonBar = new HorizontalLayout();
             buttonBar.setSpacing(true);
             buttonBar.setPadding(false);
+            buttonBar.setAlignItems(FlexComponent.Alignment.CENTER);
             buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
             buttonBar.addClassName("wams-card__button-bar");
             buttons.forEach(buttonBar::add);

@@ -11,7 +11,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.PasswordConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PasswordConfigService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.secrets.password.dialog.DeletePasswordConfigDialog;
 import eu.isygoit.ui.kms.views.secrets.password.dialog.PasswordConfigDetailsViewDialog;
@@ -19,7 +19,7 @@ import eu.isygoit.ui.kms.views.secrets.password.dialog.UpdatePasswordConfigDialo
 
 import java.util.List;
 
-public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordConfigService> {
+public class PasswordConfigCard extends BaseCodeAssignableCard<PasswordConfigView, PasswordConfigService, PasswordConfigDto> {
 
     private final Runnable onDeleteRefresh;
     private PasswordConfigDto dto;
@@ -29,7 +29,7 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
                               PasswordConfigService configService,
                               PasswordConfigDto dto,
                               Runnable onDeleteRefresh) {
-        super(parentView, configService);
+        super(parentView, configService, dto);
         this.dto = dto;
         this.onDeleteRefresh = onDeleteRefresh;
         initCard();
@@ -41,6 +41,7 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
 
     public void updateDto(PasswordConfigDto newDto) {
         this.dto = newDto;
+        this.item = newDto;
         refreshDisplay();
     }
 
@@ -50,8 +51,8 @@ public class PasswordConfigCard extends BaseCard<PasswordConfigView, PasswordCon
     }
 
     @Override
-    protected String businessCode() {
-        return dto.getCode();
+    protected String codeOf(PasswordConfigDto object) {
+        return object.getCode();
     }
 
     @Override

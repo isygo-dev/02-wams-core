@@ -11,7 +11,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.PEBConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.PEBConfigService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.secrets.peb.dialog.DeletePEBConfigDialog;
 import eu.isygoit.ui.kms.views.secrets.peb.dialog.PEBConfigDetailsViewDialog;
@@ -19,7 +19,7 @@ import eu.isygoit.ui.kms.views.secrets.peb.dialog.UpdatePEBConfigDialog;
 
 import java.util.List;
 
-public class PEBConfigCard extends BaseCard<PEBConfigView, PEBConfigService> {
+public class PEBConfigCard extends BaseCodeAssignableCard<PEBConfigView, PEBConfigService, PEBConfigDto> {
 
     private final Runnable onDeleteRefresh;
     private PEBConfigDto dto;
@@ -29,7 +29,7 @@ public class PEBConfigCard extends BaseCard<PEBConfigView, PEBConfigService> {
                          PEBConfigService configService,
                          PEBConfigDto dto,
                          Runnable onDeleteRefresh) {
-        super(parentView, configService);
+        super(parentView, configService, dto);
         this.dto = dto;
         this.onDeleteRefresh = onDeleteRefresh;
         initCard();
@@ -41,6 +41,7 @@ public class PEBConfigCard extends BaseCard<PEBConfigView, PEBConfigService> {
 
     public void updateDto(PEBConfigDto newDto) {
         this.dto = newDto;
+        this.item = newDto;
         refreshDisplay();
     }
 
@@ -50,8 +51,8 @@ public class PEBConfigCard extends BaseCard<PEBConfigView, PEBConfigService> {
     }
 
     @Override
-    protected String businessCode() {
-        return dto.getCode();
+    protected String codeOf(PEBConfigDto object) {
+        return object.getCode();
     }
 
     @Override

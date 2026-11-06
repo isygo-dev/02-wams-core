@@ -16,7 +16,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.LinkedFileService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.dms.views.linkedFile.dialog.DeleteLinkedFileDialog;
 import eu.isygoit.ui.dms.views.linkedFile.dialog.FileDetailsViewDialog;
 import eu.isygoit.ui.dms.views.linkedFile.dialog.RenameLinkedFileDialog;
@@ -32,7 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
-public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFileService> {
+public class LinkedFileCard extends BaseCodeAssignableCard<LinkedFileManagementView, LinkedFileService, LinkedFileResponseDto> {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
     private final Runnable onRefresh;
@@ -42,7 +42,7 @@ public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFil
                           LinkedFileService linkedFileService,
                           LinkedFileResponseDto file,
                           Runnable onRefresh) {
-        super(parentView, linkedFileService);
+        super(parentView, linkedFileService, file);
         this.file = file;
         this.onRefresh = onRefresh;
         initCard();
@@ -54,8 +54,8 @@ public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFil
     }
 
     @Override
-    protected String businessCode() {
-        return file.getCode();
+    protected String codeOf(LinkedFileResponseDto object) {
+        return object.getCode();
     }
 
     @Override
@@ -112,6 +112,7 @@ public class LinkedFileCard extends BaseCard<LinkedFileManagementView, LinkedFil
         Button renameBtn = createEditButton(I18n.t("dms.linkedfile.card.rename.tooltip"),
                 () -> new RenameLinkedFileDialog(parentView, objectService, file, renamed -> {
                     file = renamed;
+                    item = renamed;
                     refreshBusinessCode();
                     if (onRefresh != null) onRefresh.run();
                 }).open());

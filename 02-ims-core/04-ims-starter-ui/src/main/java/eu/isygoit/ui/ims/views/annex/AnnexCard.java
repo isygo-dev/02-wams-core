@@ -12,7 +12,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.AnnexDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AnnexService;
-import eu.isygoit.ui.common.card.BaseCard;
+import eu.isygoit.ui.common.card.BaseCodeAssignableCard;
 import eu.isygoit.ui.ims.views.annex.dialog.AnnexDetailsViewDialog;
 import eu.isygoit.ui.ims.views.annex.dialog.DeleteAnnexDialog;
 import eu.isygoit.ui.ims.views.common.ImsEnumTag;
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
+public class AnnexCard extends BaseCodeAssignableCard<AnnexManagementView, AnnexService, AnnexDto> {
 
     private final AnnexDto annex;
     private final Runnable onRefresh;
@@ -30,7 +30,7 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
                      AnnexService annexService,
                      AnnexDto annex,
                      Runnable onRefresh) {
-        super(parentView, annexService);
+        super(parentView, annexService, annex);
         this.annex = annex;
         this.onRefresh = onRefresh;
         initCard();
@@ -42,8 +42,8 @@ public class AnnexCard extends BaseCard<AnnexManagementView, AnnexService> {
     }
 
     @Override
-    protected String businessCode() {
-        return annex.getTableCode();
+    protected String codeOf(AnnexDto object) {
+        return object.getTableCode();
     }
 
     @Override
