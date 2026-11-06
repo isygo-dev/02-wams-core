@@ -1,12 +1,11 @@
 package eu.isygoit.ui.cms.views.vcalendar.calendar;
 
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.ui.common.time.DailyTableGrid;
 import eu.isygoit.ui.common.time.DailyTableGridConfig;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 public class DailyCalendarView extends VerticalLayout {

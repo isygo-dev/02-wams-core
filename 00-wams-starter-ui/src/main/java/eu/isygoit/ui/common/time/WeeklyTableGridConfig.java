@@ -1,11 +1,10 @@
 package eu.isygoit.ui.common.time;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.menubar.MenuBar;
 import eu.isygoit.dto.common.DayTimeSlot;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 
 import java.time.DayOfWeek;

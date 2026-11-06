@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -17,17 +17,17 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.key.dialog.CreateKeyDialog;
@@ -48,18 +48,10 @@ import java.util.stream.Collectors;
 @Route(value = "kms/keys", layout = KmsMainLayout.class)
 @PermitAll
 public class KeyManagementView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.key.view.title");
-    }
-
-
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
-
     private final Div cardsContainer = new Div();
     private final Grid<KeyCard> grid = new Grid<>();
-    private ManagementViewModeSwitch viewModeSwitch;
     private final Button createButton = new Button(I18n.t("kms.key.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
@@ -71,6 +63,7 @@ public class KeyManagementView extends ManagementVerticalView {
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
     private final Stack<String> previousTokens = new Stack<>();
+    private ManagementViewModeSwitch viewModeSwitch;
     private int pageSize = 10;
     private String currentNextToken = null;
     private String currentToken = null;
@@ -82,7 +75,6 @@ public class KeyManagementView extends ManagementVerticalView {
     private List<KeyCard> currentPageCards = new ArrayList<>();
     private String currentSearch = "";
     private IEnumKeyStatus.Types currentStatus = null;
-
     @Autowired
     public KeyManagementView(KmsApiService kmsApiService, ObjectMapper objectMapper) {
         this.kmsApiService = kmsApiService;
@@ -173,6 +165,11 @@ public class KeyManagementView extends ManagementVerticalView {
 
         setTableMode(viewModeSwitch.isTableMode());
         resetKeyPaginationAndLoad();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.key.view.title");
     }
 
     private void resetKeyPaginationAndLoad() {
@@ -341,9 +338,6 @@ public class KeyManagementView extends ManagementVerticalView {
         new CreateKeyDialog(this, kmsApiService, objectMapper, () -> resetKeyPaginationAndLoad()).open();
     }
 
-    public record KeyStatusOption(String label, IEnumKeyStatus.Types value) {
-    }
-
     private void configureGrid() {
         grid.addClassName("management-grid");
         grid.addColumn(KeyCard::getAliasOrId)
@@ -360,5 +354,8 @@ public class KeyManagementView extends ManagementVerticalView {
         boolean loading = loadingBar.isVisible();
         cardsContainer.setVisible(!loading && !tableMode);
         grid.setVisible(!loading && tableMode);
+    }
+
+    public record KeyStatusOption(String label, IEnumKeyStatus.Types value) {
     }
 }

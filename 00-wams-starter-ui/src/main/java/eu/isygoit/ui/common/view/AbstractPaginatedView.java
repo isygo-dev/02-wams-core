@@ -159,8 +159,8 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     private boolean isSupportedCriteriaType(String type) {
         return type == null || switch (type) {
             case "String", "Integer", "int", "Long", "long", "Double", "double", "Float", "float",
-                    "BigDecimal", "Boolean", "boolean", "LocalDate", "Date", "java.sql.Date",
-                    "LocalDateTime", "Instant", "OffsetDateTime" -> true;
+                 "BigDecimal", "Boolean", "boolean", "LocalDate", "Date", "java.sql.Date",
+                 "LocalDateTime", "Instant", "OffsetDateTime" -> true;
             default -> false;
         };
     }

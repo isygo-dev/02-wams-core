@@ -3,11 +3,11 @@ package eu.isygoit.ui.kms.views.cryptography.keyStore;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -18,8 +18,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeCustomKeyStoreResponse;
 import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponse;
@@ -48,29 +48,21 @@ import java.util.stream.Collectors;
 @Route(value = "kms/custom-key-stores", layout = KmsMainLayout.class)
 @PermitAll
 public class CustomKeyStoresView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.keystore.view.title");
-    }
-
-
     private final KmsApiService kmsApiService;
     private final Div cardsContainer = new Div();
     private final Grid<DescribeCustomKeyStoreResponse.CustomKeyStore> grid = new Grid<>();
-    private ManagementViewModeSwitch viewModeSwitch;
     private final Button createButton = new Button(I18n.t("kms.keystore.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
     private final TextField filterField = new TextField();
     private final Button clearFilterButton = new Button(new Icon(VaadinIcon.CLOSE));
-
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
-
     private final Stack<String> previousTokens = new Stack<>();
+    private ManagementViewModeSwitch viewModeSwitch;
     private int pageSize = 10;
     private String currentNextToken = null;
     private String currentToken = null;
@@ -81,7 +73,6 @@ public class CustomKeyStoresView extends ManagementVerticalView {
     private boolean truncated = false;
     private String currentFilter = "";
     private List<DescribeCustomKeyStoreResponse.CustomKeyStore> currentPageStores = new ArrayList<>();
-
     @Autowired
     public CustomKeyStoresView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;
@@ -158,6 +149,11 @@ public class CustomKeyStoresView extends ManagementVerticalView {
 
         setTableMode(viewModeSwitch.isTableMode());
         resetPaginationAndLoad();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.keystore.view.title");
     }
 
     private void resetPaginationAndLoad() {

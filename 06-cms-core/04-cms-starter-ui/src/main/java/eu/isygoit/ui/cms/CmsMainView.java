@@ -1,26 +1,25 @@
 package eu.isygoit.ui.cms;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.VCalendarDto;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
+import eu.isygoit.ui.cms.layout.CmsMainLayout;
 import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
 import eu.isygoit.ui.common.component.DashboardShortcutsBar;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.cms.layout.CmsMainLayout;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,22 +38,13 @@ import java.util.List;
 @Route(value = "cms", layout = CmsMainLayout.class)
 
 public class CmsMainView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("cms.dashboard.title");
-    }
-
-
     private static final int PAGE_SIZE = 500;
-
     private final VCalendarService calendarService;
     private final UI ui;
-
     private StatCard totalCalendarsCard;
     private StatCard lockedCalendarsCard;
     private StatCard unlockedCalendarsCard;
     private DashboardBreakdownPanel calendarStatusPanel;
-
     @Autowired
     public CmsMainView(VCalendarService calendarService) {
         this.calendarService = calendarService;
@@ -76,6 +66,11 @@ public class CmsMainView extends ManagementVerticalView {
         add(calendarStatusPanel);
 
         loadStatistics();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("cms.dashboard.title");
     }
 
     private DashboardShortcutsBar buildShortcutsBar() {
@@ -103,7 +98,9 @@ public class CmsMainView extends ManagementVerticalView {
         return title;
     }
 
-    /** Calendar totals and their live lock-state breakdown. */
+    /**
+     * Calendar totals and their live lock-state breakdown.
+     */
     private StatCardGrid buildStatsGrid() {
         totalCalendarsCard = new StatCard(VaadinIcon.CALENDAR, StatCard.Variant.PRIMARY,
                 I18n.t("cms.dashboard.total.calendars"), null)

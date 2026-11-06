@@ -3,10 +3,10 @@ package eu.isygoit.ui.kms.views.cryptography.random;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -16,8 +16,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.common.RandomKeyDto;
@@ -41,41 +41,36 @@ import java.util.stream.Collectors;
 @Route(value = "kms/random-keys", layout = KmsMainLayout.class)
 @PermitAll
 public class RandomKeyView extends ManagementCompositeVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.random.key.title");
-    }
-
-
     private final RandomKeyService keyService;
-
     private final Div cardsContainer = new Div();
     private final Grid<RandomKeyDto> grid = new Grid<>();
-    private ManagementViewModeSwitch viewModeSwitch;
     private final TextField searchField = new TextField();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createButton = new Button(I18n.t("kms.random.key.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
-
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
-
+    private ManagementViewModeSwitch viewModeSwitch;
     private List<RandomKeyDto> allKeysForSearch = new ArrayList<>();
     private int currentPage = 0;
     private int pageSize = 10;
     private int totalPages = 0;
     private long totalElements = 0;
     private String currentSearch = "";
-
     @Autowired
     public RandomKeyView(RandomKeyService keyService) {
         this.keyService = keyService;
         buildUI();
         setTableMode(viewModeSwitch.isTableMode());
         loadKeys();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.random.key.title");
     }
 
     private void buildUI() {

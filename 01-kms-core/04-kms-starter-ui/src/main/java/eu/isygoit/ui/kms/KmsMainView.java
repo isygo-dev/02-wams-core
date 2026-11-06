@@ -10,8 +10,8 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
@@ -35,23 +35,15 @@ import java.util.stream.Collectors;
 @RouteScope
 @Route(value = "kms", layout = KmsMainLayout.class)
 public class KmsMainView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.dashboard.title");
-    }
-
-
     private final KmsApiService kmsApiService;
     private final KmsTokenConfigService tokenConfigService;
     private final KmsAppNextCodeService nextCodeService;
     private final RandomKeyService randomKeyService;
     private final UI ui;
-
     private final KeyStatisticsPanel keyStatsPanel;
     private final TokenStatisticsPanel tokenStatsPanel;
     private final KeyUsageStatsPanel usageStatsPanel;
     private final AuditLogPanel auditLogPanel;
-
     @Autowired
     public KmsMainView(KmsApiService kmsApiService,
                        KmsTokenConfigService tokenConfigService,
@@ -101,6 +93,11 @@ public class KmsMainView extends ManagementVerticalView {
         );
         Notification.show(notificationText, 1500, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.dashboard.title");
     }
 
     private H2 buildHeader() {

@@ -1,10 +1,9 @@
 package eu.isygoit.ui.ims.views.account.dialog;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
 import eu.isygoit.ui.common.dialog.PinConfirmActionDialog;

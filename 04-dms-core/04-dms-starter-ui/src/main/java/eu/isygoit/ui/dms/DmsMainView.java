@@ -1,18 +1,17 @@
 package eu.isygoit.ui.dms;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.async.ContextAwareAsync;
-import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
+import eu.isygoit.dto.common.PaginatedResponseDto;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
 import eu.isygoit.remote.dms.LinkedFileService;
@@ -40,22 +39,13 @@ import java.util.Map;
 @Route(value = "dms", layout = DmsMainLayout.class)
 
 public class DmsMainView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("dms.dashboard.title");
-    }
-
-
     private static final Logger log = LoggerFactory.getLogger(DmsMainView.class);
-
     private final CategoryService categoryService;
     private final LinkedFileService linkedFileService;
     private final UI ui;
-
     private StatCard categoriesCard;
     private StatCard filesCard;
     private DashboardBreakdownPanel inventoryPanel;
-
     @Autowired
     public DmsMainView(CategoryService categoryService, LinkedFileService linkedFileService) {
         this.categoryService = categoryService;
@@ -77,6 +67,11 @@ public class DmsMainView extends ManagementVerticalView {
         add(inventoryPanel);
 
         loadStatistics();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("dms.dashboard.title");
     }
 
     private DashboardShortcutsBar buildShortcutsBar() {
@@ -104,7 +99,9 @@ public class DmsMainView extends ManagementVerticalView {
         return title;
     }
 
-    /** The real category and linked-file totals in a responsive shared grid. */
+    /**
+     * The real category and linked-file totals in a responsive shared grid.
+     */
     private StatCardGrid buildStatsGrid() {
         categoriesCard = new StatCard(VaadinIcon.FOLDER, StatCard.Variant.PRIMARY,
                 I18n.t("dms.dashboard.total.categories"), null)

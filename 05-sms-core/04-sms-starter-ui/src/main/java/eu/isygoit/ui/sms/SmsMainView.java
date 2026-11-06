@@ -1,18 +1,17 @@
 package eu.isygoit.ui.sms;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.StorageConfigDto;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
 import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
@@ -41,20 +40,11 @@ import java.util.TreeMap;
 @Route(value = "sms", layout = SmsMainLayout.class)
 
 public class SmsMainView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("sms.dashboard.title");
-    }
-
-
     private static final int PAGE_SIZE = 500;
-
     private final StorageConfigService storageConfigService;
     private final UI ui;
-
     private StatCard totalConfigsCard;
     private DashboardBreakdownPanel storageTypesPanel;
-
     @Autowired
     public SmsMainView(StorageConfigService storageConfigService) {
         this.storageConfigService = storageConfigService;
@@ -76,6 +66,11 @@ public class SmsMainView extends ManagementVerticalView {
         add(storageTypesPanel);
 
         loadStatistics();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("sms.dashboard.title");
     }
 
     private DashboardShortcutsBar buildShortcutsBar() {
@@ -103,7 +98,9 @@ public class SmsMainView extends ManagementVerticalView {
         return title;
     }
 
-    /** The one live total, with its provider breakdown shown below. */
+    /**
+     * The one live total, with its provider breakdown shown below.
+     */
     private StatCardGrid buildStatsGrid() {
         totalConfigsCard = new StatCard(VaadinIcon.DATABASE, StatCard.Variant.PRIMARY,
                 I18n.t("sms.dashboard.total.configs"), null)

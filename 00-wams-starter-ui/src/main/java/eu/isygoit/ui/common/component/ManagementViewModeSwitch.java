@@ -33,6 +33,19 @@ public final class ManagementViewModeSwitch extends Div {
         return tableMode;
     }
 
+    private void setTableMode(boolean table) {
+        if (tableMode == table) {
+            return;
+        }
+        tableMode = table;
+        VaadinSession session = VaadinSession.getCurrent();
+        if (session != null) {
+            session.setAttribute(sessionKey, table ? "table" : "cards");
+        }
+        updateButtons();
+        onModeChanged.accept(table);
+    }
+
     private String readMode() {
         VaadinSession session = VaadinSession.getCurrent();
         Object mode = session == null ? null : session.getAttribute(sessionKey);
@@ -48,19 +61,6 @@ public final class ManagementViewModeSwitch extends Div {
         button.setAriaLabel(label);
         button.addClickListener(event -> setTableMode(table));
         return button;
-    }
-
-    private void setTableMode(boolean table) {
-        if (tableMode == table) {
-            return;
-        }
-        tableMode = table;
-        VaadinSession session = VaadinSession.getCurrent();
-        if (session != null) {
-            session.setAttribute(sessionKey, table ? "table" : "cards");
-        }
-        updateButtons();
-        onModeChanged.accept(table);
     }
 
     private void updateButtons() {

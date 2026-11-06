@@ -1,19 +1,17 @@
 package eu.isygoit.ui.ims;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.PaginatedResponseDto;
-import eu.isygoit.dto.data.AccountGlobalStatDto;
 import eu.isygoit.enums.IEnumSharedStatType;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.*;
 import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
@@ -59,11 +57,6 @@ public class ImsMainView extends ManagementVerticalView {
     private StatCard rolesCard;
     private StatCard registeredUsersCard;
 
-    @Override
-    public String getPageTitle() {
-        return I18n.t("ims.dashboard.title");
-    }
-
     @Autowired
     public ImsMainView(AccountService accountService,
                        TenantService tenantService,
@@ -98,6 +91,11 @@ public class ImsMainView extends ManagementVerticalView {
         loadStatistics();
     }
 
+    @Override
+    public String getPageTitle() {
+        return I18n.t("ims.dashboard.title");
+    }
+
     private DashboardShortcutsBar buildShortcutsBar() {
         List<DashboardShortcutsBar.Shortcut> shortcuts = List.of(
                 new DashboardShortcutsBar.Shortcut(VaadinIcon.PLUS,
@@ -129,7 +127,9 @@ public class ImsMainView extends ManagementVerticalView {
         return title;
     }
 
-    /** The six live entity totals in a responsive shared grid. */
+    /**
+     * The six live entity totals in a responsive shared grid.
+     */
     private StatCardGrid buildStatsGrid() {
         accountsCard = new StatCard(VaadinIcon.USER, StatCard.Variant.PRIMARY,
                 I18n.t("ims.dashboard.total.accounts"), null)

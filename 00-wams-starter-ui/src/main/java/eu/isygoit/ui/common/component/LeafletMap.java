@@ -1,9 +1,8 @@
 package eu.isygoit.ui.common.component;
 
-import eu.isygoit.exception.BadArgumentException;
-
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.shared.Registration;
+import eu.isygoit.exception.BadArgumentException;
 import software.xdev.vaadin.maps.leaflet.MapContainer;
 import software.xdev.vaadin.maps.leaflet.basictypes.LIcon;
 import software.xdev.vaadin.maps.leaflet.basictypes.LIconOptions;

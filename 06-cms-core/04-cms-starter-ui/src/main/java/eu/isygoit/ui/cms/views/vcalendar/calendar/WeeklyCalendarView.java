@@ -1,13 +1,12 @@
 package eu.isygoit.ui.cms.views.vcalendar.calendar;
 
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.ui.common.time.WeeklyTableGrid;
 import eu.isygoit.ui.common.time.WeeklyTableGridConfig;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 public class WeeklyCalendarView extends VerticalLayout {

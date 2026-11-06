@@ -3,10 +3,10 @@ package eu.isygoit.ui.dms.views.linkedFile;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -15,8 +15,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
@@ -24,9 +24,9 @@ import eu.isygoit.dto.data.CategoryDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
 import eu.isygoit.remote.dms.LinkedFileService;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
+import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.dms.layout.DmsMainLayout;
 import eu.isygoit.ui.dms.views.linkedFile.dialog.UploadLinkedFileDialog;
 import feign.FeignException;
@@ -44,43 +44,31 @@ import java.util.stream.Collectors;
 @Route(value = "dms/linked-files", layout = DmsMainLayout.class)
 @PermitAll
 public class LinkedFileManagementView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("dms.linkedfile.view.title");
-    }
-
-
     private final LinkedFileService linkedFileService;
     private final CategoryService categoryService;
-
     private final Div cardsContainer = new Div();
     private final Grid<LinkedFileResponseDto> grid = new Grid<>();
-    private ManagementViewModeSwitch viewModeSwitch;
     private final Button uploadButton = new Button(I18n.t("dms.linkedfile.view.upload.button"), new Icon(VaadinIcon.UPLOAD));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button clearFiltersButton = new Button(I18n.t("dms.linkedfile.view.clear.filters"), new Icon(VaadinIcon.ERASER));
-
     private final TextField searchField = new TextField();
     private final TextField tagsField = new TextField();
     private final ComboBox<String> categoryFilterComboBox = new ComboBox<>();
-
     private final ProgressBar loadingBar = new ProgressBar();
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
-
+    private ManagementViewModeSwitch viewModeSwitch;
     private List<LinkedFileResponseDto> allFiles = new ArrayList<>();
     private List<LinkedFileResponseDto> filteredFiles = new ArrayList<>();
-
     // The linked-file search endpoints return a plain List (no pagination
     // support server-side), so paging is done in-memory over filteredFiles —
     // same page/pageSize/prev/next shape as every other management view.
     private int currentPage = 0;
     private int pageSize = 10;
     private int totalPages = 0;
-
     private String currentTenant;
 
     @Autowired
@@ -118,6 +106,11 @@ public class LinkedFileManagementView extends ManagementVerticalView {
         setTableMode(viewModeSwitch.isTableMode());
         loadCategories();
         loadAllFiles();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("dms.linkedfile.view.title");
     }
 
     private void initEventHandlers() {

@@ -1,9 +1,8 @@
 package eu.isygoit.ui.common.profile;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.storedobject.chart.*;
 import eu.isygoit.dto.data.DailyLoginCountDto;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 
 import java.time.LocalDate;

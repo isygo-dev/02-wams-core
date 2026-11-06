@@ -3,11 +3,11 @@ package eu.isygoit.ui.mms.views.sender;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -16,8 +16,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
@@ -44,14 +44,7 @@ import java.util.stream.Collectors;
 @Route(value = "mms/sender-config", layout = MmsMainLayout.class)
 @PermitAll
 public class SenderConfigManagementView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("mms.sender.view.title");
-    }
-
-
     private final SenderConfigService senderConfigService;
-
     private final Div cardsContainer = new Div();
     private final Grid<SenderConfigCard> grid = new Grid<>();
     private final Button createButton = new Button(I18n.t("mms.sender.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
@@ -64,10 +57,9 @@ public class SenderConfigManagementView extends ManagementVerticalView {
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
+    private final Stack<String> previousTokens = new Stack<>();
     private ManagementViewModeSwitch viewModeSwitch;
     private boolean tableMode;
-
-    private final Stack<String> previousTokens = new Stack<>();
     private int pageSize = 10;
     private String currentNextToken = null;
     private String currentToken = null;
@@ -79,10 +71,8 @@ public class SenderConfigManagementView extends ManagementVerticalView {
     private List<SenderConfigCard> currentPageCards = new ArrayList<>();
     private String currentSearch = "";
     private Boolean currentActiveFilter = null;
-
     private List<SenderConfigDto> allConfigs = new ArrayList<>();
     private List<SenderConfigDto> filteredConfigs = new ArrayList<>();
-
     @Autowired
     public SenderConfigManagementView(SenderConfigService senderConfigService) {
         this.senderConfigService = senderConfigService;
@@ -176,6 +166,11 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         nextButton.setTooltipText(I18n.t("mms.sender.view.next.page.tooltip"));
 
         resetPaginationAndLoad();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("mms.sender.view.title");
     }
 
     private void resetPaginationAndLoad() {

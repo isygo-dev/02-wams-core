@@ -1,7 +1,6 @@
 package eu.isygoit.ui.dms.views.linkedFile.dialog;
 
 import eu.isygoit.exception.ServiceOperationException;
-
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.LinkedFileService;
 import eu.isygoit.ui.common.dialog.DeleteActionDialog;

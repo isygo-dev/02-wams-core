@@ -1,8 +1,8 @@
 package eu.isygoit.async;
 
+import com.vaadin.flow.server.VaadinSession;
 import eu.isygoit.exception.BadArgumentException;
 import eu.isygoit.exception.ServiceOperationException;
-import com.vaadin.flow.server.VaadinSession;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestAttributes;

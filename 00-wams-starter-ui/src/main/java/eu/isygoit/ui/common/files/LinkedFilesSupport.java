@@ -1,9 +1,8 @@
 package eu.isygoit.ui.common.files;
 
-import eu.isygoit.exception.OperationNotSupportedException;
-
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import eu.isygoit.exception.OperationNotSupportedException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;

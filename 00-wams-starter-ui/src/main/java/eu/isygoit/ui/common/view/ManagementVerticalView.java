@@ -22,11 +22,6 @@ public class ManagementVerticalView extends VerticalLayout implements BeforeEnte
         addClassName("management-view");
     }
 
-    @Override
-    public String getPageTitle() {
-        return ViewTitleUtils.humanize(getClass());
-    }
-
     public static Button createCopyButton(VaadinIcon icon, String textToCopy, String tooltip) {
         Button btn = new Button(new Icon(icon));
         btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
@@ -44,6 +39,11 @@ public class ManagementVerticalView extends VerticalLayout implements BeforeEnte
         );
         Notification.show(notificationText, 1500, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
+    @Override
+    public String getPageTitle() {
+        return ViewTitleUtils.humanize(getClass());
     }
 
     @Override

@@ -1,8 +1,7 @@
 package eu.isygoit.deepseek.model;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import eu.isygoit.exception.ServiceOperationException;
 import lombok.Builder;
 
 import java.util.List;

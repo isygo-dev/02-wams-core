@@ -3,11 +3,10 @@ package eu.isygoit.ui.kms.views.cryptography.keyAlias;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -16,12 +15,12 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
-import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
@@ -43,16 +42,9 @@ import java.util.stream.Collectors;
 @Route(value = "kms/aliases", layout = KmsMainLayout.class)
 @PermitAll
 public class AliasesView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.aliases.view.title");
-    }
-
-
     private final KmsApiService kmsApiService;
     private final Div cardsContainer = new Div();
     private final Grid<KmsDtos.ListAliasesResponse.AliasEntry> grid = new Grid<>();
-    private ManagementViewModeSwitch viewModeSwitch;
     private final Button createButton = new Button(I18n.t("kms.aliases.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
@@ -63,6 +55,7 @@ public class AliasesView extends ManagementVerticalView {
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
     private final Stack<String> previousTokens = new Stack<>();
+    private ManagementViewModeSwitch viewModeSwitch;
     private int pageSize = 10;
     private String currentNextToken = null;
     private String currentToken = null;
@@ -73,7 +66,6 @@ public class AliasesView extends ManagementVerticalView {
     private boolean truncated = false;
     private List<AliasCard> currentPageCards = new ArrayList<>();
     private String currentSearch = "";
-
     @Autowired
     public AliasesView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;
@@ -148,6 +140,11 @@ public class AliasesView extends ManagementVerticalView {
 
         setTableMode(viewModeSwitch.isTableMode());
         resetPaginationAndLoad();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.aliases.view.title");
     }
 
     void resetPaginationAndLoad() {

@@ -1,9 +1,8 @@
 package eu.isygoit.ui.common.filters;
 
-import eu.isygoit.exception.BadArgumentException;
-
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
+import eu.isygoit.exception.BadArgumentException;
 import eu.isygoit.i18n.I18n;
 
 import java.math.BigDecimal;

@@ -1,8 +1,6 @@
 package eu.isygoit.ui.auth;
 
 import eu.isygoit.async.ContextAwareAsync;
-import eu.isygoit.exception.RemoteCallFailedException;
-import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.request.QrLoginChallengeRequest;
@@ -11,6 +9,8 @@ import eu.isygoit.dto.response.AuthResponseDto;
 import eu.isygoit.dto.response.QrLoginStatusDto;
 import eu.isygoit.dto.response.UserContext;
 import eu.isygoit.enums.IEnumAuth;
+import eu.isygoit.exception.RemoteCallFailedException;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.remote.ims.PublicAuthService;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Qualifier;

@@ -7,8 +7,8 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.dto.common.NextCodeDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.exception.GenerationFailedException;
@@ -17,8 +17,6 @@ import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsIncrementalKeyService;
 import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
-import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.DeleteNextCodeConfigDialog;
-import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.NextCodeDetailsViewDialog;
 import eu.isygoit.ui.kms.views.cryptography.incremental.dialog.SubscribeNextCodeConfigDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
@@ -70,8 +68,8 @@ public class IncrementalKeyView extends AbstractPaginatedView<NextCodeDto> {
         String mergedCriteria = searchCriteria.isBlank()
                 ? criteria
                 : criteria == null || criteria.isBlank()
-                    ? searchCriteria
-                    : "(" + criteria + ") & " + searchCriteria;
+                ? searchCriteria
+                : "(" + criteria + ") & " + searchCriteria;
         var response = nextCodeService.findAllFilteredByCriteria(mergedCriteria, page, size);
         return response != null ? response.getBody() : null;
     }

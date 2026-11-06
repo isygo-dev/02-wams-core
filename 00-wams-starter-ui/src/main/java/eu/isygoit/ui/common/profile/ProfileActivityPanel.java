@@ -104,9 +104,9 @@ class ProfileActivityPanel extends VerticalLayout {
         Div error = new Div(new Span(I18n.t("profile.activity.load.error")), retry);
         error.addClassName("profile-load-error");
         return error;
-    }    private final ProfilePagerBar pager = new ProfilePagerBar(this::loadPage);
+    }
 
-
+    private final ProfilePagerBar pager = new ProfilePagerBar(this::loadPage);
 
 
 }

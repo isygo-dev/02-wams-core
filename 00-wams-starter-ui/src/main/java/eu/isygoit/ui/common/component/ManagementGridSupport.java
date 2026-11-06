@@ -13,7 +13,7 @@ public final class ManagementGridSupport {
     }
 
     public static <T> Grid.Column<T> addCardActionsColumn(Grid<T> grid,
-                                                           Function<T, Component> cardRenderer) {
+                                                          Function<T, Component> cardRenderer) {
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_NO_BORDER);
         grid.setAllRowsVisible(true);
         grid.setWidthFull();

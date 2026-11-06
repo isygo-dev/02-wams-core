@@ -1,10 +1,6 @@
 package eu.isygoit.ui.common.layout;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.HasElement;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
@@ -36,13 +32,8 @@ import eu.isygoit.dto.response.UserDataResponseDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountImageService;
 import eu.isygoit.remote.ims.AccountService;
-import eu.isygoit.ui.common.component.AppSearchBar;
-import eu.isygoit.ui.common.component.Breadcrumbs;
-import eu.isygoit.ui.common.component.CollapsibleNavSection;
-import eu.isygoit.ui.common.component.INavRegistry;
+import eu.isygoit.ui.common.component.*;
 import eu.isygoit.ui.common.component.INavRegistry.NavTarget;
-import eu.isygoit.ui.common.component.LanguageSelectorComponent;
-import eu.isygoit.ui.common.component.ThemeToggleButton;
 import eu.isygoit.ui.common.nav.NavRegistryProvider;
 import eu.isygoit.ui.common.spring.SpringContextUtil;
 import eu.isygoit.util.SecurityUtils;

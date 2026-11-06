@@ -103,7 +103,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
             log.warn("Failed to load login activity", e);
         }
         return List.of();
-    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
+    }
 
     private Div buildChartCard(List<DailyLoginCountDto> activity) {
         Div chartCard = new Div();
@@ -147,7 +147,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
 
         chartCard.add(chartHeader, chartHolder);
         return chartCard;
-    }
+    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
 
     private Div buildRecentSessionsCard(Runnable onViewAllActivity) {
         Div listCard = new Div();

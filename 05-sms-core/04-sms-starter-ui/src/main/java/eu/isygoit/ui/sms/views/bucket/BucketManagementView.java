@@ -3,10 +3,10 @@ package eu.isygoit.ui.sms.views.bucket;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -16,18 +16,18 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.remote.sms.StorageConfigService;
-import eu.isygoit.ui.common.component.StatCard;
-import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
+import eu.isygoit.ui.common.component.StatCard;
+import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
 import eu.isygoit.ui.sms.views.bucket.dialog.CreateBucketDialog;
@@ -49,31 +49,22 @@ import java.util.stream.Collectors;
 @Route(value = "sms/buckets", layout = SmsMainLayout.class)
 @PermitAll
 public class BucketManagementView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("sms.buckets.view.title");
-    }
-
-
     private final ObjectStorageService objectStorageService;
     private final StorageConfigService storageConfigService;
-
     private final Div cardsContainer = new Div();
     private final Grid<BucketDto> grid = new Grid<>();
-    private ManagementViewModeSwitch viewModeSwitch;
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createBucketButton = new Button(I18n.t("sms.buckets.view.create.bucket"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final TextField searchField = new TextField();
     private final ComboBox<StorageConfigDto> tenantSelector = new ComboBox<>();
     private final ProgressBar loadingBar = new ProgressBar();
-
     // Pagination
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
-
+    private ManagementViewModeSwitch viewModeSwitch;
     private List<BucketDto> allBuckets = new ArrayList<>();
     private List<BucketDto> currentPageBuckets = new ArrayList<>();
     private StorageConfigDto selectedStorageConfig;
@@ -83,7 +74,6 @@ public class BucketManagementView extends ManagementVerticalView {
     private int totalPages = 0;
     private long totalElements = 0;
     private StatCard totalBucketsCard;
-
     @Autowired
     public BucketManagementView(ObjectStorageService objectStorageService,
                                 StorageConfigService storageConfigService) {
@@ -114,6 +104,11 @@ public class BucketManagementView extends ManagementVerticalView {
         initEventHandlers();
         setTableMode(viewModeSwitch.isTableMode());
         loadStorageConfigs();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("sms.buckets.view.title");
     }
 
     private StatCardGrid buildStats() {

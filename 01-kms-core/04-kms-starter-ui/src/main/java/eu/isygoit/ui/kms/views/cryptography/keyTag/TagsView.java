@@ -14,8 +14,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
@@ -43,12 +43,6 @@ import java.util.stream.Collectors;
 @Route(value = "kms/tags", layout = KmsMainLayout.class)
 @PermitAll
 public class TagsView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.tags.view.title");
-    }
-
-
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>();
     private final RowCardList<KmsDtos.ListResourceTagsResponse.Tag> tagsList = new RowCardList<>();
@@ -56,11 +50,9 @@ public class TagsView extends ManagementVerticalView {
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final TextField searchField = new TextField();
     private final ProgressBar loadingBar = new ProgressBar();
-
     private List<KeyOption> keyOptions = new ArrayList<>();
     private String selectedKeyId = null;
     private List<KmsDtos.ListResourceTagsResponse.Tag> allTags;
-
     @Autowired
     public TagsView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;
@@ -99,6 +91,11 @@ public class TagsView extends ManagementVerticalView {
         add(loadingBar);
 
         loadKeyOptions();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.tags.view.title");
     }
 
     private HorizontalLayout buildToolbar() {
@@ -347,4 +344,4 @@ public class TagsView extends ManagementVerticalView {
             return displayName;
         }
     }
-}
+}

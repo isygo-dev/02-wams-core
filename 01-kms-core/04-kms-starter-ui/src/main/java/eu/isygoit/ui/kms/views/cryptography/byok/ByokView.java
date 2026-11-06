@@ -19,8 +19,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeyExpirationModel;
@@ -52,12 +52,6 @@ import java.util.stream.Collectors;
 @Route(value = "kms/byok", layout = KmsMainLayout.class)
 @PermitAll
 public class ByokView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.byok.view.title");
-    }
-
-
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.byok.view.select.key"));
     private final Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
@@ -73,14 +67,12 @@ public class ByokView extends ManagementVerticalView {
     private final ProgressBar loadingBar = new ProgressBar();
     private final Span paramsExpiryInfo = new Span();
     private final Span keyStatusInfo = new Span();
-
     private String selectedKeyId = null;
     private String currentImportToken = null;
     private LocalDateTime parametersValidUntil = null;
     private String currentPublicKey = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
     private boolean hasImportedMaterial = false;
-
     @Autowired
     public ByokView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;
@@ -155,6 +147,11 @@ public class ByokView extends ManagementVerticalView {
 
         configureComponents();
         loadKeyOptions();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.byok.view.title");
     }
 
     // ---------- UI Helpers ----------

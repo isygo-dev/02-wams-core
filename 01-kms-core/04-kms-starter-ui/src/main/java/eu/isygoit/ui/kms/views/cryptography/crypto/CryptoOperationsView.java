@@ -14,8 +14,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeySpec;
@@ -45,33 +45,23 @@ import java.util.stream.Collectors;
 @Route(value = "kms/crypto", layout = KmsMainLayout.class)
 @PermitAll
 public class CryptoOperationsView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.crypto.view.title");
-    }
-
-
     private final KmsApiService kmsApiService;
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.crypto.view.select.key"));
     private final Button refreshKeysButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final ProgressBar loadingBar = new ProgressBar();
-
     private final Tabs tabs;
     private final Tab encryptDecryptTabHeader;
     private final Tab signVerifyTabHeader;
     private final Tab dataKeyTabHeader;
     private final Tab macTabHeader;
-
     private final EncryptDecryptPanel encryptDecryptPanel;
     private final SignVerifyPanel signVerifyPanel;
     private final DataKeyPanel dataKeyPanel;
     private final MacPanel macPanel;
-
     private List<KeyOption> keyOptions = new ArrayList<>();
     private String selectedKeyId = null;
     private IEnumKeySpec.Types selectedKeySpec = null;
     private IEnumKeyUsage.Types selectedKeyUsage = null;
-
     @Autowired
     public CryptoOperationsView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;
@@ -133,6 +123,11 @@ public class CryptoOperationsView extends ManagementVerticalView {
         add(tabs, encryptDecryptPanel, signVerifyPanel, dataKeyPanel, macPanel);
 
         loadKeyOptions();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.crypto.view.title");
     }
 
     private HorizontalLayout createKeyLayout() {

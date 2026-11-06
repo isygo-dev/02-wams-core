@@ -15,8 +15,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
@@ -47,15 +47,8 @@ import java.util.stream.Collectors;
 @Route(value = "kms/grants", layout = KmsMainLayout.class)
 @PermitAll
 public class GrantsView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.grants.view.title");
-    }
-
-
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
-
     // UI components
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.grants.view.select.key"));
     private final TextField filterField = new TextField();
@@ -64,11 +57,9 @@ public class GrantsView extends ManagementVerticalView {
     private final Button refreshButton = new Button(I18n.t("kms.grants.view.refresh.button"), new Icon(VaadinIcon.REFRESH));
     private final Button createGrantButton = new Button(I18n.t("kms.grants.view.create.grant.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final ProgressBar loadingBar = new ProgressBar();
-
     private String selectedKeyId = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
     private List<KmsDtos.ListGrantsResponse.Grant> allGrants = new ArrayList<>();
-
     @Autowired
     public GrantsView(KmsApiService kmsApiService, ObjectMapper objectMapper) {
         this.kmsApiService = kmsApiService;
@@ -96,6 +87,11 @@ public class GrantsView extends ManagementVerticalView {
         });
 
         loadKeyOptions();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.grants.view.title");
     }
 
     // ------------------------------------------------------------------------
@@ -367,4 +363,4 @@ public class GrantsView extends ManagementVerticalView {
             return displayName;
         }
     }
-}
+}

@@ -13,13 +13,12 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
@@ -27,8 +26,8 @@ import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.common.KmsConfirmationDialog;
-import eu.isygoit.ui.kms.views.cryptography.keyPolicy.dialog.PolicyEvaluationDialog;
 import eu.isygoit.ui.kms.views.cryptography.keyPolicy.dialog.PolicyBuilderDialog;
+import eu.isygoit.ui.kms.views.cryptography.keyPolicy.dialog.PolicyEvaluationDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
@@ -45,20 +44,12 @@ import java.util.stream.Collectors;
 @Route(value = "kms/policies", layout = KmsMainLayout.class)
 @PermitAll
 public class PoliciesView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.policy.view.title");
-    }
-
-
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
-
     // UI components
     private final ComboBox<KeyOption> keyCombo = new ComboBox<>(I18n.t("kms.policy.view.select.key"));
     private final TextArea policyEditor = new TextArea(I18n.t("kms.policy.view.policy.editor.label"));
     private final ProgressBar loadingBar = new ProgressBar();
-
     private final Button loadButton = new Button(I18n.t("kms.policy.view.load.button"), new Icon(VaadinIcon.DOWNLOAD));
     private final Button saveButton = new Button(I18n.t("kms.policy.view.save.button"), new Icon(VaadinIcon.UPLOAD));
     private final Button formatButton = new Button(I18n.t("kms.policy.view.format.button"), new Icon(VaadinIcon.CODE));
@@ -66,10 +57,8 @@ public class PoliciesView extends ManagementVerticalView {
     private final Button builderButton = new Button(I18n.t("kms.policy.view.builder.button"), new Icon(VaadinIcon.PUZZLE_PIECE));
     private final TextField actionField = new TextField(I18n.t("kms.policy.view.check.action"));
     private final Button checkActionButton = new Button(I18n.t("kms.policy.view.check.action"), new Icon(VaadinIcon.SEARCH));
-
     private String selectedKeyId = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
-
     @Autowired
     public PoliciesView(KmsApiService kmsApiService, ObjectMapper objectMapper) {
         this.kmsApiService = kmsApiService;
@@ -89,6 +78,11 @@ public class PoliciesView extends ManagementVerticalView {
 
         updateButtonsState();
         loadKeyOptions();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.policy.view.title");
     }
 
     private void buildHeader() {

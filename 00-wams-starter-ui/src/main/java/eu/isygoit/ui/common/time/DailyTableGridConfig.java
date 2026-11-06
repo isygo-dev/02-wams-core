@@ -1,9 +1,8 @@
 package eu.isygoit.ui.common.time;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.common.DayTimeSlot;
+import eu.isygoit.exception.ServiceOperationException;
 
 import java.time.LocalTime;
 import java.util.List;

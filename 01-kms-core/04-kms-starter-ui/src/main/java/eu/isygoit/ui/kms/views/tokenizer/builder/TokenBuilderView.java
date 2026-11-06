@@ -21,8 +21,8 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.TokenRequestDto;
 import eu.isygoit.dto.common.TokenResponseDto;
@@ -49,17 +49,9 @@ import java.util.Set;
 @Route(value = "kms/token-builder", layout = KmsMainLayout.class)
 @PermitAll
 public class TokenBuilderView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("kms.token.builder.title");
-    }
-
-
     private final KmsTokenService tokenService;
     private final ObjectMapper objectMapper;
-
     private final ProgressBar globalLoadingBar = new ProgressBar();
-
     // Build section
     private final Card buildCard = new Card();
     private final ComboBox<IEnumToken.Types> tokenTypeCombo = new ComboBox<>();
@@ -69,7 +61,6 @@ public class TokenBuilderView extends ManagementVerticalView {
     private final Button buildClaimsButton = new Button(I18n.t("kms.token.builder.custom.claims.build"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button buildButton = new Button(I18n.t("kms.token.builder.generate.button"), new Icon(VaadinIcon.COG));
     private final VerticalLayout buildResultPanel = new VerticalLayout();
-
     // Validate section
     private final Card validateCard = new Card();
     private final ComboBox<IEnumToken.Types> validateTokenTypeCombo = new ComboBox<>();
@@ -78,7 +69,6 @@ public class TokenBuilderView extends ManagementVerticalView {
     private final TextField validateSubjectField = new TextField();
     private final Button validateButton = new Button(I18n.t("kms.token.builder.validate.token"), new Icon(VaadinIcon.SEARCH));
     private final Span validationResultSpan = new Span();
-
     public TokenBuilderView(KmsTokenService tokenService, ObjectMapper objectMapper) {
         this.tokenService = tokenService;
         this.objectMapper = objectMapper;
@@ -103,6 +93,11 @@ public class TokenBuilderView extends ManagementVerticalView {
         cardsRow.addClassName("cards-row");
         cardsRow.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         add(cardsRow);
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("kms.token.builder.title");
     }
 
     private void buildHeader() {

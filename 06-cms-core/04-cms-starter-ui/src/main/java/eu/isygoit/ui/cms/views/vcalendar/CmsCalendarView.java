@@ -1,7 +1,5 @@
 package eu.isygoit.ui.cms.views.vcalendar;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -11,22 +9,23 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.shared.communication.PushMode;
+import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.VCalendarDto;
 import eu.isygoit.dto.data.VCalendarEventDto;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarEventService;
 import eu.isygoit.remote.cms.VCalendarService;
@@ -384,7 +383,7 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
                 ? DateTimeFormatter.ofPattern("MMMM yyyy").format(currentDate)
                 : currentMode == CalendarMode.WEEK
                 ? DateTimeFormatter.ofPattern("dd MMM yyyy").format(weekStart)
-                        + " – " + DateTimeFormatter.ofPattern("dd MMM yyyy").format(weekEnd)
+                + " – " + DateTimeFormatter.ofPattern("dd MMM yyyy").format(weekEnd)
                 : DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy").format(currentDate));
         navigationSubtitle.setText(currentMode == CalendarMode.MONTH
                 ? I18n.t("cms.calendar.view.month.subtitle")

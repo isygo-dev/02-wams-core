@@ -34,12 +34,6 @@ import java.util.List;
 @Route("landing")
 @PermitAll
 public class LandingView extends BaseLandingView implements BeforeEnterObserver {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("common.landing.page.title");
-    }
-
-
     /**
      * Single source of truth for all modules.
      * Add new modules here and they'll automatically appear on the landing page.
@@ -47,6 +41,11 @@ public class LandingView extends BaseLandingView implements BeforeEnterObserver 
     private static final List<ModuleInfo> MODULES = List.of(
             new ModuleInfo("KMS", "kms", VaadinIcon.KEY)
     );
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("common.landing.page.title");
+    }
 
     @Override
     protected List<ModuleInfo> getModules() {

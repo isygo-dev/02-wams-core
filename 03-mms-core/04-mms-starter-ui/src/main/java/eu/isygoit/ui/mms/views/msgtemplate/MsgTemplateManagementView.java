@@ -3,11 +3,11 @@ package eu.isygoit.ui.mms.views.msgtemplate;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -17,8 +17,8 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.MsgTemplateDto;
 import eu.isygoit.enums.IEnumLanguage;
@@ -49,16 +49,9 @@ import java.util.stream.Collectors;
 @Route(value = "mms/templates", layout = MmsMainLayout.class)
 @PermitAll
 public class MsgTemplateManagementView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("mms.msgtemplate.view.title");
-    }
-
-
     private final MsgTemplateService templateService;
     private final MsgTemplateFileService templateFileService;
     private final SenderConfigService senderConfigService;
-
     private final Div cardsContainer = new Div();
     private final Grid<MsgTemplateCard> grid = new Grid<>();
     private final Button createButton = new Button(I18n.t("mms.msgtemplate.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
@@ -72,10 +65,9 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
+    private final Stack<String> previousTokens = new Stack<>();
     private ManagementViewModeSwitch viewModeSwitch;
     private boolean tableMode;
-
-    private final Stack<String> previousTokens = new Stack<>();
     private int pageSize = 10;
     private String currentNextToken = null;
     private String currentToken = null;
@@ -88,10 +80,8 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
     private String currentSearch = "";
     private IEnumLanguage.Types currentLanguageFilter = null;
     private String currentNameFilter = null;
-
     private List<MsgTemplateDto> allTemplates = new ArrayList<>();
     private List<MsgTemplateDto> filteredTemplates = new ArrayList<>();
-
     @Autowired
     public MsgTemplateManagementView(MsgTemplateService templateService,
                                      MsgTemplateFileService templateFileService,
@@ -212,6 +202,11 @@ public class MsgTemplateManagementView extends ManagementVerticalView {
         nextButton.setTooltipText(I18n.t("mms.msgtemplate.view.next.page.tooltip"));
 
         resetPaginationAndLoad();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("mms.msgtemplate.view.title");
     }
 
     private void loadTemplateNames() {

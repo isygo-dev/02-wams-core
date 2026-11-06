@@ -1,8 +1,5 @@
 package eu.isygoit.config;
 
-import eu.isygoit.exception.BadArgumentException;
-import eu.isygoit.exception.ServiceOperationException;
-import eu.isygoit.exception.UnauthorizedException;
 import eu.isygoit.com.camel.repository.ICamelRepository;
 import eu.isygoit.dto.wsocket.WsConnectDto;
 import eu.isygoit.dto.wsocket.WsMessageDto;
@@ -12,6 +9,9 @@ import eu.isygoit.enums.IEnumWSBroker;
 import eu.isygoit.enums.IEnumWSEndpoint;
 import eu.isygoit.enums.IEnumWSMessage;
 import eu.isygoit.enums.IEnumWSStatus;
+import eu.isygoit.exception.BadArgumentException;
+import eu.isygoit.exception.ServiceOperationException;
+import eu.isygoit.exception.UnauthorizedException;
 import eu.isygoit.service.IWebSocketService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

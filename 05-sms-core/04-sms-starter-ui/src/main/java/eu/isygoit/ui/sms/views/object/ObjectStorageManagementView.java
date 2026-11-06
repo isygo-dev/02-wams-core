@@ -4,10 +4,10 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -15,9 +15,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.*;
-import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.OptionalParameter;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.data.FileStorageDto;
@@ -25,10 +28,10 @@ import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.remote.sms.StorageConfigService;
-import eu.isygoit.ui.common.component.StatCard;
-import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
+import eu.isygoit.ui.common.component.StatCard;
+import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
 import eu.isygoit.ui.sms.views.common.SmsEnumTag;
@@ -65,18 +68,10 @@ import java.util.stream.Collectors;
 @Route(value = "sms/objectstorage", layout = SmsMainLayout.class)
 @PermitAll
 public class ObjectStorageManagementView extends ManagementVerticalView implements HasUrlParameter<String> {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("sms.objects.view.title");
-    }
-
-
     private final ObjectStorageService objectStorageService;
     private final StorageConfigService storageConfigService;
-
     private final Div cardsContainer = new Div();
     private final Grid<FileItem> grid = new Grid<>();
-    private ManagementViewModeSwitch viewModeSwitch;
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createBucketButton = new Button(new Icon(VaadinIcon.PLUS));
     private final Button uploadFileButton = new Button(I18n.t("sms.objects.view.upload.file"), new Icon(VaadinIcon.UPLOAD));
@@ -84,19 +79,17 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     private final ComboBox<StorageConfigDto> tenantSelector = new ComboBox<>();
     private final ComboBox<BucketDto> bucketSelector = new ComboBox<>();
     private final ProgressBar loadingBar = new ProgressBar();
-
     // Pagination
     private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
     private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
     private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
     private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
-
+    private ManagementViewModeSwitch viewModeSwitch;
     // Stats
     private StatCard totalFilesCard;
     private StatCard totalSizeCard;
     private StatCard uniqueTagsCard;
-
     private List<StorageConfigDto> storageConfigs = new ArrayList<>();
     private List<BucketDto> buckets = new ArrayList<>();
     private List<FileItem> allFiles = new ArrayList<>();
@@ -108,7 +101,6 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     private int pageSize = 10;
     private int totalPages = 0;
     private long totalElements = 0;
-
     @Autowired
     public ObjectStorageManagementView(ObjectStorageService objectStorageService,
                                        StorageConfigService storageConfigService) {
@@ -136,6 +128,11 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
 
         initEventHandlers();
         setTableMode(viewModeSwitch.isTableMode());
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("sms.objects.view.title");
     }
 
     /**

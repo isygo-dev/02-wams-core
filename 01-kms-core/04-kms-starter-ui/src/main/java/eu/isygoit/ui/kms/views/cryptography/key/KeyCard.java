@@ -40,11 +40,10 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
 
     // Dedicated body container – cleared and rebuilt on refresh
     private final VerticalLayout bodyContainer = new VerticalLayout();
-
+    private final boolean loadVersionCountOnAttach;
     private DescribeKeyResponse.KeyMetadata metadata;
     private String aliasOrId;
     private String statusText;
-
     // UI components (updated on refresh)
     private Span titleSpan;
     private Span statusChip;
@@ -55,7 +54,6 @@ class KeyCard extends BaseCard<KeyManagementView, KmsApiService> {
     private Span deletionWarningSpan;
     private ContextMenu currentContextMenu;
     private int versionCount = 0;
-    private final boolean loadVersionCountOnAttach;
 
     public KeyCard(KeyManagementView parentView,
                    KmsApiService kmsApiService,

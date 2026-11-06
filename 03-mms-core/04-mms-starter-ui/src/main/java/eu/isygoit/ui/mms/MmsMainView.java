@@ -1,18 +1,17 @@
 package eu.isygoit.ui.mms;
 
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.RouteScope;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.MsgTemplateDto;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.remote.mms.SenderConfigService;
@@ -38,23 +37,14 @@ import java.util.TreeMap;
 @Route(value = "mms", layout = MmsMainLayout.class)
 @PermitAll
 public class MmsMainView extends ManagementVerticalView {
-    @Override
-    public String getPageTitle() {
-        return I18n.t("mms.dashboard.title");
-    }
-
-
     private static final int PAGE_SIZE = 500;
-
     private final SenderConfigService senderConfigService;
     private final MsgTemplateService templateService;
     private final UI ui;
     private final Locale locale;
-
     private final DashboardBreakdownPanel templateLanguagesPanel;
     private StatCard sendersCard;
     private StatCard templatesCard;
-
     @Autowired
     public MmsMainView(SenderConfigService senderConfigService, MsgTemplateService templateService) {
         this.senderConfigService = senderConfigService;
@@ -76,6 +66,11 @@ public class MmsMainView extends ManagementVerticalView {
         templateLanguagesPanel.setRefreshAction(this::loadStatistics);
         add(templateLanguagesPanel);
         loadStatistics();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return I18n.t("mms.dashboard.title");
     }
 
     private DashboardShortcutsBar buildShortcutsBar() {

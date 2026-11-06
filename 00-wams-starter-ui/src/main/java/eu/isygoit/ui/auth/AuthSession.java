@@ -1,10 +1,9 @@
 package eu.isygoit.ui.auth;
 
-import eu.isygoit.exception.BadArgumentException;
-import eu.isygoit.exception.ServiceOperationException;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
+import eu.isygoit.exception.BadArgumentException;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.util.SecurityUtils;
 import org.springframework.stereotype.Component;
 
