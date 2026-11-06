@@ -1,34 +1,26 @@
 package eu.isygoit.ui.kms.views.cryptography.key;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
-import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
 import eu.isygoit.ui.kms.views.cryptography.key.dialog.CreateKeyDialog;
@@ -40,81 +32,30 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
-import java.util.stream.Collectors;
 
 @Slf4j
 @SpringComponent
 @RouteScope
 @Route(value = "kms/keys", layout = KmsMainLayout.class)
 @PermitAll
-public class KeyManagementView extends ManagementVerticalView {
+public class KeyManagementView extends AbstractPaginatedView<KeyManagementView.KeyRow> {
     private final KmsApiService kmsApiService;
     private final ObjectMapper objectMapper;
-    private final Div cardsContainer = new Div();
-    private final Grid<KeyCard> grid = new Grid<>();
-    private final Button createButton = new Button(I18n.t("kms.key.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final TextField searchField = new TextField();
     private final ComboBox<KeyStatusOption> statusFilter = new ComboBox<>();
-    private final ProgressBar loadingBar = new ProgressBar();
-    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
-    private final Stack<String> previousTokens = new Stack<>();
-    private ManagementViewModeSwitch viewModeSwitch;
-    private int pageSize = 10;
-    private String currentNextToken = null;
-    private String currentToken = null;
-    private int currentPage = 1;
-    private int totalPages = 0;
-    private long totalElements = 0;
-    private int numberOfElements = 0;
-    private boolean truncated = false;
-    private List<KeyCard> currentPageCards = new ArrayList<>();
-    private String currentSearch = "";
     private IEnumKeyStatus.Types currentStatus = null;
+
     @Autowired
     public KeyManagementView(KmsApiService kmsApiService, ObjectMapper objectMapper) {
         this.kmsApiService = kmsApiService;
         this.objectMapper = objectMapper;
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        addClassName("kms-keys-view");
+        this.pageSize = 10;
 
-        add(new PageHeader("kms.key.view.title", "kms.key.view.subtitle"));
-
-        HorizontalLayout toolbar = buildToolbar();
-        add(toolbar);
-
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("keys-grid");
-        add(cardsContainer);
-        configureGrid();
-        add(grid);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
-
-        createButton.addClickListener(e -> openCreateKeyDialog());
-        createButton.setTooltipText(I18n.t("kms.key.view.create.tooltip"));
-
-        refreshButton.addClickListener(e -> resetKeyPaginationAndLoad());
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.addClickListener(e -> loadPage(0));
         refreshButton.setTooltipText(I18n.t("kms.key.view.refresh.tooltip"));
-
-        searchField.setPlaceholder(I18n.t("kms.key.view.search.placeholder"));
-        searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.setTooltipText(I18n.t("kms.key.view.search.tooltip"));
-        searchField.addValueChangeListener(e -> {
-            currentSearch = e.getValue();
-            resetKeyPaginationAndLoad();
-        });
+        totalCountLabel.addClassName("management-total-count");
 
         statusFilter.setItems(
                 new KeyStatusOption(I18n.t("kms.key.view.status.all"), null),
@@ -127,233 +68,178 @@ public class KeyManagementView extends ManagementVerticalView {
                 ? new Span(option.label())
                 : KmsEnumTag.of(option.value(), null)));
         statusFilter.setValue(new KeyStatusOption(I18n.t("kms.key.view.status.all"), null));
-        statusFilter.setPlaceholder(I18n.t("kms.key.view.status.placeholder"));
+        statusFilter.setLabel(I18n.t("kms.key.view.status.placeholder"));
         statusFilter.setTooltipText(I18n.t("kms.key.view.status.tooltip"));
+        statusFilter.setWidth("160px");
         statusFilter.addValueChangeListener(e -> {
-            currentStatus = e.getValue().value();
-            resetKeyPaginationAndLoad();
+            currentStatus = e.getValue() != null ? e.getValue().value() : null;
+            loadPage(0);
         });
 
-        pageSizeSelect.setItems(10, 20, 30, 40, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.setPlaceholder(I18n.t("kms.key.view.page.per.page"));
-        pageSizeSelect.setTooltipText(I18n.t("kms.key.view.page.per.page.tooltip"));
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                resetKeyPaginationAndLoad();
-            }
-        });
-
-        prevButton.addClickListener(e -> {
-            if (!previousTokens.isEmpty()) {
-                String prevToken = previousTokens.pop();
-                loadKeysPage(prevToken);
-            }
-        });
-        prevButton.setTooltipText(I18n.t("kms.key.view.prev.page.tooltip"));
-
-        nextButton.addClickListener(e -> {
-            if (truncated && currentNextToken != null) {
-                previousTokens.push(currentToken);
-                loadKeysPage(currentNextToken);
-            }
-        });
-        nextButton.setTooltipText(I18n.t("kms.key.view.next.page.tooltip"));
-
-        setTableMode(viewModeSwitch.isTableMode());
-        resetKeyPaginationAndLoad();
+        initPaginatedView();
     }
 
     @Override
     public String getPageTitle() {
-        return I18n.t("kms.key.view.title");
+        return I18n.t(getTitleKey());
     }
 
-    private void resetKeyPaginationAndLoad() {
-        previousTokens.clear();
-        currentNextToken = null;
-        currentToken = null;
-        currentPage = 1;
-        totalPages = 0;
-        totalElements = 0;
-        numberOfElements = 0;
-        truncated = false;
-        loadKeysPage(null);
-    }
+    // ─── Data ──────────────────────────────────────────────────────
 
-    private void loadKeysPage(String nextToken) {
-        showLoading(true);
-        try {
-            ResponseEntity<ListKeysResponse> response = kmsApiService.listKeys(pageSize, nextToken);
-            ListKeysResponse body = response.getBody();
-            List<ListKeysResponse.KeyEntry> keyEntries = (body != null && body.getKeys() != null) ? body.getKeys() : new ArrayList<>();
-            currentNextToken = (body != null) ? body.getNextToken() : null;
-            numberOfElements = (body != null && body.getNumberOfElements() != null) ? body.getNumberOfElements() : keyEntries.size();
-            totalPages = (body != null && body.getTotalPages() != null) ? body.getTotalPages() : 0;
-            totalElements = (body != null && body.getTotalElements() != null) ? body.getTotalElements() : 0L;
-            truncated = (body != null && Boolean.TRUE.equals(body.getTruncated()));
-            currentToken = nextToken;
+    @Override
+    protected PaginatedResponseDto<KeyRow> fetchPage(int page, int size) {
+        // The backend token of this endpoint is the 0-based page index (null = first page).
+        ResponseEntity<ListKeysResponse> response = kmsApiService.listKeys(size, page == 0 ? null : String.valueOf(page));
+        ListKeysResponse body = response.getBody();
+        List<ListKeysResponse.KeyEntry> keyEntries = (body != null && body.getKeys() != null) ? body.getKeys() : new ArrayList<>();
 
-            if (nextToken == null) {
-                currentPage = 1;
-            } else {
-                currentPage = previousTokens.size() + 1;
+        List<KeyRow> rows = new ArrayList<>();
+        for (ListKeysResponse.KeyEntry entry : keyEntries) {
+            try {
+                ResponseEntity<DescribeKeyResponse> descResponse = kmsApiService.describeKey(entry.getKeyId());
+                DescribeKeyResponse describe = descResponse.getBody();
+                rows.add(new KeyRow(entry.getKeyId(), describe != null ? describe.getKeyMetadata() : null));
+            } catch (Exception ex) {
+                rows.add(new KeyRow(entry.getKeyId(), null));
             }
-
-            List<KeyCard> cards = new ArrayList<>();
-            for (ListKeysResponse.KeyEntry entry : keyEntries) {
-                try {
-                    ResponseEntity<DescribeKeyResponse> descResponse = kmsApiService.describeKey(entry.getKeyId());
-                    DescribeKeyResponse describe = descResponse.getBody();
-                    if (describe != null && describe.getKeyMetadata() != null) {
-                        cards.add(new KeyCard(this, kmsApiService, objectMapper, entry.getKeyId(), describe.getKeyMetadata()));
-                    } else {
-                        cards.add(new KeyCard(this, kmsApiService, objectMapper, entry.getKeyId(), null));
-                    }
-                } catch (Exception ex) {
-                    cards.add(new KeyCard(this, kmsApiService, objectMapper, entry.getKeyId(), null));
-                }
-            }
-            currentPageCards = cards;
-            updatePaginationDisplay();
-            filterCards();
-        } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            Notification.show(I18n.t("kms.key.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load keys", ex.getMessage());
-        } catch (Exception e) {
-            Notification.show(I18n.t("kms.key.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load keys", e);
-        } finally {
-            showLoading(false);
         }
+        return PaginatedResponseDto.<KeyRow>builder()
+                .content(rows)
+                .totalPages((body != null && body.getTotalPages() != null) ? body.getTotalPages() : 0)
+                .totalElements((body != null && body.getTotalElements() != null) ? body.getTotalElements() : 0L)
+                .pageNumber(page)
+                .pageSize(size)
+                .build();
     }
 
-    private void updatePaginationDisplay() {
-        if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("kms.key.view.page.info", currentPage, totalPages, numberOfElements));
-        } else {
-            pageInfoLabel.setText(I18n.t("kms.key.view.page.info.simple", currentPage, numberOfElements));
+    @Override
+    protected Component renderItem(KeyRow row) {
+        return new KeyCard(this, kmsApiService, objectMapper, row.keyId(), row.metadata());
+    }
+
+    @Override
+    protected boolean matchesSearch(KeyRow row, String search) {
+        if (search == null || search.isEmpty()) {
+            return true;
         }
+        String searchLower = search.toLowerCase();
+        return row.aliasOrId().toLowerCase().contains(searchLower)
+                || row.keyId().toLowerCase().contains(searchLower);
+    }
+
+    @Override
+    protected boolean matchesAdditionalFilters(KeyRow row) {
+        return currentStatus == null || row.status() == currentStatus;
+    }
+
+    @Override
+    protected void onSearchChanged() {
+        // Previous behaviour: a search change reloads from the first page.
+        loadPage(0);
+    }
+
+    @Override
+    protected void onPageLoaded() {
         totalCountLabel.setText(I18n.t("kms.key.view.total.count", totalElements));
-
-        prevButton.setEnabled(!previousTokens.isEmpty());
-        nextButton.setEnabled(truncated && currentNextToken != null);
     }
 
-    private void filterCards() {
-        cardsContainer.removeAll();
-        List<KeyCard> filtered = currentPageCards.stream()
-                .filter(card -> {
-                    if (currentStatus != null) {
-                        IEnumKeyStatus.Types status = card.getStatus();
-                        if (status != currentStatus) return false;
-                    }
-                    if (currentSearch != null && !currentSearch.isEmpty()) {
-                        String searchLower = currentSearch.toLowerCase();
-                        return (card.getAliasOrId().toLowerCase().contains(searchLower) ||
-                                card.getKeyId().toLowerCase().contains(searchLower));
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
-        grid.setItems(filtered);
-
-        if (filtered.isEmpty()) {
-            Div emptyState = new Div();
-            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-            emptyState.addClassName(LumoUtility.Padding.XLARGE);
-            Icon emptyIcon = VaadinIcon.KEY.create();
-            emptyIcon.setSize("48px");
-            emptyIcon.addClassName("empty-state-icon");
-            H4 emptyTitle = new H4(I18n.t("kms.key.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("kms.key.view.empty.description"));
-            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-            cardsContainer.add(emptyState);
-        } else {
-            filtered.forEach(cardsContainer::add);
-        }
+    @Override
+    protected void openCreateDialog() {
+        new CreateKeyDialog(this, kmsApiService, objectMapper, () -> loadPage(0)).open();
     }
 
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("key-management-toolbar");
-
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(FlexComponent.Alignment.END);
-        searchField.setWidth("200px");
-        Span statusLabel = new Span(I18n.t("kms.key.view.status.label"));
-        statusLabel.getElement().setAttribute("title", I18n.t("kms.key.view.status.tooltip"));
-        statusFilter.setWidth("140px");
-        HorizontalLayout statusLayout = new HorizontalLayout(statusLabel, statusFilter);
-        statusLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        statusLayout.setSpacing(true);
-        leftGroup.add(searchField, statusLayout);
-
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setSpacing(true);
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        centerGroup.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        pageSizeSelect.setWidth("120px");
-        pageInfoLabel.addClassName("pagination-page-info");
-        totalCountLabel.addClassName("pagination-total-count");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
-
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("kms.key.view.refresh.tooltip"));
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
-        rightGroup.add(viewModeSwitch, refreshButton, createButton);
-
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
-    }
-
-    public void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
-        grid.setVisible(!show && viewModeSwitch.isTableMode());
-        refreshButton.setEnabled(!show);
-        createButton.setEnabled(!show);
-    }
-
-    private void openCreateKeyDialog() {
-        new CreateKeyDialog(this, kmsApiService, objectMapper, () -> resetKeyPaginationAndLoad()).open();
-    }
-
-    private void configureGrid() {
-        grid.addClassName("management-grid");
-        grid.addColumn(KeyCard::getAliasOrId)
+    @Override
+    protected boolean configureGrid(Grid<KeyRow> grid) {
+        grid.addColumn(KeyRow::aliasOrId)
                 .setHeader(I18n.t("kms.key.table.name")).setAutoWidth(true).setFlexGrow(1);
-        grid.addColumn(KeyCard::getKeyId)
+        grid.addColumn(KeyRow::keyId)
                 .setHeader(I18n.t("kms.key.card.key.id")).setAutoWidth(true).setFlexGrow(1);
-        grid.addColumn(card -> card.getStatus() != null ? card.getStatus().name() : I18n.t("kms.key.card.status.unknown"))
+        grid.addColumn(row -> row.status() != null ? row.status().name() : I18n.t("kms.key.card.status.unknown"))
                 .setHeader(I18n.t("kms.key.view.status.label")).setAutoWidth(true);
-        ManagementGridSupport.addCardActionsColumn(grid, card -> new KeyCard(
-                this, kmsApiService, objectMapper, card.getKeyId(), card.getMetadata(), false));
+        ManagementGridSupport.addCardActionsColumn(grid, row -> new KeyCard(
+                this, kmsApiService, objectMapper, row.keyId(), row.metadata(), false));
+        return true;
     }
 
-    private void setTableMode(boolean tableMode) {
-        boolean loading = loadingBar.isVisible();
-        cardsContainer.setVisible(!loading && !tableMode);
-        grid.setVisible(!loading && tableMode);
+    @Override
+    protected List<Component> buildToolbarFilters() {
+        return List.of(statusFilter);
+    }
+
+    @Override
+    protected List<Component> buildToolbarActions() {
+        return List.of(refreshButton, totalCountLabel);
+    }
+
+    @Override
+    protected String extractErrorMessage(Exception e) {
+        if (e instanceof FeignException ex) {
+            return (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
+        }
+        return e.getMessage();
+    }
+
+    // ─── Base-class contract ───────────────────────────────────────
+
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"kms-keys-view"};
+    }
+
+    @Override
+    protected String getTitleKey() {
+        return "kms.key.view.title";
+    }
+
+    @Override
+    protected String getSubtitleKey() {
+        return "kms.key.view.subtitle";
+    }
+
+    @Override
+    protected String getCreateButtonKey() {
+        return "kms.key.view.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "kms.key.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "kms.key.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "kms.key.view.empty.description";
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "kms.key.view.load.error";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.KEY;
     }
 
     public record KeyStatusOption(String label, IEnumKeyStatus.Types value) {
+    }
+
+    /**
+     * One listed key: its id and (when describeKey succeeded) its metadata.
+     */
+    public record KeyRow(String keyId, DescribeKeyResponse.KeyMetadata metadata) {
+        String aliasOrId() {
+            return (metadata != null && metadata.getKeyAlias() != null && !metadata.getKeyAlias().isEmpty())
+                    ? metadata.getKeyAlias() : keyId;
+        }
+
+        IEnumKeyStatus.Types status() {
+            return metadata != null ? metadata.getKeyStatus() : null;
+        }
     }
 }

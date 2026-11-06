@@ -1,31 +1,19 @@
 package eu.isygoit.ui.mms.views.sender;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.SenderConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.common.component.ManagementGridSupport;
-import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
-import eu.isygoit.ui.common.component.PageHeader;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.mms.layout.MmsMainLayout;
 import eu.isygoit.ui.mms.views.sender.dialog.CreateSenderConfigDialog;
 import feign.FeignException;
@@ -36,7 +24,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -44,126 +31,19 @@ import java.util.stream.Collectors;
 @RouteScope
 @Route(value = "mms/sender-config", layout = MmsMainLayout.class)
 @PermitAll
-public class SenderConfigManagementView extends ManagementVerticalView {
+public class SenderConfigManagementView extends AbstractPaginatedView<SenderConfigDto> {
     private final SenderConfigService senderConfigService;
-    private final Div cardsContainer = new Div();
-    private final Grid<SenderConfigCard> grid = new Grid<>();
-    private final Button createButton = new Button(I18n.t("mms.sender.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
-    private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final TextField searchField = new TextField();
+    private final Button refreshButton = new Button(VaadinIcon.REFRESH.create());
     private final ComboBox<SenderStatusOption> statusFilter = new ComboBox<>();
-    private final ProgressBar loadingBar = new ProgressBar();
-    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
-    private final Span totalCountLabel = new Span();
-    private final Stack<String> previousTokens = new Stack<>();
-    private ManagementViewModeSwitch viewModeSwitch;
-    private boolean tableMode;
-    private int pageSize = 10;
-    private String currentNextToken = null;
-    private String currentToken = null;
-    private int currentPage = 1;
-    private int totalPages = 0;
-    private long totalElements = 0;
-    private int numberOfElements = 0;
-    private boolean truncated = false;
-    private List<SenderConfigCard> currentPageCards = new ArrayList<>();
-    private String currentSearch = "";
     private Boolean currentActiveFilter = null;
-    private List<SenderConfigDto> allConfigs = new ArrayList<>();
-    private List<SenderConfigDto> filteredConfigs = new ArrayList<>();
+
     @Autowired
     public SenderConfigManagementView(SenderConfigService senderConfigService) {
         this.senderConfigService = senderConfigService;
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        addClassName("sender-config-view");
-
-        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
-        tableMode = viewModeSwitch.isTableMode();
-        configureGrid();
-
-        add(new PageHeader("mms.sender.view.title", "mms.sender.view.subtitle"));
-
-        HorizontalLayout toolbar = buildToolbar();
-        add(toolbar);
-
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("sender-grid");
-        add(cardsContainer);
-        grid.setAllRowsVisible(true);
-        grid.setWidthFull();
-        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES, GridVariant.LUMO_NO_BORDER);
-        grid.addClassName("management-grid");
-        grid.setVisible(false);
-        add(grid);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
-
-        createButton.addClickListener(e -> openCreateSenderDialog());
+        this.pageSize = 10;
+        initPaginatedView();
         createButton.setTooltipText(I18n.t("mms.sender.view.create.tooltip"));
-
-        refreshButton.addClickListener(e -> resetPaginationAndLoad());
-        refreshButton.setTooltipText(I18n.t("mms.sender.view.refresh.tooltip"));
-
-        searchField.setPlaceholder(I18n.t("mms.sender.view.search.placeholder"));
-        searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.setTooltipText(I18n.t("mms.sender.view.search.tooltip"));
-        searchField.addValueChangeListener(e -> {
-            currentSearch = e.getValue();
-            resetPaginationAndLoad();
-        });
-
-        statusFilter.setItems(
-                new SenderStatusOption(I18n.t("mms.sender.view.status.all"), null),
-                new SenderStatusOption(I18n.t("mms.sender.view.status.active"), true),
-                new SenderStatusOption(I18n.t("mms.sender.view.status.inactive"), false)
-        );
-        statusFilter.setItemLabelGenerator(option -> option.label());
-        statusFilter.setValue(new SenderStatusOption(I18n.t("mms.sender.view.status.all"), null));
-        statusFilter.setPlaceholder(I18n.t("mms.sender.view.status.placeholder"));
-        statusFilter.setTooltipText(I18n.t("mms.sender.view.status.tooltip"));
-        statusFilter.addValueChangeListener(e -> {
-            SenderStatusOption option = e.getValue();
-            currentActiveFilter = option != null ? option.value() : null;
-            resetPaginationAndLoad();
-        });
-
-        pageSizeSelect.setItems(10, 20, 30, 40, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.setPlaceholder(I18n.t("mms.sender.view.page.per.page"));
-        pageSizeSelect.setTooltipText(I18n.t("mms.sender.view.page.per.page.tooltip"));
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                resetPaginationAndLoad();
-            }
-        });
-
-        prevButton.addClickListener(e -> {
-            if (!previousTokens.isEmpty()) {
-                String prevToken = previousTokens.pop();
-                loadSenderConfigsPage(prevToken);
-            }
-        });
-        prevButton.setTooltipText(I18n.t("mms.sender.view.prev.page.tooltip"));
-
-        nextButton.addClickListener(e -> {
-            if (truncated && currentNextToken != null) {
-                previousTokens.push(currentToken);
-                loadSenderConfigsPage(currentNextToken);
-            }
-        });
-        nextButton.setTooltipText(I18n.t("mms.sender.view.next.page.tooltip"));
-
-        resetPaginationAndLoad();
     }
 
     @Override
@@ -171,76 +51,45 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         return I18n.t("mms.sender.view.title");
     }
 
-    private void resetPaginationAndLoad() {
-        previousTokens.clear();
-        currentNextToken = null;
-        currentToken = null;
-        currentPage = 1;
-        totalPages = 0;
-        totalElements = 0;
-        numberOfElements = 0;
-        truncated = false;
-        loadSenderConfigsPage(null);
-    }
+    // ─── Data ────────────────────────────────────────────────────────────────
 
-    private void loadSenderConfigsPage(String nextToken) {
-        showLoading(true);
-        try {
-            // Use paginated API if available, otherwise use findAllList with manual pagination
-            ResponseEntity<List<SenderConfigDto>> response = senderConfigService.findAllList();
-            allConfigs = response.getBody() != null ? response.getBody() : new ArrayList<>();
+    /**
+     * The backend returns the full list: filters (search, status) are applied over the whole
+     * list and the result is paged manually, exactly as before.
+     */
+    @Override
+    protected PaginatedResponseDto<SenderConfigDto> fetchPage(int page, int size) {
+        ResponseEntity<List<SenderConfigDto>> response = senderConfigService.findAllList();
+        List<SenderConfigDto> all = response.getBody() != null ? response.getBody() : new ArrayList<>();
+        List<SenderConfigDto> filtered = filterConfigs(all);
 
-            // Apply filters
-            filteredConfigs = filterConfigs(allConfigs);
+        int total = filtered.size();
+        int totalPagesCount = (int) Math.ceil((double) total / size);
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, total);
+        List<SenderConfigDto> pageContent = startIndex < total
+                ? new ArrayList<>(filtered.subList(startIndex, endIndex))
+                : new ArrayList<>();
 
-            // Manual pagination
-            totalElements = filteredConfigs.size();
-            totalPages = (int) Math.ceil((double) totalElements / pageSize);
-
-            int startIndex = (currentPage - 1) * pageSize;
-            int endIndex = Math.min(startIndex + pageSize, (int) totalElements);
-
-            List<SenderConfigDto> pageConfigs;
-            if (startIndex < totalElements) {
-                pageConfigs = filteredConfigs.subList(startIndex, endIndex);
-            } else {
-                pageConfigs = new ArrayList<>();
-            }
-
-            numberOfElements = pageConfigs.size();
-            truncated = endIndex < totalElements;
-            currentNextToken = truncated ? String.valueOf(currentPage + 1) : null;
-
-            currentPageCards = pageConfigs.stream()
-                    .map(config -> new SenderConfigCard(this, senderConfigService, config, this::resetPaginationAndLoad))
-                    .collect(Collectors.toList());
-
-            updatePaginationDisplay();
-            displayCards();
-
-        } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            Notification.show(I18n.t("mms.sender.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load sender configs", ex.getMessage());
-        } catch (Exception e) {
-            Notification.show(I18n.t("mms.sender.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load sender configs", e);
-        } finally {
-            showLoading(false);
-        }
+        return PaginatedResponseDto.<SenderConfigDto>builder()
+                .content(pageContent)
+                .totalElements(total)
+                .totalPages(totalPagesCount)
+                .pageNumber(page)
+                .pageSize(size)
+                .build();
     }
 
     private List<SenderConfigDto> filterConfigs(List<SenderConfigDto> configs) {
+        String search = searchField.getValue();
         return configs.stream()
                 .filter(config -> {
                     if (currentActiveFilter != null) {
                         boolean isActive = config.getSmtpStarttlsEnable() != null && config.getSmtpStarttlsEnable();
                         if (isActive != currentActiveFilter) return false;
                     }
-                    if (currentSearch != null && !currentSearch.isEmpty()) {
-                        String searchLower = currentSearch.toLowerCase();
+                    if (search != null && !search.isEmpty()) {
+                        String searchLower = search.toLowerCase();
                         String code = config.getCode() != null ? config.getCode().toLowerCase() : "";
                         String name = config.getName() != null ? config.getName().toLowerCase() : "";
                         String host = config.getHost() != null ? config.getHost().toLowerCase() : "";
@@ -257,120 +106,134 @@ public class SenderConfigManagementView extends ManagementVerticalView {
                 .collect(Collectors.toList());
     }
 
-    private void updatePaginationDisplay() {
-        if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("mms.sender.view.page.info", currentPage, totalPages, numberOfElements));
-        } else {
-            pageInfoLabel.setText(I18n.t("mms.sender.view.page.info.simple", currentPage, numberOfElements));
-        }
-        totalCountLabel.setText(I18n.t("mms.sender.view.total.count", totalElements));
-
-        prevButton.setEnabled(!previousTokens.isEmpty());
-        nextButton.setEnabled(truncated && currentNextToken != null);
+    /**
+     * Search is already applied over the whole list in {@link #fetchPage(int, int)}.
+     */
+    @Override
+    protected boolean matchesSearch(SenderConfigDto item, String search) {
+        return true;
     }
 
-    private void displayCards() {
-        cardsContainer.removeAll();
-        grid.setItems(currentPageCards);
-
-        if (currentPageCards.isEmpty()) {
-            Div emptyState = new Div();
-            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-            emptyState.addClassName(LumoUtility.Padding.XLARGE);
-            Icon emptyIcon = VaadinIcon.INBOX.create();
-            emptyIcon.setSize("48px");
-            emptyIcon.addClassName("wams-empty-state-icon");
-            H4 emptyTitle = new H4(I18n.t("mms.sender.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("mms.sender.view.empty.description"));
-            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-            cardsContainer.add(emptyState);
-        } else {
-            currentPageCards.forEach(cardsContainer::add);
-        }
-        updateDisplayMode(false);
+    @Override
+    protected void onSearchChanged() {
+        loadPage(0);
     }
 
-    private void configureGrid() {
-        grid.addColumn(SenderConfigCard::getCode)
+    // ─── Rendering ───────────────────────────────────────────────────────────
+
+    @Override
+    protected Component renderItem(SenderConfigDto item) {
+        return new SenderConfigCard(this, senderConfigService, item, this::reloadFirstPage);
+    }
+
+    @Override
+    protected boolean configureGrid(Grid<SenderConfigDto> grid) {
+        grid.addColumn(SenderConfigDto::getCode)
                 .setHeader(I18n.t("mms.sender.card.code")).setAutoWidth(true);
-        grid.addColumn(card -> card.getConfig().getName())
+        grid.addColumn(SenderConfigDto::getName)
                 .setHeader(I18n.t("mms.sender.card.name")).setAutoWidth(true);
-        grid.addColumn(SenderConfigCard::getHost)
+        grid.addColumn(SenderConfigDto::getHost)
                 .setHeader(I18n.t("mms.sender.card.host")).setAutoWidth(true);
-        grid.addColumn(card -> I18n.t(card.isActive()
+        grid.addColumn(c -> I18n.t(c.getSmtpStarttlsEnable() != null && c.getSmtpStarttlsEnable()
                         ? "mms.sender.card.status.active" : "mms.sender.card.status.inactive"))
                 .setHeader(I18n.t("mms.sender.view.status.label")).setAutoWidth(true);
-        ManagementGridSupport.addCardActionsColumn(grid, card -> new SenderConfigCard(
-                this, senderConfigService, card.getConfig(), this::resetPaginationAndLoad));
+        addCardActionsColumn(grid);
+        return true;
     }
 
-    private void setTableMode(boolean table) {
-        tableMode = table;
-        updateDisplayMode(false);
+    @Override
+    protected void openCreateDialog() {
+        new CreateSenderConfigDialog(this, senderConfigService, this::reloadFirstPage).open();
     }
 
-    private void updateDisplayMode(boolean loading) {
-        boolean hasItems = !currentPageCards.isEmpty();
-        cardsContainer.setVisible(!loading && (!tableMode || !hasItems));
-        grid.setVisible(!loading && tableMode && hasItems);
+    private void reloadFirstPage() {
+        loadPage(0);
     }
 
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("sender-toolbar");
+    // ─── Toolbar ─────────────────────────────────────────────────────────────
 
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(FlexComponent.Alignment.END);
-        leftGroup.addClassName("wams-toolbar-group");
-        searchField.setWidth("200px");
-        Span statusLabel = new Span(I18n.t("mms.sender.view.status.label"));
-        statusLabel.getElement().setAttribute("title", I18n.t("mms.sender.view.status.tooltip"));
-        statusFilter.setWidth("140px");
-        HorizontalLayout statusLayout = new HorizontalLayout(statusLabel, statusFilter);
-        statusLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        statusLayout.setSpacing(true);
-        leftGroup.add(searchField, statusLayout);
+    @Override
+    protected List<Component> buildToolbarFilters() {
+        statusFilter.setLabel(I18n.t("mms.sender.view.status.label"));
+        statusFilter.setItems(
+                new SenderStatusOption(I18n.t("mms.sender.view.status.all"), null),
+                new SenderStatusOption(I18n.t("mms.sender.view.status.active"), true),
+                new SenderStatusOption(I18n.t("mms.sender.view.status.inactive"), false)
+        );
+        statusFilter.setItemLabelGenerator(option -> option.label());
+        statusFilter.setValue(new SenderStatusOption(I18n.t("mms.sender.view.status.all"), null));
+        statusFilter.setPlaceholder(I18n.t("mms.sender.view.status.placeholder"));
+        statusFilter.setTooltipText(I18n.t("mms.sender.view.status.tooltip"));
+        statusFilter.setWidth("160px");
+        statusFilter.addValueChangeListener(e -> {
+            SenderStatusOption option = e.getValue();
+            currentActiveFilter = option != null ? option.value() : null;
+            loadPage(0);
+        });
+        return List.of(statusFilter);
+    }
 
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setSpacing(true);
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        centerGroup.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        pageSizeSelect.setWidth("120px");
-        pageInfoLabel.addClassName("pagination-page-info");
-        totalCountLabel.addClassName("pagination-total-count");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
-
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
+    @Override
+    protected List<Component> buildToolbarActions() {
         refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.setTooltipText(I18n.t("mms.sender.view.refresh.tooltip"));
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        rightGroup.add(refreshButton, createButton);
-        rightGroup.add(viewModeSwitch);
-
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
+        refreshButton.addClickListener(e -> loadPage(0));
+        return List.of(refreshButton);
     }
 
-    public void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        updateDisplayMode(show);
-        refreshButton.setEnabled(!show);
-        createButton.setEnabled(!show);
+    // ─── Shell hooks ─────────────────────────────────────────────────────────
+
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"sender-config-view"};
     }
 
-    private void openCreateSenderDialog() {
-        new CreateSenderConfigDialog(this, senderConfigService, this::resetPaginationAndLoad).open();
+    @Override
+    protected String extractErrorMessage(Exception e) {
+        if (e instanceof FeignException ex) {
+            return (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
+        }
+        return e.getMessage();
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "mms.sender.view.load.error";
+    }
+
+    @Override
+    protected String getTitleKey() {
+        return "mms.sender.view.title";
+    }
+
+    @Override
+    protected String getSubtitleKey() {
+        return "mms.sender.view.subtitle";
+    }
+
+    @Override
+    protected String getCreateButtonKey() {
+        return "mms.sender.view.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "mms.sender.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "mms.sender.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "mms.sender.view.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.INBOX;
     }
 
     public record SenderStatusOption(String label, Boolean value) {

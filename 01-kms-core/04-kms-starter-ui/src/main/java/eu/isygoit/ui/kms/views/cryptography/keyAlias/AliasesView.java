@@ -1,32 +1,23 @@
 package eu.isygoit.ui.kms.views.cryptography.keyAlias;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
-import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.component.ManagementGridSupport;
-import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.keyAlias.dialog.CreateAliasDialog;
 import jakarta.annotation.security.PermitAll;
@@ -35,272 +26,101 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 @SpringComponent
 @RouteScope
 @Route(value = "kms/aliases", layout = KmsMainLayout.class)
 @PermitAll
-public class AliasesView extends ManagementVerticalView {
+public class AliasesView extends AbstractPaginatedView<ListAliasesResponse.AliasEntry> {
     private final KmsApiService kmsApiService;
-    private final Div cardsContainer = new Div();
-    private final Grid<KmsDtos.ListAliasesResponse.AliasEntry> grid = new Grid<>();
-    private final Button createButton = new Button(I18n.t("kms.aliases.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final TextField searchField = new TextField();
-    private final ProgressBar loadingBar = new ProgressBar();
-    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
-    private final Stack<String> previousTokens = new Stack<>();
-    private ManagementViewModeSwitch viewModeSwitch;
-    private int pageSize = 10;
-    private String currentNextToken = null;
-    private String currentToken = null;
-    private int currentPage = 1;
-    private int totalPages = 0;
-    private long totalElements = 0;
-    private int numberOfElements = 0;
-    private boolean truncated = false;
-    private List<AliasCard> currentPageCards = new ArrayList<>();
-    private String currentSearch = "";
+
     @Autowired
     public AliasesView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        addClassName("kms-aliases-view");
+        this.pageSize = 10;
 
-        add(new PageHeader("kms.aliases.view.title", "kms.aliases.view.subtitle"));
-
-        HorizontalLayout toolbar = buildToolbar();
-        add(toolbar);
-
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("aliases-grid");
-        add(cardsContainer);
-        configureGrid();
-        add(grid);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
-
-        createButton.addClickListener(e -> createAlias());
-        createButton.setTooltipText(I18n.t("kms.aliases.view.create.tooltip"));
-
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         refreshButton.addClickListener(e -> resetPaginationAndLoad());
         refreshButton.setTooltipText(I18n.t("kms.aliases.view.refresh.tooltip"));
-
-        searchField.setPlaceholder(I18n.t("kms.aliases.view.search.placeholder"));
-        searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.setTooltipText(I18n.t("kms.aliases.view.search.tooltip"));
-        searchField.addValueChangeListener(e -> {
-            currentSearch = e.getValue();
-            filterCards();
-        });
-
-        pageSizeSelect.setItems(10, 20, 30, 40, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.setPlaceholder(I18n.t("kms.aliases.view.page.per.page"));
-        pageSizeSelect.setTooltipText(I18n.t("kms.aliases.view.page.per.page.tooltip"));
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                resetPaginationAndLoad();
-            }
-        });
-
-        prevButton.addClickListener(e -> {
-            if (!previousTokens.isEmpty()) {
-                String prevToken = previousTokens.pop();
-                loadAliasesPage(prevToken);
-            }
-        });
-        prevButton.setTooltipText(I18n.t("kms.aliases.view.prev.page.tooltip"));
-
-        nextButton.addClickListener(e -> {
-            if (truncated && currentNextToken != null) {
-                previousTokens.push(currentToken);
-                loadAliasesPage(currentNextToken);
-            }
-        });
-        nextButton.setTooltipText(I18n.t("kms.aliases.view.next.page.tooltip"));
-
-        pageInfoLabel.getElement().setAttribute("title", I18n.t("kms.aliases.view.page.info.title"));
+        totalCountLabel.addClassName("management-total-count");
         totalCountLabel.getElement().setAttribute("title", I18n.t("kms.aliases.view.total.count.title"));
 
-        setTableMode(viewModeSwitch.isTableMode());
-        resetPaginationAndLoad();
+        initPaginatedView();
     }
 
     @Override
     public String getPageTitle() {
-        return I18n.t("kms.aliases.view.title");
+        return I18n.t(getTitleKey());
     }
 
+    /**
+     * Reloads from the first page (used by the cards and dialogs after a change).
+     */
     void resetPaginationAndLoad() {
-        previousTokens.clear();
-        currentNextToken = null;
-        currentToken = null;
-        currentPage = 1;
-        totalPages = 0;
-        totalElements = 0;
-        numberOfElements = 0;
-        truncated = false;
-        loadAliasesPage(null);
+        loadPage(0);
     }
 
-    private void loadAliasesPage(String nextToken) {
-        showLoading(true);
-        try {
-            ResponseEntity<ListAliasesResponse> response = kmsApiService.listAliases(pageSize, nextToken);
-            ListAliasesResponse body = response.getBody();
-            List<ListAliasesResponse.AliasEntry> aliasEntries = (body != null && body.getAliases() != null)
-                    ? body.getAliases() : new ArrayList<>();
+    // ─── Data ──────────────────────────────────────────────────────
 
-            currentNextToken = (body != null) ? body.getNextToken() : null;
-            numberOfElements = (body != null && body.getNumberOfElements() != null)
-                    ? body.getNumberOfElements() : aliasEntries.size();
-            totalPages = (body != null && body.getTotalPages() != null) ? body.getTotalPages() : 0;
-            totalElements = (body != null && body.getTotalElements() != null) ? body.getTotalElements() : 0L;
-            truncated = (body != null && Boolean.TRUE.equals(body.getTruncated()));
-            currentToken = nextToken;
-
-            if (nextToken == null) {
-                currentPage = 1;
-            } else {
-                currentPage = previousTokens.size() + 1;
-            }
-
-            List<AliasCard> cards = new ArrayList<>();
-            for (ListAliasesResponse.AliasEntry entry : aliasEntries) {
-                cards.add(new AliasCard(this, kmsApiService, entry));
-            }
-            currentPageCards = cards;
-            updatePaginationDisplay();
-            filterCards();
-        } catch (Exception e) {
-            Notification.show(I18n.t("kms.aliases.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-        } finally {
-            showLoading(false);
-        }
+    @Override
+    protected PaginatedResponseDto<ListAliasesResponse.AliasEntry> fetchPage(int page, int size) {
+        // The backend token of this endpoint is the 0-based page index (null = first page).
+        ResponseEntity<ListAliasesResponse> response = kmsApiService.listAliases(size, page == 0 ? null : String.valueOf(page));
+        ListAliasesResponse body = response.getBody();
+        List<ListAliasesResponse.AliasEntry> aliasEntries = (body != null && body.getAliases() != null)
+                ? body.getAliases() : new ArrayList<>();
+        return PaginatedResponseDto.<ListAliasesResponse.AliasEntry>builder()
+                .content(aliasEntries)
+                .totalPages((body != null && body.getTotalPages() != null) ? body.getTotalPages() : 0)
+                .totalElements((body != null && body.getTotalElements() != null) ? body.getTotalElements() : 0L)
+                .pageNumber(page)
+                .pageSize(size)
+                .build();
     }
 
-    private void updatePaginationDisplay() {
-        if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("kms.aliases.view.page.info", currentPage, totalPages, numberOfElements));
-        } else {
-            pageInfoLabel.setText(I18n.t("kms.aliases.view.page.info.simple", currentPage, numberOfElements));
+    @Override
+    protected Component renderItem(ListAliasesResponse.AliasEntry entry) {
+        return new AliasCard(this, kmsApiService, entry);
+    }
+
+    @Override
+    protected boolean matchesSearch(ListAliasesResponse.AliasEntry entry, String search) {
+        if (search == null || search.isEmpty()) {
+            return true;
         }
+        String searchLower = search.toLowerCase();
+        return (entry.getAliasName() != null && entry.getAliasName().toLowerCase().contains(searchLower))
+                || (entry.getTargetKeyId() != null && entry.getTargetKeyId().toLowerCase().contains(searchLower));
+    }
+
+    @Override
+    protected void onPageLoaded() {
         totalCountLabel.setText(I18n.t("kms.aliases.view.total.count", totalElements));
-        prevButton.setEnabled(!previousTokens.isEmpty());
-        nextButton.setEnabled(truncated && currentNextToken != null);
     }
 
-    private void filterCards() {
-        cardsContainer.removeAll();
-        List<AliasCard> filtered = currentPageCards.stream()
-                .filter(card -> {
-                    if (currentSearch == null || currentSearch.isEmpty()) return true;
-                    String searchLower = currentSearch.toLowerCase();
-                    return card.getAliasName().toLowerCase().contains(searchLower) ||
-                            card.getTargetKeyId().toLowerCase().contains(searchLower);
-                })
-                .collect(Collectors.toList());
-        grid.setItems(filtered.stream().map(AliasCard::getEntry).toList());
-
-        if (filtered.isEmpty()) {
-            Div emptyState = new Div();
-            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-            emptyState.addClassName(LumoUtility.Padding.XLARGE);
-            Icon emptyIcon = VaadinIcon.TAG.create();
-            emptyIcon.setSize("48px");
-            emptyIcon.addClassName("empty-state-icon");
-            H4 emptyTitle = new H4(I18n.t("kms.aliases.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("kms.aliases.view.empty.description"));
-            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-            cardsContainer.add(emptyState);
-        } else {
-            filtered.forEach(cardsContainer::add);
-        }
-    }
-
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("aliases-toolbar");
-
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(FlexComponent.Alignment.END);
-        searchField.setWidth("200px");
-        leftGroup.add(searchField);
-
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setSpacing(true);
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        centerGroup.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        pageSizeSelect.setWidth("120px");
-        pageInfoLabel.addClassName("pagination-page-info");
-        totalCountLabel.addClassName("pagination-total-count");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
-
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("kms.aliases.view.refresh.tooltip"));
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
-        rightGroup.add(viewModeSwitch, refreshButton, createButton);
-
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
-    }
-
-    public void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
-        grid.setVisible(!show && viewModeSwitch.isTableMode());
-        refreshButton.setEnabled(!show);
-        createButton.setEnabled(!show);
-    }
-
-    private void configureGrid() {
-        grid.addClassName("management-grid");
-        grid.addColumn(KmsDtos.ListAliasesResponse.AliasEntry::getAliasName)
-                .setHeader(I18n.t("kms.alias.table.name")).setAutoWidth(true).setFlexGrow(1);
-        grid.addColumn(KmsDtos.ListAliasesResponse.AliasEntry::getTargetKeyId)
-                .setHeader(I18n.t("kms.alias.card.target.key")).setAutoWidth(true).setFlexGrow(1);
-        grid.addColumn(KmsDtos.ListAliasesResponse.AliasEntry::getCreateDate)
-                .setHeader(I18n.t("kms.alias.card.created")).setAutoWidth(true);
-        ManagementGridSupport.addCardActionsColumn(grid,
-                entry -> new AliasCard(this, kmsApiService, entry));
-    }
-
-    private void setTableMode(boolean tableMode) {
-        boolean loading = loadingBar.isVisible();
-        cardsContainer.setVisible(!loading && !tableMode);
-        grid.setVisible(!loading && tableMode);
-    }
-
-    private void createAlias() {
+    @Override
+    protected void openCreateDialog() {
         new CreateAliasDialog(this, kmsApiService, this::resetPaginationAndLoad).open();
+    }
+
+    @Override
+    protected boolean configureGrid(Grid<ListAliasesResponse.AliasEntry> grid) {
+        grid.addColumn(ListAliasesResponse.AliasEntry::getAliasName)
+                .setHeader(I18n.t("kms.alias.table.name")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(ListAliasesResponse.AliasEntry::getTargetKeyId)
+                .setHeader(I18n.t("kms.alias.card.target.key")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(ListAliasesResponse.AliasEntry::getCreateDate)
+                .setHeader(I18n.t("kms.alias.card.created")).setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected List<Component> buildToolbarActions() {
+        return List.of(refreshButton, totalCountLabel);
     }
 
     public List<String> fetchKeyIds() {
@@ -318,5 +138,52 @@ public class AliasesView extends ManagementVerticalView {
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
         }
         return keyIds;
+    }
+
+    // ─── Base-class contract ───────────────────────────────────────
+
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"kms-aliases-view"};
+    }
+
+    @Override
+    protected String getTitleKey() {
+        return "kms.aliases.view.title";
+    }
+
+    @Override
+    protected String getSubtitleKey() {
+        return "kms.aliases.view.subtitle";
+    }
+
+    @Override
+    protected String getCreateButtonKey() {
+        return "kms.aliases.view.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "kms.aliases.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "kms.aliases.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "kms.aliases.view.empty.description";
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "kms.aliases.view.load.error";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.TAG;
     }
 }

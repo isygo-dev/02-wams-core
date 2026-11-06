@@ -5,35 +5,26 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.data.FileStorageDto;
 import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.remote.sms.StorageConfigService;
-import eu.isygoit.ui.common.component.ManagementGridSupport;
-import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
-import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
 import eu.isygoit.ui.sms.views.common.SmsEnumTag;
 import eu.isygoit.ui.sms.views.object.dialog.CreateBucketDialog;
@@ -53,13 +44,11 @@ import java.util.stream.Collectors;
 
 /**
  * Browse, upload, tag, share, download and delete objects across the
- * tenant's storage buckets. Aligned to the same header/stats/3-group-toolbar/
- * pagination/card-grid shape used by every other management view in the app
- * (see e.g. CategoryManagementView) rather than a bespoke layout.
+ * tenant's storage buckets, on the shared paginated management view.
  *
  * <p>Accepts an optional {@code /sms/objectstorage/{bucketName}} URL segment
- * (plus an optional {@code ?tenant=} query parameter) so other views — e.g.
- * the "Browse Files" action on {@code BucketManagementView} — can deep-link
+ * (plus an optional {@code ?tenant=} query parameter) so other views - e.g.
+ * the "Browse Files" action on {@code BucketManagementView} - can deep-link
  * straight into a specific bucket instead of always landing on the default
  * tenant/bucket selection.
  */
@@ -68,25 +57,14 @@ import java.util.stream.Collectors;
 @RouteScope
 @Route(value = "sms/objectstorage", layout = SmsMainLayout.class)
 @PermitAll
-public class ObjectStorageManagementView extends ManagementVerticalView implements HasUrlParameter<String> {
+public class ObjectStorageManagementView extends AbstractPaginatedView<ObjectStorageManagementView.FileItem>
+        implements HasUrlParameter<String> {
     private final ObjectStorageService objectStorageService;
     private final StorageConfigService storageConfigService;
-    private final Div cardsContainer = new Div();
-    private final Grid<FileItem> grid = new Grid<>();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button createBucketButton = new Button(new Icon(VaadinIcon.PLUS));
-    private final Button uploadFileButton = new Button(I18n.t("sms.objects.view.upload.file"), new Icon(VaadinIcon.UPLOAD));
-    private final TextField searchField = new TextField();
     private final ComboBox<StorageConfigDto> tenantSelector = new ComboBox<>();
     private final ComboBox<BucketDto> bucketSelector = new ComboBox<>();
-    private final ProgressBar loadingBar = new ProgressBar();
-    // Pagination
-    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
-    private final Span totalCountLabel = new Span();
-    private ManagementViewModeSwitch viewModeSwitch;
     // Stats
     private StatCard totalFilesCard;
     private StatCard totalSizeCard;
@@ -94,41 +72,22 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     private List<StorageConfigDto> storageConfigs = new ArrayList<>();
     private List<BucketDto> buckets = new ArrayList<>();
     private List<FileItem> allFiles = new ArrayList<>();
-    private List<FileItem> currentPageFiles = new ArrayList<>();
+    // True when the next fetchPage() must query the backend for the objects of the selected bucket.
+    // Search and page changes only re-filter the cached list.
+    private boolean remoteReloadNeeded = true;
     private StorageConfigDto selectedStorageConfig;
     private BucketDto selectedBucket;
-    private String currentSearch = "";
-    private int currentPage = 0;
-    private int pageSize = 10;
-    private int totalPages = 0;
-    private long totalElements = 0;
+
     @Autowired
     public ObjectStorageManagementView(ObjectStorageService objectStorageService,
                                        StorageConfigService storageConfigService) {
         this.objectStorageService = objectStorageService;
         this.storageConfigService = storageConfigService;
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        addClassName("objectstorage-management-view");
-
-        add(buildHeader());
-        add(buildStats());
-        add(buildToolbar());
-
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("objects-cards-grid");
-        add(cardsContainer);
-        configureGrid();
-        add(grid);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
-
-        initEventHandlers();
-        setTableMode(viewModeSwitch.isTableMode());
+        this.pageSize = 10;
+        initPaginatedView();
+        createButton.setIcon(new Icon(VaadinIcon.UPLOAD));
+        createButton.setTooltipText(I18n.t("sms.objects.view.upload.file.tooltip"));
+        createButton.setEnabled(false);
     }
 
     @Override
@@ -171,12 +130,9 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         }
     }
 
-    // ----- Header & Stats -----
-    private Component buildHeader() {
-        return new PageHeader("sms.objects.view.title", "sms.objects.view.subtitle");
-    }
-
-    private Component buildStats() {
+    // ----- Stats -----
+    @Override
+    protected Component buildPreToolbarContent() {
         totalFilesCard = new StatCard(VaadinIcon.FILE, StatCard.Variant.PRIMARY,
                 I18n.t("sms.objects.stats.total.files"), "0");
         totalSizeCard = new StatCard(VaadinIcon.HARDDRIVE, StatCard.Variant.PRIMARY,
@@ -195,66 +151,61 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         uniqueTagsCard.setValue(String.valueOf(uniqueTags));
     }
 
-    // ----- Event handlers -----
-    private void initEventHandlers() {
-        refreshButton.addClickListener(e -> refreshAll());
-        refreshButton.setTooltipText(I18n.t("sms.objects.view.refresh.tooltip"));
+    // ----- Data loading -----
+    @Override
+    protected PaginatedResponseDto<FileItem> fetchPage(int page, int size) {
+        if (selectedBucket == null || selectedStorageConfig == null) {
+            allFiles = new ArrayList<>();
+            remoteReloadNeeded = true;
+            updateStats();
+            return null;
+        }
+        if (remoteReloadNeeded) {
+            ResponseEntity<List<FileStorageDto>> response =
+                    objectStorageService.getObjects(selectedStorageConfig.getTenant(), selectedBucket.getName());
+            List<FileItem> files = parseFileResponse(response.getBody());
+            allFiles = files != null ? files : new ArrayList<>();
+            updateStats();
+            if (allFiles.isEmpty()) showWarning(I18n.t("sms.objects.view.no.files"));
+            remoteReloadNeeded = false;
+        }
 
-        createBucketButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        createBucketButton.setTooltipText(I18n.t("sms.objects.view.create.bucket.tooltip"));
-        createBucketButton.setEnabled(false);
-        createBucketButton.addClickListener(e -> openCreateBucketDialog());
+        String search = searchField.getValue() == null ? "" : searchField.getValue();
+        List<FileItem> filtered = allFiles.stream()
+                .filter(f -> search.isBlank() ||
+                        f.getFileName().toLowerCase().contains(search.toLowerCase()) ||
+                        f.getTags().stream().anyMatch(t -> t.toLowerCase().contains(search.toLowerCase())))
+                .collect(Collectors.toList());
 
-        uploadFileButton.addClickListener(e -> openUploadFileDialog());
-        uploadFileButton.setTooltipText(I18n.t("sms.objects.view.upload.file.tooltip"));
+        int total = filtered.size();
+        int totalPagesCount = (int) Math.ceil((double) total / size);
+        int safePage = totalPagesCount == 0 ? 0 : Math.min(page, totalPagesCount - 1);
+        int start = safePage * size;
+        int end = Math.min(start + size, total);
+        List<FileItem> pageContent = new ArrayList<>(filtered.subList(start, end));
 
-        searchField.setPlaceholder(I18n.t("sms.objects.view.search.placeholder"));
-        searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.addValueChangeListener(e -> {
-            currentSearch = e.getValue();
-            applyFiltersAndPagination();
-        });
-
-        tenantSelector.addValueChangeListener(e -> {
-            selectedStorageConfig = e.getValue();
-            createBucketButton.setEnabled(selectedStorageConfig != null);
-            if (selectedStorageConfig != null) loadBuckets(selectedStorageConfig.getTenant());
-            else clearBuckets();
-        });
-
-        bucketSelector.addValueChangeListener(e -> {
-            selectedBucket = e.getValue();
-            if (selectedBucket != null && selectedStorageConfig != null)
-                loadFiles(selectedStorageConfig.getTenant(), selectedBucket.getName());
-            else clearFiles();
-            uploadFileButton.setEnabled(selectedBucket != null && selectedStorageConfig != null);
-        });
-
-        pageSizeSelect.setItems(5, 10, 20, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                applyFiltersAndPagination();
-            }
-        });
-
-        prevButton.addClickListener(e -> {
-            if (currentPage > 0) {
-                currentPage--;
-                applyFiltersAndPagination();
-            }
-        });
-        nextButton.addClickListener(e -> {
-            if (currentPage + 1 < totalPages) {
-                currentPage++;
-                applyFiltersAndPagination();
-            }
-        });
+        return PaginatedResponseDto.<FileItem>builder()
+                .content(pageContent)
+                .totalElements(total)
+                .totalPages(totalPagesCount)
+                .pageNumber(safePage)
+                .pageSize(size)
+                .build();
     }
 
-    // ----- Data loading -----
+    /**
+     * Search (file name / tags) is applied over the whole cached list in {@link #fetchPage(int, int)}.
+     */
+    @Override
+    protected boolean matchesSearch(FileItem item, String search) {
+        return true;
+    }
+
+    @Override
+    protected void onSearchChanged() {
+        loadPage(0);
+    }
+
     private void loadStorageConfigs() {
         showLoading(true);
         try {
@@ -305,24 +256,9 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         }
     }
 
-    private void loadFiles(String tenant, String bucketName) {
-        showLoading(true);
-        try {
-            ResponseEntity<List<FileStorageDto>> response = objectStorageService.getObjects(tenant, bucketName);
-            List<FileItem> files = parseFileResponse(response.getBody());
-            allFiles = files != null ? files : new ArrayList<>();
-            updateStats();
-            if (allFiles.isEmpty()) showWarning(I18n.t("sms.objects.view.no.files"));
-            applyFiltersAndPagination();
-        } catch (FeignException ex) {
-            showError(I18n.t("sms.objects.view.load.files.error", extractErrorMessage(ex)));
-            log.error("Failed to load files from bucket: {}", bucketName, ex);
-        } catch (Exception e) {
-            showError(I18n.t("sms.objects.view.load.files.error", e.getMessage()));
-            log.error("Failed to load files from bucket: {}", bucketName, e);
-        } finally {
-            showLoading(false);
-        }
+    private void loadFiles() {
+        remoteReloadNeeded = true;
+        loadPage(0);
     }
 
     // ----- File parsing with path extraction -----
@@ -366,55 +302,28 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         return items;
     }
 
-    // ----- Filtering & Pagination -----
-    private void applyFiltersAndPagination() {
-        List<FileItem> filtered = allFiles.stream()
-                .filter(f -> currentSearch.isBlank() ||
-                        f.getFileName().toLowerCase().contains(currentSearch.toLowerCase()) ||
-                        f.getTags().stream().anyMatch(t -> t.toLowerCase().contains(currentSearch.toLowerCase())))
-                .collect(Collectors.toList());
-
-        totalElements = filtered.size();
-        totalPages = (int) Math.ceil((double) totalElements / pageSize);
-        if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
-        int start = currentPage * pageSize;
-        int end = Math.min(start + pageSize, (int) totalElements);
-        currentPageFiles = filtered.subList(start, end);
-
-        updatePaginationDisplay();
-        grid.setItems(currentPageFiles);
-        displayCards();
+    // ----- Rendering -----
+    @Override
+    protected Component renderItem(FileItem item) {
+        return new FileCard(this, objectStorageService, item, getSelectedTenant(),
+                selectedBucket.getName(), this::refreshAll);
     }
 
-    private void displayCards() {
-        cardsContainer.removeAll();
-        if (currentPageFiles.isEmpty()) {
-            grid.setItems(List.of());
-            Div emptyState = new Div();
-            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-            emptyState.addClassName(LumoUtility.Padding.XLARGE);
-            Icon emptyIcon = VaadinIcon.FILE.create();
-            emptyIcon.setSize("48px");
-            emptyIcon.addClassName("wams-empty-state-icon");
-            H4 emptyTitle = new H4(I18n.t("sms.objects.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("sms.objects.view.empty.description"));
-            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-            cardsContainer.add(emptyState);
-        } else {
-            String tenant = getSelectedTenant();
-            String bucketName = selectedBucket.getName();
-            for (FileItem file : currentPageFiles) {
-                cardsContainer.add(new FileCard(this, objectStorageService, file, tenant, bucketName, this::refreshAll));
-            }
-        }
-    }
-
-    private void updatePaginationDisplay() {
-        pageInfoLabel.setText(I18n.t("sms.objects.view.page.info", totalPages == 0 ? 0 : currentPage + 1, totalPages));
-        totalCountLabel.setText(I18n.t("sms.objects.view.total.count", totalElements));
-        prevButton.setEnabled(currentPage > 0);
-        nextButton.setEnabled(currentPage + 1 < totalPages);
+    @Override
+    protected boolean configureGrid(Grid<FileItem> grid) {
+        grid.addColumn(FileItem::getFileName)
+                .setHeader(I18n.t("sms.objects.card.name")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(file -> file.getPath().isBlank()
+                        ? I18n.t("sms.objects.card.path.root") : file.getPath())
+                .setHeader(I18n.t("sms.objects.card.path")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(FileItem::getType)
+                .setHeader(I18n.t("sms.objects.card.type")).setAutoWidth(true);
+        grid.addColumn(FileItem::getSizeDisplay)
+                .setHeader(I18n.t("sms.objects.card.size")).setAutoWidth(true);
+        grid.addColumn(file -> file.getTags() == null ? "" : String.join(", ", file.getTags()))
+                .setHeader(I18n.t("sms.objects.card.tags")).setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
     }
 
     // ----- Actions -----
@@ -422,7 +331,7 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         loadStorageConfigs();
         if (selectedStorageConfig != null) {
             loadBuckets(selectedStorageConfig.getTenant());
-            if (selectedBucket != null) loadFiles(selectedStorageConfig.getTenant(), selectedBucket.getName());
+            if (selectedBucket != null) loadFiles();
         }
     }
 
@@ -433,12 +342,9 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     }
 
     private void clearFiles() {
-        allFiles.clear();
-        currentPageFiles.clear();
-        grid.setItems(List.of());
-        cardsContainer.removeAll();
-        updateStats();
-        updatePaginationDisplay();
+        allFiles = new ArrayList<>();
+        remoteReloadNeeded = true;
+        loadPage(0);
     }
 
     public String getSelectedTenant() {
@@ -446,50 +352,47 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
     }
 
     // ----- Toolbar & Dialogs -----
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("objects-toolbar");
-
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(FlexComponent.Alignment.END);
+    @Override
+    protected List<Component> buildToolbarFilters() {
         tenantSelector.setPlaceholder(I18n.t("sms.objects.view.select.tenant"));
         tenantSelector.setWidth("220px");
         bucketSelector.setPlaceholder(I18n.t("sms.objects.view.select.bucket"));
         bucketSelector.setWidth("180px");
-        searchField.setWidth("250px");
-        searchField.setPlaceholder(I18n.t("sms.objects.view.search.placeholder"));
-        leftGroup.add(tenantSelector, bucketSelector, searchField);
 
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setSpacing(true);
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        pageSizeSelect.setWidth("100px");
-        pageInfoLabel.addClassName("pagination-page-info");
-        totalCountLabel.addClassName("pagination-total-count");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
+        tenantSelector.addValueChangeListener(e -> {
+            selectedStorageConfig = e.getValue();
+            createBucketButton.setEnabled(selectedStorageConfig != null);
+            if (selectedStorageConfig != null) loadBuckets(selectedStorageConfig.getTenant());
+            else clearBuckets();
+        });
 
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
-        uploadFileButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        uploadFileButton.setEnabled(false);
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
-        rightGroup.add(viewModeSwitch, refreshButton, createBucketButton, uploadFileButton);
-
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
+        bucketSelector.addValueChangeListener(e -> {
+            selectedBucket = e.getValue();
+            if (selectedBucket != null && selectedStorageConfig != null) loadFiles();
+            else clearFiles();
+            createButton.setEnabled(selectedBucket != null && selectedStorageConfig != null);
+        });
+        return List.of(tenantSelector, bucketSelector);
     }
 
-    private void openUploadFileDialog() {
+    @Override
+    protected List<Component> buildToolbarActions() {
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.setTooltipText(I18n.t("sms.objects.view.refresh.tooltip"));
+        refreshButton.addClickListener(e -> refreshAll());
+
+        createBucketButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        createBucketButton.setTooltipText(I18n.t("sms.objects.view.create.bucket.tooltip"));
+        createBucketButton.setEnabled(false);
+        createBucketButton.addClickListener(e -> openCreateBucketDialog());
+        return List.of(refreshButton, createBucketButton);
+    }
+
+    /**
+     * The primary toolbar button is the "upload file" action.
+     */
+    @Override
+    protected void openCreateDialog() {
         if (selectedStorageConfig == null || selectedBucket == null) {
             showError(I18n.t("sms.objects.error.select.bucket"));
             return;
@@ -507,22 +410,18 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
                 () -> loadBuckets(selectedStorageConfig.getTenant())).open();
     }
 
+    @Override
     public void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
-        grid.setVisible(!show && viewModeSwitch.isTableMode());
+        super.showLoading(show);
         refreshButton.setEnabled(!show);
         createBucketButton.setEnabled(!show && selectedStorageConfig != null);
-        uploadFileButton.setEnabled(!show && selectedBucket != null);
+        createButton.setEnabled(!show && selectedBucket != null);
         tenantSelector.setEnabled(!show);
         bucketSelector.setEnabled(!show);
         searchField.setEnabled(!show);
-        pageSizeSelect.setEnabled(!show);
-        prevButton.setEnabled(!show && currentPage > 0);
-        nextButton.setEnabled(!show && currentPage + 1 < totalPages);
     }
 
-    // ----- Helpers -----
+    // ----- Helpers / shell hooks -----
     private void showError(String msg) {
         Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
@@ -546,27 +445,57 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         return ex.getMessage() != null ? ex.getMessage() : "Unknown error";
     }
 
-    private void configureGrid() {
-        grid.addClassName("management-grid");
-        grid.addColumn(FileItem::getFileName)
-                .setHeader(I18n.t("sms.objects.card.name")).setAutoWidth(true).setFlexGrow(1);
-        grid.addColumn(file -> file.getPath().isBlank()
-                        ? I18n.t("sms.objects.card.path.root") : file.getPath())
-                .setHeader(I18n.t("sms.objects.card.path")).setAutoWidth(true).setFlexGrow(1);
-        grid.addColumn(FileItem::getType)
-                .setHeader(I18n.t("sms.objects.card.type")).setAutoWidth(true);
-        grid.addColumn(FileItem::getSizeDisplay)
-                .setHeader(I18n.t("sms.objects.card.size")).setAutoWidth(true);
-        grid.addColumn(file -> file.getTags() == null ? "" : String.join(", ", file.getTags()))
-                .setHeader(I18n.t("sms.objects.card.tags")).setAutoWidth(true);
-        ManagementGridSupport.addCardActionsColumn(grid, file -> new FileCard(this, objectStorageService,
-                file, getSelectedTenant(), selectedBucket.getName(), this::refreshAll));
+    @Override
+    protected String extractErrorMessage(Exception e) {
+        if (e instanceof FeignException ex) {
+            return extractErrorMessage(ex);
+        }
+        return e.getMessage();
     }
 
-    private void setTableMode(boolean tableMode) {
-        boolean loading = loadingBar.isVisible();
-        cardsContainer.setVisible(!loading && !tableMode);
-        grid.setVisible(!loading && tableMode);
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"objectstorage-management-view"};
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "sms.objects.view.load.files.error";
+    }
+
+    @Override
+    protected String getTitleKey() {
+        return "sms.objects.view.title";
+    }
+
+    @Override
+    protected String getSubtitleKey() {
+        return "sms.objects.view.subtitle";
+    }
+
+    @Override
+    protected String getCreateButtonKey() {
+        return "sms.objects.view.upload.file";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "sms.objects.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "sms.objects.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "sms.objects.view.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.FILE;
     }
 
     // ----- Inner FileItem with all fields -----

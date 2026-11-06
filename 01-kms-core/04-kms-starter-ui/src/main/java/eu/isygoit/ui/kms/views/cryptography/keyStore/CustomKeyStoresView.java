@@ -1,323 +1,139 @@
 package eu.isygoit.ui.kms.views.cryptography.keyStore;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeCustomKeyStoreResponse;
 import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponse;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
-import eu.isygoit.ui.common.component.ManagementGridSupport;
-import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.cryptography.keyStore.dialog.CreateCustomKeyStoreDialog;
 import feign.FeignException;
 import jakarta.annotation.security.PermitAll;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
-import java.util.stream.Collectors;
 
-@Slf4j
 @SpringComponent
 @RouteScope
 @Route(value = "kms/custom-key-stores", layout = KmsMainLayout.class)
 @PermitAll
-public class CustomKeyStoresView extends ManagementVerticalView {
+public class CustomKeyStoresView extends AbstractPaginatedView<DescribeCustomKeyStoreResponse.CustomKeyStore> {
     private final KmsApiService kmsApiService;
-    private final Div cardsContainer = new Div();
-    private final Grid<DescribeCustomKeyStoreResponse.CustomKeyStore> grid = new Grid<>();
-    private final Button createButton = new Button(I18n.t("kms.keystore.view.create.button"), new Icon(VaadinIcon.PLUS_CIRCLE));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final ProgressBar loadingBar = new ProgressBar();
-    private final TextField filterField = new TextField();
-    private final Button clearFilterButton = new Button(new Icon(VaadinIcon.CLOSE));
-    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
     private final Span totalCountLabel = new Span();
-    private final Stack<String> previousTokens = new Stack<>();
-    private ManagementViewModeSwitch viewModeSwitch;
-    private int pageSize = 10;
-    private String currentNextToken = null;
-    private String currentToken = null;
-    private int currentPage = 1;
-    private int totalPages = 0;
-    private long totalElements = 0;
-    private int numberOfElements = 0;
-    private boolean truncated = false;
-    private String currentFilter = "";
-    private List<DescribeCustomKeyStoreResponse.CustomKeyStore> currentPageStores = new ArrayList<>();
+    /**
+     * The backend uses opaque cursor tokens (not page indexes): pageTokens.get(p) is the token that
+     * returns page p (index 0 = null, the first page). Tokens are learnt while paging forward.
+     */
+    private final List<String> pageTokens = new ArrayList<>();
+
     @Autowired
     public CustomKeyStoresView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;
+        this.pageSize = 10;
 
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        addClassName("kms-custom-stores-view");
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.addClickListener(e -> loadStores());
+        refreshButton.setTooltipText(I18n.t("kms.keystore.view.refresh.stores"));
+        totalCountLabel.addClassName("management-total-count");
 
-        add(new PageHeader("kms.keystore.view.title", "kms.keystore.view.subtitle"));
-
-        HorizontalLayout toolbar = buildToolbar();
-        add(toolbar);
-
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("stores-grid");
-        add(cardsContainer);
-        configureGrid();
-        add(grid);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
-
-        createButton.addClickListener(e -> createCustomKeyStore());
-        refreshButton.addClickListener(e -> resetPaginationAndLoad());
-
-        filterField.setPlaceholder(I18n.t("kms.keystore.view.filter.placeholder"));
-        filterField.setValueChangeMode(ValueChangeMode.LAZY);
-        filterField.setValueChangeTimeout(300);
-        filterField.setWidth("250px");
-        filterField.addValueChangeListener(e -> {
-            currentFilter = e.getValue();
-            applyFilter();
-        });
-
-        clearFilterButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        clearFilterButton.setTooltipText(I18n.t("kms.keystore.view.clear.filter.tooltip"));
-        clearFilterButton.setEnabled(false);
-        clearFilterButton.addClickListener(e -> {
-            filterField.clear();
-            currentFilter = "";
-            applyFilter();
-        });
-
-        pageSizeSelect.setItems(5, 10, 20, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.setPlaceholder(I18n.t("kms.keystore.view.page.per.page"));
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                resetPaginationAndLoad();
-            }
-        });
-
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        prevButton.addClickListener(e -> {
-            if (!previousTokens.isEmpty()) {
-                String prevToken = previousTokens.pop();
-                loadStoresPage(prevToken);
-            }
-        });
-
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addClickListener(e -> {
-            if (truncated && currentNextToken != null) {
-                previousTokens.push(currentToken);
-                loadStoresPage(currentNextToken);
-            }
-        });
-
-        setTableMode(viewModeSwitch.isTableMode());
-        resetPaginationAndLoad();
+        initPaginatedView();
     }
 
     @Override
     public String getPageTitle() {
-        return I18n.t("kms.keystore.view.title");
+        return I18n.t(getTitleKey());
     }
 
-    private void resetPaginationAndLoad() {
-        previousTokens.clear();
-        currentNextToken = null;
-        currentToken = null;
-        currentPage = 1;
-        totalPages = 0;
-        totalElements = 0;
-        numberOfElements = 0;
-        truncated = false;
-        loadStoresPage(null);
-    }
-
-    private void loadStoresPage(String nextToken) {
-        showLoading(true);
-        try {
-            ResponseEntity<ListCustomKeyStoresResponse> response = kmsApiService.listCustomKeyStores(pageSize, nextToken);
-            ListCustomKeyStoresResponse body = response.getBody();
-            List<DescribeCustomKeyStoreResponse.CustomKeyStore> stores = (body != null && body.getCustomKeyStores() != null)
-                    ? body.getCustomKeyStores() : new ArrayList<>();
-
-            currentNextToken = (body != null) ? body.getNextToken() : null;
-            numberOfElements = (body != null && body.getNumberOfElements() != null) ? body.getNumberOfElements() : stores.size();
-            totalPages = (body != null && body.getTotalPages() != null) ? body.getTotalPages() : 0;
-            totalElements = (body != null && body.getTotalElements() != null) ? body.getTotalElements() : 0L;
-            truncated = (body != null && Boolean.TRUE.equals(body.getTruncated()));
-            currentToken = nextToken;
-
-            if (nextToken == null) {
-                currentPage = 1;
-            } else {
-                currentPage = previousTokens.size() + 1;
-            }
-
-            currentPageStores = stores;
-            updatePaginationDisplay();
-            applyFilter();
-        } catch (FeignException ex) {
-            String errorMsg = (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
-            Notification.show(I18n.t("kms.keystore.view.load.error", errorMsg), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load custom key stores: {}", errorMsg);
-            currentPageStores = new ArrayList<>();
-            updatePaginationDisplay();
-            showEmptyState();
-        } catch (Exception e) {
-            Notification.show(I18n.t("kms.keystore.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load custom key stores: {}", e.getMessage());
-            currentPageStores = new ArrayList<>();
-            updatePaginationDisplay();
-            showEmptyState();
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    private void updatePaginationDisplay() {
-        if (totalPages > 0) {
-            pageInfoLabel.setText(I18n.t("kms.keystore.view.page.info", currentPage, totalPages, numberOfElements));
-        } else {
-            pageInfoLabel.setText(I18n.t("kms.keystore.view.page.info.simple", currentPage, numberOfElements));
-        }
-        totalCountLabel.setText(I18n.t("kms.keystore.view.total.count", totalElements));
-
-        prevButton.setEnabled(!previousTokens.isEmpty());
-        nextButton.setEnabled(truncated && currentNextToken != null);
-    }
-
-    private void applyFilter() {
-        cardsContainer.removeAll();
-
-        List<DescribeCustomKeyStoreResponse.CustomKeyStore> filtered = currentPageStores.stream()
-                .filter(s -> {
-                    if (StringUtils.hasText(currentFilter)) {
-                        String lower = currentFilter.toLowerCase();
-                        boolean nameMatch = s.getName() != null && s.getName().toLowerCase().contains(lower);
-                        boolean typeMatch = s.getCustomKeyStoreType() != null && s.getCustomKeyStoreType().toLowerCase().contains(lower);
-                        return nameMatch || typeMatch;
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
-        grid.setItems(filtered);
-
-        clearFilterButton.setEnabled(StringUtils.hasText(currentFilter));
-
-        if (filtered.isEmpty()) {
-            showEmptyState();
-        } else {
-            filtered.forEach(s -> cardsContainer.add(new StoreCard(this, kmsApiService, s)));
-        }
-    }
-
-    private void showEmptyState() {
-        cardsContainer.removeAll();
-        Div emptyState = new Div();
-        emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-        emptyState.addClassName(LumoUtility.Padding.XLARGE);
-        Icon emptyIcon = VaadinIcon.STORAGE.create();
-        emptyIcon.setSize("48px");
-        emptyIcon.addClassName("kms-partc-empty-icon");
-        H4 emptyTitle = new H4(I18n.t("kms.keystore.view.empty.title"));
-        Span emptyDesc = new Span(I18n.t("kms.keystore.view.empty.description"));
-        emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-        emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-        cardsContainer.add(emptyState);
-    }
-
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("custom-stores-toolbar");
-
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(FlexComponent.Alignment.BASELINE);
-        leftGroup.add(filterField, clearFilterButton);
-
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setSpacing(true);
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        pageSizeSelect.setWidth("120px");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
-
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        refreshButton.setTooltipText(I18n.t("kms.keystore.view.refresh.stores"));
-        createButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        createButton.setTooltipText(I18n.t("kms.keystore.view.create.tooltip"));
-        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
-        rightGroup.add(viewModeSwitch, refreshButton, createButton);
-
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
-    }
-
-    private void createCustomKeyStore() {
-        new CreateCustomKeyStoreDialog(this, kmsApiService, this::resetPaginationAndLoad).open();
-    }
-
-    public void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
-        grid.setVisible(!show && viewModeSwitch.isTableMode());
-        createButton.setEnabled(!show);
-        refreshButton.setEnabled(!show);
-        filterField.setEnabled(!show);
-        prevButton.setEnabled(!show && !previousTokens.isEmpty());
-        nextButton.setEnabled(!show && (truncated && currentNextToken != null));
-        pageSizeSelect.setEnabled(!show);
-    }
-
+    /**
+     * Reloads from the first page (used by the cards and dialogs after a change).
+     */
     public void loadStores() {
-        resetPaginationAndLoad();
+        loadPage(0);
     }
 
-    private void configureGrid() {
-        grid.addClassName("management-grid");
+    // ─── Data ──────────────────────────────────────────────────────
+
+    @Override
+    protected PaginatedResponseDto<DescribeCustomKeyStoreResponse.CustomKeyStore> fetchPage(int page, int size) {
+        if (page <= 0 || pageTokens.isEmpty()) {
+            pageTokens.clear();
+            pageTokens.add(null);
+        }
+        int index = Math.min(Math.max(page, 0), pageTokens.size() - 1);
+        ListCustomKeyStoresResponse body;
+        // Walk forward from the furthest known token until the requested page (or the last page) is reached.
+        while (true) {
+            ResponseEntity<ListCustomKeyStoresResponse> response =
+                    kmsApiService.listCustomKeyStores(size, pageTokens.get(index));
+            body = response.getBody();
+            String next = body != null ? body.getNextToken() : null;
+            if (next != null) {
+                if (pageTokens.size() > index + 1) {
+                    pageTokens.set(index + 1, next);
+                } else {
+                    pageTokens.add(next);
+                }
+            }
+            if (index >= page || next == null) {
+                break;
+            }
+            index++;
+        }
+
+        List<DescribeCustomKeyStoreResponse.CustomKeyStore> stores = (body != null && body.getCustomKeyStores() != null)
+                ? body.getCustomKeyStores() : new ArrayList<>();
+        return PaginatedResponseDto.<DescribeCustomKeyStoreResponse.CustomKeyStore>builder()
+                .content(stores)
+                .totalPages((body != null && body.getTotalPages() != null) ? body.getTotalPages() : 0)
+                .totalElements((body != null && body.getTotalElements() != null) ? body.getTotalElements() : 0L)
+                .pageNumber(index)
+                .pageSize(size)
+                .build();
+    }
+
+    @Override
+    protected Component renderItem(DescribeCustomKeyStoreResponse.CustomKeyStore store) {
+        return new StoreCard(this, kmsApiService, store);
+    }
+
+    @Override
+    protected boolean matchesSearch(DescribeCustomKeyStoreResponse.CustomKeyStore store, String search) {
+        if (search == null || search.isBlank()) {
+            return true;
+        }
+        String lower = search.toLowerCase();
+        boolean nameMatch = store.getName() != null && store.getName().toLowerCase().contains(lower);
+        boolean typeMatch = store.getCustomKeyStoreType() != null
+                && store.getCustomKeyStoreType().toLowerCase().contains(lower);
+        return nameMatch || typeMatch;
+    }
+
+    @Override
+    protected void onPageLoaded() {
+        totalCountLabel.setText(I18n.t("kms.keystore.view.total.count", totalElements));
+    }
+
+    @Override
+    protected void openCreateDialog() {
+        new CreateCustomKeyStoreDialog(this, kmsApiService, this::loadStores).open();
+    }
+
+    @Override
+    protected boolean configureGrid(Grid<DescribeCustomKeyStoreResponse.CustomKeyStore> grid) {
         grid.addColumn(DescribeCustomKeyStoreResponse.CustomKeyStore::getName)
                 .setHeader(I18n.t("kms.keystore.table.name")).setAutoWidth(true).setFlexGrow(1);
         grid.addColumn(DescribeCustomKeyStoreResponse.CustomKeyStore::getCustomKeyStoreType)
@@ -326,12 +142,67 @@ public class CustomKeyStoresView extends ManagementVerticalView {
                 .setHeader(I18n.t("kms.keystore.table.status")).setAutoWidth(true);
         grid.addColumn(DescribeCustomKeyStoreResponse.CustomKeyStore::getConnectionState)
                 .setHeader(I18n.t("kms.keystore.table.connection")).setAutoWidth(true);
-        ManagementGridSupport.addCardActionsColumn(grid, store -> new StoreCard(this, kmsApiService, store));
+        addCardActionsColumn(grid);
+        return true;
     }
 
-    private void setTableMode(boolean tableMode) {
-        boolean loading = loadingBar.isVisible();
-        cardsContainer.setVisible(!loading && !tableMode);
-        grid.setVisible(!loading && tableMode);
+    @Override
+    protected List<Component> buildToolbarActions() {
+        return List.of(refreshButton, totalCountLabel);
+    }
+
+    @Override
+    protected String extractErrorMessage(Exception e) {
+        if (e instanceof FeignException ex) {
+            return (ex.status() == 500 || ex.status() == 400) ? ex.contentUTF8() : ex.getMessage();
+        }
+        return e.getMessage();
+    }
+
+    // ─── Base-class contract ───────────────────────────────────────
+
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"kms-custom-stores-view"};
+    }
+
+    @Override
+    protected String getTitleKey() {
+        return "kms.keystore.view.title";
+    }
+
+    @Override
+    protected String getSubtitleKey() {
+        return "kms.keystore.view.subtitle";
+    }
+
+    @Override
+    protected String getCreateButtonKey() {
+        return "kms.keystore.view.create.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "kms.keystore.view.filter.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "kms.keystore.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "kms.keystore.view.empty.description";
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "kms.keystore.view.load.error";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.STORAGE;
     }
 }

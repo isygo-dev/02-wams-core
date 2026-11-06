@@ -1,33 +1,26 @@
 package eu.isygoit.ui.dms.views.linkedFile;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.CategoryDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
 import eu.isygoit.remote.dms.LinkedFileService;
-import eu.isygoit.ui.common.component.ManagementGridSupport;
-import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
-import eu.isygoit.ui.common.component.PageHeader;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.dms.layout.DmsMainLayout;
 import eu.isygoit.ui.dms.views.linkedFile.dialog.UploadLinkedFileDialog;
 import feign.FeignException;
@@ -44,66 +37,35 @@ import java.util.stream.Collectors;
 @RouteScope
 @Route(value = "dms/linked-files", layout = DmsMainLayout.class)
 @PermitAll
-public class LinkedFileManagementView extends ManagementVerticalView {
+public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileResponseDto> {
     private final LinkedFileService linkedFileService;
     private final CategoryService categoryService;
-    private final Div cardsContainer = new Div();
-    private final Grid<LinkedFileResponseDto> grid = new Grid<>();
-    private final Button uploadButton = new Button(I18n.t("dms.linkedfile.view.upload.button"), new Icon(VaadinIcon.UPLOAD));
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
     private final Button clearFiltersButton = new Button(I18n.t("dms.linkedfile.view.clear.filters"), new Icon(VaadinIcon.ERASER));
-    private final TextField searchField = new TextField();
     private final TextField tagsField = new TextField();
     private final ComboBox<String> categoryFilterComboBox = new ComboBox<>();
-    private final ProgressBar loadingBar = new ProgressBar();
-    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
-    private final Span totalCountLabel = new Span();
-    private ManagementViewModeSwitch viewModeSwitch;
-    private List<LinkedFileResponseDto> allFiles = new ArrayList<>();
-    private List<LinkedFileResponseDto> filteredFiles = new ArrayList<>();
+
     // The linked-file search endpoints return a plain List (no pagination
-    // support server-side), so paging is done in-memory over filteredFiles —
-    // same page/pageSize/prev/next shape as every other management view.
-    private int currentPage = 0;
-    private int pageSize = 10;
-    private int totalPages = 0;
+    // support server-side), so paging is done in-memory over the filtered list.
+    private List<LinkedFileResponseDto> allFiles = new ArrayList<>();
+    // True when the next fetchPage() must query the backend again (initial load, refresh,
+    // tags/category change, upload...). Free-text search and page changes only re-filter allFiles.
+    private boolean remoteReloadNeeded = true;
+    private boolean suppressFilterEvents = false;
     private String currentTenant;
 
     @Autowired
     public LinkedFileManagementView(LinkedFileService linkedFileService, CategoryService categoryService) {
         this.linkedFileService = linkedFileService;
         this.categoryService = categoryService;
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        addClassName("linked-file-management-view");
+        this.pageSize = 10;
 
         // Get tenant from security context or use default
         this.currentTenant = getTenant();
 
-        add(new PageHeader("dms.linkedfile.view.title", "dms.linkedfile.view.subtitle"));
-
-        HorizontalLayout toolbar = buildToolbar();
-        add(toolbar);
-
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("linked-file-cards-grid");
-        add(cardsContainer);
-        configureGrid();
-        add(grid);
-
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
-
-        initEventHandlers();
-        setTableMode(viewModeSwitch.isTableMode());
-        loadCategories();
-        loadAllFiles();
+        initPaginatedView();
+        createButton.setIcon(new Icon(VaadinIcon.UPLOAD));
+        createButton.setTooltipText(I18n.t("dms.linkedfile.view.upload.tooltip"));
     }
 
     @Override
@@ -111,120 +73,64 @@ public class LinkedFileManagementView extends ManagementVerticalView {
         return I18n.t("dms.linkedfile.view.title");
     }
 
-    private void initEventHandlers() {
-        uploadButton.addClickListener(e -> openUploadLinkedFileDialog());
-        uploadButton.setTooltipText(I18n.t("dms.linkedfile.view.upload.tooltip"));
+    // ─── Data ────────────────────────────────────────────────────────────────
 
-        refreshButton.addClickListener(e -> loadAllFiles());
-        refreshButton.setTooltipText(I18n.t("dms.linkedfile.view.refresh.tooltip"));
-
-        clearFiltersButton.addClickListener(e -> clearFilters());
-        clearFiltersButton.setTooltipText(I18n.t("dms.linkedfile.view.clear.filters.tooltip"));
-
-        // Free-text search has no matching backend endpoint (no "contains"
-        // search by file name/code), so it only ever re-filters whatever
-        // loadAllFiles() already fetched — no new network call needed.
-        searchField.setPlaceholder(I18n.t("dms.linkedfile.view.search.placeholder"));
-        searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.addValueChangeListener(e -> applyFilters());
-
-        // Tags and category, unlike free-text search, ARE backed by real
-        // searchByTags/searchByCategories endpoints — route their value
-        // changes into a fresh server-side query instead of just filtering
-        // whatever the last (possibly unrelated) query happened to return.
-        tagsField.setPlaceholder(I18n.t("dms.linkedfile.view.tags.placeholder"));
-        tagsField.setClearButtonVisible(true);
-        tagsField.setValueChangeMode(ValueChangeMode.LAZY);
-        tagsField.addValueChangeListener(e -> loadAllFiles());
-
-        categoryFilterComboBox.setPlaceholder(I18n.t("dms.linkedfile.view.category.placeholder"));
-        categoryFilterComboBox.setClearButtonVisible(true);
-        categoryFilterComboBox.addValueChangeListener(e -> loadAllFiles());
-
-        pageSizeSelect.setItems(5, 10, 20, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                currentPage = 0;
-                displayFiles();
-            }
-        });
-
-        prevButton.addClickListener(e -> {
-            if (currentPage > 0) {
-                currentPage--;
-                displayFiles();
-            }
-        });
-        nextButton.addClickListener(e -> {
-            if (currentPage + 1 < totalPages) {
-                currentPage++;
-                displayFiles();
-            }
-        });
-    }
-
-    private void loadCategories() {
-        try {
-            ResponseEntity<PaginatedResponseDto<CategoryDto>> response = categoryService.findAll(0, 100);
-            if (response.getBody() != null && response.getBody().getContent() != null) {
-                List<String> categoryNames = response.getBody().getContent().stream()
-                        .map(CategoryDto::getName)
-                        .collect(Collectors.toList());
-                categoryFilterComboBox.setItems(categoryNames);
-            }
-        } catch (Exception e) {
-            log.error("Failed to load categories", e);
-        }
-    }
-
-    private void loadAllFiles() {
-        showLoading(true);
-        allFiles.clear();
-        filteredFiles.clear();
-
-        try {
-            String selectedCategory = categoryFilterComboBox.getValue();
-            String tagsQuery = tagsField.getValue();
-
-            List<LinkedFileResponseDto> results;
-            if (selectedCategory != null && !selectedCategory.isBlank()) {
-                // A category is selected: query it directly instead of
-                // fetching everything and filtering client-side.
-                results = searchByCategoriesSafe(Arrays.asList(selectedCategory));
-            } else if (tagsQuery != null && !tagsQuery.isBlank()) {
-                results = searchByTagsSafe(Arrays.asList(tagsQuery));
-            } else {
-                // No category/tag filter selected and there is no dedicated
-                // "list all" endpoint — combining both empty-query searches
-                // is the closest available substitute for a full browse.
-                List<LinkedFileResponseDto> combined = new ArrayList<>(searchByCategoriesSafe(Arrays.asList("")));
-                combined.addAll(searchByTagsSafe(Arrays.asList("")));
-                results = combined;
-            }
-
-            Map<String, LinkedFileResponseDto> byCode = new LinkedHashMap<>();
-            for (LinkedFileResponseDto file : results) {
-                byCode.putIfAbsent(file.getCode(), file);
-            }
-            allFiles = new ArrayList<>(byCode.values());
-
-            applyFilters();
-
+    @Override
+    protected PaginatedResponseDto<LinkedFileResponseDto> fetchPage(int page, int size) {
+        if (remoteReloadNeeded) {
+            allFiles = new ArrayList<>();
+            allFiles = loadAllFilesFromBackend();
+            remoteReloadNeeded = false;
             if (allFiles.isEmpty()) {
                 Notification.show(I18n.t("dms.linkedfile.view.no.files"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_WARNING);
             }
-
-        } catch (Exception e) {
-            Notification.show(I18n.t("dms.linkedfile.view.load.error", e.getMessage()), 6000, Notification.Position.BOTTOM_END)
-                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
-            log.error("Failed to load linked files", e);
-        } finally {
-            showLoading(false);
         }
+
+        List<LinkedFileResponseDto> filtered = applyFilters(allFiles);
+        int total = filtered.size();
+        int totalPagesCount = total == 0 ? 0 : (int) Math.ceil((double) total / size);
+        int safePage = totalPagesCount == 0 ? 0 : Math.min(page, totalPagesCount - 1);
+        int start = safePage * size;
+        int end = Math.min(start + size, total);
+        List<LinkedFileResponseDto> pageContent = start < total
+                ? new ArrayList<>(filtered.subList(start, end))
+                : new ArrayList<>();
+
+        return PaginatedResponseDto.<LinkedFileResponseDto>builder()
+                .content(pageContent)
+                .totalElements(total)
+                .totalPages(totalPagesCount)
+                .pageNumber(safePage)
+                .pageSize(size)
+                .build();
+    }
+
+    private List<LinkedFileResponseDto> loadAllFilesFromBackend() {
+        String selectedCategory = categoryFilterComboBox.getValue();
+        String tagsQuery = tagsField.getValue();
+
+        List<LinkedFileResponseDto> results;
+        if (selectedCategory != null && !selectedCategory.isBlank()) {
+            // A category is selected: query it directly instead of
+            // fetching everything and filtering client-side.
+            results = searchByCategoriesSafe(Arrays.asList(selectedCategory));
+        } else if (tagsQuery != null && !tagsQuery.isBlank()) {
+            results = searchByTagsSafe(Arrays.asList(tagsQuery));
+        } else {
+            // No category/tag filter selected and there is no dedicated
+            // "list all" endpoint — combining both empty-query searches
+            // is the closest available substitute for a full browse.
+            List<LinkedFileResponseDto> combined = new ArrayList<>(searchByCategoriesSafe(Arrays.asList("")));
+            combined.addAll(searchByTagsSafe(Arrays.asList("")));
+            results = combined;
+        }
+
+        Map<String, LinkedFileResponseDto> byCode = new LinkedHashMap<>();
+        for (LinkedFileResponseDto file : results) {
+            byCode.putIfAbsent(file.getCode(), file);
+        }
+        return new ArrayList<>(byCode.values());
     }
 
     private List<LinkedFileResponseDto> searchByCategoriesSafe(List<String> categories) {
@@ -247,12 +153,12 @@ public class LinkedFileManagementView extends ManagementVerticalView {
         }
     }
 
-    private void applyFilters() {
+    private List<LinkedFileResponseDto> applyFilters(List<LinkedFileResponseDto> files) {
         String searchText = searchField.getValue() != null ? searchField.getValue().toLowerCase().trim() : "";
         String tagsText = tagsField.getValue() != null ? tagsField.getValue().toLowerCase().trim() : "";
         String selectedCategory = categoryFilterComboBox.getValue();
 
-        filteredFiles = allFiles.stream()
+        return files.stream()
                 .filter(file -> {
                     if (!searchText.isEmpty()) {
                         boolean matchesName = file.getOriginalFileName() != null &&
@@ -290,121 +196,59 @@ public class LinkedFileManagementView extends ManagementVerticalView {
                     return true;
                 })
                 .collect(Collectors.toList());
+    }
 
-        currentPage = 0;
-        displayFiles();
+    /**
+     * Free-text search is applied over the whole cached list in {@link #fetchPage(int, int)}.
+     */
+    @Override
+    protected boolean matchesSearch(LinkedFileResponseDto item, String search) {
+        return true;
+    }
+
+    /**
+     * Free-text search has no matching backend endpoint, so it only re-filters whatever was
+     * already fetched — no new network call.
+     */
+    @Override
+    protected void onSearchChanged() {
+        if (!suppressFilterEvents) {
+            loadPage(0);
+        }
+    }
+
+    /**
+     * Forces a new backend query (tags/category/refresh/upload), then shows the first page.
+     */
+    private void reloadFromBackend() {
+        if (suppressFilterEvents) {
+            return;
+        }
+        remoteReloadNeeded = true;
+        loadPage(0);
     }
 
     private void clearFilters() {
-        searchField.clear();
-        tagsField.clear();
-        categoryFilterComboBox.clear();
-        applyFilters();
-    }
-
-    private void displayFiles() {
-        cardsContainer.removeAll();
-
-        int totalElements = filteredFiles.size();
-        totalPages = totalElements == 0 ? 0 : (int) Math.ceil((double) totalElements / pageSize);
-        if (currentPage >= totalPages) {
-            currentPage = Math.max(0, totalPages - 1);
+        suppressFilterEvents = true;
+        try {
+            searchField.clear();
+            tagsField.clear();
+            categoryFilterComboBox.clear();
+        } finally {
+            suppressFilterEvents = false;
         }
-        updatePaginationDisplay(totalElements);
-
-        if (filteredFiles.isEmpty()) {
-            grid.setItems(List.of());
-            Div emptyState = new Div();
-            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-            emptyState.addClassName(LumoUtility.Padding.XLARGE);
-            Icon emptyIcon = VaadinIcon.FILE_O.create();
-            emptyIcon.setSize("48px");
-            emptyIcon.addClassName("wams-empty-state-icon");
-            H4 emptyTitle = new H4(I18n.t("dms.linkedfile.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("dms.linkedfile.view.empty.description"));
-            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-            cardsContainer.add(emptyState);
-        } else {
-            int start = currentPage * pageSize;
-            int end = Math.min(start + pageSize, totalElements);
-            List<LinkedFileResponseDto> pageFiles = filteredFiles.subList(start, end);
-            grid.setItems(pageFiles);
-            for (LinkedFileResponseDto file : pageFiles) {
-                cardsContainer.add(new LinkedFileCard(this, linkedFileService, file, this::loadAllFiles));
-            }
-        }
+        reloadFromBackend();
     }
 
-    private void updatePaginationDisplay(int totalElements) {
-        pageInfoLabel.setText(I18n.t("dms.linkedfile.view.page.info", totalPages == 0 ? 0 : currentPage + 1, totalPages));
-        totalCountLabel.setText(I18n.t("dms.linkedfile.view.total.count", totalElements));
-        prevButton.setEnabled(currentPage > 0);
-        nextButton.setEnabled(currentPage + 1 < totalPages);
+    // ─── Rendering ───────────────────────────────────────────────────────────
+
+    @Override
+    protected Component renderItem(LinkedFileResponseDto item) {
+        return new LinkedFileCard(this, linkedFileService, item, this::reloadFromBackend);
     }
 
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("linked-file-management-toolbar");
-
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(FlexComponent.Alignment.END);
-
-        searchField.setWidth("200px");
-        tagsField.setWidth("200px");
-        categoryFilterComboBox.setWidth("180px");
-        clearFiltersButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        clearFiltersButton.setSizeUndefined();
-
-        leftGroup.add(searchField, tagsField, categoryFilterComboBox, clearFiltersButton);
-
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setSpacing(true);
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        pageSizeSelect.setWidth("100px");
-        pageInfoLabel.addClassName("pagination-page-info");
-        totalCountLabel.addClassName("pagination-total-count");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
-
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
-
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        uploadButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
-        rightGroup.add(viewModeSwitch, refreshButton, uploadButton);
-
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
-    }
-
-    private void openUploadLinkedFileDialog() {
-        new UploadLinkedFileDialog(this, linkedFileService, categoryService, this::loadAllFiles).open();
-    }
-
-    public void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
-        grid.setVisible(!show && viewModeSwitch.isTableMode());
-        refreshButton.setEnabled(!show);
-        uploadButton.setEnabled(!show);
-    }
-
-    public String getTenant() {
-        return currentTenant != null ? currentTenant : "default";
-    }
-
-    private void configureGrid() {
-        grid.addClassName("management-grid");
+    @Override
+    protected boolean configureGrid(Grid<LinkedFileResponseDto> grid) {
         grid.addColumn(LinkedFileResponseDto::getOriginalFileName)
                 .setHeader(I18n.t("dms.linkedfile.table.name")).setAutoWidth(true).setFlexGrow(1);
         grid.addColumn(LinkedFileResponseDto::getCode)
@@ -413,13 +257,113 @@ public class LinkedFileManagementView extends ManagementVerticalView {
                 .setHeader(I18n.t("dms.linkedfile.card.path")).setAutoWidth(true).setFlexGrow(1);
         grid.addColumn(file -> file.getCategoryNames() == null ? "" : String.join(", ", file.getCategoryNames()))
                 .setHeader(I18n.t("dms.linkedfile.card.categories")).setAutoWidth(true);
-        ManagementGridSupport.addCardActionsColumn(grid,
-                file -> new LinkedFileCard(this, linkedFileService, file, this::loadAllFiles));
+        addCardActionsColumn(grid);
+        return true;
     }
 
-    private void setTableMode(boolean tableMode) {
-        boolean loading = loadingBar.isVisible();
-        cardsContainer.setVisible(!loading && !tableMode);
-        grid.setVisible(!loading && tableMode);
+    @Override
+    protected void openCreateDialog() {
+        new UploadLinkedFileDialog(this, linkedFileService, categoryService, this::reloadFromBackend).open();
+    }
+
+    // ─── Toolbar ─────────────────────────────────────────────────────────────
+
+    @Override
+    protected List<Component> buildToolbarFilters() {
+        loadCategories();
+
+        // Tags and category, unlike free-text search, ARE backed by real
+        // searchByTags/searchByCategories endpoints — route their value
+        // changes into a fresh server-side query.
+        tagsField.setPlaceholder(I18n.t("dms.linkedfile.view.tags.placeholder"));
+        tagsField.setClearButtonVisible(true);
+        tagsField.setValueChangeMode(ValueChangeMode.LAZY);
+        tagsField.setWidth("220px");
+        tagsField.addValueChangeListener(e -> reloadFromBackend());
+
+        categoryFilterComboBox.setPlaceholder(I18n.t("dms.linkedfile.view.category.placeholder"));
+        categoryFilterComboBox.setClearButtonVisible(true);
+        categoryFilterComboBox.setWidth("200px");
+        categoryFilterComboBox.addValueChangeListener(e -> reloadFromBackend());
+
+        return List.of(tagsField, categoryFilterComboBox);
+    }
+
+    @Override
+    protected List<Component> buildToolbarActions() {
+        clearFiltersButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        clearFiltersButton.setTooltipText(I18n.t("dms.linkedfile.view.clear.filters.tooltip"));
+        clearFiltersButton.addClickListener(e -> clearFilters());
+
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.setTooltipText(I18n.t("dms.linkedfile.view.refresh.tooltip"));
+        refreshButton.addClickListener(e -> reloadFromBackend());
+
+        return List.of(clearFiltersButton, refreshButton);
+    }
+
+    private void loadCategories() {
+        try {
+            ResponseEntity<PaginatedResponseDto<CategoryDto>> response = categoryService.findAll(0, 100);
+            if (response.getBody() != null && response.getBody().getContent() != null) {
+                List<String> categoryNames = response.getBody().getContent().stream()
+                        .map(CategoryDto::getName)
+                        .collect(Collectors.toList());
+                categoryFilterComboBox.setItems(categoryNames);
+            }
+        } catch (Exception e) {
+            log.error("Failed to load categories", e);
+        }
+    }
+
+    public String getTenant() {
+        return currentTenant != null ? currentTenant : "default";
+    }
+
+    // ─── Shell hooks ─────────────────────────────────────────────────────────
+
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"linked-file-management-view"};
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "dms.linkedfile.view.load.error";
+    }
+
+    @Override
+    protected String getTitleKey() {
+        return "dms.linkedfile.view.title";
+    }
+
+    @Override
+    protected String getSubtitleKey() {
+        return "dms.linkedfile.view.subtitle";
+    }
+
+    @Override
+    protected String getCreateButtonKey() {
+        return "dms.linkedfile.view.upload.button";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "dms.linkedfile.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "dms.linkedfile.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "dms.linkedfile.view.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.FILE_O;
     }
 }

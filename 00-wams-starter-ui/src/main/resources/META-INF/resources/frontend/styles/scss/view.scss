@@ -35,7 +35,9 @@
     content: "";
   }
 
-  > vaadin-horizontal-layout[class*="toolbar"] {
+  // Only the outer toolbar is a framed card; the clusters inside it (.toolbar-left /
+  // .toolbar-right) are layout-only, otherwise search and actions render as nested cards.
+  > vaadin-horizontal-layout[class*="toolbar"]:not(.toolbar-left):not(.toolbar-right):not([class*="toolbar-group"]) {
     box-sizing: border-box;
     flex-wrap: wrap;
     gap: var(--lumo-space-s) var(--lumo-space-m);
@@ -46,7 +48,7 @@
     background: var(--lumo-base-color);
   }
 
-  vaadin-horizontal-layout[class*="toolbar"] {
+  vaadin-horizontal-layout[class*="toolbar"]:not(.toolbar-left):not(.toolbar-right):not([class*="toolbar-group"]) {
     box-sizing: border-box;
     flex-wrap: wrap;
     gap: var(--lumo-space-s) var(--lumo-space-m);

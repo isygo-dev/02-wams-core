@@ -102,6 +102,27 @@ vaadin-app-layout::part(content) {
   box-shadow: none;
 }
 
+/* One frame only: search, view-mode switch and the create button all sit inside
+   .administration-toolbar. The clusters inside it are layout-only, never framed. */
+.administration-toolbar {
+  padding: var(--wams-card-padding);
+  gap: var(--wams-field-gap);
+
+  > .toolbar-left,
+  > .toolbar-right {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  > .toolbar-right {
+    align-items: flex-end;
+    gap: var(--wams-field-gap);
+  }
+}
+
 .toolbar-add-btn {
   font-weight: 600;
 }

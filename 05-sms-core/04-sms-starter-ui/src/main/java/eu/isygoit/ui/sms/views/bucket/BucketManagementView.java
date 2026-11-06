@@ -1,35 +1,27 @@
 package eu.isygoit.ui.sms.views.bucket;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.BucketDto;
 import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.remote.sms.StorageConfigService;
-import eu.isygoit.ui.common.component.ManagementGridSupport;
-import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
-import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
-import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.common.view.AbstractPaginatedView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
 import eu.isygoit.ui.sms.views.bucket.dialog.CreateBucketDialog;
 import eu.isygoit.ui.sms.views.common.SmsEnumTag;
@@ -49,58 +41,26 @@ import java.util.stream.Collectors;
 @RouteScope
 @Route(value = "sms/buckets", layout = SmsMainLayout.class)
 @PermitAll
-public class BucketManagementView extends ManagementVerticalView {
+public class BucketManagementView extends AbstractPaginatedView<BucketDto> {
     private final ObjectStorageService objectStorageService;
     private final StorageConfigService storageConfigService;
-    private final Div cardsContainer = new Div();
-    private final Grid<BucketDto> grid = new Grid<>();
     private final Button refreshButton = new Button(new Icon(VaadinIcon.REFRESH));
-    private final Button createBucketButton = new Button(I18n.t("sms.buckets.view.create.bucket"), new Icon(VaadinIcon.PLUS_CIRCLE));
-    private final TextField searchField = new TextField();
     private final ComboBox<StorageConfigDto> tenantSelector = new ComboBox<>();
-    private final ProgressBar loadingBar = new ProgressBar();
-    // Pagination
-    private final ComboBox<Integer> pageSizeSelect = new ComboBox<>();
-    private final Button prevButton = new Button(new Icon(VaadinIcon.CHEVRON_LEFT));
-    private final Button nextButton = new Button(new Icon(VaadinIcon.CHEVRON_RIGHT));
-    private final Span pageInfoLabel = new Span();
-    private final Span totalCountLabel = new Span();
-    private ManagementViewModeSwitch viewModeSwitch;
     private List<BucketDto> allBuckets = new ArrayList<>();
-    private List<BucketDto> currentPageBuckets = new ArrayList<>();
+    // True when the next fetchPage() must query the backend (tenant change, refresh, create/delete...).
+    // Search and page changes only re-filter the cached list.
+    private boolean remoteReloadNeeded = true;
     private StorageConfigDto selectedStorageConfig;
-    private String currentSearch = "";
-    private int currentPage = 0;
-    private int pageSize = 10;
-    private int totalPages = 0;
-    private long totalElements = 0;
     private StatCard totalBucketsCard;
+
     @Autowired
     public BucketManagementView(ObjectStorageService objectStorageService,
                                 StorageConfigService storageConfigService) {
         this.objectStorageService = objectStorageService;
         this.storageConfigService = storageConfigService;
-        setSizeFull();
-        setPadding(true);
-        setSpacing(true);
-        addClassName("bucket-management-view");
-
-        add(new PageHeader("sms.buckets.view.title", "sms.buckets.view.subtitle"));
-
-        add(buildStats());
-        add(buildToolbar());
-        cardsContainer.setWidthFull();
-        cardsContainer.addClassName("buckets-cards-grid");
-        add(cardsContainer);
-        configureGrid();
-        add(grid);
-        loadingBar.setIndeterminate(true);
-        loadingBar.setVisible(false);
-        loadingBar.setWidth("200px");
-        add(loadingBar);
-
-        initEventHandlers();
-        setTableMode(viewModeSwitch.isTableMode());
+        this.pageSize = 10;
+        initPaginatedView();
+        createButton.setTooltipText(I18n.t("sms.buckets.view.create.bucket.tooltip"));
         loadStorageConfigs();
     }
 
@@ -109,7 +69,10 @@ public class BucketManagementView extends ManagementVerticalView {
         return I18n.t("sms.buckets.view.title");
     }
 
-    private StatCardGrid buildStats() {
+    // ─── Stats ───────────────────────────────────────────────────────────────
+
+    @Override
+    protected Component buildPreToolbarContent() {
         totalBucketsCard = new StatCard(VaadinIcon.DATABASE, StatCard.Variant.PRIMARY,
                 I18n.t("sms.buckets.stats.total.buckets"), "0");
         return new StatCardGrid(totalBucketsCard);
@@ -119,47 +82,58 @@ public class BucketManagementView extends ManagementVerticalView {
         totalBucketsCard.setValue(String.valueOf(allBuckets.size()));
     }
 
-    private void initEventHandlers() {
-        refreshButton.addClickListener(e -> refreshAll());
-        refreshButton.setTooltipText(I18n.t("sms.buckets.view.refresh.tooltip"));
-        createBucketButton.addClickListener(e -> openCreateBucketDialog());
-        createBucketButton.setTooltipText(I18n.t("sms.buckets.view.create.bucket.tooltip"));
+    // ─── Data ────────────────────────────────────────────────────────────────
 
-        searchField.setPlaceholder(I18n.t("sms.buckets.view.search.placeholder"));
-        searchField.setClearButtonVisible(true);
-        searchField.setValueChangeMode(ValueChangeMode.LAZY);
-        searchField.addValueChangeListener(e -> {
-            currentSearch = e.getValue();
-            applyFiltersAndPagination();
-        });
-
-        tenantSelector.addValueChangeListener(e -> {
-            selectedStorageConfig = e.getValue();
-            if (selectedStorageConfig != null) loadBuckets(selectedStorageConfig.getTenant());
-            else clearBuckets();
-        });
-
-        pageSizeSelect.setItems(5, 10, 20, 50);
-        pageSizeSelect.setValue(10);
-        pageSizeSelect.addValueChangeListener(e -> {
-            if (e.getValue() != null) {
-                pageSize = e.getValue();
-                applyFiltersAndPagination();
+    @Override
+    protected PaginatedResponseDto<BucketDto> fetchPage(int page, int size) {
+        if (selectedStorageConfig == null) {
+            allBuckets = new ArrayList<>();
+            remoteReloadNeeded = true;
+            updateStats();
+            return null;
+        }
+        if (remoteReloadNeeded) {
+            ResponseEntity<List<BucketDto>> response = objectStorageService.getBuckets(selectedStorageConfig.getTenant());
+            if (response.getBody() != null) {
+                allBuckets = response.getBody();
+                updateStats();
+                if (allBuckets.isEmpty()) showWarning(I18n.t("sms.buckets.view.no.buckets"));
             }
-        });
+            remoteReloadNeeded = false;
+        }
 
-        prevButton.addClickListener(e -> {
-            if (currentPage > 0) {
-                currentPage--;
-                applyFiltersAndPagination();
-            }
-        });
-        nextButton.addClickListener(e -> {
-            if (currentPage + 1 < totalPages) {
-                currentPage++;
-                applyFiltersAndPagination();
-            }
-        });
+        String search = searchField.getValue() == null ? "" : searchField.getValue();
+        List<BucketDto> filtered = allBuckets.stream()
+                .filter(b -> search.isBlank() || (b.getName() != null && b.getName().toLowerCase().contains(search.toLowerCase())))
+                .collect(Collectors.toList());
+
+        int total = filtered.size();
+        int totalPagesCount = (int) Math.ceil((double) total / size);
+        int safePage = totalPagesCount == 0 ? 0 : Math.min(page, totalPagesCount - 1);
+        int start = safePage * size;
+        int end = Math.min(start + size, total);
+        List<BucketDto> pageContent = new ArrayList<>(filtered.subList(start, end));
+
+        return PaginatedResponseDto.<BucketDto>builder()
+                .content(pageContent)
+                .totalElements(total)
+                .totalPages(totalPagesCount)
+                .pageNumber(safePage)
+                .pageSize(size)
+                .build();
+    }
+
+    /**
+     * Search is applied over the whole cached bucket list in {@link #fetchPage(int, int)}.
+     */
+    @Override
+    protected boolean matchesSearch(BucketDto item, String search) {
+        return true;
+    }
+
+    @Override
+    protected void onSearchChanged() {
+        loadPage(0);
     }
 
     private void loadStorageConfigs() {
@@ -190,84 +164,12 @@ public class BucketManagementView extends ManagementVerticalView {
         }
     }
 
-    private void loadBuckets(String tenant) {
-        showLoading(true);
-        try {
-            ResponseEntity<List<BucketDto>> response = objectStorageService.getBuckets(tenant);
-            if (response.getBody() != null) {
-                allBuckets = response.getBody();
-                updateStats();
-                if (allBuckets.isEmpty()) showWarning(I18n.t("sms.buckets.view.no.buckets"));
-                applyFiltersAndPagination();
-            }
-        } catch (FeignException ex) {
-            showError(I18n.t("sms.buckets.view.load.buckets.error", extractErrorMessage(ex)));
-            log.error("Failed to load buckets for tenant: {}", tenant, ex);
-        } catch (Exception e) {
-            showError(I18n.t("sms.buckets.view.load.buckets.error", e.getMessage()));
-            log.error("Failed to load buckets for tenant: {}", tenant, e);
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    private void applyFiltersAndPagination() {
-        List<BucketDto> filtered = allBuckets.stream()
-                .filter(b -> currentSearch.isBlank() || (b.getName() != null && b.getName().toLowerCase().contains(currentSearch.toLowerCase())))
-                .collect(Collectors.toList());
-
-        totalElements = filtered.size();
-        totalPages = (int) Math.ceil((double) totalElements / pageSize);
-        if (currentPage >= totalPages) currentPage = Math.max(0, totalPages - 1);
-        int start = currentPage * pageSize;
-        int end = Math.min(start + pageSize, (int) totalElements);
-        currentPageBuckets = filtered.subList(start, end);
-
-        updatePaginationDisplay();
-        grid.setItems(currentPageBuckets);
-        displayCards();
-    }
-
-    private void displayCards() {
-        cardsContainer.removeAll();
-        if (currentPageBuckets.isEmpty()) {
-            Div emptyState = new Div();
-            emptyState.addClassName(LumoUtility.TextAlignment.CENTER);
-            emptyState.addClassName(LumoUtility.Padding.XLARGE);
-            Icon emptyIcon = VaadinIcon.FOLDER.create();
-            emptyIcon.setSize("48px");
-            emptyIcon.addClassName("wams-empty-state-icon");
-            H4 emptyTitle = new H4(I18n.t("sms.buckets.view.empty.title"));
-            Paragraph emptyDesc = new Paragraph(I18n.t("sms.buckets.view.empty.description"));
-            emptyDesc.addClassName(LumoUtility.TextColor.SECONDARY);
-            emptyState.add(emptyIcon, emptyTitle, emptyDesc);
-            cardsContainer.add(emptyState);
-        } else {
-            for (BucketDto bucket : currentPageBuckets) {
-                cardsContainer.add(new BucketCard(this, objectStorageService, bucket, this::refreshAll));
-            }
-        }
-    }
-
-    private void updatePaginationDisplay() {
-        pageInfoLabel.setText(I18n.t("sms.buckets.view.page.info", totalPages == 0 ? 0 : currentPage + 1, totalPages));
-        totalCountLabel.setText(I18n.t("sms.buckets.view.total.count", totalElements));
-        prevButton.setEnabled(currentPage > 0);
-        nextButton.setEnabled(currentPage + 1 < totalPages);
-    }
-
     private void refreshAll() {
         loadStorageConfigs();
-        if (selectedStorageConfig != null) loadBuckets(selectedStorageConfig.getTenant());
-    }
-
-    private void clearBuckets() {
-        allBuckets.clear();
-        currentPageBuckets.clear();
-        grid.setItems(List.of());
-        cardsContainer.removeAll();
-        updateStats();
-        updatePaginationDisplay();
+        if (selectedStorageConfig != null) {
+            remoteReloadNeeded = true;
+            loadPage(0);
+        }
     }
 
     public String getSelectedTenant() {
@@ -281,46 +183,26 @@ public class BucketManagementView extends ManagementVerticalView {
         getUI().ifPresent(ui -> ui.navigate(ObjectStorageManagementView.class, bucket.getName(), queryParameters));
     }
 
-    private HorizontalLayout buildToolbar() {
-        HorizontalLayout toolbar = new HorizontalLayout();
-        toolbar.setWidthFull();
-        toolbar.setPadding(false);
-        toolbar.setSpacing(true);
-        toolbar.setAlignItems(FlexComponent.Alignment.CENTER);
-        toolbar.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        toolbar.addClassName("buckets-toolbar");
+    // ─── Rendering ───────────────────────────────────────────────────────────
 
-        HorizontalLayout leftGroup = new HorizontalLayout();
-        leftGroup.setSpacing(true);
-        leftGroup.setAlignItems(FlexComponent.Alignment.END);
-        tenantSelector.setPlaceholder(I18n.t("sms.buckets.view.select.tenant"));
-        tenantSelector.setWidth("250px");
-        searchField.setWidth("250px");
-        leftGroup.add(tenantSelector, searchField);
-
-        HorizontalLayout centerGroup = new HorizontalLayout();
-        centerGroup.setSpacing(true);
-        centerGroup.setAlignItems(FlexComponent.Alignment.CENTER);
-        prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        pageSizeSelect.setWidth("100px");
-        pageInfoLabel.addClassName("pagination-page-info");
-        totalCountLabel.addClassName("pagination-total-count");
-        centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
-
-        HorizontalLayout rightGroup = new HorizontalLayout();
-        rightGroup.setSpacing(true);
-        rightGroup.setAlignItems(FlexComponent.Alignment.END);
-        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        createBucketButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setTableMode);
-        rightGroup.add(viewModeSwitch, refreshButton, createBucketButton);
-
-        toolbar.add(leftGroup, centerGroup, rightGroup);
-        return toolbar;
+    @Override
+    protected Component renderItem(BucketDto item) {
+        return new BucketCard(this, objectStorageService, item, this::refreshAll);
     }
 
-    private void openCreateBucketDialog() {
+    @Override
+    protected boolean configureGrid(Grid<BucketDto> grid) {
+        grid.addColumn(BucketDto::getName)
+                .setHeader(I18n.t("sms.buckets.card.name")).setAutoWidth(true).setFlexGrow(1);
+        grid.addColumn(bucket -> bucket.getCreationDate() != null
+                        ? bucket.getCreationDate().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "")
+                .setHeader(I18n.t("sms.buckets.card.created")).setAutoWidth(true);
+        addCardActionsColumn(grid);
+        return true;
+    }
+
+    @Override
+    protected void openCreateDialog() {
         if (selectedStorageConfig == null) {
             showError(I18n.t("sms.buckets.error.select.tenant"));
             return;
@@ -328,18 +210,37 @@ public class BucketManagementView extends ManagementVerticalView {
         new CreateBucketDialog(this, objectStorageService, selectedStorageConfig.getTenant(), this::refreshAll).open();
     }
 
+    // ─── Toolbar ─────────────────────────────────────────────────────────────
+
+    @Override
+    protected List<Component> buildToolbarFilters() {
+        tenantSelector.setPlaceholder(I18n.t("sms.buckets.view.select.tenant"));
+        tenantSelector.setWidth("250px");
+        tenantSelector.addValueChangeListener(e -> {
+            selectedStorageConfig = e.getValue();
+            remoteReloadNeeded = true;
+            loadPage(0);
+        });
+        return List.of(tenantSelector);
+    }
+
+    @Override
+    protected List<Component> buildToolbarActions() {
+        refreshButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        refreshButton.setTooltipText(I18n.t("sms.buckets.view.refresh.tooltip"));
+        refreshButton.addClickListener(e -> refreshAll());
+        return List.of(refreshButton);
+    }
+
+    @Override
     public void showLoading(boolean show) {
-        loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show && !viewModeSwitch.isTableMode());
-        grid.setVisible(!show && viewModeSwitch.isTableMode());
+        super.showLoading(show);
         refreshButton.setEnabled(!show);
-        createBucketButton.setEnabled(!show);
         tenantSelector.setEnabled(!show);
         searchField.setEnabled(!show);
-        pageSizeSelect.setEnabled(!show);
-        prevButton.setEnabled(!show && currentPage > 0);
-        nextButton.setEnabled(!show && currentPage + 1 < totalPages);
     }
+
+    // ─── Helpers / shell hooks ───────────────────────────────────────────────
 
     private void showError(String msg) {
         Notification.show(msg, 5000, Notification.Position.BOTTOM_END).addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -357,20 +258,56 @@ public class BucketManagementView extends ManagementVerticalView {
         return ex.getMessage() != null ? ex.getMessage() : "Unknown error";
     }
 
-    private void configureGrid() {
-        grid.addClassName("management-grid");
-        grid.addColumn(BucketDto::getName)
-                .setHeader(I18n.t("sms.buckets.card.name")).setAutoWidth(true).setFlexGrow(1);
-        grid.addColumn(bucket -> bucket.getCreationDate() != null
-                        ? bucket.getCreationDate().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) : "")
-                .setHeader(I18n.t("sms.buckets.card.created")).setAutoWidth(true);
-        ManagementGridSupport.addCardActionsColumn(grid,
-                bucket -> new BucketCard(this, objectStorageService, bucket, this::refreshAll));
+    @Override
+    protected String extractErrorMessage(Exception e) {
+        if (e instanceof FeignException ex) {
+            return extractErrorMessage(ex);
+        }
+        return e.getMessage();
     }
 
-    private void setTableMode(boolean tableMode) {
-        boolean loading = loadingBar.isVisible();
-        cardsContainer.setVisible(!loading && !tableMode);
-        grid.setVisible(!loading && tableMode);
+    @Override
+    protected String[] getRootCssClasses() {
+        return new String[]{"bucket-management-view"};
+    }
+
+    @Override
+    protected String getLoadErrorKey() {
+        return "sms.buckets.view.load.buckets.error";
+    }
+
+    @Override
+    protected String getTitleKey() {
+        return "sms.buckets.view.title";
+    }
+
+    @Override
+    protected String getSubtitleKey() {
+        return "sms.buckets.view.subtitle";
+    }
+
+    @Override
+    protected String getCreateButtonKey() {
+        return "sms.buckets.view.create.bucket";
+    }
+
+    @Override
+    protected String getSearchPlaceholderKey() {
+        return "sms.buckets.view.search.placeholder";
+    }
+
+    @Override
+    protected String getEmptyTitleKey() {
+        return "sms.buckets.view.empty.title";
+    }
+
+    @Override
+    protected String getEmptyDescriptionKey() {
+        return "sms.buckets.view.empty.description";
+    }
+
+    @Override
+    protected VaadinIcon getEmptyIcon() {
+        return VaadinIcon.FOLDER;
     }
 }
