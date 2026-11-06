@@ -22,6 +22,7 @@ import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.dto.KmsDtos.ListAliasesResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
@@ -74,10 +75,7 @@ public class AliasesView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-aliases-view");
 
-        H2 header = new H2(I18n.t("kms.aliases.view.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-        add(header);
+        add(new PageHeader("kms.aliases.view.title", "kms.aliases.view.subtitle"));
 
         HorizontalLayout toolbar = buildToolbar();
         add(toolbar);

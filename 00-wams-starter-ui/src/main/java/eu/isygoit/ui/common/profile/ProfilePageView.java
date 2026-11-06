@@ -18,6 +18,7 @@ import eu.isygoit.api.ProfileServiceApi;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.dto.data.AccountStatDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.dialog.ImageCropperDialog;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
@@ -71,6 +72,7 @@ public class ProfilePageView extends ManagementVerticalView {
 
     private void showContent() {
         removeAll();
+        add(new PageHeader("profile.page.title", "profile.page.subtitle"));
         loadUserData();
         add(currentAccount != null ? buildMainContent() : buildLoadError());
     }

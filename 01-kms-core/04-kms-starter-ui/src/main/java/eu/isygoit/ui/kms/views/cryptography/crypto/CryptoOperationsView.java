@@ -3,7 +3,6 @@ package eu.isygoit.ui.kms.views.cryptography.crypto;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -16,11 +15,11 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.enums.IEnumKeySpec;
 import eu.isygoit.enums.IEnumKeyUsage;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
@@ -71,10 +70,7 @@ public class CryptoOperationsView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-crypto-view");
 
-        H2 header = new H2(I18n.t("kms.crypto.view.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-        add(header);
+        add(new PageHeader("kms.crypto.view.title", "kms.crypto.view.subtitle"));
 
         // Key selection toolbar
         HorizontalLayout keyLayout = createKeyLayout();

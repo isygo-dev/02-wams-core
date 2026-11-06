@@ -24,6 +24,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.SenderConfigService;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.mms.layout.MmsMainLayout;
 import eu.isygoit.ui.mms.views.sender.dialog.CreateSenderConfigDialog;
@@ -85,10 +86,7 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         tableMode = viewModeSwitch.isTableMode();
         configureGrid();
 
-        H2 header = new H2(I18n.t("mms.sender.view.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-        add(header);
+        add(new PageHeader("mms.sender.view.title", "mms.sender.view.subtitle"));
 
         HorizontalLayout toolbar = buildToolbar();
         add(toolbar);

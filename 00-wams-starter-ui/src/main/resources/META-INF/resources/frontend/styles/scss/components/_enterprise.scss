@@ -50,7 +50,7 @@ vaadin-app-layout::part(content) {
     inset-inline-start: 0;
     width: 4px;
     border-radius: var(--lumo-border-radius-l) 0 0 var(--lumo-border-radius-l);
-    background: var(--admin-accent);
+    background: var(--admin-accent, var(--lumo-primary-color));
     content: "";
   }
 

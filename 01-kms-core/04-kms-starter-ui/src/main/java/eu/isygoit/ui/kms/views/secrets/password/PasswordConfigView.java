@@ -145,7 +145,7 @@ public class PasswordConfigView extends AbstractPaginatedView<PasswordConfigDto>
 
     @Override
     protected String getSubtitleKey() {
-        return null;
+        return "kms.password.config.subtitle";
     }
 
     @Override

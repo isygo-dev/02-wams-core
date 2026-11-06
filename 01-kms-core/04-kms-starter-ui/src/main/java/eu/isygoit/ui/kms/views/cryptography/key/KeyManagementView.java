@@ -24,6 +24,7 @@ import eu.isygoit.dto.KmsDtos.DescribeKeyResponse;
 import eu.isygoit.dto.KmsDtos.ListKeysResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
@@ -84,10 +85,7 @@ public class KeyManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-keys-view");
 
-        H2 header = new H2(I18n.t("kms.key.view.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-        add(header);
+        add(new PageHeader("kms.key.view.title", "kms.key.view.subtitle"));
 
         HorizontalLayout toolbar = buildToolbar();
         add(toolbar);

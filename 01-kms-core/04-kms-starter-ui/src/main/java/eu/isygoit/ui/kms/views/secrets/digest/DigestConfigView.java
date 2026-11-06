@@ -144,7 +144,7 @@ public class DigestConfigView extends AbstractPaginatedView<DigestConfigDto> {
 
     @Override
     protected String getSubtitleKey() {
-        return null;
+        return "kms.digest.config.subtitle";
     }
 
     @Override

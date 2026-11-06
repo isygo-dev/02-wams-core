@@ -8,7 +8,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -29,6 +28,7 @@ import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsTokenService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
@@ -101,12 +101,7 @@ public class TokenBuilderView extends ManagementVerticalView {
     }
 
     private void buildHeader() {
-        H2 header = new H2(I18n.t("kms.token.builder.title"));
-        header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE, LumoUtility.Margin.Top.NONE);
-        Span subtitle = new Span(I18n.t("kms.token.builder.subtitle"));
-        subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
-        subtitle.addClassName(LumoUtility.FontSize.SMALL);
-        add(header, subtitle);
+        add(new PageHeader("kms.token.builder.title", "kms.token.builder.subtitle"));
     }
 
     private void buildBuildCard() {

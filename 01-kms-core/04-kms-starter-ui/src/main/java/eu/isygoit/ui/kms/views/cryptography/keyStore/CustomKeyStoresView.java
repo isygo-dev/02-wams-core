@@ -5,7 +5,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -24,6 +23,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos.DescribeCustomKeyStoreResponse;
 import eu.isygoit.dto.KmsDtos.ListCustomKeyStoresResponse;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
@@ -82,9 +82,7 @@ public class CustomKeyStoresView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("kms-custom-stores-view");
 
-        H2 header = new H2(I18n.t("kms.keystore.view.title"));
-        header.addClassNames(LumoUtility.FontSize.XXLARGE, LumoUtility.Margin.Bottom.NONE);
-        add(header);
+        add(new PageHeader("kms.keystore.view.title", "kms.keystore.view.subtitle"));
 
         HorizontalLayout toolbar = buildToolbar();
         add(toolbar);

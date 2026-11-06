@@ -26,6 +26,7 @@ import eu.isygoit.remote.dms.CategoryService;
 import eu.isygoit.remote.dms.LinkedFileService;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.dms.layout.DmsMainLayout;
 import eu.isygoit.ui.dms.views.linkedFile.dialog.UploadLinkedFileDialog;
@@ -83,10 +84,7 @@ public class LinkedFileManagementView extends ManagementVerticalView {
         // Get tenant from security context or use default
         this.currentTenant = getTenant();
 
-        H2 header = new H2(I18n.t("dms.linkedfile.view.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-        add(header);
+        add(new PageHeader("dms.linkedfile.view.title", "dms.linkedfile.view.subtitle"));
 
         HorizontalLayout toolbar = buildToolbar();
         add(toolbar);

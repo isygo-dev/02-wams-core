@@ -31,9 +31,17 @@ public class I18n implements ApplicationContextAware {
     public static String t(String key) {
         CustomI18nProvider provider = getProvider();
         if (provider != null) {
-            return provider.get(key);
+            return unescapeQuotes(provider.get(key));
         }
         return key;
+    }
+
+    /**
+     * Bundles escape apostrophes as two quotes so MessageFormat keeps them; messages
+     * read without parameters are not run through MessageFormat, so undo the escape.
+     */
+    private static String unescapeQuotes(String message) {
+        return message == null ? null : message.replace("''", "'");
     }
 
     /**
@@ -77,7 +85,7 @@ public class I18n implements ApplicationContextAware {
     public static String t(String key, Locale locale) {
         CustomI18nProvider provider = getProvider();
         if (provider != null) {
-            return provider.get(key, locale);
+            return unescapeQuotes(provider.get(key, locale));
         }
         return key;
     }

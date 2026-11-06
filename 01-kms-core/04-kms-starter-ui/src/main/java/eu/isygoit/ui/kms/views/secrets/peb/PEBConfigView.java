@@ -143,7 +143,7 @@ public class PEBConfigView extends AbstractPaginatedView<PEBConfigDto> {
 
     @Override
     protected String getSubtitleKey() {
-        return null;
+        return "kms.peb.config.subtitle";
     }
 
     @Override

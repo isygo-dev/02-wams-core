@@ -1,13 +1,11 @@
 package eu.isygoit.ui.cms;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.data.VCalendarDto;
@@ -16,6 +14,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
 import eu.isygoit.ui.cms.layout.CmsMainLayout;
 import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.component.DashboardShortcutsBar;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
@@ -91,11 +90,8 @@ public class CmsMainView extends ManagementVerticalView {
         return new DashboardShortcutsBar(I18n.t("cms.dashboard.quick.actions"), shortcuts);
     }
 
-    private H2 buildHeader() {
-        H2 title = new H2(I18n.t("cms.dashboard.title"));
-        title.addClassName(LumoUtility.FontSize.XXLARGE);
-        title.addClassName("wams-dashboard-header");
-        return title;
+    private PageHeader buildHeader() {
+        return new PageHeader("cms.dashboard.title", "cms.dashboard.subtitle");
     }
 
     /**

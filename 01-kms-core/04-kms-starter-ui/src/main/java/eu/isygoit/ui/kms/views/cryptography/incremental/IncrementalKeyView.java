@@ -162,7 +162,7 @@ public class IncrementalKeyView extends AbstractPaginatedView<NextCodeDto> {
 
     @Override
     protected String getSubtitleKey() {
-        return null;
+        return "kms.incremental.key.subtitle";
     }
 
     @Override

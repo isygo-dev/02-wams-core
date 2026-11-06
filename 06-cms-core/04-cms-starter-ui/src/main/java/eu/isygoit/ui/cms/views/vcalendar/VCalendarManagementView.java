@@ -162,7 +162,7 @@ public class VCalendarManagementView extends AbstractPaginatedView<VCalendarDto>
 
     @Override
     protected String getSubtitleKey() {
-        return null;
+        return "cms.calendar.view.subtitle";
     }
 
     @Override

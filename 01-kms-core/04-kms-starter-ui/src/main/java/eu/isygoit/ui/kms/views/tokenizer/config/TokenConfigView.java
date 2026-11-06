@@ -147,7 +147,7 @@ public class TokenConfigView extends AbstractPaginatedView<TokenConfigDto> {
 
     @Override
     protected String getSubtitleKey() {
-        return null;
+        return "kms.token.config.subtitle";
     }
 
     @Override

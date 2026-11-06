@@ -30,6 +30,7 @@ import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.remote.sms.StorageConfigService;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
@@ -172,10 +173,7 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
 
     // ----- Header & Stats -----
     private Component buildHeader() {
-        H2 header = new H2(I18n.t("sms.objects.view.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-        return header;
+        return new PageHeader("sms.objects.view.title", "sms.objects.view.subtitle");
     }
 
     private Component buildStats() {

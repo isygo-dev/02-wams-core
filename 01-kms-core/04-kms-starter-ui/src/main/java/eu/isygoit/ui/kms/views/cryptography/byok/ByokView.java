@@ -6,7 +6,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -28,6 +27,7 @@ import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
@@ -84,11 +84,7 @@ public class ByokView extends ManagementVerticalView {
         setAlignItems(FlexComponent.Alignment.STRETCH);
 
         // Header
-        H2 header = new H2(I18n.t("kms.byok.view.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.SMALL);
-        header.addClassName(LumoUtility.Margin.Top.NONE);
-        add(header);
+        add(new PageHeader("kms.byok.view.title", "kms.byok.view.subtitle"));
 
         // Step 1: Key selection + status + delete button
         add(createStepCard(I18n.t("kms.byok.view.step1.title"),

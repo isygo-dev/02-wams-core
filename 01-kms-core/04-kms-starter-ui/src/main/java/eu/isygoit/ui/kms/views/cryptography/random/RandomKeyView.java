@@ -22,6 +22,7 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.dto.common.RandomKeyDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
@@ -80,10 +81,7 @@ public class RandomKeyView extends ManagementCompositeVerticalView {
         layout.setSpacing(true);
         layout.addClassName("random-keys-view");
 
-        H2 header = new H2(I18n.t("kms.random.key.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-        layout.add(header);
+        layout.add(new PageHeader("kms.random.key.title", "kms.random.key.subtitle"));
 
         HorizontalLayout toolbar = buildToolbar();
         layout.add(toolbar);

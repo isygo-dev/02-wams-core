@@ -26,6 +26,7 @@ import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.remote.sms.StorageConfigService;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.component.StatCard;
 import eu.isygoit.ui.common.component.StatCardGrid;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
@@ -84,10 +85,7 @@ public class BucketManagementView extends ManagementVerticalView {
         setSpacing(true);
         addClassName("bucket-management-view");
 
-        H2 header = new H2(I18n.t("sms.buckets.view.title"));
-        header.addClassName(LumoUtility.FontSize.XXLARGE);
-        header.addClassName(LumoUtility.Margin.Bottom.NONE);
-        add(header);
+        add(new PageHeader("sms.buckets.view.title", "sms.buckets.view.subtitle"));
 
         add(buildStats());
         add(buildToolbar());

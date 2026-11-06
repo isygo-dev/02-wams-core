@@ -5,7 +5,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -19,9 +18,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
@@ -86,13 +85,7 @@ public class PoliciesView extends ManagementVerticalView {
     }
 
     private void buildHeader() {
-        H2 header = new H2(I18n.t("kms.policy.view.title"));
-        header.addClassNames(
-                LumoUtility.FontSize.XXLARGE,
-                LumoUtility.Margin.Bottom.NONE,
-                LumoUtility.Margin.Top.NONE
-        );
-        add(header);
+        add(new PageHeader("kms.policy.view.title", "kms.policy.view.subtitle"));
         add(new Hr());
     }
 

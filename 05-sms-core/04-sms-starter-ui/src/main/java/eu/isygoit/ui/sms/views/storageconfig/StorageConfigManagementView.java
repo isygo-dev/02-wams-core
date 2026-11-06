@@ -164,7 +164,7 @@ public class StorageConfigManagementView extends AbstractPaginatedView<StorageCo
 
     @Override
     protected String getSubtitleKey() {
-        return null;
+        return "sms.storageconfig.view.subtitle";
     }
 
     @Override

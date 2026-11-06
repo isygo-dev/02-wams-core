@@ -140,7 +140,7 @@ public class CategoryManagementView extends AbstractPaginatedView<CategoryDto> {
 
     @Override
     protected String getSubtitleKey() {
-        return null;
+        return "dms.category.view.subtitle";
     }
 
     @Override

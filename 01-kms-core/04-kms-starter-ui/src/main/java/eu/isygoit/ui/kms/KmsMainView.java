@@ -3,7 +3,6 @@ package eu.isygoit.ui.kms;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -12,8 +11,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
@@ -100,12 +99,8 @@ public class KmsMainView extends ManagementVerticalView {
         return I18n.t("kms.dashboard.title");
     }
 
-    private H2 buildHeader() {
-        H2 title = new H2(I18n.t("kms.dashboard.title"));
-        title.addClassName(LumoUtility.FontSize.XXLARGE);
-        title.addClassName("wams-dashboard-header");
-        title.addClassName("kms-parta-dashboard-title");
-        return title;
+    private PageHeader buildHeader() {
+        return new PageHeader("kms.dashboard.title", "kms.dashboard.subtitle");
     }
 
     private void loadKeyOptions() {
