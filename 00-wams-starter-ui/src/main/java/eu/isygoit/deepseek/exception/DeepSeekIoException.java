@@ -1,9 +1,12 @@
 package eu.isygoit.deepseek.exception;
 
+import eu.isygoit.annotation.MsgLocale;
+
 /**
  * Thrown for network errors, timeouts, or other I/O issues
  * (where no HTTP status code is available).
  */
+@MsgLocale("deepseek.io.exception")
 public final class DeepSeekIoException extends DeepSeekException {
     public DeepSeekIoException(String message, Throwable cause) {
         super(message, cause, 0);  // 0 indicates no HTTP status

@@ -1,5 +1,7 @@
 package eu.isygoit.ui.ims;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -208,7 +210,7 @@ public class ImsMainView extends ManagementVerticalView {
 
     private long count(PaginatedResponseDto<?> body) {
         if (body == null) {
-            throw new IllegalStateException("IMS dashboard count response did not contain data");
+            throw new ServiceOperationException("IMS dashboard count response did not contain data");
         }
         return body.getTotalElements();
     }

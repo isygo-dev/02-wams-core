@@ -1,6 +1,10 @@
 package eu.isygoit.deepseek.exception;
 
-public sealed abstract class DeepSeekException extends Exception
+import eu.isygoit.annotation.MsgLocale;
+import eu.isygoit.exception.ManagedException;
+
+@MsgLocale("deepseek.exception")
+public sealed abstract class DeepSeekException extends ManagedException
         permits AuthenticationException,
         RateLimitException,
         InvalidRequestException,

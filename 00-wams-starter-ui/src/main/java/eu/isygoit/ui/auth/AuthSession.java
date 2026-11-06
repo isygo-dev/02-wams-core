@@ -1,24 +1,28 @@
 package eu.isygoit.ui.auth;
 
+import eu.isygoit.exception.BadArgumentException;
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinSession;
 import eu.isygoit.util.SecurityUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 
 @Component
 public class AuthSession {
 
     public void write(String username, String accessToken) {
-        Objects.requireNonNull(username, "username");
+        if (username == null) {
+            throw new BadArgumentException("username must not be null");
+        }
         if (accessToken == null || accessToken.isBlank()) {
-            throw new IllegalArgumentException("A non-empty access token is required");
+            throw new BadArgumentException("A non-empty access token is required");
         }
 
         VaadinSession vaadinSession = VaadinSession.getCurrent();
         if (vaadinSession == null) {
-            throw new IllegalStateException("No active Vaadin session");
+            throw new ServiceOperationException("No active Vaadin session");
         }
 
         vaadinSession.setAttribute("user", username);

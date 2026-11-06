@@ -809,7 +809,7 @@ public class KeyManagementService implements IKeyManagementService {
         log.info("Updating alias: {} for tenant: {} to keyId: {}", aliasName, tenant, request.getTargetKeyId());
 
         KmsAlias alias = kmsAliasRepository.findByTenantAndAliasName(tenant, aliasName)
-                .orElseThrow(() -> new IllegalArgumentException("Alias not found: " + aliasName));
+                .orElseThrow(() -> new KeyAliasNotFoundException("Alias not found: " + aliasName));
 
         KmsKey key = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getTargetKeyId())
                 .orElseThrow(() -> new KeyNotFoundException(request.getTargetKeyId()));
@@ -828,7 +828,7 @@ public class KeyManagementService implements IKeyManagementService {
         log.info("Deleting alias: {} for tenant: {}", aliasName, tenant);
 
         KmsAlias alias = kmsAliasRepository.findByTenantAndAliasName(tenant, aliasName)
-                .orElseThrow(() -> new IllegalArgumentException("Alias not found: " + aliasName));
+                .orElseThrow(() -> new KeyAliasNotFoundException("Alias not found: " + aliasName));
 
         kmsAliasRepository.delete(alias);
     }
@@ -1263,4 +1263,3 @@ public class KeyManagementService implements IKeyManagementService {
                 .orElse(0);
     }
 }
-

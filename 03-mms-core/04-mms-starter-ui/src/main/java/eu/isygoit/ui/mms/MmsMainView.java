@@ -1,5 +1,7 @@
 package eu.isygoit.ui.mms;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -135,12 +137,12 @@ public class MmsMainView extends ManagementVerticalView {
     private DashboardData fetchDashboardData() {
         PaginatedResponseDto<?> senderBody = senderConfigService.findAll(0, 1).getBody();
         if (senderBody == null) {
-            throw new IllegalStateException("Sender configuration response did not contain data");
+            throw new ServiceOperationException("Sender configuration response did not contain data");
         }
         PaginatedResponseDto<MsgTemplateDto> templateBody =
                 templateService.findAll(0, PAGE_SIZE).getBody();
         if (templateBody == null) {
-            throw new IllegalStateException("Message template response did not contain data");
+            throw new ServiceOperationException("Message template response did not contain data");
         }
         long senderCount = senderBody.getTotalElements();
         long templateCount = templateBody.getTotalElements();
@@ -151,7 +153,7 @@ public class MmsMainView extends ManagementVerticalView {
             PaginatedResponseDto<MsgTemplateDto> nextPage =
                     templateService.findAll(page, PAGE_SIZE).getBody();
             if (nextPage == null || nextPage.getContent() == null) {
-                throw new IllegalStateException("Message template page " + page + " was empty");
+                throw new ServiceOperationException("Message template page " + page + " was empty");
             }
             addLanguageCounts(countsByLanguage, nextPage.getContent());
         }

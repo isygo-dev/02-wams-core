@@ -1,5 +1,7 @@
 package eu.isygoit.ui.cms;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -144,7 +146,7 @@ public class CmsMainView extends ManagementVerticalView {
                 calendarService.findAll(0, PAGE_SIZE);
         PaginatedResponseDto<VCalendarDto> body = response.getBody();
         if (body == null) {
-            throw new IllegalStateException("Calendar response did not contain data");
+            throw new ServiceOperationException("Calendar response did not contain data");
         }
 
         long total = body.getTotalElements();
@@ -163,7 +165,7 @@ public class CmsMainView extends ManagementVerticalView {
             PaginatedResponseDto<VCalendarDto> nextPage =
                     calendarService.findAll(page, PAGE_SIZE).getBody();
             if (nextPage == null || nextPage.getContent() == null) {
-                throw new IllegalStateException("Calendar page " + page + " was empty");
+                throw new ServiceOperationException("Calendar page " + page + " was empty");
             }
             for (VCalendarDto calendar : nextPage.getContent()) {
                 if (Boolean.TRUE.equals(calendar.getLocked())) {

@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.filters;
 
+import eu.isygoit.exception.BadArgumentException;
+
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import eu.isygoit.i18n.I18n;
@@ -67,7 +69,7 @@ public class NumberRangeFilter extends HorizontalLayout {
         this.fieldName = fieldName;
 
         if (label == null) {
-            throw new IllegalArgumentException("label must not be null");
+            throw new BadArgumentException("label must not be null");
         }
 
         addClassName("filter-number-range");
@@ -95,7 +97,7 @@ public class NumberRangeFilter extends HorizontalLayout {
      */
     private static String format(double v) {
         if (!Double.isFinite(v)) {
-            throw new IllegalArgumentException("Non-finite numeric bound: " + v);
+            throw new BadArgumentException("Non-finite numeric bound: " + v);
         }
         if (v == Math.floor(v) && Math.abs(v) < 1e15) {
             return Long.toString((long) v);

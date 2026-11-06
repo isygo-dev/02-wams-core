@@ -1,10 +1,11 @@
 package eu.isygoit.service.impl;
 
 import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
 import eu.isygoit.config.AppProperties;
+import eu.isygoit.exception.ConvertFileException;
+import eu.isygoit.exception.ManagedException;
 import eu.isygoit.service.IConverterService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
@@ -43,16 +44,17 @@ public class ConverterService implements IConverterService {
      * @param action    The function to execute with the path
      * @param <T>       Return type
      * @return The result from the function
-     * @throws IOException In case of any IO error
      */
-    private <T> T withGeneratedTempPath(String extension, WithTempPath<T> action) throws IOException {
-        Path tempPath = Path.of(appProperties.getUploadDirectory(), "convert", "temp", UUID.randomUUID() + extension);
-        Files.createDirectories(tempPath.getParent());
+    private <T> T withGeneratedTempPath(String extension, WithTempPath<T> action) {
         try {
+            Path tempPath = Path.of(appProperties.getUploadDirectory(), "convert", "temp", UUID.randomUUID() + extension);
+            Files.createDirectories(tempPath.getParent());
             return action.apply(tempPath);
+        } catch (ManagedException e) {
+            throw e;
         } catch (Exception e) {
-            log.error("Error while handling temporary path operation: {}", tempPath, e);
-            throw (e instanceof IOException io) ? io : new IOException("Unexpected error", e);
+            log.error("Error while handling temporary path operation for extension {}", extension, e);
+            throw new ConvertFileException("File conversion failed", e);
         }
     }
 
@@ -61,10 +63,9 @@ public class ConverterService implements IConverterService {
      *
      * @param inputFile PDF file input stream
      * @return Generated HTML file
-     * @throws IOException if the conversion fails
      */
     @Override
-    public File doConvertPdfToHtml(final InputStream inputFile) throws IOException {
+    public File doConvertPdfToHtml(final InputStream inputFile) {
         log.info("Converting PDF to HTML...");
 
         return withGeneratedTempPath(".html", htmlPath -> {
@@ -75,10 +76,6 @@ public class ConverterService implements IConverterService {
 
                 log.info("PDF successfully converted to HTML at {}", htmlPath);
                 return htmlPath.toFile();
-
-            } catch (IOException e) {
-                log.error("Error converting PDF to HTML", e);
-                throw e;
             }
         });
     }
@@ -88,30 +85,21 @@ public class ConverterService implements IConverterService {
      *
      * @param inputFile HTML input stream
      * @return Generated PDF file
-     * @throws DocumentException If PDF creation fails
-     * @throws IOException       If file IO fails
      */
     @Override
-    public File doConvertHtmlToPdf(final InputStream inputFile) throws DocumentException, IOException {
+    public File doConvertHtmlToPdf(final InputStream inputFile) {
         log.info("Converting HTML to PDF...");
-        try {
-            return withGeneratedTempPath(".pdf", pdfPath -> {
-                try (OutputStream os = Files.newOutputStream(pdfPath)) {
-                    Document document = new Document();
-                    PdfWriter writer = PdfWriter.getInstance(document, os);
-                    document.open();
-                    XMLWorkerHelper.getInstance().parseXHtml(writer, document, inputFile, StandardCharsets.UTF_8);
-                    document.close();
-                    log.info("HTML successfully converted to PDF at {}", pdfPath);
-                    return pdfPath.toFile();
-                } catch (DocumentException | IOException e) {
-                    log.error("Error converting HTML to PDF", e);
-                    throw e;
-                }
-            });
-        } catch (IOException e) {
-            throw new IOException("Failed to convert HTML to PDF", e);
-        }
+        return withGeneratedTempPath(".pdf", pdfPath -> {
+            try (OutputStream os = Files.newOutputStream(pdfPath)) {
+                Document document = new Document();
+                PdfWriter writer = PdfWriter.getInstance(document, os);
+                document.open();
+                XMLWorkerHelper.getInstance().parseXHtml(writer, document, inputFile, StandardCharsets.UTF_8);
+                document.close();
+                log.info("HTML successfully converted to PDF at {}", pdfPath);
+                return pdfPath.toFile();
+            }
+        });
     }
 
     /**
@@ -119,10 +107,9 @@ public class ConverterService implements IConverterService {
      *
      * @param inputStream PDF file input stream
      * @return Generated TXT file
-     * @throws IOException if the conversion fails
      */
     @Override
-    public File doConvertPdfToText(InputStream inputStream) throws IOException {
+    public File doConvertPdfToText(InputStream inputStream) {
         log.info("Converting PDF to Text...");
 
         return withGeneratedTempPath(".txt", textPath -> {
@@ -136,10 +123,6 @@ public class ConverterService implements IConverterService {
                 log.info("PDF successfully converted to Text at {}", textPath);
 
                 return textPath.toFile();
-
-            } catch (IOException e) {
-                log.error("Error converting PDF to text", e);
-                throw e;
             }
         });
     }

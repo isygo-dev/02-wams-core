@@ -6,7 +6,7 @@ import eu.isygoit.annotation.MsgLocale;
  * The type Encryption exception.
  */
 @MsgLocale("encryption.exception")
-public class EncryptionException extends RuntimeException {
+public class EncryptionException extends ManagedException {
 
     /**
      * Instantiates a new Encryption exception.
@@ -27,4 +27,3 @@ public class EncryptionException extends RuntimeException {
         super(message, cause);
     }
 }
-

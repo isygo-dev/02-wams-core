@@ -6,7 +6,7 @@ import eu.isygoit.annotation.MsgLocale;
  * The type Invalid key state exception.
  */
 @MsgLocale("invalid.key.state.exception")
-public class InvalidKeyStateException extends RuntimeException {
+public class InvalidKeyStateException extends ManagedException {
 
     /**
      * Instantiates a new Invalid key state exception.
@@ -27,4 +27,3 @@ public class InvalidKeyStateException extends RuntimeException {
         super(message, cause);
     }
 }
-

@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.time;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.dto.common.DayTimeSlot;
 
@@ -168,7 +170,7 @@ public class DailyTableGridConfig<E extends DayTimeSlot> {
     public DailyTableGridConfig<E> build() {
         // Required
         if (startTimeExtractor == null || endTimeExtractor == null || titleExtractor == null) {
-            throw new IllegalStateException(
+            throw new ServiceOperationException(
                     "startTimeExtractor, endTimeExtractor, and titleExtractor are required");
         }
 

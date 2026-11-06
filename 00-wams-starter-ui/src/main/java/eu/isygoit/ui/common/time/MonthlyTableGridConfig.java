@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.time;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.Component;
 import eu.isygoit.dto.common.DayTimeSlot;
 
@@ -128,7 +130,7 @@ public class MonthlyTableGridConfig<E extends DayTimeSlot> {
     public MonthlyTableGridConfig<E> build() {
         // Required
         if (dateExtractor == null || titleExtractor == null || colorExtractor == null) {
-            throw new IllegalStateException(
+            throw new ServiceOperationException(
                     "dateExtractor, titleExtractor, and colorExtractor are required");
         }
 

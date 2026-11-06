@@ -41,7 +41,7 @@ public class SigningService implements ISigningService {
                         tenant,
                         request.getKeyId()
                 )
-                .orElseThrow(() -> new RuntimeException("KMS Key not found"));
+                .orElseThrow(() -> new KeyNotFoundException(request.getKeyId()));
 
         if (!kmsKey.isEnabled()) {
             throw new DisabledKeyException("KMS Key is not enabled");
@@ -76,7 +76,7 @@ public class SigningService implements ISigningService {
         log.info("Verifying signature for tenant: {} with keyId: {}", tenant, request.getKeyId());
 
         KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
-                .orElseThrow(() -> new RuntimeException("KMS Key not found"));
+                .orElseThrow(() -> new KeyNotFoundException(request.getKeyId()));
 
         if (!kmsKey.isEnabled()) {
             throw new DisabledKeyException("KMS Key is not enabled");
@@ -117,7 +117,7 @@ public class SigningService implements ISigningService {
         log.info("Generating MAC for tenant: {} with keyId: {}", tenant, request.getKeyId());
 
         KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
-                .orElseThrow(() -> new RuntimeException("KMS Key not found"));
+                .orElseThrow(() -> new KeyNotFoundException(request.getKeyId()));
 
         if (!kmsKey.isEnabled()) {
             throw new DisabledKeyException("KMS Key is not enabled");
@@ -159,7 +159,7 @@ public class SigningService implements ISigningService {
         log.info("Verifying MAC for tenant: {} with keyId: {}", tenant, request.getKeyId());
 
         KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
-                .orElseThrow(() -> new RuntimeException("KMS Key not found"));
+                .orElseThrow(() -> new KeyNotFoundException(request.getKeyId()));
 
         if (!kmsKey.isEnabled()) {
             throw new DisabledKeyException("KMS Key is not enabled");
@@ -199,4 +199,3 @@ public class SigningService implements ISigningService {
         }
     }
 }
-

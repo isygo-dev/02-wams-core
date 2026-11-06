@@ -3,7 +3,7 @@ package eu.isygoit.exception;
 import eu.isygoit.annotation.MsgLocale;
 
 @MsgLocale("key.spec.not.supported.exception")
-public class KeySpecNotSupportedException extends RuntimeException {
+public class KeySpecNotSupportedException extends ManagedException {
 
     public KeySpecNotSupportedException(String s) {
         super(s);

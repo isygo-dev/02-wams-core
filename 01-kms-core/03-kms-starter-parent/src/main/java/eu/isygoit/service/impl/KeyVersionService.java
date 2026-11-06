@@ -7,6 +7,7 @@ import eu.isygoit.dto.KmsDtos.ListKeyVersionsResponse;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.exception.InvalidKeyStateException;
 import eu.isygoit.exception.KeyNotFoundException;
+import eu.isygoit.exception.NoActiveVersionException;
 import eu.isygoit.model.KmsKeyVersion;
 import eu.isygoit.repository.KmsKeyVersionRepository;
 import eu.isygoit.service.IKeyVersionService;
@@ -142,7 +143,7 @@ public class KeyVersionService implements IKeyVersionService {
 
         KmsKeyVersion activeVersion = kmsKeyVersionRepository
                 .findFirstByTenantAndKeyIdAndKeyStatusOrderByCreateDateDesc(tenant, keyId, IEnumKeyStatus.Types.ENABLED)
-                .orElseThrow(() -> new RuntimeException("No active version found for key: " + keyId));
+                .orElseThrow(() -> new NoActiveVersionException("No active version found for key: " + keyId));
 
         return ActiveVersionResponse.builder()
                 .keyId(activeVersion.getKeyId())
@@ -150,4 +151,3 @@ public class KeyVersionService implements IKeyVersionService {
                 .build();
     }
 }
-

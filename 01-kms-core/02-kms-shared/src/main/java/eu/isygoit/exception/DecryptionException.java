@@ -6,7 +6,7 @@ import eu.isygoit.annotation.MsgLocale;
  * The type Decryption exception.
  */
 @MsgLocale("decryption.exception")
-public class DecryptionException extends RuntimeException {
+public class DecryptionException extends ManagedException {
 
     /**
      * Instantiates a new Decryption exception.
@@ -27,4 +27,3 @@ public class DecryptionException extends RuntimeException {
         super(message, cause);
     }
 }
-

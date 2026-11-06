@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.files;
 
+import eu.isygoit.exception.StorageException;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -407,10 +409,10 @@ public class AdditionalFilesManager<F extends LinkedFileMinDto<Long>> extends Ve
                     return response.getBody().getInputStream();
                 } catch (Exception e) {
                     log.error("Error opening stream for file {}", file.getId(), e);
-                    throw new RuntimeException(I18n.t("files.download.failed"));
+                    throw new StorageException(I18n.t("files.download.failed"));
                 }
             }
-            throw new RuntimeException(I18n.t("files.download.failed"));
+            throw new StorageException(I18n.t("files.download.failed"));
         });
 
         Anchor link = new Anchor(resource, "");

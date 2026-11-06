@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.time;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -204,7 +206,7 @@ public class WeeklyTableGridConfig<E extends DayTimeSlot> {
         // Required
         if (dayOfWeekExtractor == null || startTimeExtractor == null || endTimeExtractor == null ||
                 titleExtractor == null || locationExtractor == null || categoryKeyExtractor == null) {
-            throw new IllegalStateException("dayOfWeekExtractor, startTimeExtractor, endTimeExtractor, " +
+            throw new ServiceOperationException("dayOfWeekExtractor, startTimeExtractor, endTimeExtractor, " +
                     "titleExtractor, locationExtractor, and categoryKeyExtractor are required");
         }
 

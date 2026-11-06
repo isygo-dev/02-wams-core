@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.component;
 
+import eu.isygoit.exception.BadArgumentException;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.shared.Registration;
 import software.xdev.vaadin.maps.leaflet.MapContainer;
@@ -15,7 +17,6 @@ import software.xdev.vaadin.maps.leaflet.registry.LDefaultComponentManagementReg
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Reusable Leaflet map using OpenStreetMap tiles; no map API key is required.
@@ -107,7 +108,7 @@ public class LeafletMap extends Div {
      */
     public void setZoom(int zoom) {
         if (zoom < 0 || zoom > MAX_ZOOM) {
-            throw new IllegalArgumentException("Zoom must be between 0 and " + MAX_ZOOM);
+            throw new BadArgumentException("Zoom must be between 0 and " + MAX_ZOOM);
         }
         this.zoom = zoom;
         map.setView(new LLatLng(registry, centerLatitude, centerLongitude), zoom);
@@ -125,7 +126,9 @@ public class LeafletMap extends Div {
      */
     public void addMarker(double latitude, double longitude, String popupHtml, String iconUrl) {
         validateCoordinates(latitude, longitude);
-        Objects.requireNonNull(popupHtml, "popupHtml must not be null");
+        if (popupHtml == null) {
+            throw new BadArgumentException("popupHtml must not be null");
+        }
         LMarker marker = new LMarker(registry, new LLatLng(registry, latitude, longitude));
         marker.setIcon(createMarkerIcon(iconUrl));
         marker.bindPopup(popupHtml).addTo(map);
@@ -155,10 +158,10 @@ public class LeafletMap extends Div {
 
     private void validateCoordinates(double latitude, double longitude) {
         if (!Double.isFinite(latitude) || latitude < -90 || latitude > 90) {
-            throw new IllegalArgumentException("Latitude must be finite and between -90 and 90");
+            throw new BadArgumentException("Latitude must be finite and between -90 and 90");
         }
         if (!Double.isFinite(longitude) || longitude < -180 || longitude > 180) {
-            throw new IllegalArgumentException("Longitude must be finite and between -180 and 180");
+            throw new BadArgumentException("Longitude must be finite and between -180 and 180");
         }
     }
 

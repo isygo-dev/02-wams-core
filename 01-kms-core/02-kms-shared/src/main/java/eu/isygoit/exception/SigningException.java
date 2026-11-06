@@ -6,7 +6,7 @@ import eu.isygoit.annotation.MsgLocale;
  * The type Signing exception.
  */
 @MsgLocale("signing.exception")
-public class SigningException extends RuntimeException {
+public class SigningException extends ManagedException {
 
     /**
      * Instantiates a new Signing exception.
@@ -27,4 +27,3 @@ public class SigningException extends RuntimeException {
         super(message, cause);
     }
 }
-

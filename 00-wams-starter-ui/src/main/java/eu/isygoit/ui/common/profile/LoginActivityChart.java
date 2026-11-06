@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.profile;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.storedobject.chart.*;
 import eu.isygoit.dto.data.DailyLoginCountDto;
 import eu.isygoit.i18n.I18n;
@@ -94,7 +96,7 @@ class LoginActivityChart extends SOChart {
             try {
                 update(false);
             } catch (Exception e) {
-                throw new IllegalStateException("Unable to update login activity chart", e);
+                throw new ServiceOperationException("Unable to update login activity chart", e);
             }
         }
     }

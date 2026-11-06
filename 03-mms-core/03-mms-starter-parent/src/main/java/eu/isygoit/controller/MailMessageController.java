@@ -10,6 +10,7 @@ import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.data.MailOptionsDto;
 import eu.isygoit.dto.data.MessageCompositionDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.exception.handler.MmsExceptionHandler;
 import eu.isygoit.mapper.MailMessageMapper;
 import eu.isygoit.model.MailMessage;
@@ -92,7 +93,7 @@ public class MailMessageController extends MappedCrudTenantController<UUID, Mail
                             mailMessage.getResources())
             );
             if (!sent) {
-                throw new IllegalStateException("Mail service reported delivery failure.");
+                throw new ServiceOperationException("Mail service reported delivery failure.");
             }
 
             return ResponseFactory.responseOk();

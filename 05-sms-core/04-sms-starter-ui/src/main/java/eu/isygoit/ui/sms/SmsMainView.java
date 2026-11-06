@@ -1,5 +1,7 @@
 package eu.isygoit.ui.sms;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -133,7 +135,7 @@ public class SmsMainView extends ManagementVerticalView {
                 storageConfigService.findAll(0, PAGE_SIZE);
         PaginatedResponseDto<StorageConfigDto> body = response.getBody();
         if (body == null) {
-            throw new IllegalStateException("Storage configuration response did not contain data");
+            throw new ServiceOperationException("Storage configuration response did not contain data");
         }
 
         long total = body.getTotalElements();
@@ -144,7 +146,7 @@ public class SmsMainView extends ManagementVerticalView {
             PaginatedResponseDto<StorageConfigDto> nextPage =
                     storageConfigService.findAll(page, PAGE_SIZE).getBody();
             if (nextPage == null || nextPage.getContent() == null) {
-                throw new IllegalStateException("Storage configuration page " + page + " was empty");
+                throw new ServiceOperationException("Storage configuration page " + page + " was empty");
             }
             addTypeCounts(countsByType, nextPage.getContent());
         }

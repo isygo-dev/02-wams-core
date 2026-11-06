@@ -1,5 +1,7 @@
 package eu.isygoit.ui.ims.views.account.dialog;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.dto.data.AccountDto;
 import eu.isygoit.enums.IEnumEnabledBinaryStatus;
@@ -38,7 +40,7 @@ public class EnableDisableAccountDialog extends PinConfirmActionDialog {
                     ResponseEntity<AccountDto> response = accountService.findById(accountId);
                     AccountDto account = response.getBody();
                     if (account == null) {
-                        throw new IllegalStateException(I18n.t("ims.account.dialog.toggle.not.found"));
+                        throw new ServiceOperationException(I18n.t("ims.account.dialog.toggle.not.found"));
                     }
                     account.setAdminStatus(currentlyEnabled
                             ? IEnumEnabledBinaryStatus.Types.DISABLED

@@ -34,7 +34,7 @@ public class EncryptionService implements IEncryptionService {
         log.info("Encrypt for tenant {} keyId {}", tenant, request.getKeyId());
 
         KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, request.getKeyId())
-                .orElseThrow(() -> new RuntimeException("KMS Key not found"));
+                .orElseThrow(() -> new KeyNotFoundException(request.getKeyId()));
 
         if (!kmsKey.isEnabled()) {
             throw new DisabledKeyException("KMS Key is not enabled");
@@ -103,7 +103,7 @@ public class EncryptionService implements IEncryptionService {
         if (keyId == null) throw new MissingKeyIdException("keyId required");
 
         KmsKey kmsKey = kmsKeyRepository.findByTenantAndKeyId(tenant, keyId)
-                .orElseThrow(() -> new RuntimeException("KMS Key not found"));
+                .orElseThrow(() -> new KeyNotFoundException(keyId));
 
         if (!kmsKey.isEnabled()) {
             throw new DisabledKeyException("KMS Key is not enabled");

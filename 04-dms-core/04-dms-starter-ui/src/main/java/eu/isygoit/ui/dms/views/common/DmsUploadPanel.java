@@ -17,8 +17,8 @@ import eu.isygoit.util.ByteArrayMultipartFile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
+import eu.isygoit.exception.StorageException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -90,7 +90,7 @@ public final class DmsUploadPanel extends VerticalLayout {
                 uploadedFile = new ByteArrayMultipartFile(bytes, uploadedFileName,
                         memoryBuffer.getFileData().getMimeType());
             } catch (IOException e) {
-                throw new UncheckedIOException("Failed to read uploaded file into memory", e);
+                throw new StorageException("Failed to read uploaded file into memory", e);
             }
             fileNameDisplay.setText(I18n.t("dms.linkedfile.dialog.upload.file.name", uploadedFileName));
             fileSizeDisplay.setText(I18n.t("dms.linkedfile.dialog.upload.file.size",

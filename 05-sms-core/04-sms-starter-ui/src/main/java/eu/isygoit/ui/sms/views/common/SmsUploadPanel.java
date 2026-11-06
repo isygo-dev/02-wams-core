@@ -16,8 +16,8 @@ import eu.isygoit.ui.common.files.LinkedFilesSupport;
 import eu.isygoit.util.ByteArrayMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import eu.isygoit.exception.StorageException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -86,7 +86,7 @@ public final class SmsUploadPanel extends VerticalLayout {
                 uploadedFile = new ByteArrayMultipartFile(bytes, uploadedFileName,
                         memoryBuffer.getFileData().getMimeType());
             } catch (IOException e) {
-                throw new UncheckedIOException(e);
+                throw new StorageException("Failed to read uploaded file into memory", e);
             }
             fileNameDisplay.setText(I18n.t("sms.objects.dialog.upload.file.name", uploadedFileName));
             fileSizeDisplay.setText(I18n.t("sms.objects.dialog.upload.file.size",

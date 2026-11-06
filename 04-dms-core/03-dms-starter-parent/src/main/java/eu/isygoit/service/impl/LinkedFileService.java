@@ -8,6 +8,7 @@ import eu.isygoit.config.AppProperties;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.exception.FileNotFoundException;
+import eu.isygoit.exception.FileAlreadyExistsException;
 import eu.isygoit.exception.LinkedFileNotFoundException;
 import eu.isygoit.exception.ResourceNotFoundException;
 import eu.isygoit.exception.StoreFileException;
@@ -37,7 +38,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;

@@ -1,5 +1,7 @@
 package eu.isygoit.ui.dms.views.linkedFile.dialog;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.LinkedFileService;
 import eu.isygoit.ui.common.dialog.DeleteActionDialog;
@@ -27,7 +29,7 @@ public class DeleteLinkedFileDialog extends DeleteActionDialog {
                 () -> {
                     ResponseEntity<Boolean> response = linkedFileService.deleteFile(fileCode);
                     if (response.getStatusCode().is2xxSuccessful() && !Boolean.TRUE.equals(response.getBody())) {
-                        throw new IllegalStateException(I18n.t("dms.linkedfile.dialog.delete.failed"));
+                        throw new ServiceOperationException(I18n.t("dms.linkedfile.dialog.delete.failed"));
                     }
                     return response;
                 },

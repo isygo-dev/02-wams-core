@@ -1,5 +1,7 @@
 package eu.isygoit.ui.cms.views.vcalendar;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -307,7 +309,7 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
     private List<VCalendarDto> fetchCalendars() {
         PaginatedResponseDto<VCalendarDto> firstPage = calendarService.findAll(0, PAGE_SIZE).getBody();
         if (firstPage == null) {
-            throw new IllegalStateException("Calendar response did not contain data");
+            throw new ServiceOperationException("Calendar response did not contain data");
         }
         List<VCalendarDto> calendars = new ArrayList<>(
                 firstPage.getContent() == null ? List.of() : firstPage.getContent());
@@ -315,7 +317,7 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
         for (int page = 1; page < pageCount; page++) {
             PaginatedResponseDto<VCalendarDto> response = calendarService.findAll(page, PAGE_SIZE).getBody();
             if (response == null || response.getContent() == null) {
-                throw new IllegalStateException("Calendar page " + page + " was empty");
+                throw new ServiceOperationException("Calendar page " + page + " was empty");
             }
             calendars.addAll(response.getContent());
         }

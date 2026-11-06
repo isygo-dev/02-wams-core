@@ -6,7 +6,7 @@ import eu.isygoit.annotation.MsgLocale;
  * The type Key not found exception.
  */
 @MsgLocale("key.not.found.exception")
-public class KeyNotFoundException extends RuntimeException {
+public class KeyNotFoundException extends ManagedException {
 
     public KeyNotFoundException(String s) {
         super(s);
@@ -16,4 +16,3 @@ public class KeyNotFoundException extends RuntimeException {
         super(s, cause);
     }
 }
-

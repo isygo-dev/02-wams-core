@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.component;
 
+import eu.isygoit.exception.BadArgumentException;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -14,7 +16,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import eu.isygoit.i18n.I18n;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Responsive, data-backed bar chart for module dashboards.
@@ -66,7 +67,10 @@ public class DashboardBreakdownPanel extends VerticalLayout {
     }
 
     public void setRefreshAction(Runnable action) {
-        refreshAction = Objects.requireNonNull(action);
+        if (action == null) {
+            throw new BadArgumentException("refresh action must not be null");
+        }
+        refreshAction = action;
         refreshButton.setEnabled(true);
     }
 
@@ -111,7 +115,7 @@ public class DashboardBreakdownPanel extends VerticalLayout {
     public record Item(String label, long value) {
         public Item {
             if (value < 0) {
-                throw new IllegalArgumentException("Dashboard chart values cannot be negative");
+                throw new BadArgumentException("Dashboard chart values cannot be negative");
             }
         }
     }

@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.filters;
 
+import eu.isygoit.exception.BadArgumentException;
+
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import eu.isygoit.i18n.I18n;
@@ -66,7 +68,7 @@ public class DateRangeFilter extends HorizontalLayout {
         this.fieldName = fieldName;
 
         if (label == null) {
-            throw new IllegalArgumentException("label must not be null");
+            throw new BadArgumentException("label must not be null");
         }
 
         // No layout API calls — layout is owned by SCSS.

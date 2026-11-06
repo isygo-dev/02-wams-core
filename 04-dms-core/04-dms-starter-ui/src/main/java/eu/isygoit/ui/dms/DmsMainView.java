@@ -1,5 +1,7 @@
 package eu.isygoit.ui.dms;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -146,11 +148,11 @@ public class DmsMainView extends ManagementVerticalView {
 
     private void addFiles(Map<String, LinkedFileResponseDto> files, List<LinkedFileResponseDto> results) {
         if (results == null) {
-            throw new IllegalStateException("Linked-file search did not return a result list");
+            throw new ServiceOperationException("Linked-file search did not return a result list");
         }
         for (LinkedFileResponseDto file : results) {
             if (file.getCode() == null || file.getCode().isBlank()) {
-                throw new IllegalStateException("Linked-file result did not include a business code");
+                throw new ServiceOperationException("Linked-file result did not include a business code");
             }
             files.putIfAbsent(file.getCode(), file);
         }
@@ -158,7 +160,7 @@ public class DmsMainView extends ManagementVerticalView {
 
     private long count(PaginatedResponseDto<?> body) {
         if (body == null) {
-            throw new IllegalStateException("DMS category response did not contain data");
+            throw new ServiceOperationException("DMS category response did not contain data");
         }
         return body.getTotalElements();
     }

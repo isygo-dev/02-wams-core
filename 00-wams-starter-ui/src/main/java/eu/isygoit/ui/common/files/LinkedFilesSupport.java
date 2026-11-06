@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.files;
 
+import eu.isygoit.exception.OperationNotSupportedException;
+
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import org.springframework.web.multipart.MultipartFile;
@@ -128,7 +130,7 @@ public final class LinkedFilesSupport {
 
         @Override
         public void transferTo(File dest) {
-            throw new UnsupportedOperationException("Not implemented");
+            throw new OperationNotSupportedException("Not implemented");
         }
     }
 }

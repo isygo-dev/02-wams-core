@@ -1,5 +1,7 @@
 package eu.isygoit.security;
 
+import eu.isygoit.exception.BadArgumentException;
+import eu.isygoit.exception.UnauthorizedException;
 import eu.isygoit.dto.request.IsPwdExpiredRequestDto;
 import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumAuth;
@@ -13,7 +15,6 @@ import eu.isygoit.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,16 +48,18 @@ public class UserService implements UserDetailsService {
             case QRC:
                 return kmsPublicPasswordService.isQrcExpired(isPwdExpiredRequestDto).getBody();
             default:
-                throw new IllegalArgumentException("Invalid auth type: " + isPwdExpiredRequestDto.getAuthType());
+                throw new BadArgumentException("Invalid auth type: " + isPwdExpiredRequestDto.getAuthType());
         }
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         String[] userNameArray = username.split("@");
         if (userNameArray.length >= 2) {
-            Tenant tenant = tenantRepository.findByNameIgnoreCase(userNameArray[1]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
-            Account account = accountRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(userNameArray[1], userNameArray[0]).orElseThrow(() -> new UsernameNotFoundException("User Not Found!"));
+            Tenant tenant = tenantRepository.findByNameIgnoreCase(userNameArray[1])
+                    .orElseThrow(() -> new UnauthorizedException("User Not Found!"));
+            Account account = accountRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(userNameArray[1], userNameArray[0])
+                    .orElseThrow(() -> new UnauthorizedException("User Not Found!"));
             return CustomUserDetails.builder()
                     .username(account.getCode())
                     .isAdmin(account.getIsAdmin())
@@ -77,6 +80,6 @@ public class UserService implements UserDetailsService {
                     .build();
         }
 
-        throw new UsernameNotFoundException(username);
+        throw new UnauthorizedException("User Not Found!");
     }
 }

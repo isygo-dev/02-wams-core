@@ -1,6 +1,8 @@
 package eu.isygoit.ui.auth;
 
 import eu.isygoit.async.ContextAwareAsync;
+import eu.isygoit.exception.RemoteCallFailedException;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.dto.request.AuthenticationContextRequest;
 import eu.isygoit.dto.request.AuthenticationRequestDto;
 import eu.isygoit.dto.request.QrLoginChallengeRequest;
@@ -74,7 +76,7 @@ public class AuthServiceFacade {
                 return request.get();
             } catch (FeignException exception) {
                 if (exception.status() < 400 || exception.status() > 499) {
-                    throw exception;
+                    throw new RemoteCallFailedException(exception);
                 }
                 HttpHeaders headers = new HttpHeaders();
                 exception.responseHeaders().forEach((name, values) ->
@@ -174,7 +176,8 @@ public class AuthServiceFacade {
             return ContextAwareAsync.supplyAsync(clientErrorsAsResponses(request), authExecutor)
                     .thenApply(responseMapper);
         } catch (RejectedExecutionException exception) {
-            return CompletableFuture.failedFuture(exception);
+            return CompletableFuture.failedFuture(
+                    new ServiceOperationException("Authentication request could not be scheduled", exception));
         }
     }
 

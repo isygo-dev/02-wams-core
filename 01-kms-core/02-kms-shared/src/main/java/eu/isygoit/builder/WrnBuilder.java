@@ -1,5 +1,6 @@
 package eu.isygoit.builder;
 
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.exception.WrnValidationException;
 
 /**
@@ -270,10 +271,10 @@ public final class WrnBuilder {
      */
     public String build() {
         if (region == null) {
-            throw new IllegalStateException("Region is required");
+            throw new ServiceOperationException("Region is required");
         }
         if (resource == null) {
-            throw new IllegalStateException("Resource is required");
+            throw new ServiceOperationException("Resource is required");
         }
 
         String accountPart = (accountId != null && !accountId.isBlank()) ? accountId : "";

@@ -1,5 +1,7 @@
 package eu.isygoit.ui.common.files;
 
+import eu.isygoit.exception.StorageException;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -294,7 +296,7 @@ public class OneFilesManager extends VerticalLayout {
             } catch (Exception ex) {
                 log.error("Download failed for file {}", fileId, ex);
             }
-            throw new RuntimeException(I18n.t("files.download.failed"));
+            throw new StorageException(I18n.t("files.download.failed"));
         });
     }
 

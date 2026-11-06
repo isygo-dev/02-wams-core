@@ -1,5 +1,7 @@
 package eu.isygoit.ui.ims.views.account.dialog;
 
+import eu.isygoit.exception.ServiceOperationException;
+
 import com.vaadin.flow.component.button.ButtonVariant;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.ims.AccountService;
@@ -36,7 +38,7 @@ public class ResetPasswordDialog extends PinConfirmActionDialog {
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
-                        throw new IllegalStateException(I18n.t("ims.account.dialog.reset.interrupted"), e);
+                        throw new ServiceOperationException(I18n.t("ims.account.dialog.reset.interrupted"), e);
                     }
                     return null;
                 },
