@@ -27,9 +27,9 @@ import eu.isygoit.enums.IEnumKeyOrigin;
 import eu.isygoit.enums.IEnumKeyStatus;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.component.PageHeader;
-import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.remote.kms.KmsApiService;
+import eu.isygoit.ui.common.component.FloatingRefreshButton;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.util.RsaEncryptionUtil;
@@ -73,6 +73,7 @@ public class ByokView extends ManagementVerticalView {
     private String currentPublicKey = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
     private boolean hasImportedMaterial = false;
+
     @Autowired
     public ByokView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;

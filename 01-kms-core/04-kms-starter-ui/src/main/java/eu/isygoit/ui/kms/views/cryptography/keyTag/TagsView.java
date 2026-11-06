@@ -18,9 +18,9 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.ui.common.component.PageHeader;
-import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.RowCard;
 import eu.isygoit.ui.common.component.RowCardList;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
@@ -53,6 +53,7 @@ public class TagsView extends ManagementVerticalView {
     private List<KeyOption> keyOptions = new ArrayList<>();
     private String selectedKeyId = null;
     private List<KmsDtos.ListResourceTagsResponse.Tag> allTags;
+
     @Autowired
     public TagsView(KmsApiService kmsApiService) {
         this.kmsApiService = kmsApiService;

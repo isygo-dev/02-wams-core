@@ -15,18 +15,18 @@
 
 // key: (accent, light stop of the gradient, strong text colour, strong text colour in dark mode)
 $wams-modules: (
-  "kms": (#8b5cf6, #a78bfa, #6d28d9, #c4b5fd),
-  "ims": (#10b981, #34d399, #047857, #6ee7b7),
-  "mms": (#14b8a6, #2dd4bf, #0f766e, #5eead4),
-  "dms": (#ec4899, #f472b6, #be185d, #f9a8d4),
-  "sms": (#f43f5e, #fb7185, #be123c, #fda4af),
-  "cms": (#06b6d4, #22d3ee, #0e7490, #67e8f9),
-  "edyra-vue": (#6366f1, #818cf8, #4f46e5, #a5b4fc),
-  "edyra-studio": (#d946ef, #e879f9, #a21caf, #f0abfc),
-  "edyra-pilot": (#f59e0b, #fbbf24, #b45309, #fcd34d),
-  "edyra-radar": (#84cc16, #a3e635, #4d7c0f, #bef264),
-  "edyra-spark": (#3b82f6, #60a5fa, #1d4ed8, #93c5fd),
-  "edyra-hub": (#f97316, #fb923c, #c2410c, #fdba74)
+        "kms": (#8b5cf6, #a78bfa, #6d28d9, #c4b5fd),
+        "ims": (#10b981, #34d399, #047857, #6ee7b7),
+        "mms": (#14b8a6, #2dd4bf, #0f766e, #5eead4),
+        "dms": (#ec4899, #f472b6, #be185d, #f9a8d4),
+        "sms": (#f43f5e, #fb7185, #be123c, #fda4af),
+        "cms": (#06b6d4, #22d3ee, #0e7490, #67e8f9),
+        "edyra-vue": (#6366f1, #818cf8, #4f46e5, #a5b4fc),
+        "edyra-studio": (#d946ef, #e879f9, #a21caf, #f0abfc),
+        "edyra-pilot": (#f59e0b, #fbbf24, #b45309, #fcd34d),
+        "edyra-radar": (#84cc16, #a3e635, #4d7c0f, #bef264),
+        "edyra-spark": (#3b82f6, #60a5fa, #1d4ed8, #93c5fd),
+        "edyra-hub": (#f97316, #fb923c, #c2410c, #fdba74)
 );
 
 @each $key, $c in $wams-modules {

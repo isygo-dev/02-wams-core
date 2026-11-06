@@ -65,6 +65,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
      * Table of the current page, available when {@link #configureGrid(Grid)} returns true.
      */
     protected final Grid<T> grid = new Grid<>();
+    private final Map<String, byte[]> imageCache = new ConcurrentHashMap<>();
     // ─── Pagination state ──────────────────────────────────────────
     protected int currentPage = 0;
     protected int pageSize = DEFAULT_PAGE_SIZE;
@@ -76,19 +77,31 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     protected String currentCriteria = "";
     // ─── Data (current page only) ──────────────────────────────────
     protected List<T> currentItems = new ArrayList<>();
+    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
     private boolean gridSupported;
     private boolean gridMode;
     private int renderedCount;
     private boolean imageColumnChecked;
-    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
-    private final Map<String, byte[]> imageCache = new ConcurrentHashMap<>();
-
     // ─── Criteria state ────────────────────────────────────────────
     private ManagementViewModeSwitch viewModeSwitch;
 
     // ══════════════════════════════════════════════════════════════
     //  Abstract contract — subclasses must implement
     // ══════════════════════════════════════════════════════════════
+
+    private static String imagePathOf(Object item) {
+        if (item instanceof IImageEntity entity) {
+            return entity.getImagePath();
+        }
+        if (item instanceof IImageUploadDto dto) {
+            return dto.getImagePath();
+        }
+        return null;
+    }
+
+    private static boolean hasImage(Object item) {
+        return item instanceof IImageEntity || item instanceof IImageUploadDto;
+    }
 
     /**
      * Fetch one page from the backend. Return {@code null} for an empty page.
@@ -119,13 +132,13 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
 
     protected abstract String getSearchPlaceholderKey();
 
-    protected abstract String getEmptyTitleKey();
-
-    protected abstract String getEmptyDescriptionKey();
-
     // ══════════════════════════════════════════════════════════════
     //  Optional hooks — subclasses may override
     // ══════════════════════════════════════════════════════════════
+
+    protected abstract String getEmptyTitleKey();
+
+    protected abstract String getEmptyDescriptionKey();
 
     protected abstract VaadinIcon getEmptyIcon();
 
@@ -181,6 +194,11 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         return false;
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  Criteria hooks — subclasses override when their backend
+    //  supports /filter and /filter/criteria
+    // ══════════════════════════════════════════════════════════════
+
     /**
      * Adds the actions column of a table by reusing the buttons of the item's card (same icons, tooltips, visibility
      * rules and handlers), so a table never needs its own copy of the card actions. The card is built but never
@@ -196,11 +214,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     protected String getLoadErrorKey() {
         return "common.load.error";
     }
-
-    // ══════════════════════════════════════════════════════════════
-    //  Criteria hooks — subclasses override when their backend
-    //  supports /filter and /filter/criteria
-    // ══════════════════════════════════════════════════════════════
 
     /**
      * Fetch a filtered page.
@@ -225,6 +238,10 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         return Map.of();
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  Template method — call from the subclass constructor
+    // ══════════════════════════════════════════════════════════════
+
     /**
      * Apply a criteria string and reload from page 0.
      */
@@ -240,10 +257,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         this.currentCriteria = "";
         loadPage(0);
     }
-
-    // ══════════════════════════════════════════════════════════════
-    //  Template method — call from the subclass constructor
-    // ══════════════════════════════════════════════════════════════
 
     /**
      * Builds the entire view shell and triggers the initial page load.
@@ -326,6 +339,10 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         loadPage(0);
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  Data loading
+    // ══════════════════════════════════════════════════════════════
+
     /**
      * Called when the user clicks the floating refresh button. Default: reload the current page with the
      * current criteria and page size. Override when the view caches data that must be re-queried first,
@@ -390,10 +407,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         return toolbar;
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  Data loading
-    // ══════════════════════════════════════════════════════════════
-
     /**
      * Loads the given 0‑based page from the backend, refreshes the cards
      * and updates the pagination bar. Honours {@link #currentCriteria}.
@@ -431,6 +444,10 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         }
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  Filtering & rendering
+    // ══════════════════════════════════════════════════════════════
+
     /**
      * Reload the current page — call this after a create / update / delete.
      */
@@ -446,10 +463,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         refreshFab.setLoading(show);
         paginationBar.setVisible(!show && totalPages > 0);
     }
-
-    // ══════════════════════════════════════════════════════════════
-    //  Filtering & rendering
-    // ══════════════════════════════════════════════════════════════
 
     /**
      * Re‑apply the local search filter to the current page.
@@ -477,20 +490,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
      */
     protected String getItemImageLabel(T item) {
         return "";
-    }
-
-    private static String imagePathOf(Object item) {
-        if (item instanceof IImageEntity entity) {
-            return entity.getImagePath();
-        }
-        if (item instanceof IImageUploadDto dto) {
-            return dto.getImagePath();
-        }
-        return null;
-    }
-
-    private static boolean hasImage(Object item) {
-        return item instanceof IImageEntity || item instanceof IImageUploadDto;
     }
 
     /**

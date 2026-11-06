@@ -46,6 +46,14 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
         initPaginatedView();
     }
 
+    private static byte[] readBytes(org.springframework.core.io.Resource resource) {
+        try {
+            return resource.getContentAsByteArray();
+        } catch (java.io.IOException e) {
+            return null;
+        }
+    }
+
     @Override
     protected PaginatedResponseDto<ApplicationDto> fetchPage(int page, int size) {
         var r = applicationService.findAll(page, size);
@@ -85,7 +93,9 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
                 item, this::loadPageZero);
     }
 
-    /** Image shown in the first column of the table mode (the item implements IImageUploadDto). */
+    /**
+     * Image shown in the first column of the table mode (the item implements IImageUploadDto).
+     */
     @Override
     protected byte[] downloadItemImage(ApplicationDto item) {
         if (item == null || item.getId() == null) {
@@ -104,14 +114,6 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
     @Override
     protected String getItemImageLabel(ApplicationDto item) {
         return item.getName() != null ? item.getName() : item.getCode();
-    }
-
-    private static byte[] readBytes(org.springframework.core.io.Resource resource) {
-        try {
-            return resource.getContentAsByteArray();
-        } catch (java.io.IOException e) {
-            return null;
-        }
     }
 
     @Override

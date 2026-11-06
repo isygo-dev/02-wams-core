@@ -69,23 +69,19 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
     private final Button previousButton = new Button(VaadinIcon.CHEVRON_LEFT.create());
     private final Button nextButton = new Button(VaadinIcon.CHEVRON_RIGHT.create());
     private final Button todayButton = new Button(I18n.t("cms.calendar.view.today"));
-    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::refresh);
-    private final Span navigationTitle = new Span();
+    private final Span navigationTitle = new Span();    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::refresh);
     private final Span navigationSubtitle = new Span();
     private final Span feedback = new Span();
     private final Span eventCount = new Span();
     private final ProgressBar loadingBar = new ProgressBar();
     private final Tabs viewTabs = new Tabs();
     private final Div viewContainer = new Div();
-
     private final MonthlyCalendarView monthlyView;
     private final WeeklyCalendarView weeklyView;
     private final DailyCalendarView dailyView;
-
     private LocalDate currentDate = LocalDate.now();
     private CalendarMode currentMode = CalendarMode.MONTH;
     private List<CmsCalendarEventSlot> events = List.of();
-
     @Autowired
     public CmsCalendarView(VCalendarService calendarService, VCalendarEventService eventService) {
         this.calendarService = calendarService;
@@ -430,4 +426,6 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
     private enum CalendarMode {
         MONTH, WEEK, DAY
     }
+
+
 }

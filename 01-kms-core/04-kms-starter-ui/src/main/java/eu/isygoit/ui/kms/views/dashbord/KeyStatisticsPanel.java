@@ -36,10 +36,8 @@ public class KeyStatisticsPanel extends VerticalLayout {
     private final RandomKeyService randomKeyService;
     private final UI ui;
     private final ProgressBar loadingBar = new ProgressBar();
-    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::loadStatistics);
-
     // Status group
-    private StatCard totalCard;
+    private StatCard totalCard;    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::loadStatistics);
     private StatCard activeCard;
     private StatCard disabledCard;
     private StatCard pendingDeletionCard;
@@ -57,7 +55,6 @@ public class KeyStatisticsPanel extends VerticalLayout {
     private StatCard customStoresCard;
     private StatCard incrementalConfigsCard;
     private StatCard randomKeysCard;
-
     public KeyStatisticsPanel(KmsApiService kmsApiService,
                               KmsAppNextCodeService nextCodeService,
                               RandomKeyService randomKeyService,
@@ -258,4 +255,6 @@ public class KeyStatisticsPanel extends VerticalLayout {
                 symmetricKeys = 0, asymmetricKeys = 0, encryptUsage = 0, signUsage = 0, macUsage = 0,
                 totalAliases = 0, totalGrants = 0, totalStores = 0, nextCodeTotal = 0, randomKeysTotal = 0;
     }
+
+
 }

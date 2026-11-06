@@ -13,11 +13,7 @@ import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.cms.VCalendarService;
 import eu.isygoit.ui.cms.layout.CmsMainLayout;
-import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
-import eu.isygoit.ui.common.component.PageHeader;
-import eu.isygoit.ui.common.component.DashboardShortcutsBar;
-import eu.isygoit.ui.common.component.StatCard;
-import eu.isygoit.ui.common.component.StatCardGrid;
+import eu.isygoit.ui.common.component.*;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +40,7 @@ public class CmsMainView extends ManagementVerticalView {
     private StatCard lockedCalendarsCard;
     private StatCard unlockedCalendarsCard;
     private DashboardBreakdownPanel calendarStatusPanel;
+
     @Autowired
     public CmsMainView(VCalendarService calendarService) {
         this.calendarService = calendarService;

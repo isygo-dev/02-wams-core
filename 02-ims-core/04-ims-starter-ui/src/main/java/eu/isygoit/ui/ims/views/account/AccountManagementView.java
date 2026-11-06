@@ -57,6 +57,14 @@ public class AccountManagementView extends AbstractPaginatedView<MinAccountDto> 
         initPaginatedView();
     }
 
+    private static byte[] readBytes(org.springframework.core.io.Resource resource) {
+        try {
+            return resource.getContentAsByteArray();
+        } catch (java.io.IOException e) {
+            return null;
+        }
+    }
+
     @Override
     protected PaginatedResponseDto<MinAccountDto> fetchPage(int page, int size) {
         var r = accountService.findAll(page, size);
@@ -95,7 +103,9 @@ public class AccountManagementView extends AbstractPaginatedView<MinAccountDto> 
         return new AccountCard(this, accountService, accountImageService, item, this::loadPageZero);
     }
 
-    /** Image shown in the first column of the table mode (the item implements IImageUploadDto). */
+    /**
+     * Image shown in the first column of the table mode (the item implements IImageUploadDto).
+     */
     @Override
     protected byte[] downloadItemImage(MinAccountDto item) {
         if (item == null || item.getId() == null) {
@@ -114,14 +124,6 @@ public class AccountManagementView extends AbstractPaginatedView<MinAccountDto> 
     @Override
     protected String getItemImageLabel(MinAccountDto item) {
         return item.getFullName() != null ? item.getFullName() : item.getEmail();
-    }
-
-    private static byte[] readBytes(org.springframework.core.io.Resource resource) {
-        try {
-            return resource.getContentAsByteArray();
-        } catch (java.io.IOException e) {
-            return null;
-        }
     }
 
     @Override

@@ -45,6 +45,14 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
         initPaginatedView();
     }
 
+    private static byte[] readBytes(org.springframework.core.io.Resource resource) {
+        try {
+            return resource.getContentAsByteArray();
+        } catch (java.io.IOException e) {
+            return null;
+        }
+    }
+
     @Override
     protected PaginatedResponseDto<TenantDto> fetchPage(int page, int size) {
         var r = tenantService.findAll(page, size);
@@ -82,7 +90,9 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
         return new TenantCard(this, tenantService, tenantImageService, item, this::loadPageZero);
     }
 
-    /** Image shown in the first column of the table mode (the item implements IImageUploadDto). */
+    /**
+     * Image shown in the first column of the table mode (the item implements IImageUploadDto).
+     */
     @Override
     protected byte[] downloadItemImage(TenantDto item) {
         if (item == null || item.getId() == null) {
@@ -101,14 +111,6 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
     @Override
     protected String getItemImageLabel(TenantDto item) {
         return item.getCode();
-    }
-
-    private static byte[] readBytes(org.springframework.core.io.Resource resource) {
-        try {
-            return resource.getContentAsByteArray();
-        } catch (java.io.IOException e) {
-            return null;
-        }
     }
 
     @Override

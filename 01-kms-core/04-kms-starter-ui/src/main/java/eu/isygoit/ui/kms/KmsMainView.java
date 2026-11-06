@@ -12,12 +12,12 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.remote.kms.KmsAppNextCodeService;
 import eu.isygoit.remote.kms.KmsTokenConfigService;
 import eu.isygoit.remote.kms.RandomKeyService;
 import eu.isygoit.ui.common.component.DashboardShortcutsBar;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.dashbord.AuditLogPanel;
@@ -43,6 +43,7 @@ public class KmsMainView extends ManagementVerticalView {
     private final TokenStatisticsPanel tokenStatsPanel;
     private final KeyUsageStatsPanel usageStatsPanel;
     private final AuditLogPanel auditLogPanel;
+
     @Autowired
     public KmsMainView(KmsApiService kmsApiService,
                        KmsTokenConfigService tokenConfigService,

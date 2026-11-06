@@ -28,8 +28,8 @@ import eu.isygoit.dto.common.TokenResponseDto;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.helper.DateHelper;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.remote.kms.KmsTokenService;
+import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.common.KmsEnumTag;
@@ -69,6 +69,7 @@ public class TokenBuilderView extends ManagementVerticalView {
     private final TextField validateSubjectField = new TextField();
     private final Button validateButton = new Button(I18n.t("kms.token.builder.validate.token"), new Icon(VaadinIcon.SEARCH));
     private final Span validationResultSpan = new Span();
+
     public TokenBuilderView(KmsTokenService tokenService, ObjectMapper objectMapper) {
         this.tokenService = tokenService;
         this.objectMapper = objectMapper;

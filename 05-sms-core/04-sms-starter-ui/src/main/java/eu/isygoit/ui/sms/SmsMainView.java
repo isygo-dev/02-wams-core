@@ -12,11 +12,7 @@ import eu.isygoit.dto.data.StorageConfigDto;
 import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.sms.StorageConfigService;
-import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
-import eu.isygoit.ui.common.component.PageHeader;
-import eu.isygoit.ui.common.component.DashboardShortcutsBar;
-import eu.isygoit.ui.common.component.StatCard;
-import eu.isygoit.ui.common.component.StatCardGrid;
+import eu.isygoit.ui.common.component.*;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.sms.layout.SmsMainLayout;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +41,7 @@ public class SmsMainView extends ManagementVerticalView {
     private final UI ui;
     private StatCard totalConfigsCard;
     private DashboardBreakdownPanel storageTypesPanel;
+
     @Autowired
     public SmsMainView(StorageConfigService storageConfigService) {
         this.storageConfigService = storageConfigService;

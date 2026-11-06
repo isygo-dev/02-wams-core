@@ -147,7 +147,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
 
         chartCard.add(chartHeader, chartHolder);
         return chartCard;
-    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
+    }
 
     private Div buildRecentSessionsCard(Runnable onViewAllActivity) {
         Div listCard = new Div();
@@ -166,7 +166,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
 
         listCard.add(listTitle, sessionsBody, sessionsPager, viewAll);
         return listCard;
-    }
+    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
 
     private void loadSessions(int page) {
         ConnectionPageDto result = fetchSessions(page);

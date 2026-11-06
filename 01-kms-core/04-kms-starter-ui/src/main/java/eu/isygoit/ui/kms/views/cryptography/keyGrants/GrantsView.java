@@ -18,9 +18,9 @@ import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.ui.common.component.PageHeader;
-import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.RowCard;
 import eu.isygoit.ui.common.component.RowCardList;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
@@ -59,6 +59,7 @@ public class GrantsView extends ManagementVerticalView {
     private String selectedKeyId = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
     private List<KmsDtos.ListGrantsResponse.Grant> allGrants = new ArrayList<>();
+
     @Autowired
     public GrantsView(KmsApiService kmsApiService, ObjectMapper objectMapper) {
         this.kmsApiService = kmsApiService;

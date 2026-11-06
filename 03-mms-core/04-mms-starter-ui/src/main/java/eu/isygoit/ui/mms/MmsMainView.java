@@ -13,11 +13,7 @@ import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.mms.MsgTemplateService;
 import eu.isygoit.remote.mms.SenderConfigService;
-import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
-import eu.isygoit.ui.common.component.PageHeader;
-import eu.isygoit.ui.common.component.DashboardShortcutsBar;
-import eu.isygoit.ui.common.component.StatCard;
-import eu.isygoit.ui.common.component.StatCardGrid;
+import eu.isygoit.ui.common.component.*;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.mms.layout.MmsMainLayout;
 import jakarta.annotation.security.PermitAll;
@@ -44,6 +40,7 @@ public class MmsMainView extends ManagementVerticalView {
     private final DashboardBreakdownPanel templateLanguagesPanel;
     private StatCard sendersCard;
     private StatCard templatesCard;
+
     @Autowired
     public MmsMainView(SenderConfigService senderConfigService, MsgTemplateService templateService) {
         this.senderConfigService = senderConfigService;

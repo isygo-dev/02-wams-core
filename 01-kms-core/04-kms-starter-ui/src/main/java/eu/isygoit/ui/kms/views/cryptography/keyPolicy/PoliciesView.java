@@ -20,9 +20,9 @@ import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.dto.KmsDtos;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.ui.common.component.PageHeader;
-import eu.isygoit.remote.kms.KmsApiService;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.kms.layout.KmsMainLayout;
 import eu.isygoit.ui.kms.views.common.KmsConfirmationDialog;
@@ -59,6 +59,7 @@ public class PoliciesView extends ManagementVerticalView {
     private final Button checkActionButton = new Button(I18n.t("kms.policy.view.check.action"), new Icon(VaadinIcon.SEARCH));
     private String selectedKeyId = null;
     private List<KeyOption> keyOptions = new ArrayList<>();
+
     @Autowired
     public PoliciesView(KmsApiService kmsApiService, ObjectMapper objectMapper) {
         this.kmsApiService = kmsApiService;

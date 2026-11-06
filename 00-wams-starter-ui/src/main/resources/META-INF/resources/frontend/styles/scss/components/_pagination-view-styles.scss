@@ -23,8 +23,8 @@ $pagination-text-muted: var(--lumo-secondary-text-color);
 
 $pagination-font-weight: 500;
 $pagination-transition: background-color var(--wams-motion-duration) var(--wams-motion-ease),
-  border-color var(--wams-motion-duration) var(--wams-motion-ease),
-  color var(--wams-motion-duration) var(--wams-motion-ease);
+border-color var(--wams-motion-duration) var(--wams-motion-ease),
+color var(--wams-motion-duration) var(--wams-motion-ease);
 
 // ── Mixins ───────────────────────────────────────────────────
 @mixin circle($size) {

@@ -9,14 +9,11 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
+import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
 import eu.isygoit.remote.dms.LinkedFileService;
-import eu.isygoit.ui.common.component.DashboardBreakdownPanel;
-import eu.isygoit.ui.common.component.PageHeader;
-import eu.isygoit.ui.common.component.DashboardShortcutsBar;
-import eu.isygoit.ui.common.component.StatCard;
-import eu.isygoit.ui.common.component.StatCardGrid;
+import eu.isygoit.ui.common.component.*;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.dms.layout.DmsMainLayout;
 import org.slf4j.Logger;
@@ -44,6 +41,7 @@ public class DmsMainView extends ManagementVerticalView {
     private StatCard categoriesCard;
     private StatCard filesCard;
     private DashboardBreakdownPanel inventoryPanel;
+
     @Autowired
     public DmsMainView(CategoryService categoryService, LinkedFileService linkedFileService) {
         this.categoryService = categoryService;

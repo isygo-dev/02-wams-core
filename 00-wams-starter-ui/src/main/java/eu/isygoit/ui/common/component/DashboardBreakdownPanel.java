@@ -20,9 +20,9 @@ public class DashboardBreakdownPanel extends VerticalLayout {
 
     private final Div chart = new Div();
     private final Span error = new Span();
-    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::refresh);
     private final ProgressBar loadingBar = new ProgressBar();
     private Runnable refreshAction;
+    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::refresh);
 
     public DashboardBreakdownPanel(String title) {
         setSpacing(false);
