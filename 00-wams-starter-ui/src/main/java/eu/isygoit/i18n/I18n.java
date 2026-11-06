@@ -61,6 +61,21 @@ public class I18n implements ApplicationContextAware {
     }
 
     /**
+     * Returns the translation registered for an enum constant using the given locale.
+     */
+    public static String enumLabel(Enum<?> value, Locale locale) {
+        if (value == null) {
+            return null;
+        }
+        String key = "enum." + value.name();
+        String translation = t(key, locale);
+        return translation != null && !translation.isBlank()
+                && !translation.equals(key) && !translation.equals("!" + key + "!")
+                ? translation
+                : value.name();
+    }
+
+    /**
      * Obtient une traduction formatée avec les paramètres donnés
      * Utilise MessageFormat pour substituer les paramètres {0}, {1}, etc.
      */

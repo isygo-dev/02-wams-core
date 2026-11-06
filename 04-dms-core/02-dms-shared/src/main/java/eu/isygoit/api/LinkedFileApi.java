@@ -37,7 +37,7 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
     })
     @GetMapping(path = "/searchByTags")
     ResponseEntity<List<LinkedFileResponseDto>> searchByTags(
-            @RequestParam(name = RestApiConstants.TAGS) List<String> tags);
+            @RequestParam(name = RestApiConstants.TAGS, required = false) List<String> tags);
 
 
     /**
@@ -94,5 +94,5 @@ public interface LinkedFileApi extends ILinkedFileApi<LinkedFileRequestDto> {
     })
     @GetMapping(path = "/searchByCategories")
     ResponseEntity<List<LinkedFileResponseDto>> searchByCategories(
-            @RequestParam(name = RestApiConstants.CATEGORIES) List<String> categories);
+            @RequestParam(name = RestApiConstants.CATEGORIES, required = false) List<String> categories);
 }

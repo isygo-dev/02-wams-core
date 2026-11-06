@@ -5,6 +5,7 @@ import eu.isygoit.api.LinkedFileApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.exception.handler.DmsExceptionHandler;
@@ -17,8 +18,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -42,11 +45,14 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     private RequestContextService requestContextService;
 
     @Override
-    public ResponseEntity<List<LinkedFileResponseDto>> searchByTags(List<String> tags) {
+    public ResponseEntity<List<LinkedFileResponseDto>> searchByTags(
+            @RequestParam(name = RestApiConstants.TAGS, required = false) List<String> tags) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         log.info("Search file by tags from tenant: {} / tags:{}", tenant, tags);
         try {
-            return ResponseFactory.responseOk(linkedFileMapper.listEntityToDto(linkedFileService.searchByTags(tenant, tags)));
+            List<LinkedFileResponseDto> list = linkedFileMapper.listEntityToDto(
+                    isUnfiltered(tags) ? linkedFileService.findAll(tenant) : linkedFileService.searchByTags(tenant, tags));
+            return ResponseFactory.responseOk(list);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
@@ -94,11 +100,14 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     }
 
     @Override
-    public ResponseEntity<List<LinkedFileResponseDto>> searchByCategories(List<String> categories) {
+    public ResponseEntity<List<LinkedFileResponseDto>> searchByCategories(
+            @RequestParam(name = RestApiConstants.CATEGORIES, required = false) List<String> categories) {
         String tenant = requestContextService.getCurrentContext().getSenderTenant();
         log.info("Search files by categories from tenant {} : {}", tenant, categories);
         try {
-            List<LinkedFileResponseDto> list = linkedFileMapper.listEntityToDto(linkedFileService.searchByCategories(tenant, categories));
+            List<LinkedFileResponseDto> list = linkedFileMapper.listEntityToDto(
+                    isUnfiltered(categories) ? linkedFileService.findAll(tenant)
+                            : linkedFileService.searchByCategories(tenant, categories));
             if (CollectionUtils.isEmpty(list)) {
                 return ResponseFactory.responseNoContent();
             }
@@ -107,6 +116,10 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
         }
+    }
+
+    private boolean isUnfiltered(List<String> values) {
+        return CollectionUtils.isEmpty(values) || values.stream().noneMatch(StringUtils::hasText);
     }
 
     @Override
@@ -143,6 +156,3 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
         }
     }
 }
-
-
-

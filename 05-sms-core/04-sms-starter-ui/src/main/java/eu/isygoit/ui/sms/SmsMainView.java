@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -106,7 +107,8 @@ public class SmsMainView extends ManagementVerticalView {
 
     private void loadStatistics() {
         storageTypesPanel.setLoading(true);
-        ContextAwareAsync.supplyAsync(this::fetchDashboardData)
+        Locale locale = ui.getLocale();
+        ContextAwareAsync.supplyAsync(() -> fetchDashboardData(locale))
                 .whenComplete((data, failure) -> ui.access(() -> {
                     if (failure != null) {
                         log.error("Failed to load storage configuration statistics", failure);
@@ -123,7 +125,7 @@ public class SmsMainView extends ManagementVerticalView {
                 }));
     }
 
-    private DashboardData fetchDashboardData() {
+    private DashboardData fetchDashboardData(Locale locale) {
         ResponseEntity<PaginatedResponseDto<StorageConfigDto>> response =
                 storageConfigService.findAll(0, PAGE_SIZE);
         PaginatedResponseDto<StorageConfigDto> body = response.getBody();
@@ -133,7 +135,7 @@ public class SmsMainView extends ManagementVerticalView {
 
         long total = body.getTotalElements();
         Map<String, Long> countsByType = new TreeMap<>();
-        addTypeCounts(countsByType, body.getContent());
+        addTypeCounts(countsByType, body.getContent(), locale);
         long pageCount = (total + PAGE_SIZE - 1) / PAGE_SIZE;
         for (int page = 1; page < pageCount; page++) {
             PaginatedResponseDto<StorageConfigDto> nextPage =
@@ -141,19 +143,19 @@ public class SmsMainView extends ManagementVerticalView {
             if (nextPage == null || nextPage.getContent() == null) {
                 throw new ServiceOperationException("Storage configuration page " + page + " was empty");
             }
-            addTypeCounts(countsByType, nextPage.getContent());
+            addTypeCounts(countsByType, nextPage.getContent(), locale);
         }
         return new DashboardData(total, Map.copyOf(countsByType));
     }
 
-    private void addTypeCounts(Map<String, Long> countsByType, List<StorageConfigDto> configs) {
+    private void addTypeCounts(Map<String, Long> countsByType, List<StorageConfigDto> configs, Locale locale) {
         if (configs == null) {
             return;
         }
         configs.stream()
                 .map(StorageConfigDto::getType)
                 .filter(type -> type != null)
-                .forEach(type -> countsByType.merge(I18n.enumLabel(type), 1L, Long::sum));
+                .forEach(type -> countsByType.merge(I18n.enumLabel(type, locale), 1L, Long::sum));
     }
 
     private record DashboardData(long total, Map<String, Long> countsByType) {

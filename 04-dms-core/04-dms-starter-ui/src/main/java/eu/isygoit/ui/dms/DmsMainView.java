@@ -9,7 +9,6 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.async.ContextAwareAsync;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
-import eu.isygoit.exception.ServiceOperationException;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.dms.CategoryService;
 import eu.isygoit.remote.dms.LinkedFileService;
@@ -134,14 +133,13 @@ public class DmsMainView extends ManagementVerticalView {
     private DashboardData fetchDashboardData() {
         long categories = count(categoryService.findAll(0, 1).getBody());
         Map<String, LinkedFileResponseDto> linkedFiles = new LinkedHashMap<>();
-        addFiles(linkedFiles, linkedFileService.searchByCategories(List.of("")).getBody());
-        addFiles(linkedFiles, linkedFileService.searchByTags(List.of("")).getBody());
+        addFiles(linkedFiles, linkedFileService.searchByCategories(List.of()).getBody());
         return new DashboardData(categories, linkedFiles.size());
     }
 
     private void addFiles(Map<String, LinkedFileResponseDto> files, List<LinkedFileResponseDto> results) {
         if (results == null) {
-            throw new ServiceOperationException("Linked-file search did not return a result list");
+            return;
         }
         for (LinkedFileResponseDto file : results) {
             if (file.getCode() == null || file.getCode().isBlank()) {

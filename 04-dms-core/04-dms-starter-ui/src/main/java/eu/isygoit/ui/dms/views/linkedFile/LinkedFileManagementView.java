@@ -117,12 +117,8 @@ public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileRe
         } else if (tagsQuery != null && !tagsQuery.isBlank()) {
             results = searchByTagsSafe(Arrays.asList(tagsQuery));
         } else {
-            // No category/tag filter selected and there is no dedicated
-            // "list all" endpoint — combining both empty-query searches
-            // is the closest available substitute for a full browse.
-            List<LinkedFileResponseDto> combined = new ArrayList<>(searchByCategoriesSafe(Arrays.asList("")));
-            combined.addAll(searchByTagsSafe(Arrays.asList("")));
-            results = combined;
+            // An empty filter asks the backend for all files belonging to this tenant.
+            results = searchByCategoriesSafe(List.of());
         }
 
         Map<String, LinkedFileResponseDto> byCode = new LinkedHashMap<>();
