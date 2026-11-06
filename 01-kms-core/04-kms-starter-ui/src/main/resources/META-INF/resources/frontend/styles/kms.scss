@@ -1,6 +1,10 @@
 // Component partials stay in source order to preserve the existing CSS cascade.
 
-@use "kms/foundation" as *;
+@use "kms/tokens" as *;
+@use "kms/components/enum-tag" as *;
+@use "kms/components/copy-toast" as *;
+@use "kms/components/key-card-utilities" as *;
+@use "kms/components/text-utilities" as *;
 @use "kms/views/dashboard" as *;
 @use "kms/views/byok" as *;
 @use "kms/views/crypto-operations" as *;
