@@ -313,8 +313,48 @@ vaadin-dialog-overlay::part(header) {
 
 .management-grid__actions {
   display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 2px;
+  gap: var(--lumo-space-xs);
+  white-space: nowrap;
+
+  // Card action bars are reused as-is in table rows: keep them on one line.
+  .wams-card__button-bar,
+  vaadin-horizontal-layout {
+    flex-wrap: nowrap;
+  }
+}
+
+// "…" overflow menu holding the actions beyond the first four.
+.management-grid__more {
+  flex: none;
+  --vaadin-menu-bar-gap: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.management-grid__more-icon {
+  width: var(--lumo-icon-size-s);
+  height: var(--lumo-icon-size-s);
+  color: var(--lumo-secondary-text-color);
+}
+
+.management-grid__menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+
+  vaadin-icon {
+    width: var(--lumo-icon-size-s);
+    height: var(--lumo-icon-size-s);
+    color: var(--lumo-secondary-text-color);
+  }
+
+  &--danger,
+  &--danger vaadin-icon {
+    color: var(--lumo-error-text-color);
+  }
 }
 
 .management-grid__photo {
