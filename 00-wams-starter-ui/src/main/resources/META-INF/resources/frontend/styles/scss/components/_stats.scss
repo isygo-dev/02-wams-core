@@ -82,6 +82,96 @@
   }
 }
 
+.stat-card--metric {
+  background: var(--lumo-base-color);
+  padding: var(--lumo-space-m) var(--lumo-space-l);
+  border-radius: var(--lumo-border-radius-l);
+  box-shadow: var(--lumo-box-shadow-xs);
+  min-width: 100px;
+  flex: 1 1 100px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  border-inline-start: 4px solid var(--lumo-primary-color);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--lumo-box-shadow-m);
+  }
+
+  &.stat-card-primary {
+    border-inline-start-color: var(--lumo-primary-color);
+  }
+
+  &.stat-card-success {
+    border-inline-start-color: var(--lumo-success-color);
+  }
+
+  &.stat-card-warning {
+    border-inline-start-color: var(--wams-warning-color);
+  }
+
+  &.stat-card-error {
+    border-inline-start-color: var(--lumo-error-color);
+  }
+
+  &.stat-card-contrast {
+    border-inline-start-color: var(--lumo-contrast-50pct);
+  }
+
+  .stat-card__icon {
+    color: var(--lumo-primary-text-color);
+    margin-bottom: var(--lumo-space-xs);
+  }
+
+  .stat-card__value {
+    font-size: var(--lumo-font-size-xxl);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .stat-card__label {
+    font-size: var(--lumo-font-size-s);
+    color: var(--lumo-secondary-text-color);
+    margin-top: var(--lumo-space-xs);
+  }
+}
+
+.stats-grid--compact {
+  width: 100%;
+  container: stats-grid-compact / inline-size;
+
+  .stats-row {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  }
+
+  @container stats-grid-compact (max-width: #{$bp-panel-compact}) {
+    .stats-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: $space-3;
+    }
+
+    .stat-card {
+      min-height: 0;
+      padding: $space-3;
+
+      .stat-card__icon {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 0.65rem;
+      }
+
+      .stat-card__value {
+        font-size: $font-size-xl;
+      }
+
+      .stat-card__label {
+        font-size: $font-size-xxs;
+        letter-spacing: 0.06em;
+      }
+    }
+  }
+}
+
 @media (max-width: $breakpoint-sm) {
   .stats-row {
     grid-template-columns: 1fr;
