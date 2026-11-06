@@ -1,0 +1,15 @@
+/* ── ByokView / CryptoOperationsView narrow-phone refinement ─────────────────
+   The existing 768px breakpoint (kms.css Part A) already stacks the key-selection
+   toolbar and forms to full width. Below 480px, tighten the step-card padding and
+   let the crypto tabs remain horizontally scrollable without stretching. */
+
+@media (max-width: 480px) {
+  .kms-byok-view .kms-parta-step-card {
+    padding: var(--lumo-space-s);
+  }
+
+  .kms-crypto-view .kms-parta-crypto-tabs {
+    width: 100%;
+  }
+}
+

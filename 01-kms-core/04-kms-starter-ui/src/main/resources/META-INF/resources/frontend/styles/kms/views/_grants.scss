@@ -1,0 +1,35 @@
+/* ── GrantsView ───────────────────────────────────────────────────────────── */
+
+.grants-key-layout,
+.grants-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  align-items: center;
+}
+
+.grants-grid {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .grants-key-layout,
+  .grants-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .grants-key-layout > *,
+  .grants-action-bar > * {
+    width: 100% !important;
+  }
+
+  .kms-grants-view vaadin-grid {
+    overflow-x: auto;
+  }
+
+  .kms-grants-view vaadin-grid::part(table) {
+    min-width: 900px;
+  }
+}
+

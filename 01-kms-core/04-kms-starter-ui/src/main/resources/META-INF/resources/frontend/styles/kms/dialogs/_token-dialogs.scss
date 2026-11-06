@@ -1,0 +1,62 @@
+/* ── TokenConfigDialogBase (Create/UpdateTokenConfigDialog) ───────────────── */
+
+.token-config-dialog .lifetime-label {
+  margin-right: var(--lumo-space-s);
+}
+
+.token-config-dialog .public-key-label {
+  font-weight: bold;
+  margin-right: auto;
+}
+
+.token-config-dialog .copy-public-key-button {
+  margin-left: auto;
+}
+
+/* ── ClaimsBuilderDialog ───────────────────────────────────────────────────── */
+
+.claims-builder-dialog .claim-counter {
+  margin-top: 0;
+}
+
+.claims-builder-dialog .header-bar {
+  margin-bottom: var(--lumo-space-xs);
+}
+
+.claims-builder-dialog .claim-row {
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-bottom: var(--lumo-space-xs);
+}
+
+/* ── JwtDetailsViewDialog ─────────────────────────────────────────────────── */
+
+.decode-jwt-dialog .section-title-row {
+  margin-bottom: var(--lumo-space-s);
+}
+
+.decode-jwt-dialog .signature-info {
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-secondary-text-color);
+}
+
+.decode-jwt-dialog .code-textarea {
+  font-family: monospace;
+  font-size: 12px;
+  background: var(--lumo-contrast-5pct);
+  border-radius: var(--lumo-border-radius-m);
+}
+
+.decode-jwt-dialog .code-textarea--header {
+  height: 150px;
+}
+
+.decode-jwt-dialog .code-textarea--payload {
+  height: 300px;
+}
+
+.decode-jwt-dialog .error-message {
+  color: var(--lumo-error-text-color);
+}
+
+

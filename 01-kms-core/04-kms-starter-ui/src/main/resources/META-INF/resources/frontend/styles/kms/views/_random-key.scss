@@ -1,0 +1,139 @@
+/* ── RandomKeyView / RandomKeyCard ────────────────────────────────────────── */
+
+@keyframes kms-parta-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.randomkey-toolbar {
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+}
+
+.random-keys-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+  .randomkey-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .randomkey-toolbar > * {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* Same reorder as key-management-toolbar above: keep pagination + create
+     anchored near the top and right-aligned instead of falling to the
+     bottom of the stacked column. */
+  .randomkey-toolbar > :nth-child(2),
+  .randomkey-toolbar > :nth-child(3) {
+    justify-content: flex-end;
+  }
+
+  .randomkey-toolbar > :nth-child(3) {
+    order: -2;
+  }
+
+  .randomkey-toolbar > :nth-child(2) {
+    order: -1;
+  }
+
+  /* Same nested-overflow fix as key-management-toolbar above: the group
+     itself is still an internal row-direction layout, so its fixed-px
+     search field/filter combo children need to wrap/fill individually. */
+  .randomkey-toolbar > :nth-child(1),
+  .randomkey-toolbar > :nth-child(2),
+  .randomkey-toolbar > :nth-child(3) {
+    flex-wrap: wrap;
+    row-gap: var(--lumo-space-xs);
+  }
+
+  .randomkey-toolbar > :nth-child(1) vaadin-text-field,
+  .randomkey-toolbar > :nth-child(1) vaadin-combo-box {
+    width: 100% !important;
+  }
+
+  .randomkey-toolbar > :nth-child(2) vaadin-combo-box {
+    width: 90px !important;
+  }
+
+  .random-keys-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  /* See key-management-toolbar's icon-only rule above for why the icon
+     also needs its font-size restored: Lumo sizes button icons via
+     width/height:1.5em (--lumo-icon-size-m), which collapses to 0 along
+     with the button's own font-size otherwise. */
+  .randomkey-toolbar > :nth-child(3) vaadin-button {
+    font-size: 0;
+  }
+
+  .randomkey-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+    font-size: var(--lumo-font-size-m);
+  }
+}
+
+.randomkey-pagination-label {
+  margin: 0 0.5rem;
+}
+
+.kms-parta-empty-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+/* RandomKeyCard bordered meta rows (formerly BaseCard#buildExtraStyles() override) */
+
+.random-key-card .meta-row {
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-top: var(--lumo-space-xs);
+}
+
+.random-key-card .meta-row:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 640px) {
+  .random-key-card .meta-row {
+    flex-wrap: wrap;
+  }
+
+  .random-key-card .meta-row > :not(:first-child) {
+    margin-left: 28px;
+  }
+}
+
+/* RandomKeyCard#createIconRow() / body key-value row icon/label/value styling */
+
+.random-key-card__row-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+.random-key-card__row-label {
+  min-width: 100px;
+}
+
+.random-key-card__row-value {
+  font-family: monospace;
+  flex: 1;
+}
+
+.random-key-card__row-value--wrap {
+  word-break: break-all;
+}
+

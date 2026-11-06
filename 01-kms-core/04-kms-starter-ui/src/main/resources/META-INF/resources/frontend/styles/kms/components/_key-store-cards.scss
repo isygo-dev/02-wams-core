@@ -1,0 +1,60 @@
+/* ── StoreCard / NextCodeCard shared "bordered meta row" ─────────────────────
+   (formerly duplicated buildExtraStyles() overrides on both cards; identical
+   rules, so both cards share this single scoped block.)                     */
+
+.store-card .meta-row,
+.next-code-card .meta-row {
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-top: var(--lumo-space-xs);
+}
+
+.store-card .meta-row:last-child,
+.next-code-card .meta-row:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 640px) {
+  .store-card .meta-row,
+  .next-code-card .meta-row {
+    flex-wrap: wrap;
+  }
+
+  .store-card .meta-row > :not(:first-child),
+  .next-code-card .meta-row > :not(:first-child) {
+    margin-left: 28px;
+  }
+}
+
+/* Title-row wrapper used by StoreCard#buildTitle and NextCodeCard#buildTitle */
+
+.kms-partc-title-wrap {
+  flex-wrap: wrap;
+}
+
+/* Shared icon-row label/value styling (StoreCard#createIconRow, NextCodeCard#createIconRow) */
+
+.kms-partc-row-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+.kms-partc-row-label {
+  min-width: 100px;
+}
+
+.kms-partc-row-value {
+  font-family: monospace;
+  word-break: break-all;
+  flex: 1;
+}
+
+.kms-partc-row-value-mono {
+  font-family: monospace;
+}
+
+/* StoreCard key/value metadata chips (StoreCard#addKeyValueRow) */
+
+.kms-partc-metadata-chips {
+  flex-wrap: wrap;
+}
+

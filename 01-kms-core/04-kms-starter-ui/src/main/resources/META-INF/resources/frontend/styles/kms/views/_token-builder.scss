@@ -1,0 +1,94 @@
+/* ── TokenBuilderView — build/validate cards, result panel, audience chips.
+   Previously injected via attachResponsiveStyles(). ─────────────────────────── */
+
+.tokenizer-view .cards-row {
+  flex-wrap: wrap;
+}
+
+.tokenizer-view .compact-card {
+  flex: 1;
+  min-width: 280px;
+  padding: var(--lumo-space-m);
+  transition: all 0.2s ease;
+  background: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius-xl);
+  box-shadow: var(--lumo-box-shadow-m);
+}
+
+.tokenizer-view .compact-card .form-layout {
+  margin-top: var(--lumo-space-m);
+}
+
+.tokenizer-view .result-panel {
+  margin-top: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
+  background: var(--lumo-contrast-5pct);
+  border-radius: var(--lumo-border-radius-m);
+}
+
+.tokenizer-view .chip-remove {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .tokenizer-view .compact-card {
+    min-width: 100%;
+    margin-bottom: var(--lumo-space-m);
+  }
+}
+
+/* Audience chip rows shared by TokenBuilderView.AudienceInput and
+   TokenConfigDialogBase.AudienceInput. */
+
+.tokenizer-view .audience-label {
+  margin-right: var(--lumo-space-s);
+}
+
+.tokenizer-view .audience-chips-container,
+.token-config-dialog .audience-chips-container {
+  flex-wrap: wrap;
+}
+
+.tokenizer-view .audience-chip,
+.token-config-dialog .audience-chip {
+  background-color: var(--lumo-contrast-10pct);
+  border-radius: 16px;
+  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tokenizer-view .audience-chip {
+  font-size: var(--lumo-font-size-xs);
+}
+
+.token-config-dialog .audience-chip {
+  font-size: var(--lumo-font-size-s);
+}
+
+.tokenizer-view .token-result-line {
+  flex-wrap: wrap;
+}
+
+.tokenizer-view .token-result-value {
+  font-family: monospace;
+  font-size: var(--lumo-font-size-xs);
+  word-break: break-all;
+  flex: 1;
+}
+
+.tokenizer-view .expiry-value {
+  font-family: monospace;
+}
+
+.tokenizer-view .validation-result-success {
+  color: var(--lumo-success-text-color);
+}
+
+.tokenizer-view .validation-result-error {
+  color: var(--lumo-error-text-color);
+}
+

@@ -1,0 +1,22 @@
+/* ── GrantDetailsDialog ───────────────────────────────────────────────────── */
+
+.grant-detail-row-span {
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.grant-detail-row-label {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.grant-detail-constraints-pre {
+  background-color: var(--lumo-contrast-5pct);
+  padding: 8px;
+  border-radius: var(--lumo-border-radius-m);
+}
+
+/* ── GrantsView grid status chip ──────────────────────────────────────────── */
+/* Reuses the shared .status-chip / .status-chip--* classes from tokens.css instead
+   of setting inline background/foreground colors per row.                   */
+

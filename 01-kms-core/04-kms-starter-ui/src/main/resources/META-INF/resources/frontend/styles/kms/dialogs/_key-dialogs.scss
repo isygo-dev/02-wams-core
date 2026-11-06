@@ -1,0 +1,39 @@
+/* ── DescribeKeyDialog ─────────────────────────────────────────────────────── */
+
+.describe-key-dialog .detail-row {
+  margin-bottom: var(--lumo-space-xs);
+}
+
+.describe-key-dialog .tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-xs);
+  margin-top: var(--lumo-space-s);
+}
+
+.describe-key-dialog .tag-chip {
+  white-space: nowrap;
+}
+
+.describe-key-dialog .policy-textarea {
+  font-family: monospace;
+}
+
+/* ── ShowKeyVersionsDialog — grid status chip ─────────────────────────────────
+   Reuses the shared .status-chip / .status-chip--* classes from tokens.css instead
+   of setting inline background/foreground colors per row.                    */
+
+.show-key-versions-dialog .status-chip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--lumo-border-radius-m);
+  font-size: var(--lumo-font-size-xs);
+  font-weight: 500;
+}
+
+/* ── ToggleRotationDialog ──────────────────────────────────────────────────── */
+
+.toggle-rotation-dialog .period-form {
+  margin-top: 1em;
+}
+

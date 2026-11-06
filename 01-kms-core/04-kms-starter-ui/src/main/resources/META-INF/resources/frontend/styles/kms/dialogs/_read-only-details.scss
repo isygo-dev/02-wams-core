@@ -1,0 +1,58 @@
+/* AliasDetailsDialog — read-only field grid, mirrors the *-details-dialog
+   convention used by CategoryDetailsDialog / RoleDetailsDialog / etc. (see ims.css). */
+
+.alias-details-dialog .detail-field-icon {
+  color: var(--lumo-primary-color);
+}
+
+.alias-details-dialog .detail-field-value {
+  flex: 1;
+}
+
+/* CustomKeyStoreDetailsViewDialog / NextCodeDetailsDialog — read-only field grid,
+   mirrors the *-details-dialog convention used by CategoryDetailsDialog /
+   RoleDetailsDialog / PEBConfigDetailsViewDialog / TokenConfigDetailsViewDialog / etc. */
+
+.custom-keystore-details-dialog .detail-field-icon,
+.next-code-details-dialog .detail-field-icon {
+  color: var(--lumo-primary-color);
+}
+
+.custom-keystore-details-dialog .detail-field-value,
+.next-code-details-dialog .detail-field-value {
+  flex: 1;
+  word-break: break-word;
+}
+
+/* DigestConfigDetailsViewDialog / PasswordConfigDetailsViewDialog / PEBConfigDetailsViewDialog /
+   TokenConfigDetailsViewDialog — read-only field grid, mirrors the *-details-dialog
+   convention used by CategoryDetailsDialog / RoleDetailsDialog / AliasDetailsDialog / etc. */
+
+.digest-config-details-dialog .detail-field-icon,
+.password-config-details-dialog .detail-field-icon,
+.peb-config-details-dialog .detail-field-icon,
+.token-config-details-dialog .detail-field-icon {
+  color: var(--lumo-primary-color);
+}
+
+.digest-config-details-dialog .detail-field-value,
+.password-config-details-dialog .detail-field-value,
+.peb-config-details-dialog .detail-field-value,
+.token-config-details-dialog .detail-field-value {
+  flex: 1;
+}
+
+/* RandomKeyDetailsDialog — read-only field grid split into Identity / Key value /
+   Audit sections, mirrors the *-details-dialog convention used elsewhere in this
+   module (see kms.css "Part B2"/"Part C2"/"Part D2" — AliasDetailsDialog,
+   CustomKeyStoreDetailsViewDialog, NextCodeDetailsDialog, DigestConfigDetailsViewDialog, etc.). */
+
+.random-key-details-dialog .detail-field-icon {
+  color: var(--lumo-primary-color);
+}
+
+.random-key-details-dialog .detail-field-value {
+  flex: 1;
+  word-break: break-word;
+}
+

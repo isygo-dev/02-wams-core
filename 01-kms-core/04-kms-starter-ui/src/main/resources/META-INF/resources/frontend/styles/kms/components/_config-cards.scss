@@ -1,0 +1,75 @@
+/* ── Config cards: DigestConfigCard / PasswordConfigCard / PEBConfigCard /
+   TokenConfigCard — identical "meta-row" pattern that used to be re-injected
+   per-card via the now-removed BaseCard#buildExtraStyles() hook. ──────────── */
+
+.digest-config-card .meta-row,
+.password-config-card .meta-row,
+.peb-config-card .meta-row,
+.token-config-card .meta-row {
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-top: var(--lumo-space-xs);
+}
+
+.digest-config-card .meta-row:last-child,
+.password-config-card .meta-row:last-child,
+.peb-config-card .meta-row:last-child,
+.token-config-card .meta-row:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 640px) {
+  .digest-config-card .meta-row,
+  .password-config-card .meta-row,
+  .peb-config-card .meta-row,
+  .token-config-card .meta-row {
+    flex-wrap: wrap;
+  }
+
+  .digest-config-card .meta-row > :not(:first-child),
+  .password-config-card .meta-row > :not(:first-child),
+  .peb-config-card .meta-row > :not(:first-child),
+  .token-config-card .meta-row > :not(:first-child) {
+    margin-left: 28px;
+  }
+}
+
+/* Card title group (DigestConfigCard/PasswordConfigCard/PEBConfigCard/
+   TokenConfigCard #buildTitle()) wraps on narrow cards. */
+
+.card-title-group {
+  flex-wrap: wrap;
+}
+
+.digest-config-card .meta-row-icon,
+.password-config-card .meta-row-icon,
+.peb-config-card .meta-row-icon,
+.token-config-card .meta-row-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+.digest-config-card .meta-row-label,
+.password-config-card .meta-row-label,
+.peb-config-card .meta-row-label,
+.token-config-card .meta-row-label {
+  min-width: 120px;
+}
+
+.password-config-card .meta-row-label,
+.peb-config-card .meta-row-label {
+  min-width: 100px;
+}
+
+.token-config-card .meta-row-label {
+  min-width: 80px;
+}
+
+.digest-config-card .meta-row-value,
+.password-config-card .meta-row-value,
+.peb-config-card .meta-row-value,
+.token-config-card .meta-row-value {
+  font-family: monospace;
+  word-break: break-all;
+  flex: 1;
+}
+

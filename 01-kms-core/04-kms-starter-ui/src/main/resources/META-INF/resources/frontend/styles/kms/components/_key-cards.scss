@@ -1,0 +1,95 @@
+/* ── KeyCard / AliasCard shared "bordered meta row" ───────────────────────────
+   (formerly duplicated BaseCard#buildExtraStyles() overrides; identical rules,
+   so both cards share this single scoped block.)                             */
+
+.key-card .meta-row,
+.alias-card .meta-row {
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-top: var(--lumo-space-xs);
+}
+
+.key-card .meta-row:last-child,
+.alias-card .meta-row:last-child {
+  border-bottom: none;
+}
+
+.key-card .meta-row .meta-value {
+  font-weight: 500;
+}
+
+@media (max-width: 640px) {
+  .key-card .meta-row,
+  .alias-card .meta-row {
+    flex-wrap: wrap;
+  }
+
+  .key-card .meta-row > :not(:first-child),
+  .alias-card .meta-row > :not(:first-child) {
+    margin-left: 28px;
+  }
+}
+
+/* KeyCard#buildTitle() header-left group (title, status chip, version). */
+
+.key-card .key-card__title-row {
+  flex-wrap: wrap;
+}
+
+/* KeyCard#createIconRowWithColor() icon/label/value styling. */
+
+.key-card .key-card__row-icon {
+  color: var(--lumo-primary-color);
+}
+
+.key-card .key-card__row-label {
+  min-width: 100px;
+}
+
+.key-card .key-card__row-value {
+  font-family: monospace;
+  word-break: break-all;
+  flex: 1;
+}
+
+/* KeyCard#updateVersionDisplay() current-version span. */
+
+.key-card .key-card__version-span {
+  font-family: monospace;
+}
+
+/* KeyCard context-menu "Permanently delete" item (KeyCard#populateContextMenu()). */
+
+.key-card__menu-item--danger {
+  color: var(--lumo-error-color);
+}
+
+/* AliasCard#createIconRow() / #createIconRowWithCopy() icon/label/value styling. */
+
+.alias-card .alias-card__row-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+.alias-card .alias-card__row-label {
+  min-width: 100px;
+}
+
+.alias-card .alias-card__row-value {
+  font-family: monospace;
+  word-break: break-all;
+  flex: 1;
+}
+
+/* KeyCard deletion-warning banner (KeyCard#createDeletionWarningSpan).
+   Reuses the same Lumo utility classes already applied on the element
+   (Background.ERROR_10 / TextColor.ERROR / Padding.SMALL / BorderRadius.MEDIUM)
+   instead of a separate ".deletion-warning" class with duplicated colors —
+   this rule only adds the flex layout that Lumo utilities don't cover. */
+
+.key-card .wams-card__deletion-warning {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+  margin-top: var(--lumo-space-xs);
+}
+

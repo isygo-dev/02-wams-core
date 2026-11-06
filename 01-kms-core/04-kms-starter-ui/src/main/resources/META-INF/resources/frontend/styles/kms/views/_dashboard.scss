@@ -1,0 +1,116 @@
+/* ── KmsMainView — dashboard root ─────────────────────────────────────────── */
+
+.kms-dashboard .stats-filter-bar,
+.kms-dashboard .audit-filter-bar {
+  background: var(--lumo-base-color);
+  padding: var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-m);
+  margin-bottom: var(--lumo-space-s);
+}
+
+.kms-dashboard .audit-grid {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .kms-dashboard .stats-filter-bar,
+  .kms-dashboard .audit-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kms-dashboard .stats-filter-bar > *,
+  .kms-dashboard .audit-filter-bar > * {
+    width: 100% !important;
+    margin-bottom: var(--lumo-space-xs);
+  }
+
+  .kms-dashboard .audit-grid .vaadin-grid-table {
+    min-width: 800px;
+  }
+}
+
+.kms-parta-dashboard-title {
+  margin-bottom: 10px;
+}
+
+/* ── Shared dashboard-panel spacing (AuditLogPanel, KeyUsageStatsPanel) ──────
+   Tightened to the Jira-style compact density used across the dashboard
+   (was a looser custom 24px margin). */
+
+.kms-parta-panel-spaced {
+  margin-top: var(--lumo-space-m);
+}
+
+/* ── Shared filter-bar wrapping (AuditLogPanel, KeyUsageStatsPanel, ByokView) */
+
+.kms-parta-filter-bar-wrap {
+  flex-wrap: wrap;
+}
+
+/* ── Shared stat-tile container wrapping (KeyStatisticsPanel,
+   TokenStatisticsPanel, KeyUsageStatsPanel) ─────────────────────────────── */
+
+.kms-parta-stats-wrap {
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* ── KeyStatisticsPanel — stat cards grouped into scannable sub-rows by
+   category (Status / Type / Usage / Resources) instead of one long
+   undifferentiated wrapping row of 15 cards. ─────────────────────────────── */
+
+.kms-parta-stats-groups {
+  gap: var(--lumo-space-s);
+}
+
+.kms-parta-stats-group {
+  gap: var(--lumo-space-xs);
+}
+
+.kms-parta-stats-group__title {
+  font-size: var(--lumo-font-size-xs);
+  font-weight: 600;
+  color: var(--lumo-secondary-text-color);
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+.kms-parta-stats-group .kms-parta-stats-wrap .wams-stat-card {
+  flex: 1 1 160px;
+}
+
+@media (max-width: 768px) {
+  .kms-parta-stats-group .kms-parta-stats-wrap .wams-stat-card {
+    flex-basis: calc(50% - 16px);
+  }
+}
+
+/* ── KeyUsageStatsPanel small stat card (formerly built entirely with
+   inline getStyle() calls) ──────────────────────────────────────────────── */
+
+.kms-parta-usage-stat-card {
+  width: 160px;
+  border: 1px solid var(--lumo-contrast-20pct);
+  border-radius: var(--lumo-border-radius-m);
+  box-shadow: var(--lumo-box-shadow-xs);
+  align-items: center;
+  background-color: var(--lumo-base-color);
+  text-align: center;
+  flex: 1 1 auto;
+}
+
+.kms-parta-usage-stat-card__value {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.kms-parta-usage-stat-card__label {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-xs);
+}
+
+.kms-parta-usage-stats-error {
+  color: var(--lumo-error-text-color);
+}
+

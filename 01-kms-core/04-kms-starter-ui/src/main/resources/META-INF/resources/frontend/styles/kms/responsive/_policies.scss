@@ -1,0 +1,19 @@
+/* ── PoliciesView responsive gap fill ──────────────────────────────────────
+   kms.css's existing 768px rule for .policies-view only stacked
+   .policies-action-bar; .policies-key-layout (key ComboBox + refresh) and
+   .policies-action-checker (action TextField + check button) kept their row
+   layout with fixed-width children (400px / 300px), overflowing on phones. */
+
+@media (max-width: 768px) {
+  .policies-view .policies-key-layout,
+  .policies-view .policies-action-checker {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .policies-view .policies-key-layout > *,
+  .policies-view .policies-action-checker > * {
+    width: 100% !important;
+  }
+}
+

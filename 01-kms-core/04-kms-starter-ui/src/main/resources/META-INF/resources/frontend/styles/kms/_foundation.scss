@@ -1,0 +1,114 @@
+/* KMS aliases use the shared WAMS/Lumo theme tokens. */
+:root {
+  --kms-color-primary: var(--lumo-primary-color);
+  --kms-color-primary-soft: var(--lumo-primary-color-10pct);
+  --kms-color-success: var(--lumo-success-color);
+  --kms-color-warning: var(--lumo-warning-color);
+  --kms-color-danger: var(--lumo-error-color);
+  --kms-color-info: var(--lumo-primary-text-color);
+  --kms-color-text: var(--lumo-body-text-color);
+  --kms-color-text-muted: var(--lumo-secondary-text-color);
+  --kms-color-text-soft: var(--lumo-tertiary-text-color);
+  --kms-color-surface: var(--lumo-base-color);
+  --kms-color-surface-alt: var(--lumo-contrast-5pct);
+  --kms-color-border: var(--wams-surface-line);
+  --kms-color-shadow: var(--wams-shadow-hover);
+  --kms-font-family: var(--lumo-font-family);
+  --kms-font-size-xxs: 0.625rem;
+  --kms-font-size-xs: var(--lumo-font-size-xs);
+  --kms-font-size-sm: var(--lumo-font-size-s);
+  --kms-font-size-md: var(--lumo-font-size-m);
+  --kms-font-size-lg: var(--lumo-font-size-l);
+  --kms-font-size-xl: var(--lumo-font-size-xl);
+  --kms-space-1: var(--lumo-space-xs);
+  --kms-space-2: var(--lumo-space-s);
+  --kms-space-3: var(--lumo-space-m);
+  --kms-space-4: var(--lumo-space-m);
+  --kms-space-6: var(--lumo-space-l);
+  --kms-space-8: var(--lumo-space-xl);
+  --kms-radius-sm: var(--lumo-border-radius-s);
+  --kms-radius-md: var(--lumo-border-radius-m);
+  --kms-radius-lg: var(--lumo-border-radius-l);
+  --kms-radius-xl: var(--lumo-border-radius-l);
+  --kms-shadow-sm: var(--lumo-box-shadow-xs);
+  --kms-shadow-md: var(--lumo-box-shadow-m);
+}
+
+.kms-enum-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.12rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: var(--kms-radius-lg);
+  font-size: var(--kms-font-size-xs);
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.kms-enum-tag--success {
+  color: var(--kms-color-success);
+  background: rgba(31, 132, 90, 0.1);
+}
+
+.kms-enum-tag--warning {
+  color: var(--kms-color-warning);
+  background: rgba(165, 72, 0, 0.12);
+}
+
+.kms-enum-tag--danger {
+  color: var(--kms-color-danger);
+  background: rgba(201, 55, 44, 0.1);
+}
+
+.kms-enum-tag--info {
+  color: var(--kms-color-info);
+  background: var(--kms-color-primary-soft);
+}
+
+.kms-enum-tag--neutral {
+  color: var(--kms-color-text-muted);
+  background: var(--kms-color-surface-alt);
+}
+
+.kms-copy-toast {
+  position: fixed;
+  right: var(--kms-space-4);
+  bottom: var(--kms-space-4);
+  z-index: 10000;
+  padding: var(--kms-space-2) var(--kms-space-4);
+  border-radius: var(--kms-radius-md);
+  color: var(--kms-color-surface);
+  box-shadow: var(--kms-shadow-md);
+}
+
+.kms-copy-toast--success {
+  background: var(--kms-color-success);
+}
+
+.kms-copy-toast--error {
+  background: var(--kms-color-danger);
+}
+
+.key-card__row-value--primary {
+  color: var(--kms-color-primary);
+}
+
+.key-card__rotation-button--primary {
+  color: var(--kms-color-primary);
+}
+
+.key-card__rotation-button--success {
+  color: var(--kms-color-success);
+}
+
+.key-card__rotation-button--muted {
+  color: var(--kms-color-text-soft);
+}
+
+.kms-text-danger {
+  color: var(--kms-color-danger);
+}
+

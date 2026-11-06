@@ -1,0 +1,22 @@
+/* ── ByokView ─────────────────────────────────────────────────────────────── */
+
+.kms-parta-step-card {
+  margin-bottom: var(--lumo-space-s);
+  background-color: var(--lumo-base-color);
+}
+
+.kms-parta-step-card__hint {
+  margin-bottom: var(--lumo-space-s);
+}
+
+.kms-parta-key-status-info {
+  margin-top: var(--lumo-space-xs);
+}
+
+@media (max-width: 768px) {
+  .kms-byok-view .byok-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

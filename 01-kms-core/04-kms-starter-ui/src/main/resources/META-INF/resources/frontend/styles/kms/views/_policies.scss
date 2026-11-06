@@ -1,0 +1,80 @@
+/* ── PoliciesView ─────────────────────────────────────────────────────────── */
+
+.policies-view .policies-action-bar,
+.policies-view .policies-key-layout,
+.policies-view .policies-action-checker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .policies-view .policies-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .policies-view .policies-action-bar > * {
+    width: 100%;
+  }
+
+  .policies-view .vaadin-combo-box {
+    width: 100%;
+  }
+}
+
+.policies-policy-editor {
+  font-family: monospace;
+  font-size: 13px;
+}
+
+/* Action-evaluation result dialog (PoliciesView#checkActionAgainstPolicy) */
+
+.policy-eval-decision-span {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.policy-eval-decision-span--allowed {
+  color: var(--lumo-success-text-color);
+}
+
+.policy-eval-decision-span--denied {
+  color: var(--lumo-error-text-color);
+}
+
+.policy-eval-decision-span--uncertain {
+  color: var(--wams-warning-fg);
+}
+
+.policy-eval-reason-span {
+  font-style: italic;
+}
+
+.policy-eval-warning-span {
+  color: var(--wams-warning-fg);
+  font-size: 0.9em;
+}
+
+.policy-eval-muted-span {
+  font-size: 0.9em;
+}
+
+.policy-eval-matched-header {
+  font-weight: bold;
+}
+
+.policy-eval-matched-pre {
+  background-color: var(--lumo-contrast-5pct);
+  padding: 8px;
+  border-radius: var(--lumo-border-radius-m);
+  font-size: 12px;
+  overflow-x: auto;
+}
+
+.policy-eval-help-span {
+  font-size: 0.85em;
+  color: var(--lumo-secondary-text-color);
+}
+

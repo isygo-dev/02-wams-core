@@ -1,0 +1,14 @@
+/* DescribeKeyDialog — field rows now use the shared wams-card__detail-grid /
+   detail-field convention (see RandomKeyDetailsDialog / AliasDetailsDialog),
+   split into Identity / Classification & status / Cryptographic configuration /
+   Dates sections instead of one flat list. */
+
+.describe-key-dialog .detail-field-icon {
+  color: var(--lumo-primary-color);
+}
+
+.describe-key-dialog .detail-field-value {
+  flex: 1;
+  word-break: break-word;
+}
+

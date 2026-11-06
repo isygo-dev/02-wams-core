@@ -1,0 +1,14 @@
+/* TagsView — the tag Grid can end up wider than its columns need on small
+   viewports; scroll the grid horizontally instead of letting it overflow the
+   page (same pattern as .kms-dashboard .audit-grid in kms.css "Part A"). */
+
+.tags-grid {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .kms-tags-view .tags-grid {
+    min-width: 0;
+  }
+}
+

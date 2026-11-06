@@ -1,0 +1,158 @@
+/* ── KeyManagementView / AliasesView — shared page background, toolbar and
+   card-grid layout that used to be injected at runtime via
+   injectResponsiveStyles(). ─────────────────────────────────────────────── */
+
+@keyframes kms-partb-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.key-management-toolbar,
+.aliases-toolbar,
+.tags-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  width: 100%;
+}
+
+.keys-grid,
+.aliases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+  .key-management-toolbar,
+  .aliases-toolbar,
+  .tags-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .key-management-toolbar > *,
+  .aliases-toolbar > *,
+  .tags-toolbar > * {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* DOM order is filters (leftGroup) → pagination (centerGroup) →
+     refresh/create (rightGroup), which otherwise stacks Create at the very
+     bottom, below pagination and filters, once the toolbar goes to a
+     column. Reorder so pagination + actions stay anchored near the top and
+     right-aligned; only the filters drop to the bottom. */
+  .key-management-toolbar > :nth-child(2),
+  .aliases-toolbar > :nth-child(2),
+  .tags-toolbar > :nth-child(2),
+  .key-management-toolbar > :nth-child(3),
+  .aliases-toolbar > :nth-child(3),
+  .tags-toolbar > :nth-child(3) {
+    justify-content: flex-end;
+  }
+
+  .key-management-toolbar > :nth-child(3),
+  .aliases-toolbar > :nth-child(3),
+  .tags-toolbar > :nth-child(3) {
+    order: -2;
+  }
+
+  .key-management-toolbar > :nth-child(2),
+  .aliases-toolbar > :nth-child(2),
+  .tags-toolbar > :nth-child(2) {
+    order: -1;
+  }
+
+  /* Each group (filters / pagination / actions) is still an internal
+     row-direction HorizontalLayout — width:100% on the group alone isn't
+     enough, since its fixed-px children (200px search field, 140px filter
+     combo, 120px page-size select) still overflow a group stacked into a
+     ~320-340px column. Letting each group wrap its own children, and
+     forcing text fields/combo boxes (not buttons/labels) to fill the row,
+     lands each control on its own line instead of overflowing past the
+     right edge. */
+  .key-management-toolbar > :nth-child(1),
+  .aliases-toolbar > :nth-child(1),
+  .tags-toolbar > :nth-child(1),
+  .key-management-toolbar > :nth-child(2),
+  .aliases-toolbar > :nth-child(2),
+  .tags-toolbar > :nth-child(2),
+  .key-management-toolbar > :nth-child(3),
+  .aliases-toolbar > :nth-child(3),
+  .tags-toolbar > :nth-child(3) {
+    flex-wrap: wrap;
+    row-gap: var(--lumo-space-xs);
+  }
+
+  .key-management-toolbar > :nth-child(1) vaadin-text-field,
+  .aliases-toolbar > :nth-child(1) vaadin-text-field,
+  .tags-toolbar > :nth-child(1) vaadin-text-field,
+  .key-management-toolbar > :nth-child(1) vaadin-combo-box,
+  .aliases-toolbar > :nth-child(1) vaadin-combo-box,
+  .tags-toolbar > :nth-child(1) vaadin-combo-box {
+    width: 100% !important;
+  }
+
+  /* Pagination stays compact (per spec) rather than full-width — just
+     shrink the page-size picker further than its desktop 100-140px. */
+  .key-management-toolbar > :nth-child(2) vaadin-combo-box,
+  .aliases-toolbar > :nth-child(2) vaadin-combo-box,
+  .tags-toolbar > :nth-child(2) vaadin-combo-box {
+    width: 90px !important;
+  }
+
+  .keys-grid,
+  .aliases-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Simplified page info: the separate "{0} total" label is redundant
+     with pagination-page-info's own "Page X of Y (Z items)" text, so drop it
+     to declutter the narrowest phones. */
+  .kms-keys-view .pagination-total-count,
+  .kms-aliases-view .pagination-total-count {
+    display: none;
+  }
+
+  /* Icon-only actions: same font-size:0 technique already used for the
+     sidebar's icon-rail collapse (see .wams-sidebar-collapsed in
+     layout.css) — the button's label is a plain text node with no
+     wrapping element to hide via a class. Unlike the sidebar's nav icons
+     (which get an explicit setSize("20px") in Java, so an inline style
+     wins over any shadow-DOM sizing), these buttons' icons rely on
+     Lumo's own default sizing — [part]::slotted(vaadin-icon) {
+     width/height: var(--lumo-icon-size-m) } in vaadin-button-styles.js,
+     where --lumo-icon-size-m is "1.5em" — so font-size:0 on the button
+     was also collapsing the icon to 0x0 (button appeared to vanish
+     entirely). Restoring the icon's own font-size lets that 1.5em
+     formula resolve correctly again. */
+  .key-management-toolbar > :nth-child(3) vaadin-button,
+  .aliases-toolbar > :nth-child(3) vaadin-button,
+  .tags-toolbar > :nth-child(3) vaadin-button {
+    font-size: 0;
+  }
+
+  .key-management-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+  .aliases-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+  .tags-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+    font-size: var(--lumo-font-size-m);
+  }
+}
+
+/* Empty-state icon (KeyManagementView/AliasesView #filterCards()). */
+
+.kms-keys-view .empty-state-icon,
+.kms-aliases-view .empty-state-icon {
+  color: var(--lumo-secondary-text-color);
+}
+

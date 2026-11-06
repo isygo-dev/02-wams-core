@@ -1,0 +1,61 @@
+/* ── CryptoOperationsView / crypto panels ─────────────────────────────────── */
+
+.kms-parta-crypto-tabs {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.crypto-key-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .crypto-key-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .crypto-key-layout > * {
+    width: 100% !important;
+  }
+
+  .crypto-key-layout .vaadin-combo-box {
+    width: 100% !important;
+  }
+
+  .crypto-panel .vaadin-combo-box,
+  .crypto-panel .vaadin-text-field,
+  .crypto-panel .vaadin-text-area {
+    width: 100% !important;
+  }
+
+  .crypto-button-row {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .crypto-button-row > * {
+    width: 100% !important;
+    margin-bottom: var(--lumo-space-xs);
+  }
+
+  .crypto-data-key-panel .vaadin-combo-box,
+  .crypto-data-key-panel .vaadin-text-field {
+    width: 100% !important;
+  }
+}
+
+/* CryptoPanelUtils#createLabelledTextArea() label/header row */
+
+.labelled-textarea-container__header {
+  margin-bottom: var(--lumo-space-xs);
+}
+
+.labelled-textarea-container__label {
+  font-weight: 500;
+  font-size: var(--lumo-font-size-s);
+}
+

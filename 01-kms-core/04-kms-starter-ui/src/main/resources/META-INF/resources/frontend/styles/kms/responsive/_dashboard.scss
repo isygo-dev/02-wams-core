@@ -1,0 +1,13 @@
+/* ── Dashboard panel responsive gap fill ──────────────────────────────────────
+   .wams-stat-card (KeyStatisticsPanel/TokenStatisticsPanel main stat row) already
+   gets a 768px flex-basis rule in kms.css Part A. .kms-parta-usage-stat-card
+   (KeyUsageStatsPanel's small per-metric cards) had no equivalent, so on narrow
+   phones its fixed 160px width could force horizontal crowding — let it shrink
+   to full width and stack in a single column below 480px. */
+
+@media (max-width: 480px) {
+  .kms-parta-stats-wrap .kms-parta-usage-stat-card {
+    width: 100%;
+  }
+}
+

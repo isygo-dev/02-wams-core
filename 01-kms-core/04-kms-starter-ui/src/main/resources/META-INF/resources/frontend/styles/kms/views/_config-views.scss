@@ -1,0 +1,148 @@
+/* ── Config views: DigestConfigView / PasswordConfigView / PEBConfigView /
+   TokenConfigView — shared page background, toolbar and card-grid layout that
+   used to be injected at runtime via injectResponsiveStyles(). ─────────────── */
+
+
+@keyframes wams-kms-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.digest-config-view .digest-toolbar,
+.password-config-view .password-toolbar,
+.peb-config-view .peb-toolbar,
+.token-config-view .token-config-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  width: 100%;
+}
+
+.digest-configs-grid,
+.password-configs-grid,
+.peb-configs-grid,
+.token-configs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+  .digest-config-view .digest-toolbar,
+  .password-config-view .password-toolbar,
+  .peb-config-view .peb-toolbar,
+  .token-config-view .token-config-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .digest-config-view .digest-toolbar > *,
+  .password-config-view .password-toolbar > *,
+  .peb-config-view .peb-toolbar > *,
+  .token-config-view .token-config-toolbar > * {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* Same reorder as key-management-toolbar above: keep pagination + create
+     anchored near the top and right-aligned instead of falling to the
+     bottom of the stacked column. */
+  .digest-config-view .digest-toolbar > :nth-child(2),
+  .password-config-view .password-toolbar > :nth-child(2),
+  .peb-config-view .peb-toolbar > :nth-child(2),
+  .token-config-view .token-config-toolbar > :nth-child(2),
+  .digest-config-view .digest-toolbar > :nth-child(3),
+  .password-config-view .password-toolbar > :nth-child(3),
+  .peb-config-view .peb-toolbar > :nth-child(3),
+  .token-config-view .token-config-toolbar > :nth-child(3) {
+    justify-content: flex-end;
+  }
+
+  .digest-config-view .digest-toolbar > :nth-child(3),
+  .password-config-view .password-toolbar > :nth-child(3),
+  .peb-config-view .peb-toolbar > :nth-child(3),
+  .token-config-view .token-config-toolbar > :nth-child(3) {
+    order: -2;
+  }
+
+  .digest-config-view .digest-toolbar > :nth-child(2),
+  .password-config-view .password-toolbar > :nth-child(2),
+  .peb-config-view .peb-toolbar > :nth-child(2),
+  .token-config-view .token-config-toolbar > :nth-child(2) {
+    order: -1;
+  }
+
+  .digest-config-view .digest-toolbar > :nth-child(1),
+  .password-config-view .password-toolbar > :nth-child(1),
+  .peb-config-view .peb-toolbar > :nth-child(1),
+  .token-config-view .token-config-toolbar > :nth-child(1),
+  .digest-config-view .digest-toolbar > :nth-child(2),
+  .password-config-view .password-toolbar > :nth-child(2),
+  .peb-config-view .peb-toolbar > :nth-child(2),
+  .token-config-view .token-config-toolbar > :nth-child(2),
+  .digest-config-view .digest-toolbar > :nth-child(3),
+  .password-config-view .password-toolbar > :nth-child(3),
+  .peb-config-view .peb-toolbar > :nth-child(3),
+  .token-config-view .token-config-toolbar > :nth-child(3) {
+    flex-wrap: wrap;
+    row-gap: var(--lumo-space-xs);
+  }
+
+  .digest-config-view .digest-toolbar > :nth-child(1) vaadin-text-field,
+  .password-config-view .password-toolbar > :nth-child(1) vaadin-text-field,
+  .peb-config-view .peb-toolbar > :nth-child(1) vaadin-text-field,
+  .token-config-view .token-config-toolbar > :nth-child(1) vaadin-text-field,
+  .digest-config-view .digest-toolbar > :nth-child(1) vaadin-combo-box,
+  .password-config-view .password-toolbar > :nth-child(1) vaadin-combo-box,
+  .peb-config-view .peb-toolbar > :nth-child(1) vaadin-combo-box,
+  .token-config-view .token-config-toolbar > :nth-child(1) vaadin-combo-box {
+    width: 100% !important;
+  }
+
+  .digest-config-view .digest-toolbar > :nth-child(2) vaadin-combo-box,
+  .password-config-view .password-toolbar > :nth-child(2) vaadin-combo-box,
+  .peb-config-view .peb-toolbar > :nth-child(2) vaadin-combo-box,
+  .token-config-view .token-config-toolbar > :nth-child(2) vaadin-combo-box {
+    width: 90px !important;
+  }
+
+  .digest-configs-grid,
+  .password-configs-grid,
+  .peb-configs-grid,
+  .token-configs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .digest-config-view .digest-toolbar > :nth-child(3) vaadin-button,
+  .password-config-view .password-toolbar > :nth-child(3) vaadin-button,
+  .peb-config-view .peb-toolbar > :nth-child(3) vaadin-button,
+  .token-config-view .token-config-toolbar > :nth-child(3) vaadin-button {
+    font-size: 0;
+  }
+
+  .digest-config-view .digest-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+  .password-config-view .password-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+  .peb-config-view .peb-toolbar > :nth-child(3) vaadin-button vaadin-icon,
+  .token-config-view .token-config-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+    font-size: var(--lumo-font-size-m);
+  }
+}
+
+/* Empty-state icon (all four *ConfigView#renderCards()). */
+
+.digest-config-view .empty-state-icon,
+.password-config-view .empty-state-icon,
+.peb-config-view .empty-state-icon,
+.token-config-view .empty-state-icon {
+  color: var(--lumo-secondary-text-color);
+}
+

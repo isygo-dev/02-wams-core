@@ -1,0 +1,76 @@
+/* ── IncrementalKeyView ───────────────────────────────────────────────────── */
+
+.incremental-toolbar {
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+}
+
+.incremental-toolbar .kms-partc-inline-label {
+  margin: 0 0.5rem;
+}
+
+.incremental-keys-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+  .incremental-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .incremental-toolbar > * {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* Same reorder as key-management-toolbar above: keep pagination + create
+     anchored near the top and right-aligned instead of falling to the
+     bottom of the stacked column. */
+  .incremental-toolbar > :nth-child(2),
+  .incremental-toolbar > :nth-child(3) {
+    justify-content: flex-end;
+  }
+
+  .incremental-toolbar > :nth-child(3) {
+    order: -2;
+  }
+
+  .incremental-toolbar > :nth-child(2) {
+    order: -1;
+  }
+
+  .incremental-toolbar > :nth-child(1),
+  .incremental-toolbar > :nth-child(2),
+  .incremental-toolbar > :nth-child(3) {
+    flex-wrap: wrap;
+    row-gap: var(--lumo-space-xs);
+  }
+
+  .incremental-toolbar > :nth-child(1) vaadin-text-field,
+  .incremental-toolbar > :nth-child(1) vaadin-combo-box {
+    width: 100% !important;
+  }
+
+  .incremental-toolbar > :nth-child(2) vaadin-combo-box {
+    width: 90px !important;
+  }
+
+  .incremental-keys-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .incremental-toolbar > :nth-child(3) vaadin-button {
+    font-size: 0;
+  }
+
+  .incremental-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+    font-size: var(--lumo-font-size-m);
+  }
+}
+

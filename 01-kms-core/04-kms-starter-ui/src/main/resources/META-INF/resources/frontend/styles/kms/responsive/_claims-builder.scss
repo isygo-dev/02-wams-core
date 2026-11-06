@@ -1,0 +1,14 @@
+/* ClaimsBuilderDialog — each claim row lays out key (30%) / value (60%) /
+   remove button (10%) side by side. BaseActionDialog already goes full-screen
+   below 480px via wams-dialog-responsive, but the fixed percentage widths on
+   the key/value wrappers stay cramped at that size; stack them instead. */
+
+@media (max-width: 480px) {
+  .claims-builder-dialog .claim-row {
+    flex-wrap: wrap;
+  }
+
+  .claims-builder-dialog .claim-row > * {
+    width: 100% !important;
+  }
+}
