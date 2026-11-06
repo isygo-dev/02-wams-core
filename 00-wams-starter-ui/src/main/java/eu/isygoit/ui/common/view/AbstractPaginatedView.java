@@ -15,8 +15,10 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.HasDynamicTitle;
+import eu.isygoit.dto.IImageUploadDto;
 import eu.isygoit.dto.common.PaginatedResponseDto;
 import eu.isygoit.i18n.I18n;
+import eu.isygoit.model.IImageEntity;
 import eu.isygoit.ui.common.component.ManagementGridSupport;
 import eu.isygoit.ui.common.component.ManagementViewModeSwitch;
 import eu.isygoit.ui.common.filters.FilterBar;
@@ -26,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -75,6 +78,8 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     private boolean gridSupported;
     private boolean gridMode;
     private int renderedCount;
+    private boolean imageColumnChecked;
+    private final Map<String, byte[]> imageCache = new ConcurrentHashMap<>();
 
     // ─── Criteria state ────────────────────────────────────────────
     private ManagementViewModeSwitch viewModeSwitch;
@@ -445,12 +450,67 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         renderItems(filtered);
     }
 
+    /**
+     * Bytes of the image of an item that implements {@code IImageEntity} / {@code IImageUploadDto}, shown in
+     * the first column of the table mode. Override to download it (return {@code null} for none); the default
+     * shows the initials from {@link #getItemImageLabel}.
+     */
+    protected byte[] downloadItemImage(T item) {
+        return null;
+    }
+
+    /**
+     * Name used for the initials of an item without (or before) its image.
+     */
+    protected String getItemImageLabel(T item) {
+        return "";
+    }
+
+    private static String imagePathOf(Object item) {
+        if (item instanceof IImageEntity entity) {
+            return entity.getImagePath();
+        }
+        if (item instanceof IImageUploadDto dto) {
+            return dto.getImagePath();
+        }
+        return null;
+    }
+
+    private static boolean hasImage(Object item) {
+        return item instanceof IImageEntity || item instanceof IImageUploadDto;
+    }
+
+    /**
+     * When the listed objects carry an image, add a round image column in first position (unless the view
+     * already configured its own photo column).
+     */
+    private void ensureImageColumn(List<T> items) {
+        if (imageColumnChecked || !gridSupported || items.isEmpty()) {
+            return;
+        }
+        imageColumnChecked = true;
+        if (grid.getColumnByKey(ManagementGridSupport.IMAGE_COLUMN_KEY) != null
+                || items.stream().noneMatch(AbstractPaginatedView::hasImage)) {
+            return;
+        }
+        List<Grid.Column<T>> order = new ArrayList<>();
+        order.add(ManagementGridSupport.addImageColumn(grid, this::getItemImageLabel,
+                AbstractPaginatedView::imagePathOf, this::downloadItemImage, imageCache));
+        for (Grid.Column<T> column : grid.getColumns()) {
+            if (!ManagementGridSupport.IMAGE_COLUMN_KEY.equals(column.getKey())) {
+                order.add(column);
+            }
+        }
+        grid.setColumnOrder(order);
+    }
+
     protected void renderItems(List<T> items) {
         cardsContainer.removeAll();
         renderedCount = items.size();
         if (items.isEmpty()) {
             cardsContainer.add(buildEmptyState());
         } else if (gridSupported) {
+            ensureImageColumn(items);
             grid.setItems(items);
         }
         if (!items.isEmpty() && !gridMode) {
