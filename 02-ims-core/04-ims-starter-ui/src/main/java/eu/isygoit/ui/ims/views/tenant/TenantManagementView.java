@@ -85,6 +85,35 @@ public class TenantManagementView extends AbstractPaginatedView<TenantDto> {
         return new TenantCard(this, tenantService, tenantImageService, item, this::loadPageZero);
     }
 
+    /** Image shown in the first column of the table mode (the item implements IImageUploadDto). */
+    @Override
+    protected byte[] downloadItemImage(TenantDto item) {
+        if (item == null || item.getId() == null) {
+            return null;
+        }
+        try {
+            var response = tenantImageService.downloadImage(item.getId());
+            return response != null && response.getStatusCode().is2xxSuccessful() && response.getBody() != null
+                    ? readBytes(response.getBody()) : null;
+        } catch (Exception e) {
+            // no image: the avatar keeps the initials
+            return null;
+        }
+    }
+
+    @Override
+    protected String getItemImageLabel(TenantDto item) {
+        return item.getCode();
+    }
+
+    private static byte[] readBytes(org.springframework.core.io.Resource resource) {
+        try {
+            return resource.getContentAsByteArray();
+        } catch (java.io.IOException e) {
+            return null;
+        }
+    }
+
     @Override
     protected boolean matchesSearch(TenantDto t, String search) {
         if (search == null || search.isBlank()) return true;

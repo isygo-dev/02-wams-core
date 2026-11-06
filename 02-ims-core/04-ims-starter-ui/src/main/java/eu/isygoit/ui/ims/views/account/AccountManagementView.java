@@ -98,6 +98,35 @@ public class AccountManagementView extends AbstractPaginatedView<MinAccountDto> 
         return new AccountCard(this, accountService, accountImageService, item, this::loadPageZero);
     }
 
+    /** Image shown in the first column of the table mode (the item implements IImageUploadDto). */
+    @Override
+    protected byte[] downloadItemImage(MinAccountDto item) {
+        if (item == null || item.getId() == null) {
+            return null;
+        }
+        try {
+            var response = accountImageService.downloadImage(item.getId());
+            return response != null && response.getStatusCode().is2xxSuccessful() && response.getBody() != null
+                    ? readBytes(response.getBody()) : null;
+        } catch (Exception e) {
+            // no image: the avatar keeps the initials
+            return null;
+        }
+    }
+
+    @Override
+    protected String getItemImageLabel(MinAccountDto item) {
+        return item.getFullName() != null ? item.getFullName() : item.getEmail();
+    }
+
+    private static byte[] readBytes(org.springframework.core.io.Resource resource) {
+        try {
+            return resource.getContentAsByteArray();
+        } catch (java.io.IOException e) {
+            return null;
+        }
+    }
+
     @Override
     protected boolean matchesSearch(MinAccountDto a, String search) {
         if (search == null || search.isBlank()) return true;

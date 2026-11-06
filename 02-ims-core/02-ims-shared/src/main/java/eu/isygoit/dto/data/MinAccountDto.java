@@ -2,6 +2,7 @@ package eu.isygoit.dto.data;
 
 
 import eu.isygoit.constants.AccountTypeConstants;
+import eu.isygoit.dto.IImageUploadDto;
 import eu.isygoit.dto.extendable.AccountModelDto;
 import eu.isygoit.enums.IEnumAccountSystemStatus;
 import eu.isygoit.enums.IEnumAuth;
@@ -22,7 +23,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class MinAccountDto extends AccountModelDto<Long> {
+public class MinAccountDto extends AccountModelDto<Long> implements IImageUploadDto {
 
     private Long id;
     private String tenant;

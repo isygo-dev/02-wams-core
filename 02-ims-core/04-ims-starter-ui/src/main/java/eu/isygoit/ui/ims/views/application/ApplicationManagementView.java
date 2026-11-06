@@ -88,6 +88,35 @@ public class ApplicationManagementView extends AbstractPaginatedView<Application
                 item, this::loadPageZero);
     }
 
+    /** Image shown in the first column of the table mode (the item implements IImageUploadDto). */
+    @Override
+    protected byte[] downloadItemImage(ApplicationDto item) {
+        if (item == null || item.getId() == null) {
+            return null;
+        }
+        try {
+            var response = applicationImageService.downloadImage(item.getId());
+            return response != null && response.getStatusCode().is2xxSuccessful() && response.getBody() != null
+                    ? readBytes(response.getBody()) : null;
+        } catch (Exception e) {
+            // no image: the avatar keeps the initials
+            return null;
+        }
+    }
+
+    @Override
+    protected String getItemImageLabel(ApplicationDto item) {
+        return item.getName() != null ? item.getName() : item.getCode();
+    }
+
+    private static byte[] readBytes(org.springframework.core.io.Resource resource) {
+        try {
+            return resource.getContentAsByteArray();
+        } catch (java.io.IOException e) {
+            return null;
+        }
+    }
+
     @Override
     protected boolean matchesSearch(ApplicationDto a, String search) {
         if (search == null || search.isBlank()) return true;
