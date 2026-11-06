@@ -1,8 +1,8 @@
-@import "./components/app-shell.css";
-@import "./components/surfaces.css";
-@import "./components/forms.css";
-@import "./components/data-grid.css";
-@import "./components/dashboard.css";
+@use "./components/app-shell";
+@use "./components/surfaces";
+@use "./components/forms";
+@use "./components/data-grid";
+@use "./components/dashboard";
 
 @font-face {
     font-family: "Inter";

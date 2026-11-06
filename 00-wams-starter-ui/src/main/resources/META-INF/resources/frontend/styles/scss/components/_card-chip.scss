@@ -1,0 +1,65 @@
+.wams-chip {
+  font-size: var(--lumo-font-size-xxs);
+  padding: var(--lumo-space-xs) var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-l);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.chip--primary {
+  background: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+}
+
+.chip--success {
+  background: var(--lumo-success-color-10pct);
+  color: var(--lumo-success-text-color);
+}
+
+.chip--warning {
+  background: var(--wams-warning-bg-subtle);
+  color: var(--wams-warning-color);
+}
+
+.chip--error {
+  background: var(--lumo-error-color-10pct);
+  color: var(--lumo-error-text-color);
+}
+
+.chip--neutral {
+  background: var(--lumo-contrast-10pct);
+  color: var(--lumo-secondary-text-color);
+}
+
+.chip--info {
+  background: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+}
+
+.chip--contrast {
+  background: var(--lumo-contrast-10pct);
+  color: var(--lumo-secondary-text-color);
+}
+
+.chip--active {
+  @extend .chip--success;
+}
+
+.chip--inactive {
+  @extend .chip--neutral;
+}
+
+.chip--on_leave {
+  @extend .chip--warning;
+}
+
+.chip--resigned {
+  @extend .chip--error;
+}
+
+.chip--neutral {
+  background: var(--lumo-contrast-10pct);
+  color: var(--lumo-secondary-text-color);
+}

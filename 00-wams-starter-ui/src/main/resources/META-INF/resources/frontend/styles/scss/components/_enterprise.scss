@@ -97,7 +97,8 @@ vaadin-app-layout::part(content) {
   color: var(--lumo-primary-contrast-color);
 }
 
-.administration-view .toolbar-search:focus-within vaadin-icon {
+.administration-view .toolbar-search:focus-within vaadin-icon,
+.administration-view .search-field:focus-within vaadin-icon {
   color: var(--admin-accent);
 }
 

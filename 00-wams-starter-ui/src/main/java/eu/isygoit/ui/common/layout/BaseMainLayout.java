@@ -65,7 +65,7 @@ import java.util.Optional;
 
 @Slf4j
 @CssImport("./styles/scss/common.scss")
-@CssImport("./themes/isygo/styles.css")
+@CssImport("./themes/isygo/styles.scss")
 public abstract class BaseMainLayout extends AppLayout implements BeforeEnterObserver, AfterNavigationObserver {
 
     private static final String SIDEBAR_COLLAPSED_SESSION_KEY = "wams-sidebar-collapsed";

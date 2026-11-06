@@ -322,7 +322,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
      * Toolbar: search field + create button. Override to customise.
      */
     protected HorizontalLayout buildToolbar() {
-        searchField.addClassName("toolbar-search");
+        searchField.addClassName("search-field");
         searchField.setLabel(I18n.t("common.filter.search"));
         searchField.setPlaceholder(I18n.t(getSearchPlaceholderKey()));
         searchField.setPrefixComponent(VaadinIcon.SEARCH.create());

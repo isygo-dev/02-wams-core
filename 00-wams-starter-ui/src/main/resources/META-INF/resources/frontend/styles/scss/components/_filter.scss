@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════
 // FILTER & TOOLBAR
 //   .administration-toolbar  — search + add-button surface
-//   .toolbar-search          — search input inside the toolbar
+//   .search-field            — canonical search input (.toolbar-search remains supported)
 //   .filter-card*            — modern filter bar (card)
 //   .filter-control          — base class on every filter control
 //   .filter-select           — pill dropdowns / text inputs
@@ -405,6 +405,7 @@ $filter-control-h: 2.5rem; // 40 px
 // ══════════════════════════════════════════════════════════════════
 
 .toolbar-search::part(label),
+.search-field::part(label),
 .filter-select::part(label) {
   font-size: 0.6875rem;
   letter-spacing: 0.06em;
@@ -424,6 +425,7 @@ $filter-control-h: 2.5rem; // 40 px
 // ══════════════════════════════════════════════════════════════════
 
 .toolbar-search::part(input-field),
+.search-field::part(input-field),
 .filter-select::part(input-field),
 .filter-date::part(input-field) {
   margin-top: 0.375rem;

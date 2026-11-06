@@ -12,11 +12,6 @@
     color: var(--lumo-body-text-color);
 }
 
-.dashboard-root.edyra-dashboard-statistics-panel-this-d1441a9 {
-    padding: 0;
-    background: transparent;
-}
-
 .dashboard-root .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -60,8 +55,7 @@
     grid-column: span 12;
 }
 
-.dashboard-root .dashboard-card,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .dashboard-card.edyra-dashboard-surface {
+.dashboard-root .dashboard-card {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -109,25 +103,6 @@ vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .dashboard-card.edyra-
     color: var(--lumo-secondary-text-color);
     font-size: var(--lumo-font-size-s);
     font-weight: 600;
-}
-
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-welcome-panel-title-af92f08,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-welcome-panel-subtitle-5018f25,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geographic-stats-subtitle-7f1c457,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geographic-stats-summary-a2c2539,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geographic-stats-city-cfd18b0,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geographic-stats-address-7f1c457,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geographic-stats-count-71b8bbf {
-    color: var(--lumo-body-text-color);
-}
-
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-welcome-panel-subtitle-5018f25,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geographic-stats-subtitle-7f1c457,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geographic-stats-summary-a2c2539,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geographic-stats-address-7f1c457,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geographic-stats-count-71b8bbf,
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geographic-stats-map-empty-5018f25 {
-    color: var(--lumo-secondary-text-color);
 }
 
 .dashboard-root .wams-stat-card--primary {
@@ -205,10 +180,6 @@ vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geogr
     grid-template-columns: minmax(12rem, 0.9fr) minmax(0, 2fr);
     align-items: center;
     gap: var(--dashboard-gap);
-}
-
-.dashboard-root .dashboard-welcome.edyra-dashboard-welcome-panel-this-60e4bc7 {
-    border-left: 4px solid var(--dashboard-accent);
 }
 
 .dashboard-root .dashboard-welcome__copy,
@@ -378,14 +349,14 @@ vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geogr
     border-radius: var(--lumo-border-radius-m);
 }
 
-.dashboard-root .dashboard-location-list {
+.dashboard-location-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
     gap: var(--lumo-space-s);
     width: 100%;
 }
 
-.dashboard-root .dashboard-location-list .dashboard-location-row {
+.dashboard-location-list .dashboard-location-row {
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -396,14 +367,7 @@ vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .edyra-dashboard-geogr
     box-shadow: none;
 }
 
-vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .dashboard-location-list .dashboard-location-row {
-    border-color: var(--dashboard-border);
-    background: var(--lumo-base-color);
-    color: var(--lumo-body-text-color);
-    box-shadow: none;
-}
-
-.dashboard-root .dashboard-location-row span {
+.dashboard-location-list .dashboard-location-row span {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -480,36 +444,6 @@ vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .dashboard-location-li
 .dashboard-root :where(vaadin-button, vaadin-chart, button, a, [tabindex]):focus-visible {
     outline: 2px solid var(--dashboard-accent-strong);
     outline-offset: 2px;
-}
-
-.dashboard-root .edyra-dashboard-stat-loading-indicator {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-    height: auto;
-    animation: none;
-    border: 0;
-    border-radius: inherit;
-    background: color-mix(in srgb, var(--lumo-base-color) 82%, transparent);
-    backdrop-filter: blur(2px);
-}
-
-.dashboard-root .edyra-dashboard-stat-loading-indicator::before {
-    width: 28px;
-    height: 28px;
-    border: 3px solid var(--lumo-contrast-10pct);
-    border-top-color: var(--dashboard-accent-strong);
-    border-radius: 50%;
-    content: "";
-    animation: dashboard-spin 800ms linear infinite;
-}
-
-.dashboard-root .edyra-dashboard-stat-loading-indicator[hidden] {
-    display: none;
 }
 
 .student-location-map-page {
@@ -698,10 +632,8 @@ vaadin-app-layout.wams-module-edyra-pilot .dashboard-root .dashboard-location-li
 
 @media (prefers-reduced-motion: reduce) {
     .dashboard-root .dashboard-card,
-    .dashboard-root .dashboard-row,
-    .dashboard-root .edyra-dashboard-stat-loading-indicator::before {
+    .dashboard-root .dashboard-row {
         transition: none;
-        animation: none;
     }
 
     .dashboard-root .dashboard-card:hover {

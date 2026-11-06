@@ -1,0 +1,18 @@
+.wams-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--lumo-space-m);
+  width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .wams-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .wams-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,40 @@
+.wams-card__code-stack {
+  gap: var(--lumo-space-xs);
+  min-width: 0;
+}
+
+.wams-card__code-badge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--lumo-space-xs);
+  max-width: 100%;
+  margin-bottom: var(--lumo-space-xs);
+  padding-block: 2px;
+  padding-inline: var(--lumo-space-s) var(--lumo-space-xs);
+  border-radius: var(--lumo-border-radius-m);
+  background: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+}
+
+.wams-card__code-text {
+  min-width: 0;
+  overflow: hidden;
+  color: inherit;
+  font-family: var(--lumo-font-family-monospace, ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace);
+  font-size: var(--lumo-font-size-s);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wams-card__code-badge .wams-copy-button {
+  flex: none;
+  margin: 0;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  color: var(--lumo-primary-text-color);
+}

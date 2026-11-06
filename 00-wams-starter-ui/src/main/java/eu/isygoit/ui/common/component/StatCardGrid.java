@@ -6,9 +6,9 @@ import com.vaadin.flow.component.html.Div;
 /**
  * Responsive container for a row of {@link StatCard} tiles: 4 columns on
  * desktop, 3 on tablet, 1 on mobile (see {@code .wams-stat-grid} in
- * {@code styles/scss/components/_card.scss}). Used by every module dashboard so the stat-card
- * layout is identical everywhere instead of each dashboard hand-rolling its
- * own {@code HorizontalLayout}/CSS.
+ * {@code styles/scss/components/_stat-card-grid.scss}). Used by every module
+ * dashboard so the stat-card layout is identical everywhere instead of each
+ * dashboard hand-rolling its own {@code HorizontalLayout}/CSS.
  */
 @CssImport("./styles/scss/common.scss")
 public class StatCardGrid extends Div {

@@ -51,6 +51,10 @@ $dlg-shadow-avatar: 0 4px 14px rgba(0, 0, 0, 0.08);
   font-weight: 600;
 }
 
+.wams-dlg-hero__icon {
+  color: var(--lumo-primary-color);
+}
+
 .wams-dlg-hero__chips {
   gap: $dlg-space-2;
 }
@@ -134,6 +138,11 @@ $dlg-shadow-avatar: 0 4px 14px rgba(0, 0, 0, 0.08);
   gap: $dlg-space-2;
 }
 
+.wams-dlg-card__icon {
+  width: 1rem;
+  height: 1rem;
+}
+
 .wams-dlg-row {
   gap: $dlg-space-2;
   flex-wrap: wrap;
@@ -144,10 +153,29 @@ $dlg-shadow-avatar: 0 4px 14px rgba(0, 0, 0, 0.08);
   color: var(--lumo-secondary-text-color);
 }
 
+.wams-dlg-note--error {
+  color: var(--lumo-error-text-color);
+}
+
 .wams-dlg-chip {
   display: inline-flex;
   align-items: center;
   gap: $dlg-space-1;
+}
+
+.wams-dlg-chip--muted {
+  padding: 2px $dlg-space-2;
+  border-radius: 10px;
+  background: var(--lumo-contrast-10pct);
+  font-size: $dlg-font-xs;
+}
+
+.wams-dlg-card__title {
+  font-weight: 600;
+}
+
+.wams-dlg-code {
+  font-family: monospace;
 }
 
 // Mobile (~360px): stack the hero, tighten the sections.
