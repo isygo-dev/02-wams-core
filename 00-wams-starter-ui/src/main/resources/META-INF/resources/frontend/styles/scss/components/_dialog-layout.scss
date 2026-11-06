@@ -165,7 +165,7 @@ $dlg-shadow-avatar: 0 4px 14px rgba(0, 0, 0, 0.08);
 
 .wams-dlg-chip--muted {
   padding: 2px $dlg-space-2;
-  border-radius: 10px;
+  border-radius: var(--lumo-border-radius-l);
   background: var(--lumo-contrast-10pct);
   font-size: $dlg-font-xs;
 }
@@ -175,7 +175,7 @@ $dlg-shadow-avatar: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
 .wams-dlg-code {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
 }
 
 // Mobile (~360px): stack the hero, tighten the sections.

@@ -14,17 +14,17 @@
 
 .kms-enum-tag--success {
   color: var(--kms-color-success);
-  background: rgba(31, 132, 90, 0.1);
+  background: var(--lumo-success-color-10pct);
 }
 
 .kms-enum-tag--warning {
   color: var(--kms-color-warning);
-  background: rgba(165, 72, 0, 0.12);
+  background: var(--wams-warning-bg-subtle);
 }
 
 .kms-enum-tag--danger {
   color: var(--kms-color-danger);
-  background: rgba(201, 55, 44, 0.1);
+  background: var(--lumo-error-color-10pct);
 }
 
 .kms-enum-tag--info {

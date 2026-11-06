@@ -1,68 +1,49 @@
 /*
- * Per-module brand accent. Applied as a class (wams-module-<key>) on the root
- * element of each module's MainLayout (see BaseMainLayout#getModuleKey()) and
- * on the landing page's module-picker cards. Shared components (cards, dialogs,
- * buttons, chips) never use these directly — only layout/_app-shell.scss /
- * landing.scss do,
- * via the --wams-module-accent / --wams-module-accent-gradient custom properties.
+ * Per-module brand accent — the ONLY per-module design override.
+ *
+ * Applied as a class (wams-module-<key>) on the root element of each module's
+ * MainLayout (see BaseMainLayout#getModuleKey()) and on the landing page's
+ * module-picker cards. Shared components (cards, dialogs, buttons, chips, nav, grids) keep the
+ * unified primary colour and never use these; only the header / top bar in the app shell (themes/isygo/components/_app-shell.scss)
+ * and landing.scss read them, through:
+ *   --module-accent          brand fill (header rule, gradient start)
+ *   --module-accent-strong   text/icon colour on light tints (AA contrast)
+ *   --wams-module-accent(-gradient)
+ *
+ * Each of the 12 modules has its own hue (no two share an accent). To add a module, add one row to $wams-modules.
  */
 
-.wams-module-edyra-vue {
-  --wams-module-accent: #6366f1;
-  --wams-module-accent-gradient: linear-gradient(135deg, #818cf8, #6366f1);
-}
+// key: (accent, light stop of the gradient, strong text colour, strong text colour in dark mode)
+$wams-modules: (
+  "kms": (#8b5cf6, #a78bfa, #6d28d9, #c4b5fd),
+  "ims": (#10b981, #34d399, #047857, #6ee7b7),
+  "mms": (#14b8a6, #2dd4bf, #0f766e, #5eead4),
+  "dms": (#ec4899, #f472b6, #be185d, #f9a8d4),
+  "sms": (#f43f5e, #fb7185, #be123c, #fda4af),
+  "cms": (#06b6d4, #22d3ee, #0e7490, #67e8f9),
+  "edyra-vue": (#6366f1, #818cf8, #4f46e5, #a5b4fc),
+  "edyra-studio": (#d946ef, #e879f9, #a21caf, #f0abfc),
+  "edyra-pilot": (#f59e0b, #fbbf24, #b45309, #fcd34d),
+  "edyra-radar": (#84cc16, #a3e635, #4d7c0f, #bef264),
+  "edyra-spark": (#3b82f6, #60a5fa, #1d4ed8, #93c5fd),
+  "edyra-hub": (#f97316, #fb923c, #c2410c, #fdba74)
+);
 
-.wams-module-edyra-studio {
-  --wams-module-accent: #10b981;
-  --wams-module-accent-gradient: linear-gradient(135deg, #34d399, #10b981);
-}
+@each $key, $c in $wams-modules {
+  $accent: nth($c, 1);
+  $light: nth($c, 2);
+  $strong: nth($c, 3);
+  $strong-dark: nth($c, 4);
 
-.wams-module-edyra-pilot {
-  --wams-module-accent: #f59e0b;
-  --wams-module-accent-gradient: linear-gradient(135deg, #fbbf24, #f59e0b);
-}
+  .wams-module-#{$key} {
+    --module-accent: #{$accent};
+    --module-accent-strong: #{$strong};
+    --wams-module-accent: #{$accent};
+    --wams-module-accent-gradient: linear-gradient(135deg, #{$light}, #{$accent});
 
-.wams-module-edyra-radar {
-  --wams-module-accent: #ec4899;
-  --wams-module-accent-gradient: linear-gradient(135deg, #f472b6, #ec4899);
-}
+  }
 
-.wams-module-edyra-spark {
-  --wams-module-accent: #64748b;
-  --wams-module-accent-gradient: linear-gradient(135deg, #94a3b8, #64748b);
-}
-
-.wams-module-edyra-hub {
-  --wams-module-accent: #06b6d4;
-  --wams-module-accent-gradient: linear-gradient(135deg, #22d3ee, #06b6d4);
-}
-
-.wams-module-kms {
-  --wams-module-accent: #6366f1;
-  --wams-module-accent-gradient: linear-gradient(135deg, #818cf8, #6366f1);
-}
-
-.wams-module-ims {
-  --wams-module-accent: #10b981;
-  --wams-module-accent-gradient: linear-gradient(135deg, #34d399, #10b981);
-}
-
-.wams-module-mms {
-  --wams-module-accent: #f59e0b;
-  --wams-module-accent-gradient: linear-gradient(135deg, #fbbf24, #f59e0b);
-}
-
-.wams-module-dms {
-  --wams-module-accent: #ec4899;
-  --wams-module-accent-gradient: linear-gradient(135deg, #f472b6, #ec4899);
-}
-
-.wams-module-sms {
-  --wams-module-accent: #64748b;
-  --wams-module-accent-gradient: linear-gradient(135deg, #94a3b8, #64748b);
-}
-
-.wams-module-cms {
-  --wams-module-accent: #06b6d4;
-  --wams-module-accent-gradient: linear-gradient(135deg, #22d3ee, #06b6d4);
+  html[theme~="dark"] .wams-module-#{$key} {
+    --module-accent-strong: #{$strong-dark};
+  }
 }

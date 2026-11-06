@@ -19,7 +19,7 @@
   border-radius: $radius-xl;
   box-shadow: $shadow-sm;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform var(--wams-motion-duration) var(--wams-motion-ease), box-shadow var(--wams-motion-duration) var(--wams-motion-ease), border-color var(--wams-motion-duration) var(--wams-motion-ease);
 
   &::before {
     content: "";
@@ -31,7 +31,7 @@
 
   &:hover {
     transform: translateY(-3px);
-    border-color: rgba($color-primary, 0.24);
+    border-color: color-mix(in srgb, var(--lumo-primary-color) 24%, transparent);
     box-shadow: $shadow-md;
   }
 
@@ -50,10 +50,10 @@
     justify-content: center;
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: 0.85rem;
-    background: linear-gradient(135deg, rgba($color-primary, 0.18), rgba($color-info, 0.18));
+    border-radius: var(--lumo-border-radius-l);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--lumo-primary-color) 18%, transparent), rgba($color-info, 0.18));
     color: $color-primary;
-    box-shadow: inset 0 0 0 1px rgba($color-primary, 0.08);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--lumo-primary-color) 8%, transparent);
 
     vaadin-icon,
     iron-icon,
@@ -89,7 +89,7 @@
   box-shadow: var(--lumo-box-shadow-xs);
   min-width: 100px;
   flex: 1 1 100px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform var(--wams-motion-duration) var(--wams-motion-ease), box-shadow var(--wams-motion-duration) var(--wams-motion-ease);
   text-align: center;
   border-inline-start: 4px solid var(--lumo-primary-color);
 
@@ -157,7 +157,7 @@
       .stat-card__icon {
         width: 2.1rem;
         height: 2.1rem;
-        border-radius: 0.65rem;
+        border-radius: var(--lumo-border-radius-l);
       }
 
       .stat-card__value {

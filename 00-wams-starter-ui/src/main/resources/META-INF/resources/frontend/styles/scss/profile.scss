@@ -20,7 +20,7 @@
   box-shadow: var(--lumo-box-shadow-xs);
   padding: var(--lumo-space-xl);
   margin: var(--lumo-space-m) var(--lumo-space-m) 0;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .profile-avatar-section {
@@ -49,7 +49,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.15s ease;
+  transition: transform var(--wams-motion-duration) var(--wams-motion-ease), opacity var(--wams-motion-duration) var(--wams-motion-ease);
   border: 2px solid var(--lumo-base-color);
 }
 
@@ -172,7 +172,7 @@
   box-shadow: var(--lumo-box-shadow-xs);
   padding: var(--lumo-space-xl);
   margin-bottom: var(--lumo-space-l);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow var(--wams-motion-duration) var(--wams-motion-ease), transform var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .profile-section-card:hover {
@@ -231,7 +231,7 @@
 .password-strength-bar::part(value) {
   background: var(--strength-color, var(--lumo-error-color));
   border-radius: var(--lumo-border-radius-s);
-  transition: width 0.3s ease;
+  transition: width var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .password-strength-bar--weak {
@@ -402,7 +402,7 @@
   padding: var(--lumo-space-m);
   border: 1px solid var(--lumo-contrast-10pct);
   border-radius: var(--lumo-border-radius-m);
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background var(--wams-motion-duration) var(--wams-motion-ease), border-color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .profile-connection-item:hover {

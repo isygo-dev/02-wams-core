@@ -15,7 +15,7 @@
   border-radius: var(--lumo-border-radius-l) !important;
   padding: var(--lumo-space-m) !important;
   background: var(--lumo-contrast-5pct) !important;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition: border-color var(--wams-motion-duration) var(--wams-motion-ease), background-color var(--wams-motion-duration) var(--wams-motion-ease);
 
   &:hover {
     border-color: var(--lumo-primary-color) !important;
@@ -44,7 +44,7 @@
   padding: var(--lumo-space-s) var(--lumo-space-m);
   border-bottom: 1px solid var(--lumo-contrast-10pct);
   background: var(--lumo-base-color);
-  transition: background-color 0.2s ease;
+  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease);
 
   &:hover {
     background: var(--lumo-contrast-5pct);
@@ -91,7 +91,7 @@
     justify-content: center;
     color: var(--lumo-primary-color);
     text-decoration: none;
-    transition: color 0.2s ease;
+    transition: color var(--wams-motion-duration) var(--wams-motion-ease);
 
     &:hover {
       color: var(--lumo-primary-text-color);
@@ -116,7 +116,7 @@
 .file-row--existing {
   padding: 8px 12px;
   border: 1px solid var(--lumo-contrast-20pct);
-  border-radius: 10px;
+  border-radius: var(--lumo-border-radius-l);
   background: var(--lumo-contrast-5pct);
 }
 

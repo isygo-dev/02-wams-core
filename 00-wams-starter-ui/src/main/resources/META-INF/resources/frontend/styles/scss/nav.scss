@@ -25,7 +25,7 @@
   padding: var(--lumo-space-s) var(--lumo-space-m);
   color: var(--lumo-secondary-text-color);
   background: transparent;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease), color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .wams-collapsible-nav-section__header:hover {
@@ -53,7 +53,7 @@
 
 .wams-collapsible-nav-section__toggle-icon {
   flex-shrink: 0;
-  transition: transform 0.3s ease;
+  transition: transform var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .wams-collapsible-nav-section--expanded .wams-collapsible-nav-section__toggle-icon {
@@ -74,7 +74,7 @@
   overflow: hidden;
   max-height: 0;
   background: var(--lumo-base-color);
-  transition: max-height 0.3s ease-in-out;
+  transition: max-height var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .wams-collapsible-nav-section--expanded .wams-collapsible-nav-section__content {
@@ -110,7 +110,7 @@
   .wams-sidebar-collapsed .wams-collapsible-nav-section__header {
     justify-content: center;
     padding: var(--lumo-space-s);
-    min-height: 40px;
+    min-height: var(--wams-control-height);
   }
 
   .wams-sidebar-collapsed .wams-collapsible-nav-section:has(vaadin-side-nav-item[current]) .wams-collapsible-nav-section__rail-icon {

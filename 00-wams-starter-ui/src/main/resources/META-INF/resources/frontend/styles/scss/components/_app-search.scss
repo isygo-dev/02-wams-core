@@ -145,10 +145,9 @@ $app-search-w-max: 440px;
 // ══════════════════════════════════════════════════════════════════
 
 .wams-app-search::part(overlay) {
-  border-radius: 14px;
+  border-radius: var(--wams-radius-card);
   border: 1px solid var(--lumo-contrast-10pct);
-  box-shadow: 0 2px 4px rgba(9, 30, 66, 0.06),
-  0 12px 32px -12px rgba(9, 30, 66, 0.18);
+  box-shadow: var(--lumo-box-shadow-l);
   overflow: hidden;
   padding: 0.25rem;
 }
@@ -171,7 +170,7 @@ $app-search-w-max: 440px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 
-  color: var(--wams-module-accent, var(--lumo-secondary-text-color));
+  color: var(--lumo-primary-text-color);
   cursor: default;
   user-select: none;
 }
@@ -194,7 +193,7 @@ $app-search-w-max: 440px;
   padding: 0.4375rem 0.75rem 0.4375rem 1.5rem;
   margin: 0.125rem 0.25rem;
 
-  border-radius: 8px;
+  border-radius: var(--lumo-border-radius-m);
   font-size: 0.875rem;
   color: var(--lumo-body-text-color);
   cursor: pointer;

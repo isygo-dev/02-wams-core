@@ -68,7 +68,7 @@
 .password-config-card .meta-row-value,
 .peb-config-card .meta-row-value,
 .token-config-card .meta-row-value {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
   word-break: break-all;
   flex: 1;
 }

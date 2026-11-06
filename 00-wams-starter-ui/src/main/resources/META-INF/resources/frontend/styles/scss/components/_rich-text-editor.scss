@@ -26,7 +26,7 @@
   border-radius: var(--wams-rte-radius);
   background: var(--lumo-base-color);
   overflow: hidden;
-  transition: border-color .15s ease, box-shadow .15s ease;
+  transition: border-color var(--wams-motion-duration) var(--wams-motion-ease), box-shadow var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 /* Focus ring when the editable area is focused. The class is applied
@@ -87,7 +87,7 @@
   border-radius: var(--lumo-border-radius-s);
   color: var(--lumo-body-text-color);
   background: transparent;
-  transition: background-color .12s ease, color .12s ease;
+  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease), color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .wams-rte__btn:hover {
@@ -139,7 +139,7 @@
   height: 32px;
   border-radius: var(--lumo-border-radius-s);
   cursor: pointer;
-  transition: background-color .12s ease;
+  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .wams-rte__swatch:hover {
@@ -171,7 +171,7 @@
   height: 3px;
   margin-top: 1px;
   border-radius: 1px;
-  transition: background-color .15s ease;
+  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 /* The native color input fills the swatch, opacity 0 → any click opens

@@ -1,6 +1,6 @@
 .dashboard-root {
     --dashboard-gap: var(--lumo-space-m);
-    --dashboard-accent: var(--wams-module-accent, var(--lumo-primary-color));
+    --dashboard-accent: var(--lumo-primary-color);
     --dashboard-accent-strong: var(--lumo-warning-text-color);
     --dashboard-accent-tint: color-mix(in srgb, var(--dashboard-accent) 12%, var(--lumo-base-color));
     --lumo-primary-color: var(--dashboard-accent);

@@ -7,7 +7,7 @@ button {
   border-radius: var(--lumo-border-radius-m);
   padding: var(--lumo-space-s) var(--lumo-space-m);
   font-weight: 500;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity var(--wams-motion-duration) var(--wams-motion-ease), transform var(--wams-motion-duration) var(--wams-motion-ease);
 
   &:hover {
     transform: translateY(-1px);

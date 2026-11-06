@@ -1,20 +1,22 @@
-// Atlassian-inspired palette and compact geometry shared by WAMS views.
-$color-primary: #0c66e4;
-$color-primary-10: rgba(12, 102, 228, 0.1);
-$color-primary-50: rgba(12, 102, 228, 0.5);
+// Sass mirror of the canonical CSS tokens in ../tokens.scss (needed where Sass
+// colour functions such as rgba($color, a) require a literal value).
+// Keep every value here identical to its CSS custom property counterpart.
+$color-primary: #4f46e5; // --lumo-primary-text-color
+$color-primary-10: rgba(99, 102, 241, 0.1); // --lumo-primary-color-10pct
+$color-primary-50: rgba(99, 102, 241, 0.5); // --lumo-primary-color-50pct
 
-$color-success: #1f845a;
-$color-warning: #a54800;
-$color-danger: #c9372c;
-$color-info: #0055cc;
+$color-success: #047857; // --lumo-success-text-color
+$color-warning: #92400e; // --wams-warning-color
+$color-danger: #b91c1c; // --lumo-error-text-color
+$color-info: #0369a1; // --wams-info-fg
 
-$color-text: #172b4d;
-$color-text-muted: #44546f;
-$color-text-soft: #626f86;
-$color-surface: #ffffff;
-$color-surface-alt: #f7f8f9;
-$color-border: rgba(9, 30, 66, 0.14);
-$color-shadow: rgba(9, 30, 66, 0.13);
+$color-text: #0f172a; // --lumo-body-text-color
+$color-text-muted: #475569; // --lumo-tertiary-text-color
+$color-text-soft: #64748b; // --lumo-secondary-text-color
+$color-surface: #ffffff; // --lumo-base-color
+$color-surface-alt: #f7f8fa; // --wams-page-bg
+$color-border: #e2e8f0; // --lumo-contrast-10pct
+$color-shadow: rgba(0, 0, 0, 0.08);
 
 $space-1: 0.25rem;
 $space-2: 0.5rem;
@@ -26,12 +28,12 @@ $space-8: 2rem;
 $space-10: 2.5rem;
 $space-12: 3rem;
 
-$radius-sm: 3px;
-$radius-md: 3px;
-$radius-lg: 6px;
-$radius-xl: 8px;
+$radius-sm: 6px; // --lumo-border-radius-s
+$radius-md: 8px; // --lumo-border-radius-m (controls)
+$radius-lg: 12px; // --lumo-border-radius-l (cards)
+$radius-xl: 16px; // --lumo-border-radius-xl
 
-$font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$font-family-base: "Inter", ui-sans-serif, system-ui, sans-serif;
 
 $font-size-xxs: 0.625rem;
 $font-size-xs: 0.75rem;
@@ -65,8 +67,8 @@ $bp-panel-wide: 1200px;
 $card-grid-min: 320px;
 
 $container-max-width: 1400px;
-$header-height: 52px;
+$header-height: 64px; // --wams-header-height
 $toolbar-height: 52px;
 
-$shadow-sm: 0 2px 8px $color-shadow;
-$shadow-md: 0 4px 16px $color-shadow;
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06); // --lumo-box-shadow-s
+$shadow-md: 0 4px 12px $color-shadow; // --lumo-box-shadow-m

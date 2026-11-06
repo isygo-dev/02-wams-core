@@ -41,7 +41,7 @@
 }
 
 .decode-jwt-dialog .code-textarea {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
   font-size: 12px;
   background: var(--lumo-contrast-5pct);
   border-radius: var(--lumo-border-radius-m);

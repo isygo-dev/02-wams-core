@@ -1,7 +1,7 @@
 vaadin-grid {
     --_lumo-grid-border-color: var(--lumo-contrast-10pct);
     border: 1px solid var(--lumo-contrast-10pct);
-    border-radius: var(--lumo-border-radius-l);
+    border-radius: var(--wams-radius-card);
     background: var(--lumo-base-color);
     color: var(--lumo-body-text-color);
     font-family: var(--lumo-font-family);
@@ -16,7 +16,13 @@ vaadin-grid::part(header-cell) {
 }
 
 vaadin-grid::part(body-cell) {
+    min-height: var(--wams-control-height);
+    padding-block: var(--lumo-space-xs);
     color: var(--lumo-body-text-color);
+}
+
+vaadin-grid::part(row) {
+    transition: background-color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 vaadin-grid::part(row):hover {

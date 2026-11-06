@@ -3,22 +3,15 @@
 //
 // Direction: a calm tinted canvas with crisp white surfaces. Hierarchy comes from three radii (controls < cards <
 // dialogs), one border colour, one elevation step on hover, and a tighter type scale with tabular figures.
-// The brand blue stays the only saturated colour; amber is reserved for the single "current record" accent.
+// The brand indigo stays the only saturated colour; amber is reserved for the single "current record" accent.
 
+// Aliases of the canonical tokens (tokens.scss) kept for existing selectors; they
+// flip automatically in dark mode because the targets do.
 html {
-  --wams-canvas: #f4f6fa;
-  --wams-surface-line: #dce1ea;
-  --wams-surface-line-strong: #c3cad6;
-  --wams-shadow-hover: 0 6px 18px -6px rgba(9, 30, 66, 0.2), 0 0 1px rgba(9, 30, 66, 0.14);
-  --lumo-font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, 'Noto Sans', 'Noto Naskh Arabic',
-  sans-serif;
-}
-
-[theme~='dark'] {
-  --wams-canvas: var(--lumo-base-color);
-  --wams-surface-line: var(--lumo-contrast-20pct);
-  --wams-surface-line-strong: var(--lumo-contrast-30pct);
-  --wams-shadow-hover: 0 6px 18px -6px rgba(0, 0, 0, 0.6);
+  --wams-canvas: var(--wams-page-bg);
+  --wams-surface-line: var(--lumo-contrast-10pct);
+  --wams-surface-line-strong: var(--lumo-contrast-20pct);
+  --wams-shadow-hover: var(--lumo-box-shadow-m);
 }
 
 /* ── Canvas ───────────────────────────────────────────────────────────── */
@@ -30,11 +23,8 @@ vaadin-app-layout::part(content) {
 // Shared chrome for CRUD views across modules. Pilot-specific view partials
 // keep only their domain sections; these primitives live in WAMS.
 .administration-view {
-  --admin-accent: var(--wams-module-accent, var(--lumo-primary-color));
-  --admin-accent-gradient: var(
-                  --wams-module-accent-gradient,
-                  linear-gradient(135deg, var(--lumo-primary-color), var(--lumo-primary-text-color))
-  );
+  --admin-accent: var(--lumo-primary-color);
+  --admin-accent-gradient: linear-gradient(135deg, var(--lumo-primary-color), var(--lumo-primary-text-color));
   container-type: inline-size;
   container-name: adminview;
   box-sizing: border-box;
@@ -132,7 +122,7 @@ vaadin-app-layout::part(content) {
 .wams-card {
   border: 1px solid var(--wams-surface-line);
   box-shadow: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--wams-motion-duration) var(--wams-motion-ease), box-shadow var(--wams-motion-duration) var(--wams-motion-ease);
 
   &:hover {
     border-color: var(--wams-surface-line-strong);
@@ -182,7 +172,7 @@ vaadin-app-layout::part(content) {
   padding: 0;
   border-radius: var(--lumo-border-radius-m);
   color: var(--lumo-secondary-text-color);
-  transition: background-color 0.12s ease, color 0.12s ease;
+  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease), color var(--wams-motion-duration) var(--wams-motion-ease);
 
   &:hover {
     background: var(--lumo-primary-color-10pct);

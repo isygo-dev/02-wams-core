@@ -54,7 +54,7 @@
 .tokenizer-view .audience-chip,
 .token-config-dialog .audience-chip {
   background-color: var(--lumo-contrast-10pct);
-  border-radius: 16px;
+  border-radius: var(--lumo-border-radius-xl);
   padding: 4px 12px;
   display: inline-flex;
   align-items: center;
@@ -74,14 +74,14 @@
 }
 
 .tokenizer-view .token-result-value {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
   font-size: var(--lumo-font-size-xs);
   word-break: break-all;
   flex: 1;
 }
 
 .tokenizer-view .expiry-value {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
 }
 
 .tokenizer-view .validation-result-success {

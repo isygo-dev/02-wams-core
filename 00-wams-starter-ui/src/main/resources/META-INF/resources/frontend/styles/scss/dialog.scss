@@ -117,7 +117,7 @@ vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sm
    higher-contrast code panel below. */
 .wams-dialog-code-span {
   font-size: 28px;
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
   background-color: var(--lumo-contrast-5pct);
   padding: 12px 20px;
   border-radius: var(--lumo-border-radius-m);

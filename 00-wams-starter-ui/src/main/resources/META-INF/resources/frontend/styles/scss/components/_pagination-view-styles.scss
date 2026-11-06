@@ -1,30 +1,30 @@
 // ─────────────────────────────────────────────────────────────
-// Student View — Material-UI-style rounded pagination
+// Shared pagination (tokens only; light/dark follow the Lumo custom properties)
 // ─────────────────────────────────────────────────────────────
 
 // ── Variables ────────────────────────────────────────────────
 $pagination-btn-size: 40px;
-$pagination-radius: 50%; // circular (MUI "rounded")
+$pagination-radius: var(--wams-radius-control);
 $pagination-gap: 8px;
 $pagination-padding-y: 16px;
 
-$pagination-bg: #fff;
-$pagination-bg-hover: #f5f5f5;
-$pagination-bg-active: #1976d2;
-$pagination-bg-active-hv: #1565c0;
+$pagination-bg: var(--lumo-base-color);
+$pagination-bg-hover: var(--lumo-contrast-5pct);
+$pagination-bg-active: var(--lumo-primary-text-color);
+$pagination-bg-active-hv: color-mix(in srgb, var(--lumo-primary-text-color) 88%, black);
 
-$pagination-border: #e0e0e0;
-$pagination-border-hover: #bdbdbd;
-$pagination-border-active: #1976d2;
+$pagination-border: var(--lumo-contrast-10pct);
+$pagination-border-hover: var(--lumo-contrast-30pct);
+$pagination-border-active: var(--lumo-primary-text-color);
 
-$pagination-text: #424242;
-$pagination-text-active: #fff;
-$pagination-text-muted: #757575;
+$pagination-text: var(--lumo-body-text-color);
+$pagination-text-active: var(--lumo-primary-contrast-color);
+$pagination-text-muted: var(--lumo-secondary-text-color);
 
 $pagination-font-weight: 500;
-$pagination-transition: background 0.15s ease,
-border-color 0.15s ease,
-color 0.15s ease;
+$pagination-transition: background-color var(--wams-motion-duration) var(--wams-motion-ease),
+  border-color var(--wams-motion-duration) var(--wams-motion-ease),
+  color var(--wams-motion-duration) var(--wams-motion-ease);
 
 // ── Mixins ───────────────────────────────────────────────────
 @mixin circle($size) {
@@ -127,43 +127,4 @@ color 0.15s ease;
   color: $pagination-text-muted;
   font-size: 1.2rem;
   user-select: none;
-}
-
-// ── Dark theme ───────────────────────────────────────────────
-// Lumo's dark mode is an attribute on the document root, not on each component, so the dark rules apply under
-// html[theme~="dark"] as well as under a component-level theme="dark".
-@mixin pagination-dark {
-  .pagination-btn {
-    background: #1e1e1e;
-    border-color: #424242;
-    color: #e0e0e0;
-
-    &:hover {
-      background: #2a2a2a;
-      border-color: #616161;
-    }
-
-    &.pagination-btn--active {
-      background: #90caf9;
-      border-color: #90caf9;
-      color: #121212;
-
-      &:hover {
-        background: #64b5f6;
-        border-color: #64b5f6;
-      }
-    }
-  }
-
-  .pagination-ellipsis {
-    color: #9e9e9e;
-  }
-}
-
-:host([theme~="dark"]) .pagination-bar {
-  @include pagination-dark;
-}
-
-[theme~="dark"] .pagination-bar {
-  @include pagination-dark;
 }

@@ -92,7 +92,7 @@
   width: 220px;
   display: flex;
   flex-direction: column;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: transform var(--wams-motion-duration) var(--wams-motion-ease), box-shadow var(--wams-motion-duration) var(--wams-motion-ease), border-color var(--wams-motion-duration) var(--wams-motion-ease);
   cursor: pointer;
 }
 

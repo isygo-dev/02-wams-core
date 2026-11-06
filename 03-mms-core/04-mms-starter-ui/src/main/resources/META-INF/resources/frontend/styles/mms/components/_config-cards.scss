@@ -2,7 +2,7 @@
 
 .template-card .wams-tenant-badge,
 .sender-config-card .wams-tenant-badge {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
 }
 
 .template-card .wams-title-row,
@@ -38,7 +38,7 @@
 
 .template-card .detail-row .detail-value,
 .sender-config-card .detail-row .detail-value {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
   word-break: break-all;
   flex: 1;
 }

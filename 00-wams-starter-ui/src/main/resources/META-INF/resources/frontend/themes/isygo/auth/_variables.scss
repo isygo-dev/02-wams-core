@@ -7,7 +7,7 @@ $auth-color-error: #b91c1c;
 $auth-color-error-surface: #fef2f2;
 $auth-color-success-surface: #ecfdf5;
 $auth-color-surface: #ffffff;
-$auth-color-page: #f8fafc;
+$auth-color-page: #f7f8fa; // --wams-page-bg
 $auth-color-focus: #4338ca;
 
 $auth-space-xs: 0.375rem;
@@ -18,7 +18,7 @@ $auth-space-xl: 2rem;
 
 $auth-radius-sm: 0.375rem;
 $auth-radius-md: 0.625rem;
-$auth-radius-lg: 1rem;
+$auth-radius-lg: 0.75rem; // --lumo-border-radius-l
 $auth-card-max-width: 30rem;
 $auth-touch-target: 2.75rem;
-$auth-shadow: 0 1.5rem 4rem rgba(23, 43, 77, 0.12);
+$auth-shadow: var(--lumo-box-shadow-l);

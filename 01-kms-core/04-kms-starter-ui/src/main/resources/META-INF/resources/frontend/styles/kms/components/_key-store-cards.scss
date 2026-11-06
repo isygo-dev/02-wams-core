@@ -43,13 +43,13 @@
 }
 
 .kms-partc-row-value {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
   word-break: break-all;
   flex: 1;
 }
 
 .kms-partc-row-value-mono {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
 }
 
 /* StoreCard key/value metadata chips (StoreCard#addKeyValueRow) */

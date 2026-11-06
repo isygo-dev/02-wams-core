@@ -57,7 +57,7 @@ auth-layout {
 auth-layout h1,
 auth-layout h2,
 auth-layout h3 {
-  font-family: "Inter Tight", var(--lumo-font-family);
+  font-family: var(--lumo-font-family);
 }
 
 html[theme~="dark"] auth-layout {

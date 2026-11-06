@@ -54,7 +54,7 @@ vaadin-drawer-toggle {
   cursor: pointer;
   padding: var(--lumo-space-xs) var(--lumo-space-s);
   border-radius: var(--lumo-border-radius-m);
-  transition: background-color 0.15s ease;
+  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .wams-brand:hover {
@@ -69,7 +69,7 @@ vaadin-drawer-toggle {
   margin-inline-end: var(--lumo-space-s);
   border-radius: var(--lumo-border-radius-l);
   color: var(--lumo-primary-contrast-color);
-  background: linear-gradient(135deg, var(--lumo-primary-color), var(--wams-module-accent, #0055CC));
+  background: linear-gradient(135deg, var(--lumo-primary-color), var(--wams-module-accent, var(--lumo-primary-color)));
 }
 
 .wams-brand__name {
@@ -111,7 +111,7 @@ vaadin-drawer-toggle:focus-visible {
 
 .wams-avatar-bordered {
   border: 2px solid transparent;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .wams-profile-menu:hover .wams-avatar-bordered {
@@ -287,7 +287,7 @@ vaadin-app-layout {
    transform/visibility are, for the open/close slide animation), so add it
    here to make the expanded/collapsed width swap animate smoothly too. */
 vaadin-app-layout::part(drawer) {
-  transition: width 0.2s ease, transform var(--vaadin-app-layout-transition, 200ms), visibility var(--vaadin-app-layout-transition, 200ms);
+  transition: width var(--wams-motion-duration) var(--wams-motion-ease), transform var(--vaadin-app-layout-transition, 200ms), visibility var(--vaadin-app-layout-transition, 200ms);
   background: var(--lumo-base-color);
   border-inline-end: 1px solid var(--lumo-contrast-10pct);
 }
@@ -335,7 +335,7 @@ vaadin-side-nav-item::part(link) {
   border-radius: var(--lumo-border-radius-m);
   font-size: 14px;
   min-height: 36px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease), color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 vaadin-side-nav-item::part(link):focus-visible {
@@ -410,7 +410,7 @@ vaadin-side-nav-item[slot='children'] {
   padding: var(--lumo-space-xs) var(--lumo-space-s);
   border-radius: var(--lumo-border-radius-m);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .wams-user-card:hover {
@@ -472,7 +472,7 @@ vaadin-side-nav-item[slot='children'] {
 
   .wams-sidebar-collapsed vaadin-side-nav-item::part(content) {
     position: relative;
-    min-height: 40px;
+    min-height: var(--wams-control-height);
   }
 
   .wams-sidebar-collapsed vaadin-side-nav-item::part(link) {

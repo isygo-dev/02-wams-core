@@ -35,7 +35,7 @@
   gap: $space-4;
   width: 100%;
   padding: $space-2 0;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--wams-motion-duration) var(--wams-motion-ease);
 
   // Beyond four columns the cards grow wider than they are readable.
   @media (min-width: 1600px) {

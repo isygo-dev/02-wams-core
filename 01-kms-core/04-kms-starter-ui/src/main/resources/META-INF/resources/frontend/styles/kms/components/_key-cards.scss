@@ -47,7 +47,7 @@
 }
 
 .key-card .key-card__row-value {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
   word-break: break-all;
   flex: 1;
 }
@@ -55,7 +55,7 @@
 /* KeyCard#updateVersionDisplay() current-version span. */
 
 .key-card .key-card__version-span {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
 }
 
 /* KeyCard context-menu "Permanently delete" item (KeyCard#populateContextMenu()). */
@@ -75,7 +75,7 @@
 }
 
 .alias-card .alias-card__row-value {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
   word-break: break-all;
   flex: 1;
 }

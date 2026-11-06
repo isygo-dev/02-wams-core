@@ -79,7 +79,7 @@
   &__link {
     color: var(--lumo-secondary-text-color);
     font-weight: 500;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color var(--wams-motion-duration) var(--wams-motion-ease), color var(--wams-motion-duration) var(--wams-motion-ease);
 
     &:hover {
       color: var(--lumo-primary-text-color);

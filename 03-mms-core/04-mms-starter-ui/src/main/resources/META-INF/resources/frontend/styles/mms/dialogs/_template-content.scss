@@ -34,7 +34,7 @@
 }
 
 .wams-dialog-content-editor {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
   font-size: var(--lumo-font-size-s);
   tab-size: 2;
 }

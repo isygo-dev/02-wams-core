@@ -1,65 +1,110 @@
 /*
- * Design tokens shared by every module (common, auth, ims, kms, dms, mms, sms, cms).
- * … (le préambule reste inchangé) …
+ * WAMS design tokens — the single source of truth for every UI module
+ * (common, auth, ims, kms, dms, mms, sms, cms, edyra-pilot).
+ *
+ * Light values live on `html`, dark values on `html[theme~="dark"]`.
+ * Components must consume these custom properties (or the Sass mirror in
+ * abstracts/_variables.scss); never hardcode colours, radii, shadows, spacing
+ * or durations in a component. Per-module accents are the only per-module
+ * override (see _modules.scss).
  */
 
 html {
-  /* ── Brand / semantic accents (Atlassian Design System) ─────────────── */
-  --lumo-primary-color: #0C66E4;
-  --lumo-primary-color-50pct: rgba(12, 102, 228, 0.5);
-  --lumo-primary-color-10pct: rgba(12, 102, 228, 0.1);
-  --wams-primary-rgb: 12, 102, 228;
-  --lumo-primary-text-color: #0C66E4;
-  --lumo-primary-contrast-color: #FFFFFF;
+  color-scheme: light;
 
-  --lumo-error-color: #C9372C;
-  --lumo-error-color-50pct: rgba(201, 55, 44, 0.5);
-  --lumo-error-color-10pct: rgba(201, 55, 44, 0.1);
-  --wams-error-rgb: 201, 55, 44;
-  --lumo-error-text-color: #AE2E24;
-  --lumo-error-contrast-color: #FFFFFF;
+  /* ── Brand / semantic accents ───────────────────────────────────────── */
+  --lumo-primary-color: #6366f1;
+  --lumo-primary-color-50pct: #6366f180;
+  --lumo-primary-color-10pct: #6366f11a;
+  --lumo-primary-text-color: #4f46e5;
+  --lumo-primary-contrast-color: #ffffff;
+  --wams-primary-rgb: 99, 102, 241;
 
-  --lumo-success-color: #1F845A;
-  --lumo-success-color-50pct: rgba(31, 132, 90, 0.5);
-  --lumo-success-color-10pct: rgba(31, 132, 90, 0.1);
-  --wams-success-rgb: 31, 132, 90;
-  --lumo-success-text-color: #216E4E;
-  --lumo-success-contrast-color: #FFFFFF;
+  --lumo-success-color: #10b981;
+  --lumo-success-color-50pct: #10b98180;
+  --lumo-success-color-10pct: #10b9811a;
+  --lumo-success-text-color: #047857;
+  --lumo-success-contrast-color: #ffffff;
+  --wams-success-rgb: 16, 185, 129;
 
-  /* Lumo has no native "warning" palette; every module reuses these two. */
-  --wams-warning-color: #A54800;
-  --wams-warning-rgb: 165, 72, 0;
-  --wams-warning-bg: #FFF0B3;
-  --wams-warning-bg-subtle: #FFF7D6;
-  --wams-warning-border: #F5CD47;
-  --wams-info-bg: #E9F2FF;
-  --wams-info-fg: #0055CC;
-  --wams-info-rgb: 0, 85, 204;
-  --wams-discovery-color: #6E5DC6;
-  --wams-discovery-bg: #F3F0FD;
+  --lumo-error-color: #ef4444;
+  --lumo-error-color-50pct: #ef444480;
+  --lumo-error-color-10pct: #ef44441a;
+  --lumo-error-text-color: #b91c1c;
+  --lumo-error-contrast-color: #ffffff;
+  --wams-error-rgb: 239, 68, 68;
 
-  /* ── Text ─────────────────────────────────────────────────────────────── */
-  --lumo-header-text-color: #172B4D;
-  --lumo-body-text-color: #172B4D;
-  --lumo-secondary-text-color: #44546F;
-  --lumo-tertiary-text-color: #626F86;
-  --lumo-disabled-text-color: #8590A2;
-  --wams-secondary-text-rgb: 68, 84, 111;
+  /* Lumo has no native "warning" palette; every module reuses these. */
+  --lumo-warning-color: #f59e0b;
+  --lumo-warning-color-10pct: #f59e0b1a;
+  --lumo-warning-text-color: #92400e;
+  --wams-warning-color: #92400e;
+  --wams-warning-rgb: 146, 64, 14;
+  --wams-warning-bg: #fef3c7;
+  --wams-warning-bg-subtle: #fffbeb;
+  --wams-warning-border: #f59e0b;
 
-  /* ── Shape: compact, mostly-square controls (not pill-shaped) ────────── */
-  --lumo-border-radius-s: 4px;
-  --lumo-border-radius-m: 6px;
-  --lumo-border-radius-l: 10px;
-  --lumo-border-radius-xl: 14px;
+  --lumo-info-color: #0ea5e9;
+  --lumo-info-color-10pct: #0ea5e91a;
+  --lumo-info-text-color: #0369a1;
+  --wams-info-bg: #e0f2fe;
+  --wams-info-fg: #0369a1;
+  --wams-info-rgb: 14, 165, 233;
 
-  /* ── Shadows: subtle, flat elevation ── */
-  --lumo-box-shadow-xs: 0 1px 1px rgba(9, 30, 66, 0.13);
-  --lumo-box-shadow-s: 0 1px 2px rgba(9, 30, 66, 0.16), 0 0 1px rgba(9, 30, 66, 0.1);
-  --lumo-box-shadow-m: 0 4px 8px -2px rgba(9, 30, 66, 0.18), 0 0 1px rgba(9, 30, 66, 0.12);
-  --lumo-box-shadow-l: 0 8px 16px -4px rgba(9, 30, 66, 0.22), 0 0 1px rgba(9, 30, 66, 0.12);
-  --lumo-box-shadow-xl: 0 12px 24px -6px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.12);
+  --wams-discovery-color: #6e5dc6;
+  --wams-discovery-bg: #f3f0fd;
 
-  /* ── Type scale ── */
+  /* ── Surfaces ───────────────────────────────────────────────────────── */
+  --wams-page-bg: #f7f8fa;
+  --lumo-base-color: #ffffff;
+
+  /* ── Text ───────────────────────────────────────────────────────────── */
+  --lumo-header-text-color: #0f172a;
+  --lumo-body-text-color: #0f172a;
+  --lumo-secondary-text-color: #64748b;
+  --lumo-tertiary-text-color: #475569;
+  --lumo-disabled-text-color: #64748b;
+  --wams-secondary-text-rgb: 100, 116, 139;
+
+  /* ── Neutral fills / borders ────────────────────────────────────────── */
+  --lumo-contrast-5pct: #f8fafc;
+  --lumo-contrast-10pct: #e2e8f0;
+  --lumo-contrast-20pct: #cbd5e1;
+  --lumo-contrast-30pct: #94a3b8;
+  --lumo-contrast-40pct: #64748b;
+
+  /* ── Shape ──────────────────────────────────────────────────────────── */
+  --lumo-border-radius-s: 6px;
+  --lumo-border-radius-m: 8px;
+  --lumo-border-radius-l: 12px;
+  --lumo-border-radius-xl: 16px;
+  --wams-radius-control: var(--lumo-border-radius-m);
+  --wams-radius-card: var(--lumo-border-radius-l);
+
+  /* ── Elevation: restrained, one subtle shadow per surface ───────────── */
+  --lumo-box-shadow-xs: 0 1px 2px rgb(0 0 0 / 4%);
+  --lumo-box-shadow-s: 0 1px 2px rgb(0 0 0 / 4%), 0 1px 3px rgb(0 0 0 / 6%);
+  --lumo-box-shadow-m: 0 4px 12px rgb(0 0 0 / 8%);
+  --lumo-box-shadow-l: 0 8px 24px rgb(0 0 0 / 10%);
+  --lumo-box-shadow-xl: 0 12px 32px rgb(0 0 0 / 12%);
+  --wams-shadow-card: var(--lumo-box-shadow-s);
+
+  /* ── Spacing scale ──────────────────────────────────────────────────── */
+  --lumo-space-xs: 4px;
+  --lumo-space-s: 8px;
+  --lumo-space-m: 16px;
+  --lumo-space-l: 24px;
+  --lumo-space-xl: 32px;
+  --wams-compact-gap: var(--lumo-space-s);
+  --wams-field-gap: var(--lumo-space-m);
+  --wams-section-gap: var(--lumo-space-l);
+  --wams-card-padding: var(--lumo-space-l);
+  --wams-page-padding: var(--lumo-space-l);
+
+  /* ── Typography ─────────────────────────────────────────────────────── */
+  --lumo-font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --wams-font-heading: var(--lumo-font-family);
+  --wams-font-mono: "JetBrains Mono", ui-monospace, monospace;
   --lumo-font-size-xxs: 0.6875rem;
   --lumo-font-size-xs: 0.75rem;
   --lumo-font-size-s: 0.8125rem;
@@ -67,12 +112,91 @@ html {
   --lumo-font-size-l: 1rem;
   --lumo-font-size-xl: 1.25rem;
   --lumo-font-size-xxl: 1.5rem;
-  --lumo-font-size-xxxl: 1.75rem;
+  --lumo-font-size-xxxl: 1.875rem;
 
-  /* ── App shell ─────────────────────────────────────────────────────────── */
-  --wams-header-height: 52px;
-  --wams-sidebar-width-expanded: 220px;
-  --wams-sidebar-width-collapsed: 60px;
+  /* ── Controls & motion ──────────────────────────────────────────────── */
+  --wams-control-height: 36px;
+  --wams-touch-target: 44px;
+  --wams-motion-duration: 200ms;
+  --wams-motion-ease: ease;
+
+  /* ── App shell ──────────────────────────────────────────────────────── */
+  --wams-header-height: 64px;
+  --wams-sidebar-width-expanded: 264px;
+  --wams-sidebar-width-collapsed: 68px;
+
+  /* ── Module accent (overridden per module in _modules.scss) ─────────── */
+  --module-accent: #6366f1;
+  --module-accent-strong: #4f46e5;
+  --module-brand-foreground: #ffffff;
+  --wams-module-accent: var(--module-accent);
+  --wams-module-accent-gradient: linear-gradient(135deg, #818cf8, #6366f1);
+}
+
+html[theme~="dark"] {
+  color-scheme: dark;
+
+  --lumo-primary-color: #818cf8;
+  --lumo-primary-color-50pct: #818cf880;
+  --lumo-primary-color-10pct: #818cf81a;
+  --lumo-primary-text-color: #a5b4fc;
+  --lumo-primary-contrast-color: #0b1120;
+
+  --lumo-success-color: #34d399;
+  --lumo-success-color-50pct: #34d39980;
+  --lumo-success-color-10pct: #34d3991a;
+  --lumo-success-text-color: #6ee7b7;
+  --lumo-success-contrast-color: #0b1120;
+
+  --lumo-error-color: #f87171;
+  --lumo-error-color-50pct: #f8717180;
+  --lumo-error-color-10pct: #f871711a;
+  --lumo-error-text-color: #fca5a5;
+  --lumo-error-contrast-color: #0b1120;
+
+  --lumo-warning-color: #fbbf24;
+  --lumo-warning-color-10pct: #fbbf241a;
+  --lumo-warning-text-color: #fcd34d;
+  --wams-warning-color: #fcd34d;
+  --wams-warning-bg: #422006;
+  --wams-warning-bg-subtle: #29200e;
+  --wams-warning-border: #92400e;
+
+  --lumo-info-color: #38bdf8;
+  --lumo-info-color-10pct: #38bdf81a;
+  --lumo-info-text-color: #7dd3fc;
+  --wams-info-bg: #082f49;
+  --wams-info-fg: #7dd3fc;
+
+  --wams-page-bg: #111827;
+  --lumo-base-color: #0b1120;
+  --lumo-body-text-color: #f1f5f9;
+  --lumo-header-text-color: #f1f5f9;
+  --lumo-secondary-text-color: #94a3b8;
+  --lumo-tertiary-text-color: #cbd5e1;
+  --lumo-disabled-text-color: #94a3b8;
+  --wams-secondary-text-rgb: 148, 163, 184;
+
+  --lumo-contrast-5pct: #111827;
+  --lumo-contrast-10pct: #1f2937;
+  --lumo-contrast-20pct: #334155;
+  --lumo-contrast-30pct: #475569;
+  --lumo-contrast-40pct: #64748b;
+
+  --lumo-box-shadow-xs: 0 1px 2px rgb(0 0 0 / 20%);
+  --lumo-box-shadow-s: 0 1px 3px rgb(0 0 0 / 24%);
+  --lumo-box-shadow-m: 0 8px 20px rgb(0 0 0 / 28%);
+  --lumo-box-shadow-l: 0 14px 32px rgb(0 0 0 / 32%);
+  --lumo-box-shadow-xl: 0 20px 44px rgb(0 0 0 / 36%);
+
+  --module-accent-strong: #a5b4fc;
+  --module-brand-foreground: #0b1120;
+}
+
+@media (pointer: coarse) {
+  html {
+    --wams-control-height: var(--wams-touch-target);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -240,7 +364,7 @@ html {
    ═══════════════════════════════════════════════════════════════════════ */
 
 .wams-action-btn {
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease), color var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 .wams-action-btn--danger:hover {

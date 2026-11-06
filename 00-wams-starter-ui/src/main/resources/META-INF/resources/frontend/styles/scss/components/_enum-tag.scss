@@ -7,7 +7,7 @@
   max-width: 100%;
   padding: 0.12rem 0.55rem;
   border: 1px solid transparent;
-  border-radius: 0.5625rem;
+  border-radius: var(--lumo-border-radius-l);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.5;
@@ -16,28 +16,28 @@
 }
 
 .wams-enum-tag--success {
-  color: #1f845a;
-  background: rgba(31, 132, 90, 0.1);
+  color: var(--lumo-success-text-color);
+  background: var(--lumo-success-color-10pct);
 }
 
 .wams-enum-tag--warning {
-  color: #a54800;
-  background: rgba(165, 72, 0, 0.12);
+  color: var(--wams-warning-color);
+  background: var(--wams-warning-bg-subtle);
 }
 
 .wams-enum-tag--danger {
-  color: #c9372c;
-  background: rgba(201, 55, 44, 0.1);
+  color: var(--lumo-error-text-color);
+  background: var(--lumo-error-color-10pct);
 }
 
 .wams-enum-tag--info {
-  color: #0055cc;
-  background: rgba(12, 102, 228, 0.1);
+  color: var(--wams-info-fg);
+  background: var(--wams-info-bg);
 }
 
 .wams-enum-tag--neutral {
-  color: #44546f;
-  background: #f7f8f9;
+  color: var(--lumo-secondary-text-color);
+  background: var(--lumo-contrast-10pct);
 }
 
 // Dark theme (Lumo's html[theme~="dark"]): the light-mode text colours above are too dark on a dark surface, so

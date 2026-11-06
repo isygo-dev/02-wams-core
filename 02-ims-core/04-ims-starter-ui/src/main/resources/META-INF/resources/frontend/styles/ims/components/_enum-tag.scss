@@ -15,17 +15,17 @@
 
 .ims-enum-tag--success {
   color: var(--ims-color-success);
-  background: rgba(31, 132, 90, 0.1);
+  background: var(--lumo-success-color-10pct);
 }
 
 .ims-enum-tag--warning {
   color: var(--ims-color-warning);
-  background: rgba(165, 72, 0, 0.12);
+  background: var(--wams-warning-bg-subtle);
 }
 
 .ims-enum-tag--danger {
   color: var(--ims-color-danger);
-  background: rgba(201, 55, 44, 0.1);
+  background: var(--lumo-error-color-10pct);
 }
 
 .ims-enum-tag--info {

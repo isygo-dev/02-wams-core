@@ -1,9 +1,8 @@
 .wams-main-header {
     min-height: var(--wams-header-height);
-    border-top: 3px solid var(--module-accent, var(--lumo-primary-color));
+    border-top: 2px solid var(--module-accent, var(--lumo-primary-color));
     border-bottom: 1px solid var(--lumo-contrast-10pct);
     background: var(--lumo-base-color);
-    box-shadow: var(--lumo-box-shadow-xs);
 }
 
 .wams-main-header__left,
@@ -25,7 +24,7 @@
 
 .wams-brand__name {
     color: var(--lumo-header-text-color);
-    font-family: "Inter Tight", var(--lumo-font-family);
+    font-family: var(--wams-font-heading);
     font-size: var(--lumo-font-size-l);
     font-weight: 600;
     letter-spacing: -0.02em;
@@ -34,7 +33,7 @@
 .wams-header-title {
     border-radius: 999px;
     background: var(--lumo-contrast-5pct);
-    color: var(--module-accent-strong, var(--lumo-primary-text-color));
+    color: var(--lumo-primary-text-color);
     font-weight: 600;
 }
 
@@ -67,8 +66,11 @@ vaadin-app-layout::part(content) {
 }
 
 vaadin-side-nav-item::part(link) {
-    min-height: 44px;
-    border-radius: var(--lumo-border-radius-m);
+    min-height: var(--wams-control-height);
+    border-radius: var(--wams-radius-control);
+    transition:
+        background-color var(--wams-motion-duration) var(--wams-motion-ease),
+        color var(--wams-motion-duration) var(--wams-motion-ease);
     color: var(--lumo-secondary-text-color);
     font-weight: 500;
 }
@@ -80,18 +82,13 @@ vaadin-side-nav-item::part(link):hover {
 
 vaadin-side-nav-item[current]::part(link) {
     background: var(--lumo-primary-color-10pct);
-    box-shadow: inset 3px 0 0 var(--module-accent-strong, var(--lumo-primary-text-color));
     color: var(--lumo-primary-text-color);
     font-weight: 600;
 }
 
-html[dir="rtl"] vaadin-side-nav-item[current]::part(link) {
-    box-shadow: inset -3px 0 0 var(--module-accent-strong, var(--lumo-primary-text-color));
-}
-
 vaadin-side-nav-item[current]::part(link) vaadin-icon,
 vaadin-side-nav-item[current]::part(link) [slot="prefix"] {
-    color: var(--module-accent-strong, var(--lumo-primary-text-color));
+    color: var(--lumo-primary-text-color);
 }
 
 .wams-drawer-scroll-area [slot="label"] {

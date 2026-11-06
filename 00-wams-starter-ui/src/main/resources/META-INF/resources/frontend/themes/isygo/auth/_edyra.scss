@@ -213,7 +213,7 @@ auth-layout[data-variant="edyra"] auth-card {
   gap: clamp(0.75rem, 1.8vh, 1.25rem);
   padding: clamp(1.25rem, 3.4vh, 2.5rem) clamp(1.5rem, 3vw, 2.75rem);
   border: 1px solid rgba(15, 42, 68, 0.1);
-  border-radius: 1rem;
+  border-radius: var(--lumo-border-radius-l);
   background: #ffffff;
   box-shadow: 0 1.25rem 3rem rgba(15, 42, 68, 0.1);
 }
@@ -263,7 +263,7 @@ auth-layout[data-variant="edyra"] auth-brand p {
 auth-layout[data-variant="edyra"] auth-card vaadin-text-field::part(input-field),
 auth-layout[data-variant="edyra"] auth-card vaadin-password-field::part(input-field),
 auth-layout[data-variant="edyra"] auth-card vaadin-email-field::part(input-field) {
-  border-radius: 0.5rem;
+  border-radius: var(--lumo-border-radius-m);
   background: var(--auth-brand-input, none) center / 100% 100% no-repeat, #ffffff;
   box-shadow: none;
 }
@@ -286,7 +286,7 @@ auth-layout[data-variant="edyra"] auth-card vaadin-password-field::part(reveal-b
 }
 
 auth-layout[data-variant="edyra"] auth-card vaadin-button {
-  border-radius: 0.5rem;
+  border-radius: var(--lumo-border-radius-m);
 }
 
 auth-layout[data-variant="edyra"] auth-card vaadin-button[theme~="primary"] {
@@ -451,7 +451,7 @@ auth-layout[data-variant="edyra"] {
 // the card: layered shadow, a thin brand accent on top, frosted surface
 auth-layout[data-variant="edyra"] auth-card {
   border-color: rgba(15, 42, 68, 0.08);
-  border-radius: 1.25rem;
+  border-radius: var(--lumo-border-radius-xl);
   background: linear-gradient(90deg, $edyra-teal, #5fc4b8) top / 100% 4px no-repeat,
   rgba(255, 255, 255, 0.95);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7) inset,
@@ -468,7 +468,7 @@ auth-layout[data-variant="edyra"] auth-card vaadin-email-field:hover::part(input
 auth-layout[data-variant="edyra"] auth-card vaadin-button[theme~="primary"] {
   background-image: linear-gradient(180deg, #129c9a, $edyra-teal);
   box-shadow: 0 0.4rem 1rem rgba(14, 124, 123, 0.28);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform var(--wams-motion-duration) var(--wams-motion-ease), box-shadow var(--wams-motion-duration) var(--wams-motion-ease);
 }
 
 auth-layout[data-variant="edyra"] auth-card vaadin-button[theme~="primary"]:hover:not([disabled]) {
@@ -492,7 +492,7 @@ auth-layout[data-variant="edyra"] auth-card vaadin-button[theme~="primary"]:acti
   padding-block: 0.45rem;
   padding-inline: 0.5rem 1rem;
   border: 1px solid rgba(15, 42, 68, 0.08);
-  border-radius: 1.75rem;
+  border-radius: var(--lumo-border-radius-xl);
   background: rgba(255, 255, 255, 0.7);
   box-shadow: 0 0.25rem 0.75rem rgba(15, 42, 68, 0.05);
 }

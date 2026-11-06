@@ -28,7 +28,7 @@
 
 .bucket-card .meta-row-value,
 .file-card .meta-row-value {
-  font-family: monospace;
+  font-family: var(--wams-font-mono);
   word-break: break-all;
   flex: 1;
 }
