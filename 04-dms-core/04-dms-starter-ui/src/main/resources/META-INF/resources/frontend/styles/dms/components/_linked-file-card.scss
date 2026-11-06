@@ -1,0 +1,52 @@
+/* ── Linked file card ─────────────────────────────────────────────────────── */
+
+.linked-file-card {
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+}
+
+.linked-file-card .wams-title-row {
+  flex-wrap: wrap;
+}
+
+.linked-file-card .file-type-icon {
+  color: var(--lumo-primary-color);
+}
+
+.linked-file-card .meta-row {
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-bottom: var(--lumo-space-xs);
+}
+
+.linked-file-card .meta-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.linked-file-card .wams-body-rows {
+  margin-top: var(--lumo-space-s);
+}
+
+.linked-file-card .meta-row-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+.linked-file-card .meta-row-label {
+  min-width: var(--dms-detail-label-width);
+}
+
+.linked-file-card .meta-row-value {
+  word-break: break-all;
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .linked-file-card .meta-row {
+    flex-wrap: wrap;
+  }
+
+  .linked-file-card .meta-row > :not(:first-child) {
+    margin-left: var(--dms-space-meta-indent);
+  }
+}
+

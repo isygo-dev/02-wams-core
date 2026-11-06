@@ -1,0 +1,58 @@
+/* View template / sender config dialogs — section dividers, mirrors the
+   *-details-dialog convention used by ParameterDetailsDialog / RoleDetailsDialog /
+   PasswordConfigDetailsDialog / etc. (see ims.css / kms.css) */
+
+/* .wams-section-title's underline is now a single shared rule in card.css. */
+
+/* Both dialogs now use the shared DetailsViewDialog field/grid pattern
+   (wams-card__detail-grid / wams-card__detail-field*, centralized in
+   card.css) instead of the old wams-view-detail* row layout, so those rules
+   have been removed. */
+
+/* Test connection dialog */
+
+.wams-dialog-host-value {
+  font-family: monospace;
+}
+
+.wams-dialog-status-box {
+  width: 100%;
+  padding: var(--lumo-space-m);
+  border-radius: var(--lumo-border-radius-m);
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wams-dialog-status-box--info {
+  background-color: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+}
+
+.wams-dialog-status-box--success {
+  background-color: var(--lumo-success-color-10pct);
+  color: var(--lumo-success-text-color);
+}
+
+.wams-dialog-status-box--error {
+  background-color: var(--lumo-error-color-10pct);
+  color: var(--lumo-error-text-color);
+}
+
+.wams-dialog-status-content {
+  font-size: var(--lumo-font-size-s);
+}
+
+.wams-dialog-spinner {
+  animation: mms-spin 1s linear infinite;
+}
+
+@keyframes mms-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

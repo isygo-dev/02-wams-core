@@ -1,0 +1,46 @@
+.mms-tone--primary {
+  --mms-tone-color: var(--mms-color-primary);
+  --mms-tone-soft: var(--mms-color-primary-soft);
+}
+
+.mms-tone--success {
+  --mms-tone-color: var(--mms-color-success);
+  --mms-tone-soft: var(--mms-color-success-soft);
+}
+
+.mms-tone--warning {
+  --mms-tone-color: var(--mms-color-warning);
+  --mms-tone-soft: var(--mms-color-warning-soft);
+}
+
+.mms-tone--danger {
+  --mms-tone-color: var(--mms-color-danger);
+  --mms-tone-soft: var(--mms-color-danger-soft);
+}
+
+.mms-tone--neutral {
+  --mms-tone-color: var(--mms-color-text-muted);
+  --mms-tone-soft: var(--mms-color-surface-alt);
+}
+
+.mms-tone-icon,
+.mms-tone-icon--primary {
+  color: var(--mms-color-primary);
+}
+
+.mms-tone-icon--success {
+  color: var(--mms-color-success);
+}
+
+.mms-tone-icon--warning {
+  color: var(--mms-color-warning);
+}
+
+.mms-tone-icon--danger {
+  color: var(--mms-color-danger);
+}
+
+.mms-tone-icon--neutral {
+  color: var(--mms-color-text-muted);
+}
+

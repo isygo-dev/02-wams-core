@@ -1,0 +1,78 @@
+/* ── Template / Sender config cards ───────────────────────────────────────── */
+
+.template-card .wams-tenant-badge,
+.sender-config-card .wams-tenant-badge {
+  font-family: monospace;
+}
+
+.template-card .wams-title-row,
+.sender-config-card .wams-title-row {
+  flex-wrap: wrap;
+}
+
+.wams-empty-state-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+.template-card .detail-row,
+.sender-config-card .detail-row {
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-top: var(--lumo-space-xs);
+}
+
+.template-card .detail-row:last-child,
+.sender-config-card .detail-row:last-child {
+  border-bottom: none;
+}
+
+.template-card .detail-row .detail-label,
+.sender-config-card .detail-row .detail-label {
+  min-width: 120px;
+}
+
+.template-card .detail-row .detail-icon,
+.sender-config-card .detail-row .detail-icon {
+  color: var(--lumo-primary-color);
+}
+
+.template-card .detail-row .detail-value,
+.sender-config-card .detail-row .detail-value {
+  font-family: monospace;
+  word-break: break-all;
+  flex: 1;
+}
+
+.template-card .detail-row .detail-copy-button,
+.sender-config-card .detail-row .detail-copy-button {
+  padding: var(--lumo-space-xs);
+}
+
+.sender-config-card .detail-row .detail-value--enabled {
+  color: var(--lumo-success-color);
+}
+
+.sender-config-card .detail-row .detail-value--disabled {
+  color: var(--lumo-error-color);
+}
+
+.sender-config-card .detail-row .detail-value--warning {
+  color: var(--lumo-warning-color);
+}
+
+.sender-config-card .detail-row .detail-value--muted {
+  color: var(--lumo-tertiary-text-color);
+}
+
+@media (max-width: 640px) {
+  .template-card .detail-row,
+  .sender-config-card .detail-row {
+    flex-wrap: wrap;
+  }
+
+  .template-card .detail-row > :not(:first-child),
+  .sender-config-card .detail-row > :not(:first-child) {
+    margin-left: 28px;
+  }
+}
+

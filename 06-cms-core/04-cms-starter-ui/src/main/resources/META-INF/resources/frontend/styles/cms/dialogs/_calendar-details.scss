@@ -1,0 +1,13 @@
+.calendar-details-dialog .wams-card__detail-grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.calendar-details-dialog .detail-field-icon {
+  color: var(--lumo-primary-color);
+}
+
+.calendar-details-dialog .detail-field-value {
+  flex: 1;
+}
+
+/* .wams-section-title's underline is now a single shared rule in card.css. */

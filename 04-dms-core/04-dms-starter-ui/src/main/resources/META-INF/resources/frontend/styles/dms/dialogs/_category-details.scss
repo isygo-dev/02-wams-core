@@ -1,0 +1,22 @@
+/* ── Category details dialog ──────────────────────────────────────────────── */
+/* Uses the shared .wams-card__detail-grid (card.css) for the identity/audit
+   grids; only field-level tweaks specific to this dialog live here. */
+
+.category-details-dialog .detail-field-icon {
+  color: var(--lumo-primary-color);
+}
+
+.category-details-dialog .detail-field-value {
+  flex: 1;
+}
+
+.dms-category-description {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+/* .wams-section-title's underline is now a single shared rule in card.css. */
+

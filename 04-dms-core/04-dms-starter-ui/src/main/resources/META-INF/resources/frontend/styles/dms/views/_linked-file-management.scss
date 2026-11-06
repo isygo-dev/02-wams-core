@@ -1,0 +1,84 @@
+/* ── Linked file management view ──────────────────────────────────────────── */
+
+
+.linked-file-management-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  width: 100%;
+}
+
+.linked-file-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+  .linked-file-management-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .linked-file-management-toolbar > * {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* DOM order is filters (leftGroup) → pagination (centerGroup) →
+     refresh/upload (rightGroup), which otherwise stacks Upload at the very
+     bottom, below pagination and filters, once the toolbar goes to a
+     column — see the identical note in .category-management-toolbar. */
+  .linked-file-management-toolbar > :nth-child(2),
+  .linked-file-management-toolbar > :nth-child(3) {
+    justify-content: flex-end;
+  }
+
+  .linked-file-management-toolbar > :nth-child(3) {
+    order: -2;
+  }
+
+  .linked-file-management-toolbar > :nth-child(2) {
+    order: -1;
+  }
+
+  .linked-file-management-toolbar > :nth-child(1),
+  .linked-file-management-toolbar > :nth-child(2),
+  .linked-file-management-toolbar > :nth-child(3) {
+    flex-wrap: wrap;
+    row-gap: var(--dms-space-1);
+  }
+
+  .linked-file-management-toolbar > :nth-child(1) vaadin-text-field,
+  .linked-file-management-toolbar > :nth-child(1) vaadin-combo-box {
+    width: 100% !important;
+  }
+
+  .linked-file-management-toolbar > :nth-child(2) vaadin-combo-box {
+    width: 90px !important;
+  }
+
+  .linked-file-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .linked-file-management-toolbar .pagination-total-count {
+    display: none;
+  }
+
+  .linked-file-management-toolbar > :nth-child(3) vaadin-button {
+    font-size: 0;
+  }
+
+  .linked-file-management-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+    font-size: var(--lumo-font-size-m);
+  }
+}
+
+.linked-file-management-view .wams-empty-state-icon {
+  color: var(--lumo-secondary-text-color);
+}
+

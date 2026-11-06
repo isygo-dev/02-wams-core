@@ -1,0 +1,39 @@
+.sms-enum-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: var(--sms-space-tag-y) var(--sms-space-tag-x);
+  border: 1px solid transparent;
+  border-radius: var(--sms-radius-md);
+  font-size: var(--sms-font-size-xs);
+  font-weight: var(--sms-font-weight-semibold);
+  line-height: var(--sms-line-height-normal);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.sms-enum-tag--success {
+  color: var(--sms-color-success);
+  background: var(--sms-color-success-soft);
+}
+
+.sms-enum-tag--warning {
+  color: var(--sms-color-warning);
+  background: var(--sms-color-warning-soft);
+}
+
+.sms-enum-tag--danger {
+  color: var(--sms-color-danger);
+  background: var(--sms-color-danger-soft);
+}
+
+.sms-enum-tag--info {
+  color: var(--sms-color-info);
+  background: var(--sms-color-primary-soft);
+}
+
+.sms-enum-tag--neutral {
+  color: var(--sms-color-text-muted);
+  background: var(--sms-color-surface-alt);
+}
+

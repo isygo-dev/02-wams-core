@@ -1,0 +1,98 @@
+/* ── Storage config management view ───────────────────────────────────────── */
+
+@keyframes sms-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--sms-space-4));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.storageconfig-management-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  width: 100%;
+}
+
+.storageconfig-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
+}
+
+.wams-empty-state-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+@media (max-width: 768px) {
+  .storageconfig-management-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .storageconfig-management-toolbar > * {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* DOM order is filters (leftGroup) → pagination (centerGroup) →
+     refresh/create (rightGroup), which otherwise stacks Create at the very
+     bottom, below pagination and filters, once the toolbar goes to a
+     column. Reorder so pagination + actions stay anchored near the top and
+     right-aligned; only the filters drop to the bottom. */
+  .storageconfig-management-toolbar > :nth-child(2),
+  .storageconfig-management-toolbar > :nth-child(3) {
+    justify-content: flex-end;
+  }
+
+  .storageconfig-management-toolbar > :nth-child(3) {
+    order: -2;
+  }
+
+  .storageconfig-management-toolbar > :nth-child(2) {
+    order: -1;
+  }
+
+  .storageconfig-management-toolbar > :nth-child(1),
+  .storageconfig-management-toolbar > :nth-child(2),
+  .storageconfig-management-toolbar > :nth-child(3) {
+    flex-wrap: wrap;
+    row-gap: var(--lumo-space-xs);
+  }
+
+  .storageconfig-management-toolbar > :nth-child(1) vaadin-text-field,
+  .storageconfig-management-toolbar > :nth-child(1) vaadin-combo-box {
+    width: 100% !important;
+  }
+
+  .storageconfig-management-toolbar > :nth-child(2) vaadin-combo-box {
+    width: 90px !important;
+  }
+
+  .storageconfig-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination-total-count {
+    display: none;
+  }
+
+  /* Lumo sizes button icons via width/height:1.5em (--lumo-icon-size-m),
+     which collapses to 0 along with the button's own font-size unless
+     restored — see key-management-toolbar in kms.css for the full story. */
+  .storageconfig-management-toolbar > :nth-child(3) vaadin-button {
+    font-size: 0;
+  }
+
+  .storageconfig-management-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+    font-size: var(--lumo-font-size-m);
+  }
+}
+

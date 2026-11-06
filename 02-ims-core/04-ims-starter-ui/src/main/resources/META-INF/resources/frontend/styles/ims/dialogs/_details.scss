@@ -1,0 +1,60 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Details dialogs — AccountDetailsDialog / AnnexDetailsDialog /
+   ApplicationDetailsDialog / CustomerDetailsDialog / ParameterDetailsDialog /
+   RegisteredUserDetailsViewDialog / RoleDetailsDialog / TenantDetailsDialog
+   All share the same addFieldToGrid()/createSection() helpers: a responsive
+   label/value grid plus a bordered section title. The grid container reuses
+   the shared wams-card__detail-grid class from card.css (overriding its
+   column width for the wider dialog layout); the per-row icon/value classes
+   are dialog-scoped, matching the convention used by cms.css/dms.css/sms.css.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.account-details-dialog .wams-card__detail-grid,
+.annex-details-dialog .wams-card__detail-grid,
+.application-details-dialog .wams-card__detail-grid,
+.customer-details-dialog .wams-card__detail-grid,
+.parameter-details-dialog .wams-card__detail-grid,
+.registered-details-dialog .wams-card__detail-grid,
+.tenant-details-dialog .wams-card__detail-grid,
+.role-details-dialog .wams-card__detail-grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* .wams-section-title's underline is now a single shared rule in card.css. */
+
+.account-details-dialog .detail-field-icon,
+.annex-details-dialog .detail-field-icon,
+.application-details-dialog .detail-field-icon,
+.customer-details-dialog .detail-field-icon,
+.parameter-details-dialog .detail-field-icon,
+.registered-details-dialog .detail-field-icon,
+.tenant-details-dialog .detail-field-icon,
+.role-details-dialog .detail-field-icon {
+  color: var(--lumo-primary-color);
+}
+
+.account-details-dialog .detail-field-value,
+.annex-details-dialog .detail-field-value,
+.application-details-dialog .detail-field-value,
+.customer-details-dialog .detail-field-value,
+.parameter-details-dialog .detail-field-value,
+.registered-details-dialog .detail-field-value,
+.tenant-details-dialog .detail-field-value,
+.role-details-dialog .detail-field-value {
+  flex: 1;
+}
+
+/* AccountDetailsDialog — connection-tracking rows (unique to this dialog). */
+
+.account-details-dialog .connection-row-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+.account-details-dialog .connection-row-label {
+  min-width: 160px;
+}
+
+.account-details-dialog .connection-row-value {
+  color: var(--lumo-secondary-text-color);
+}
+

@@ -1,0 +1,17 @@
+/* Upload dialog status line/icon (UploadFileDialog and siblings) */
+.wams-upload-status--success {
+  color: var(--lumo-success-text-color);
+}
+
+.wams-upload-status--error {
+  color: var(--lumo-error-text-color);
+}
+
+.wams-upload-icon--success {
+  color: var(--lumo-success-color);
+}
+
+.wams-upload-icon--error {
+  color: var(--lumo-error-color);
+}
+

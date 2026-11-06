@@ -1,0 +1,34 @@
+/* ── Linked file details dialog ──────────────────────────────────────────── */
+
+.file-details-dialog .detail-field-icon {
+  color: var(--lumo-primary-color);
+}
+
+.file-details-dialog .detail-field-value {
+  flex: 1;
+}
+
+.dms-chip-container {
+  flex-wrap: wrap;
+  gap: var(--dms-space-1);
+}
+
+.dms-download-trigger {
+  display: none;
+}
+
+.dms-secondary-text {
+  color: var(--lumo-secondary-text-color);
+}
+
+.dms-delete-warning-icon,
+.dms-upload-icon--error {
+  color: var(--dms-color-danger);
+}
+
+.dms-delete-warning-text {
+  color: var(--dms-color-danger);
+  font-weight: var(--dms-font-weight-medium);
+  font-size: var(--dms-font-size-sm);
+}
+

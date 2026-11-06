@@ -1,0 +1,43 @@
+.mms-enum-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: var(--mms-space-tag-y) var(--mms-space-tag-x);
+  border: 1px solid transparent;
+  border-radius: var(--mms-radius-md);
+  font-size: var(--mms-font-size-xs);
+  font-weight: var(--mms-font-weight-semibold);
+  line-height: var(--mms-line-height-normal);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.mms-enum-tag--success {
+  color: var(--mms-color-success);
+  background: var(--mms-color-success-soft);
+}
+
+.mms-enum-tag--warning {
+  color: var(--mms-color-warning);
+  background: var(--mms-color-warning-soft);
+}
+
+.mms-enum-tag--danger {
+  color: var(--mms-color-danger);
+  background: var(--mms-color-danger-soft);
+}
+
+.mms-enum-tag--info {
+  color: var(--mms-color-info);
+  background: var(--mms-color-primary-soft);
+}
+
+.mms-enum-tag--neutral {
+  color: var(--mms-color-text-muted);
+  background: var(--mms-color-surface-alt);
+}
+
+.mms-enum-tag--title {
+  font-size: var(--mms-font-size-md);
+}
+

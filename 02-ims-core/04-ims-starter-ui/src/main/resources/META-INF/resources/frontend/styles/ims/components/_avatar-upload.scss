@@ -1,0 +1,19 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Avatar upload (image thumbnail / placeholder) — Create/Update dialogs for
+   Account, Application, Customer, Tenant
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.wams-image-thumbnail {
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--lumo-contrast-20pct);
+}
+
+.wams-image-placeholder {
+  background: var(--lumo-contrast-10pct);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+

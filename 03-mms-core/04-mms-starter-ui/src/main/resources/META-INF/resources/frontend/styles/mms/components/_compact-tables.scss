@@ -1,0 +1,92 @@
+/* Monthly compact table */
+
+.wams-compact-table {
+  background: var(--lumo-contrast-5pct);
+  border-radius: var(--lumo-border-radius-m);
+  padding: var(--lumo-space-s);
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.wams-compact-table-header {
+  border-bottom: 2px solid var(--lumo-contrast-20pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-bottom: var(--lumo-space-xs);
+  position: sticky;
+  top: 0;
+  background: var(--lumo-contrast-5pct);
+  z-index: 1;
+}
+
+.wams-compact-table-header-cell {
+  flex: 1;
+  text-align: center;
+}
+
+.wams-compact-table-row {
+  padding: var(--lumo-space-xs) 0;
+  border-bottom: 1px solid var(--lumo-contrast-5pct);
+}
+
+.wams-compact-table-cell {
+  flex: 1;
+  text-align: center;
+}
+
+.wams-compact-table-cell--label {
+  font-weight: 500;
+}
+
+.wams-compact-table-cell--sent {
+  color: var(--mms-color-primary);
+}
+
+.wams-compact-table-cell--open {
+  color: var(--lumo-success-color);
+}
+
+.wams-compact-table-cell--bounce {
+  color: var(--lumo-error-color);
+}
+
+/* Custom scrollbar for compact/scrollable panel sections */
+
+.wams-compact-table::-webkit-scrollbar,
+.wams-scroll-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.wams-compact-table::-webkit-scrollbar-track,
+.wams-scroll-list::-webkit-scrollbar-track {
+  background: var(--lumo-contrast-5pct);
+  border-radius: var(--lumo-border-radius-m);
+}
+
+.wams-compact-table::-webkit-scrollbar-thumb,
+.wams-scroll-list::-webkit-scrollbar-thumb {
+  background: var(--lumo-contrast-30pct);
+  border-radius: var(--lumo-border-radius-m);
+}
+
+@media (max-width: 768px) {
+  .wams-mini-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .wams-mini-stat-card {
+    padding: var(--lumo-space-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .wams-mini-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .wams-usage-item {
+    flex-wrap: wrap;
+  }
+}
+

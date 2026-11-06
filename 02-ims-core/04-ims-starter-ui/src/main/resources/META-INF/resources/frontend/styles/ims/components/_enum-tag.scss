@@ -1,0 +1,39 @@
+/* Enum tags mirror Pilot's single reusable tag component. */
+.ims-enum-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.12rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: var(--ims-radius-md);
+  font-size: var(--ims-font-size-xs);
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.ims-enum-tag--success {
+  color: var(--ims-color-success);
+  background: rgba(31, 132, 90, 0.1);
+}
+
+.ims-enum-tag--warning {
+  color: var(--ims-color-warning);
+  background: rgba(165, 72, 0, 0.12);
+}
+
+.ims-enum-tag--danger {
+  color: var(--ims-color-danger);
+  background: rgba(201, 55, 44, 0.1);
+}
+
+.ims-enum-tag--info {
+  color: var(--ims-color-info);
+  background: var(--ims-color-primary-soft);
+}
+
+.ims-enum-tag--neutral {
+  color: var(--ims-color-text-muted);
+  background: var(--ims-color-surface-alt);
+}

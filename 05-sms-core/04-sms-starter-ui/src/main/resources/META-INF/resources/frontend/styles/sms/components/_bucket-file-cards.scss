@@ -1,0 +1,35 @@
+/* Bucket and File card styles - they inherit from .storageconfig-card */
+.bucket-card .wams-title-row,
+.file-card .wams-title-row {
+  flex-wrap: wrap;
+}
+
+.bucket-card .meta-row,
+.file-card .meta-row {
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-top: var(--lumo-space-xs);
+}
+
+.bucket-card .meta-row:last-child,
+.file-card .meta-row:last-child {
+  border-bottom: none;
+}
+
+.bucket-card .meta-row-icon,
+.file-card .meta-row-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+.bucket-card .meta-row-label,
+.file-card .meta-row-label {
+  min-width: 80px;
+}
+
+.bucket-card .meta-row-value,
+.file-card .meta-row-value {
+  font-family: monospace;
+  word-break: break-all;
+  flex: 1;
+}
+

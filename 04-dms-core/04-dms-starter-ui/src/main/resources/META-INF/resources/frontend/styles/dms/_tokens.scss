@@ -1,0 +1,53 @@
+/*
+ * Module-specific styling for eu.isygoit.ui.dms.** (DmsMainView, DmsMainLayout,
+ * CategoryCard/CategoryManagementView and their dialogs). Imported once via
+ * DmsMainLayout so it is available to every view rendered inside it.
+ */
+
+/* DMS aliases use the shared WAMS/Lumo theme tokens. */
+:root {
+  --dms-color-primary: var(--lumo-primary-color);
+  --dms-color-primary-soft: var(--lumo-primary-color-10pct);
+  --dms-color-success: var(--lumo-success-color);
+  --dms-color-success-soft: var(--lumo-success-color-10pct);
+  --dms-color-warning: var(--lumo-warning-color);
+  --dms-color-warning-soft: var(--lumo-warning-color-10pct);
+  --dms-color-danger: var(--lumo-error-color);
+  --dms-color-danger-soft: var(--lumo-error-color-10pct);
+  --dms-color-info: var(--lumo-primary-text-color);
+  --dms-color-text: var(--lumo-body-text-color);
+  --dms-color-text-muted: var(--lumo-secondary-text-color);
+  --dms-color-text-soft: var(--lumo-tertiary-text-color);
+  --dms-color-surface: var(--lumo-base-color);
+  --dms-color-surface-alt: var(--lumo-contrast-5pct);
+  --dms-color-border: var(--wams-surface-line);
+  --dms-font-family: var(--lumo-font-family);
+  --dms-font-size-xxs: 0.625rem;
+  --dms-font-size-xs: var(--lumo-font-size-xs);
+  --dms-font-size-sm: var(--lumo-font-size-s);
+  --dms-font-size-md: var(--lumo-font-size-m);
+  --dms-font-size-lg: var(--lumo-font-size-l);
+  --dms-font-size-xl: var(--lumo-font-size-xl);
+  --dms-font-weight-semibold: 600;
+  --dms-font-weight-medium: 500;
+  --dms-line-height-normal: 1.5;
+  --dms-space-1: 0.25rem;
+  --dms-space-2: 0.5rem;
+  --dms-space-2-5: 0.625rem;
+  --dms-space-3: 0.75rem;
+  --dms-space-4: 1rem;
+  --dms-space-6: 1.5rem;
+  --dms-space-8: 2rem;
+  --dms-space-meta-indent: 1.75rem;
+  --dms-space-icon-offset: 0.125rem;
+  --dms-space-tag-x: 0.55rem;
+  --dms-space-tag-y: 0.12rem;
+  --dms-detail-label-width: 5rem;
+  --dms-radius-sm: var(--lumo-border-radius-s);
+  --dms-radius-md: var(--lumo-border-radius-m);
+  --dms-radius-lg: var(--lumo-border-radius-l);
+  --dms-radius-xl: var(--lumo-border-radius-l);
+  --dms-shadow-sm: var(--lumo-box-shadow-xs);
+  --dms-shadow-md: var(--lumo-box-shadow-m);
+}
+

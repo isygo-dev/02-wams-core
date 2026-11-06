@@ -1,0 +1,52 @@
+/*
+ * Module-specific styling for eu.isygoit.ui.mms.** (MmsMainView, MmsMainLayout,
+ * dashboard panels, MsgTemplateCard/MsgTemplateManagementView, SenderConfigCard/
+ * SenderConfigManagementView and their dialogs). Imported once via MmsMainLayout
+ * so it is available to every view rendered inside it.
+ */
+
+/* MMS aliases use the shared WAMS/Lumo theme tokens. */
+:root {
+  --mms-color-primary: var(--lumo-primary-color);
+  --mms-color-primary-soft: var(--lumo-primary-color-10pct);
+  --mms-color-success: var(--lumo-success-color);
+  --mms-color-success-soft: var(--lumo-success-color-10pct);
+  --mms-color-warning: var(--lumo-warning-color);
+  --mms-color-warning-soft: var(--lumo-warning-color-10pct);
+  --mms-color-danger: var(--lumo-error-color);
+  --mms-color-danger-soft: var(--lumo-error-color-10pct);
+  --mms-color-info: var(--lumo-primary-text-color);
+  --mms-color-text: var(--lumo-body-text-color);
+  --mms-color-text-muted: var(--lumo-secondary-text-color);
+  --mms-color-text-soft: var(--lumo-tertiary-text-color);
+  --mms-color-surface: var(--lumo-base-color);
+  --mms-color-surface-alt: var(--lumo-contrast-5pct);
+  --mms-color-border: var(--wams-surface-line);
+  --mms-font-family: var(--lumo-font-family);
+  --mms-font-size-xxs: 0.625rem;
+  --mms-font-size-xs: var(--lumo-font-size-xs);
+  --mms-font-size-sm: var(--lumo-font-size-s);
+  --mms-font-size-md: var(--lumo-font-size-m);
+  --mms-font-size-lg: var(--lumo-font-size-l);
+  --mms-font-size-xl: var(--lumo-font-size-xl);
+  --mms-font-weight-medium: 500;
+  --mms-font-weight-semibold: 600;
+  --mms-line-height-normal: 1.5;
+  --mms-space-1: 0.25rem;
+  --mms-space-2: 0.5rem;
+  --mms-space-2-5: 0.625rem;
+  --mms-space-3: 0.75rem;
+  --mms-space-4: 1rem;
+  --mms-space-6: 1.5rem;
+  --mms-space-8: 2rem;
+  --mms-space-meta-indent: 1.75rem;
+  --mms-space-tag-x: 0.55rem;
+  --mms-space-tag-y: 0.12rem;
+  --mms-radius-sm: var(--lumo-border-radius-s);
+  --mms-radius-md: var(--lumo-border-radius-m);
+  --mms-radius-lg: var(--lumo-border-radius-l);
+  --mms-radius-xl: var(--lumo-border-radius-l);
+  --mms-shadow-sm: var(--lumo-box-shadow-xs);
+  --mms-shadow-md: var(--lumo-box-shadow-m);
+}
+

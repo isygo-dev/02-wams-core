@@ -1,0 +1,66 @@
+/* ── Dashboard panels (EmailStatisticsPanel / SenderConfigPanel / TemplateStatisticsPanel) ── */
+
+.email-stats-panel,
+.sender-config-panel,
+.template-stats-panel {
+  animation: mms-fade-in 0.5s ease-out;
+}
+
+@keyframes mms-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mms-pulse-dot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.wams-panel-container {
+  width: 100%;
+  background: var(--mms-color-surface);
+  border-radius: var(--mms-radius-lg);
+  box-shadow: var(--lumo-box-shadow-s);
+  padding: var(--lumo-space-m);
+  border: 1px solid var(--mms-color-border);
+}
+
+.wams-panel-header {
+  margin-bottom: var(--lumo-space-s);
+  flex-wrap: wrap;
+  gap: var(--lumo-space-xs);
+}
+
+.wams-panel-title {
+  font-weight: 600;
+}
+
+.wams-panel-period-badge {
+  background: var(--lumo-contrast-5pct);
+  padding: var(--lumo-space-xs) var(--lumo-space-m);
+  border-radius: var(--lumo-border-radius-s);
+}
+
+.wams-panel-live-badge {
+  background: var(--lumo-success-color-10pct);
+  color: var(--lumo-success-color);
+  padding: 2px 12px;
+  border-radius: var(--lumo-border-radius-s);
+  font-size: var(--lumo-font-size-xs);
+  font-weight: 600;
+}
+
+.wams-panel-viewall-link {
+  cursor: pointer;
+}
+

@@ -1,0 +1,12 @@
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .bucket-card .meta-row,
+  .file-card .meta-row {
+    flex-wrap: wrap;
+  }
+
+  .bucket-card .meta-row > :not(:first-child),
+  .file-card .meta-row > :not(:first-child) {
+    margin-left: var(--sms-space-meta-indent);
+  }
+}

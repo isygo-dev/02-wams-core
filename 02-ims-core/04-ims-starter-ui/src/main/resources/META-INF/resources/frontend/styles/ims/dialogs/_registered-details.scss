@@ -1,0 +1,56 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Create Account from Registered Dialog
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.registered-details-dialog .wams-section {
+  margin-bottom: var(--lumo-space-l);
+  padding: var(--lumo-space-m);
+  background: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius);
+  border: 1px solid var(--lumo-contrast-10pct);
+}
+
+.registered-details-dialog .wams-section:last-child {
+  margin-bottom: 0;
+}
+
+.registered-details-dialog .detail-field-icon {
+  color: var(--lumo-primary-color);
+}
+
+.registered-details-dialog .wams-section .wams-section-title {
+  font-size: var(--lumo-font-size-m);
+  font-weight: 600;
+  margin-bottom: var(--lumo-space-s);
+  padding-bottom: var(--lumo-space-xs);
+  border-bottom: 2px solid var(--lumo-contrast-10pct);
+}
+
+.registered-details-dialog .wams-toggle-card {
+  padding: var(--lumo-space-m);
+  background: var(--lumo-contrast-5pct);
+  border-radius: var(--lumo-border-radius);
+  border: 1px solid var(--lumo-contrast-10pct);
+  transition: all 0.3s ease;
+}
+
+.registered-details-dialog .wams-toggle-card:hover {
+  background: var(--lumo-contrast-10pct);
+  border-color: var(--lumo-primary-color-50pct);
+}
+
+.registered-details-dialog .wams-user-info {
+  background: var(--lumo-primary-color-10pct);
+  border-left: 4px solid var(--lumo-primary-color);
+}
+
+@media (max-width: 600px) {
+  .registered-details-dialog .wams-section {
+    padding: var(--lumo-space-s);
+  }
+
+  .registered-details-dialog .wams-toggle-card {
+    padding: var(--lumo-space-s);
+  }
+}
+

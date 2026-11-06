@@ -1,0 +1,43 @@
+/* ── Upload dialog ────────────────────────────────────────────────────────── */
+
+.wams-upload-component,
+.dms-upload-component {
+  width: 100%;
+}
+
+.wams-upload-file-info {
+  align-items: center;
+}
+
+.wams-upload-file-name,
+.wams-upload-file-size {
+  font-size: var(--lumo-font-size-s);
+  color: var(--lumo-secondary-text-color);
+}
+
+.wams-upload-status {
+  font-size: var(--lumo-font-size-s);
+  font-weight: 500;
+}
+
+.dms-upload-status {
+  font-size: var(--dms-font-size-sm);
+  font-weight: 500;
+}
+
+.dms-upload-status--success,
+.dms-upload-icon--success {
+  color: var(--dms-color-success);
+}
+
+.dms-upload-status--error {
+  color: var(--dms-color-danger);
+}
+
+.dms-upload-icon {
+  color: var(--dms-color-primary);
+}
+
+.dms-upload-instruction {
+  color: var(--dms-color-text-muted);
+}

@@ -1,0 +1,45 @@
+/* Usage items with progress bars (TemplateStatisticsPanel) */
+
+.wams-usage-item {
+  padding: var(--lumo-space-xs) 0;
+  border-bottom: 1px solid var(--lumo-contrast-5pct);
+  gap: var(--lumo-space-s);
+}
+
+.wams-usage-name-layout {
+  flex: 1;
+  min-width: 0;
+}
+
+.wams-usage-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wams-usage-bar-container {
+  flex: 2;
+  min-width: 60px;
+}
+
+.wams-usage-bar-track {
+  height: 5px;
+  border-radius: var(--lumo-border-radius-s);
+  background: var(--lumo-contrast-10pct);
+  overflow: hidden;
+}
+
+.wams-usage-bar-fill {
+  height: 100%;
+  border-radius: var(--lumo-border-radius-s);
+  background-color: var(--mms-tone-color, var(--mms-color-primary));
+  transition: width 0.6s ease;
+}
+
+.wams-usage-percent {
+  font-weight: 600;
+  min-width: 36px;
+  text-align: right;
+  color: var(--mms-color-primary);
+}
+

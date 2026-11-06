@@ -1,0 +1,48 @@
+/* Edit template content dialog */
+
+.wams-dialog-info-bar {
+  padding: var(--lumo-space-s);
+  background-color: var(--lumo-contrast-5pct);
+  border-radius: var(--lumo-border-radius-m);
+}
+
+.wams-dialog-status-area {
+  padding: var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-m);
+  margin-bottom: var(--lumo-space-s);
+  width: 100%;
+}
+
+.wams-dialog-status-area--success {
+  background-color: var(--lumo-success-color-10pct);
+  color: var(--lumo-success-text-color);
+}
+
+.wams-dialog-status-area--error {
+  background-color: var(--lumo-error-color-10pct);
+  color: var(--lumo-error-text-color);
+}
+
+.wams-dialog-status-area--warning {
+  background-color: var(--lumo-warning-color-10pct);
+  color: var(--lumo-warning-text-color);
+}
+
+.wams-dialog-status-area--info {
+  background-color: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+}
+
+.wams-dialog-content-editor {
+  font-family: monospace;
+  font-size: var(--lumo-font-size-s);
+  tab-size: 2;
+}
+
+.wams-dialog-actions {
+  width: 100%;
+  justify-content: flex-end;
+  gap: var(--lumo-space-s);
+  margin-top: var(--lumo-space-m);
+}
+

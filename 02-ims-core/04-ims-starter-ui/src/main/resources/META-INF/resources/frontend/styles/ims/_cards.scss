@@ -1,0 +1,152 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Cards — AccountCard / AnnexCard / ApplicationCard / CustomerCard /
+   ParameterCard / RegisteredCard / RoleCard / TenantCard
+   These 8 card types used to each override BaseCard#buildExtraStyles() with
+   an identical block (only the card-type class prefix differed). That hook
+   no longer exists on BaseCard, so the rules are consolidated here once,
+   grouped by selector, instead of being duplicated 8×.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.account-card,
+.annex-card,
+.application-card,
+.customer-card,
+.parameter-card,
+.registered-card,
+.role-card,
+.tenant-card {
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+}
+
+.account-card .meta-row,
+.annex-card .meta-row,
+.application-card .meta-row,
+.customer-card .meta-row,
+.parameter-card .meta-row,
+.registered-card .meta-row,
+.role-card .meta-row,
+.tenant-card .meta-row {
+  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  padding-bottom: var(--lumo-space-xs);
+  margin-bottom: var(--lumo-space-xs);
+}
+
+.account-card .meta-row:last-child,
+.annex-card .meta-row:last-child,
+.application-card .meta-row:last-child,
+.customer-card .meta-row:last-child,
+.parameter-card .meta-row:last-child,
+.registered-card .meta-row:last-child,
+.role-card .meta-row:last-child,
+.tenant-card .meta-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  .account-card .meta-row,
+  .annex-card .meta-row,
+  .application-card .meta-row,
+  .customer-card .meta-row,
+  .parameter-card .meta-row,
+  .registered-card .meta-row,
+  .role-card .meta-row,
+  .tenant-card .meta-row {
+    flex-wrap: wrap;
+  }
+
+  .account-card .meta-row > :not(:first-child),
+  .annex-card .meta-row > :not(:first-child),
+  .application-card .meta-row > :not(:first-child),
+  .customer-card .meta-row > :not(:first-child),
+  .parameter-card .meta-row > :not(:first-child),
+  .registered-card .meta-row > :not(:first-child),
+  .role-card .meta-row > :not(:first-child),
+  .tenant-card .meta-row > :not(:first-child) {
+    margin-left: 28px;
+  }
+}
+
+/* Card body/title rows wrap on narrow cards (AccountCard/ApplicationCard/
+   CustomerCard/TenantCard #buildTitle() row1/row2; AnnexCard/ParameterCard/
+   RegisteredCard/RoleCard #buildTitle() titleLayout). */
+
+.account-card .card-row,
+.application-card .card-row,
+.customer-card .card-row,
+.tenant-card .card-row,
+.annex-card .card-title-group,
+.parameter-card .card-title-group,
+.registered-card .card-title-group,
+.role-card .card-title-group {
+  flex-wrap: wrap;
+}
+
+.account-card .card-row--spaced,
+.application-card .card-row--spaced,
+.customer-card .card-row--spaced,
+.tenant-card .card-row--spaced {
+  margin-top: var(--lumo-space-s);
+}
+
+/* Card avatar image (AccountCard/ApplicationCard/CustomerCard/TenantCard). */
+
+.account-card .card-avatar,
+.application-card .card-avatar,
+.customer-card .card-avatar,
+.tenant-card .card-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--lumo-contrast-10pct);
+  border: 2px solid var(--lumo-contrast-20pct);
+}
+
+/* Meta-row icon/label/value (all 8 card types' createIconRow()/createInfoRow()). */
+
+.account-card .meta-row-icon,
+.annex-card .meta-row-icon,
+.application-card .meta-row-icon,
+.customer-card .meta-row-icon,
+.parameter-card .meta-row-icon,
+.registered-card .meta-row-icon,
+.role-card .meta-row-icon,
+.tenant-card .meta-row-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
+.account-card .meta-row-label,
+.annex-card .meta-row-label,
+.application-card .meta-row-label,
+.customer-card .meta-row-label,
+.parameter-card .meta-row-label,
+.registered-card .meta-row-label,
+.role-card .meta-row-label,
+.tenant-card .meta-row-label {
+  min-width: 80px;
+}
+
+.account-card .meta-row-value,
+.annex-card .meta-row-value,
+.application-card .meta-row-value,
+.customer-card .meta-row-value,
+.parameter-card .meta-row-value,
+.registered-card .meta-row-value,
+.tenant-card .meta-row-value {
+  word-break: break-all;
+  flex: 1;
+}
+
+.role-card .meta-row-value {
+  flex: 1;
+}
+
+/* RoleCard — level chip (unique to this card, static styling). */
+
+.role-card .level-chip {
+  background-color: var(--lumo-primary-color-10pct);
+  color: var(--lumo-primary-text-color);
+  border-radius: var(--lumo-border-radius-s);
+  padding: 0.2rem 0.5rem;
+  font-size: var(--lumo-font-size-xs);
+}
+

@@ -1,0 +1,17 @@
+/* ── Calendar card ─────────────────────────────────────────────────────────── */
+
+.calendar-card {
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+}
+
+.calendar-card .wams-title-row {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .calendar-card .wams-card__button-bar {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+

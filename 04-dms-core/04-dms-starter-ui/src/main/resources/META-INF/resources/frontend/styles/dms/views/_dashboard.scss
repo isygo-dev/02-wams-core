@@ -1,0 +1,20 @@
+/* ── Dashboard (DmsMainView) ──────────────────────────────────────────────── */
+
+.dms-dashboard .wams-dashboard-header {
+  margin-bottom: var(--lumo-space-s);
+}
+
+/* Stat cards now use the shared eu.isygoit.ui.common.component.StatCard /
+   StatCardGrid (.wams-stat-card / .wams-stat-grid in card.css) instead of
+   this module's own .stat-card/.stats-row/.wams-mini-stats-grid overrides. */
+
+.dms-dashboard .wams-recent-activity-panel {
+  margin-top: var(--lumo-space-m);
+}
+
+.dms-dashboard .wams-recent-activity-content {
+  padding: var(--lumo-space-m);
+  background: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius-m);
+}
+

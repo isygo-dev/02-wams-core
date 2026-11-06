@@ -1,0 +1,11 @@
+/* ── Dashboard (MmsMainView) ──────────────────────────────────────────────── */
+
+.mms-dashboard .wams-dashboard-title {
+  margin-bottom: 10px;
+}
+
+/* Top-level overview stats now use the shared eu.isygoit.ui.common.component.
+   StatCard/StatCardGrid (.wams-stat-card/.wams-stat-grid in card.css) instead
+   of this module's own .stat-card/.stats-overview. The .wams-mini-stats-grid
+   rule below is still used by EmailStatisticsPanel/TemplateStatisticsPanel. */
+

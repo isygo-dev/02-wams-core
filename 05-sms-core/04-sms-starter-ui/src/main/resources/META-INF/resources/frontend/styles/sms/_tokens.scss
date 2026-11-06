@@ -1,0 +1,51 @@
+/*
+ * Module-specific styling for eu.isygoit.ui.sms.** (SmsMainView, SmsMainLayout,
+ * StorageConfigCard/StorageConfigManagementView and their dialogs). Imported
+ * once via SmsMainLayout so it is available to every view rendered inside it.
+ */
+
+/* SMS aliases use the shared WAMS/Lumo theme tokens. */
+:root {
+  --sms-color-primary: var(--lumo-primary-color);
+  --sms-color-primary-soft: var(--lumo-primary-color-10pct);
+  --sms-color-success: var(--lumo-success-color);
+  --sms-color-success-soft: var(--lumo-success-color-10pct);
+  --sms-color-warning: var(--lumo-warning-color);
+  --sms-color-warning-soft: var(--lumo-warning-color-10pct);
+  --sms-color-danger: var(--lumo-error-color);
+  --sms-color-danger-soft: var(--lumo-error-color-10pct);
+  --sms-color-info: var(--lumo-primary-text-color);
+  --sms-color-text: var(--lumo-body-text-color);
+  --sms-color-text-muted: var(--lumo-secondary-text-color);
+  --sms-color-text-soft: var(--lumo-tertiary-text-color);
+  --sms-color-surface: var(--lumo-base-color);
+  --sms-color-surface-alt: var(--lumo-contrast-5pct);
+  --sms-color-border: var(--wams-surface-line);
+  --sms-color-shadow: var(--wams-shadow-hover);
+  --sms-font-family: var(--lumo-font-family);
+  --sms-font-size-xxs: 0.625rem;
+  --sms-font-size-xs: var(--lumo-font-size-xs);
+  --sms-font-size-sm: var(--lumo-font-size-s);
+  --sms-font-size-md: var(--lumo-font-size-m);
+  --sms-font-size-lg: var(--lumo-font-size-l);
+  --sms-font-size-xl: var(--lumo-font-size-xl);
+  --sms-font-weight-semibold: 600;
+  --sms-line-height-normal: 1.5;
+  --sms-space-1: 0.25rem;
+  --sms-space-2: 0.5rem;
+  --sms-space-2-5: 0.625rem;
+  --sms-space-3: 0.75rem;
+  --sms-space-4: 1rem;
+  --sms-space-6: 1.5rem;
+  --sms-space-8: 2rem;
+  --sms-space-meta-indent: 1.75rem;
+  --sms-space-tag-x: 0.55rem;
+  --sms-space-tag-y: 0.12rem;
+  --sms-radius-sm: var(--lumo-border-radius-s);
+  --sms-radius-md: var(--lumo-border-radius-m);
+  --sms-radius-lg: var(--lumo-border-radius-l);
+  --sms-radius-xl: var(--lumo-border-radius-l);
+  --sms-shadow-sm: var(--lumo-box-shadow-xs);
+  --sms-shadow-md: var(--lumo-box-shadow-m);
+}
+

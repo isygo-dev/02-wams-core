@@ -1,0 +1,112 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Create Account from Registered Dialog - Professional & Modern Design
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.wams-create-account-dialog {
+  padding: 0;
+}
+
+/* User info card */
+.wams-user-info-card {
+  display: flex;
+  align-items: center;
+  padding: var(--lumo-space-m) var(--lumo-space-l);
+  margin-bottom: var(--lumo-space-l);
+  background: linear-gradient(135deg, var(--lumo-primary-color-10pct), var(--lumo-base-color));
+  border-radius: var(--lumo-border-radius-m);
+  border-left: 4px solid var(--lumo-primary-color);
+}
+
+.wams-user-avatar {
+  color: var(--lumo-primary-color);
+  flex-shrink: 0;
+}
+
+.wams-user-info-name {
+  margin: 0;
+}
+
+/* Toggle section */
+.wams-toggle-section {
+  padding: var(--lumo-space-s) var(--lumo-space-xs);
+  margin-bottom: var(--lumo-space-m);
+  background: var(--lumo-contrast-5pct);
+  border-radius: var(--lumo-border-radius);
+  border: 1px solid var(--lumo-contrast-10pct);
+  transition: all 0.2s ease;
+}
+
+.wams-toggle-section:hover {
+  background: var(--lumo-contrast-10pct);
+  border-color: var(--lumo-primary-color-50pct);
+}
+
+.wams-toggle-checkbox {
+  margin: 0 var(--lumo-space-xs);
+}
+
+.wams-toggle-icon {
+  color: var(--lumo-primary-color);
+  flex-shrink: 0;
+}
+
+/* Tenant section */
+.wams-tenant-section {
+  margin-bottom: var(--lumo-space-l);
+  padding: var(--lumo-space-m);
+  background: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius);
+  border: 1px solid var(--lumo-contrast-10pct);
+}
+
+.wams-tenant-container {
+  padding: var(--lumo-space-xs) 0;
+}
+
+.wams-tenant-container--active {
+  animation: wams-fade-in 0.25s ease-out;
+}
+
+/* Account section */
+.wams-account-section {
+  padding: var(--lumo-space-m);
+  background: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius);
+  border: 1px solid var(--lumo-contrast-10pct);
+}
+
+/* Animations */
+@keyframes wams-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .wams-user-info-card {
+    padding: var(--lumo-space-m);
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .wams-user-info-card .wams-user-avatar {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .wams-toggle-section {
+    padding: var(--lumo-space-s);
+  }
+
+  .wams-tenant-section,
+  .wams-account-section {
+    padding: var(--lumo-space-s);
+  }
+}
+

@@ -1,0 +1,42 @@
+/* ── Shared dialog helpers (Base*Dialog error/status/upload areas) ───────── */
+
+.wams-dialog-error-area {
+  background-color: var(--lumo-error-color-10pct);
+  color: var(--lumo-error-text-color);
+  padding: var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-m);
+  margin-bottom: var(--lumo-space-m);
+  width: 100%;
+}
+
+.wams-dialog-content-area {
+  padding: 0;
+  width: 100%;
+}
+
+.wams-dialog-upload-section {
+  margin-top: var(--lumo-space-m);
+  padding: var(--lumo-space-m);
+  border: 1px dashed var(--lumo-contrast-30pct);
+  border-radius: var(--lumo-border-radius-m);
+}
+
+.wams-dialog-upload-label {
+  font-weight: bold;
+}
+
+.wams-dialog-file-info-area {
+  padding: var(--lumo-space-s);
+  background-color: var(--lumo-contrast-5pct);
+  border-radius: var(--lumo-border-radius-m);
+  font-size: var(--lumo-font-size-s);
+}
+
+.wams-dialog-file-info-area--success {
+  color: var(--lumo-success-color);
+}
+
+.wams-dialog-file-info-area--error {
+  color: var(--lumo-error-color);
+}
+

@@ -1,0 +1,20 @@
+/* ── Dashboard (SmsMainView) ──────────────────────────────────────────────── */
+
+.sms-dashboard .wams-dashboard-header {
+  margin-bottom: var(--sms-space-2-5);
+}
+
+/* Stat cards now use the shared eu.isygoit.ui.common.component.StatCard /
+   StatCardGrid (.wams-stat-card / .wams-stat-grid in card.css) instead of
+   this module's own .stat-card/.stats-row/.sms-mini-stats-grid overrides. */
+
+.sms-dashboard .wams-recent-activity-panel {
+  margin-top: var(--sms-space-6);
+}
+
+.sms-dashboard .wams-recent-activity-content {
+  padding: var(--lumo-space-m);
+  background: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius-m);
+}
+

@@ -1,0 +1,16 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Role dialogs — CreateRoleDialog / UpdateRoleDialog
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.role-dialog .apps-count-label {
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-secondary-text-color);
+}
+
+@media (max-width: 600px) {
+  .role-dialog .apps-filter-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+

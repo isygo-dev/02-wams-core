@@ -1,0 +1,10 @@
+/* Card grids — same 340px/768px breakpoint as .storageconfig-cards-grid, so
+   every SMS card grid behaves identically regardless of module. */
+.buckets-cards-grid,
+.objects-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
+}
+

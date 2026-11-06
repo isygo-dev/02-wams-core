@@ -1,0 +1,98 @@
+/* ── Category management view ─────────────────────────────────────────────── */
+
+@keyframes dms-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.category-management-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-s);
+  width: 100%;
+}
+
+.category-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--lumo-space-m);
+  padding: var(--lumo-space-s);
+}
+
+@media (max-width: 768px) {
+  .category-management-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .category-management-toolbar > * {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* DOM order is filters (leftGroup) → pagination (centerGroup) →
+     refresh/create (rightGroup), which otherwise stacks Create at the very
+     bottom, below pagination and filters, once the toolbar goes to a
+     column. Reorder so pagination + actions stay anchored near the top and
+     right-aligned; only the filters drop to the bottom. */
+  .category-management-toolbar > :nth-child(2),
+  .category-management-toolbar > :nth-child(3) {
+    justify-content: flex-end;
+  }
+
+  .category-management-toolbar > :nth-child(3) {
+    order: -2;
+  }
+
+  .category-management-toolbar > :nth-child(2) {
+    order: -1;
+  }
+
+  .category-management-toolbar > :nth-child(1),
+  .category-management-toolbar > :nth-child(2),
+  .category-management-toolbar > :nth-child(3) {
+    flex-wrap: wrap;
+    row-gap: var(--dms-space-1);
+  }
+
+  .category-management-toolbar > :nth-child(1) vaadin-text-field,
+  .category-management-toolbar > :nth-child(1) vaadin-combo-box {
+    width: 100% !important;
+  }
+
+  .category-management-toolbar > :nth-child(2) vaadin-combo-box {
+    width: 90px !important;
+  }
+
+  .category-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-management-toolbar .pagination-total-count {
+    display: none;
+  }
+
+  /* Lumo sizes button icons via width/height:1.5em (--lumo-icon-size-m),
+     which collapses to 0 along with the button's own font-size unless
+     restored — see key-management-toolbar in kms.css for the full story. */
+  .category-management-toolbar > :nth-child(3) vaadin-button {
+    font-size: 0;
+  }
+
+  .category-management-toolbar > :nth-child(3) vaadin-button vaadin-icon {
+    font-size: var(--lumo-font-size-m);
+  }
+}
+
+.category-management-view .wams-empty-state-icon {
+  color: var(--lumo-secondary-text-color);
+}
+
