@@ -43,6 +43,15 @@ public final class BusinessCodeBadge {
         return stack;
     }
 
+    /**
+     * Adds the badge only when the code is present, leaving the header unchanged otherwise.
+     */
+    public static void prependIfPresent(HorizontalLayout header, String code) {
+        if (header != null && StringUtils.hasText(code)) {
+            prepend(header, code);
+        }
+    }
+
     public static void update(VerticalLayout stack, String code) {
         if (stack == null) {
             return;
@@ -57,7 +66,7 @@ public final class BusinessCodeBadge {
         }
     }
 
-    private static Component of(String code) {
+    public static Component of(String code) {
         if (!StringUtils.hasText(code)) {
             return null;
         }
@@ -65,8 +74,10 @@ public final class BusinessCodeBadge {
         text.addClassName("wams-card__code-text");
         text.getElement().setAttribute("title", code);
 
-        ClipboardCopyButton copyButton = new ClipboardCopyButton(code);
-        copyButton.setAriaLabel(I18n.t("common.action.copy.tooltip"));
+        ClipboardCopyButton copyButton = new ClipboardCopyButton(
+                code,
+                I18n.t("common.code.copy.tooltip"),
+                I18n.t("common.code.copy.success", code));
 
         Div badge = new Div(text, copyButton);
         badge.addClassName("wams-card__code-badge");

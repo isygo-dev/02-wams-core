@@ -89,6 +89,25 @@ color 0.15s ease;
   }
 }
 
+.pagination-btn--compact {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+}
+
+.pagination-toolbar-group {
+  flex-wrap: wrap;
+  gap: var(--lumo-space-xs);
+  min-width: 0;
+}
+
+.pagination-page-info,
+.pagination-total-count {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-s);
+  white-space: nowrap;
+}
+
 // ── Ellipsis ("…") ───────────────────────────────────────────
 .pagination-ellipsis {
   display: flex;

@@ -349,6 +349,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         left.setSpacing(true);
         left.setPadding(false);
         left.setAlignItems(FlexComponent.Alignment.END);
+        left.addClassName("toolbar-left");
         left.add(searchField);
         for (Component c : buildToolbarFilters()) {
             left.add(c);
@@ -359,6 +360,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         right.setSpacing(true);
         right.setPadding(false);
         right.setAlignItems(FlexComponent.Alignment.END);
+        right.addClassName("toolbar-right");
         for (Component c : buildToolbarActions()) {
             right.add(c);
         }

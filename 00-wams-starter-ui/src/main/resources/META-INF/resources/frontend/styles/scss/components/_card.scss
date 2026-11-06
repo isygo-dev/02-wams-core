@@ -41,7 +41,8 @@
   gap: var(--lumo-space-xs);
   max-width: 100%;
   margin-bottom: var(--lumo-space-xs);
-  padding: 2px var(--lumo-space-xs) 2px var(--lumo-space-s);
+  padding-block: 2px;
+  padding-inline: var(--lumo-space-s) var(--lumo-space-xs);
   border-radius: var(--lumo-border-radius-m);
   background: var(--lumo-primary-color-10pct);
   color: var(--lumo-primary-text-color);
@@ -433,6 +434,18 @@
 }
 
 /* ── Copy-to-clipboard button (eu.isygoit.ui.common.component.ClipboardCopyButton) ── */
+
+.card__title-row {
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  row-gap: var(--lumo-space-xs);
+
+  .card__title {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
 
 .wams-copy-button {
   color: var(--lumo-secondary-text-color);

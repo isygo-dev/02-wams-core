@@ -1,9 +1,12 @@
 // Generic breadcrumb trail (see eu.isygoit.ui.common.component.Breadcrumbs). Lumo tokens only.
 
 .wams-content-host {
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
   min-width: 0;
   max-width: 100%;
+  min-height: 100%;
 }
 
 .wams-content-host > .wams-breadcrumbs {
@@ -142,6 +145,10 @@
 
 // narrow screens: only the first item, an ellipsis and the last two items are shown
 @media (max-width: 600px) {
+  .wams-content-host > .wams-breadcrumbs {
+    padding: var(--lumo-space-xs) var(--lumo-space-s) 0;
+  }
+
   .wams-breadcrumbs {
     font-size: var(--lumo-font-size-xs);
 
