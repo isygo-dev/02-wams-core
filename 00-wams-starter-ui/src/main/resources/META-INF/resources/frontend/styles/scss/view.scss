@@ -59,7 +59,9 @@
     background: var(--lumo-base-color);
   }
 
-  div[class*="grid"] {
+  // Card lists only. Never match on a substring of "grid": calendar, timetable, stat and detail grids
+  // (timetable-grid, monthly-grid, management-grid__*, ...) each define their own layout.
+  .cards-grid {
     box-sizing: border-box;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
