@@ -379,19 +379,6 @@
   color: var(--lumo-secondary-text-color);
 }
 
-/* Pagination "n / m" label spacing (all 8 *ManagementView#buildToolbar()). */
-
-.account-management-toolbar .page-info-label,
-.annex-management-toolbar .page-info-label,
-.application-management-toolbar .page-info-label,
-.customer-management-toolbar .page-info-label,
-.parameter-management-toolbar .page-info-label,
-.registered-management-toolbar .page-info-label,
-.role-management-toolbar .page-info-label,
-.tenant-management-toolbar .page-info-label {
-  margin: 0 0.5rem;
-}
-
 @media (max-width: 768px) {
   .account-management-toolbar,
   .annex-management-toolbar,
@@ -861,4 +848,3 @@
   color: var(--ims-color-text-muted);
   background: var(--ims-color-surface-alt);
 }
-

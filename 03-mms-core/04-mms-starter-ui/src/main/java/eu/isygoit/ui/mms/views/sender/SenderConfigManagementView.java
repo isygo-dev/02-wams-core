@@ -347,8 +347,8 @@ public class SenderConfigManagementView extends ManagementVerticalView {
         prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         pageSizeSelect.setWidth("120px");
-        pageInfoLabel.addClassName("wams-page-info-label");
-        totalCountLabel.addClassName("wams-page-info-label");
+        pageInfoLabel.addClassName("pagination-page-info");
+        totalCountLabel.addClassName("pagination-total-count");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
         HorizontalLayout rightGroup = new HorizontalLayout();

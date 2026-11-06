@@ -474,8 +474,8 @@ public class ObjectStorageManagementView extends ManagementVerticalView implemen
         prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         pageSizeSelect.setWidth("100px");
-        pageInfoLabel.addClassName("wams-page-info-label");
-        totalCountLabel.addClassName("wams-total-count-label");
+        pageInfoLabel.addClassName("pagination-page-info");
+        totalCountLabel.addClassName("pagination-total-count");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
         HorizontalLayout rightGroup = new HorizontalLayout();

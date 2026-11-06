@@ -137,14 +137,6 @@
   width: 100%;
 }
 
-.calendar-management-toolbar .wams-page-info-label {
-  margin: 0 0.5rem;
-}
-
-.calendar-management-toolbar .wams-total-count-label {
-  margin: 0 0.5rem;
-}
-
 .calendar-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -203,7 +195,7 @@
 }
 
 @media (max-width: 480px) {
-  .calendar-management-toolbar .wams-total-count-label {
+  .calendar-management-toolbar .pagination-total-count {
     display: none;
   }
 

@@ -633,11 +633,6 @@
   gap: var(--lumo-space-s);
 }
 
-.template-toolbar .wams-page-info-label,
-.sender-toolbar .wams-page-info-label {
-  margin: 0 0.5rem;
-}
-
 .template-grid,
 .sender-grid {
   display: grid;
@@ -710,12 +705,8 @@
 }
 
 @media (max-width: 480px) {
-  /* totalCountLabel shares .wams-page-info-label with pageInfoLabel here,
-     so it can't be targeted by class alone — use its structural position
-     instead: centerGroup.add(prevButton, pageInfoLabel, nextButton,
-     totalCountLabel, pageSizeSelect) makes it the group's 4th child. */
-  .template-toolbar > :nth-child(2) > :nth-child(4),
-  .sender-toolbar > :nth-child(2) > :nth-child(4) {
+  .template-toolbar .pagination-total-count,
+  .sender-toolbar .pagination-total-count {
     display: none;
   }
 

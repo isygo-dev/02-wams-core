@@ -143,13 +143,6 @@
   color: var(--lumo-secondary-text-color);
 }
 
-/* Pagination labels (centerGroup, every SMS toolbar) — shared across
-   storageconfig/buckets/objects instead of being redeclared per toolbar. */
-.wams-page-info-label,
-.wams-total-count-label {
-  margin: 0 var(--sms-space-2);
-}
-
 @media (max-width: 768px) {
   .storageconfig-management-toolbar {
     flex-direction: column;
@@ -201,7 +194,7 @@
 }
 
 @media (max-width: 480px) {
-  .wams-total-count-label {
+  .pagination-total-count {
     display: none;
   }
 

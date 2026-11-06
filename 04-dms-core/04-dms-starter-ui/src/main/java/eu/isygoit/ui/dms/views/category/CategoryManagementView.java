@@ -115,7 +115,7 @@ public class CategoryManagementView extends AbstractPaginatedView<CategoryDto> {
                 loadPageZero();
             }
         });
-        totalCountLabel.addClassName("management-total-count");
+        totalCountLabel.addClassNames("management-total-count", "pagination-total-count");
         return List.of(refreshButton, pageSizeSelect, totalCountLabel);
     }
 

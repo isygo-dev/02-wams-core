@@ -102,10 +102,20 @@ color 0.15s ease;
 }
 
 .pagination-page-info,
-.pagination-total-count {
+.pagination-total-count,
+.page-info-label,
+.total-count-label,
+.wams-page-info-label,
+.wams-total-count-label {
   color: var(--lumo-secondary-text-color);
   font-size: var(--lumo-font-size-s);
   white-space: nowrap;
+  margin: 0 var(--lumo-space-s);
+}
+
+.pagination-toolbar-group > .pagination-page-info,
+.pagination-toolbar-group > .pagination-total-count {
+  margin-inline: 0;
 }
 
 // ── Ellipsis ("…") ───────────────────────────────────────────

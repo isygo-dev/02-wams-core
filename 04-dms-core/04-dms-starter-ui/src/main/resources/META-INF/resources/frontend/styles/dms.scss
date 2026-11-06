@@ -91,10 +91,6 @@
   width: 100%;
 }
 
-.category-management-toolbar .wams-page-info-label {
-  margin: 0 var(--dms-space-2);
-}
-
 .category-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -153,10 +149,7 @@
 }
 
 @media (max-width: 480px) {
-  /* totalCountLabel has no dedicated CSS class here — target it
-     structurally: centerGroup.add(prevButton, pageInfoLabel, nextButton,
-     totalCountLabel, pageSizeSelect) makes it the group's 4th child. */
-  .category-management-toolbar > :nth-child(2) > :nth-child(4) {
+  .category-management-toolbar .pagination-total-count {
     display: none;
   }
 
@@ -270,10 +263,6 @@
   width: 100%;
 }
 
-.linked-file-management-toolbar .wams-page-info-label {
-  margin: 0 var(--dms-space-2);
-}
-
 .linked-file-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -331,10 +320,7 @@
 }
 
 @media (max-width: 480px) {
-  /* totalCountLabel has no dedicated CSS class here — target it
-     structurally: centerGroup.add(prevButton, pageInfoLabel, nextButton,
-     totalCountLabel, pageSizeSelect) makes it the group's 4th child. */
-  .linked-file-management-toolbar > :nth-child(2) > :nth-child(4) {
+  .linked-file-management-toolbar .pagination-total-count {
     display: none;
   }
 

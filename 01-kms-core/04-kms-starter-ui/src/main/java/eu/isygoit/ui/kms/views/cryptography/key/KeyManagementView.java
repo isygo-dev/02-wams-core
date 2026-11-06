@@ -309,8 +309,8 @@ public class KeyManagementView extends ManagementVerticalView {
         prevButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         pageSizeSelect.setWidth("120px");
-        pageInfoLabel.addClassName("page-info-label");
-        totalCountLabel.addClassName("total-count-label");
+        pageInfoLabel.addClassName("pagination-page-info");
+        totalCountLabel.addClassName("pagination-total-count");
         centerGroup.add(prevButton, pageInfoLabel, nextButton, totalCountLabel, pageSizeSelect);
 
         HorizontalLayout rightGroup = new HorizontalLayout();
