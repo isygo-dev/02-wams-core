@@ -1,0 +1,18 @@
+.kms-copy-toast {
+  position: fixed;
+  right: var(--kms-space-4);
+  bottom: var(--kms-space-4);
+  z-index: 10000;
+  padding: var(--kms-space-2) var(--kms-space-4);
+  border-radius: var(--kms-radius-md);
+  color: var(--kms-color-surface);
+  box-shadow: var(--kms-shadow-md);
+}
+
+.kms-copy-toast--success {
+  background: var(--kms-color-success);
+}
+
+.kms-copy-toast--error {
+  background: var(--kms-color-danger);
+}

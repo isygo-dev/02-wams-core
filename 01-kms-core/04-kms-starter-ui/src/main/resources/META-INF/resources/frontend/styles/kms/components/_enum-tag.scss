@@ -1,0 +1,38 @@
+.kms-enum-tag {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.12rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: var(--kms-radius-lg);
+  font-size: var(--kms-font-size-xs);
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.kms-enum-tag--success {
+  color: var(--kms-color-success);
+  background: rgba(31, 132, 90, 0.1);
+}
+
+.kms-enum-tag--warning {
+  color: var(--kms-color-warning);
+  background: rgba(165, 72, 0, 0.12);
+}
+
+.kms-enum-tag--danger {
+  color: var(--kms-color-danger);
+  background: rgba(201, 55, 44, 0.1);
+}
+
+.kms-enum-tag--info {
+  color: var(--kms-color-info);
+  background: var(--kms-color-primary-soft);
+}
+
+.kms-enum-tag--neutral {
+  color: var(--kms-color-text-muted);
+  background: var(--kms-color-surface-alt);
+}
