@@ -10,7 +10,7 @@ public record Task(
         Boolean required) {
 
     public Task {
-        attributes = attributes == null ? Map.of() : Map.copyOf(attributes);
+        attributes = ImmutableJsonMap.copyOf(attributes);
         candidates = candidates == null ? new TaskCandidates(null, null, null) : candidates;
         required = required == null ? Boolean.TRUE : required;
     }

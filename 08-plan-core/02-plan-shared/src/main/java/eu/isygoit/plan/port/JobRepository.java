@@ -1,6 +1,7 @@
 package eu.isygoit.plan.port;
 
 import eu.isygoit.enums.IEnumJobStatusCode;
+import eu.isygoit.plan.api.PlanningRequest;
 import eu.isygoit.plan.domain.JobStatus;
 import eu.isygoit.plan.domain.SolveResult;
 
@@ -10,7 +11,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface JobRepository {
-    boolean saveCreated(JobStatus status);
+    boolean saveCreated(JobStatus status, PlanningRequest request);
+
+    List<PlanningRequest> findCreatedRequests(int limit);
 
     void upsert(UUID jobId, SolveResult result);
 

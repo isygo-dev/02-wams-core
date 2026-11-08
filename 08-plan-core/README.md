@@ -42,11 +42,15 @@ Cassandra keyspace with an appropriate replication strategy before applying `01-
   an allow-list of constraint IDs. `maxRelaxation` is binary: `0` keeps a constraint active and `1` permits dropping the
   whole constraint; fractional values are rejected. `STRICTLY_REQUIRED` constraints are never relaxed.
 - Available engines are `cp_sat` and `timefold`. Solver time is bounded by `solverOptions.maxTimeSeconds`.
+- `solverOptions` may be omitted or partially specified. Missing values default to `engine=cp_sat`,
+  `maxTimeSeconds=30`, `numWorkers=8`, `seed=0`, `logSearch=false`, and an empty `relaxationLevels` list. Explicit
+  `maxTimeSeconds` values must be positive; `numWorkers` must be between 1 and 32.
+- Task, resource, slot, constraint-parameter, and diagnostic-detail maps preserve JSON `null` values.
 - Timefold uses 32-bit hard/soft scores; requests whose worst-case combined soft score exceeds `Integer.MAX_VALUE` are
   rejected instead of failing during solving.
 
-The request schema and a runnable example are in `04-plan-starter-ui/src/main/resources/schemas` and `.../examples`. The
-smoke script submits a new job ID and polls for completion.
+The smoke script submits a new job ID and polls for completion. A JSON Schema resource is not currently present in the
+starter UI module.
 
 ## Local configuration
 

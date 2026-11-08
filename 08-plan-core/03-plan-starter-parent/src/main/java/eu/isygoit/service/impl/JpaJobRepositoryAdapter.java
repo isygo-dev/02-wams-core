@@ -3,7 +3,10 @@ package eu.isygoit.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.enums.IEnumJobStatusCode;
+import eu.isygoit.enums.IEnumSolverStatus;
 import eu.isygoit.model.PlanJob;
+import eu.isygoit.plan.api.PlanningRequest;
+import eu.isygoit.plan.domain.Diagnostics;
 import eu.isygoit.plan.domain.JobStatus;
 import eu.isygoit.plan.domain.SolveResult;
 import eu.isygoit.plan.exception.JobNotFoundException;
@@ -31,9 +34,17 @@ public class JpaJobRepositoryAdapter implements JobRepository {
     }
 
     @Override
-    public boolean saveCreated(JobStatus status) {
+    public boolean saveCreated(JobStatus status, PlanningRequest request) {
         return repository.insertCreatedIfAbsent(
-                status.jobId(), status.submittedAt(), status.message()) > 0;
+                status.jobId(), status.submittedAt(), status.message(), writeJson(request)) > 0;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlanningRequest> findCreatedRequests(int limit) {
+        return repository.findCreatedRequestJson(PageRequest.of(0, limit)).stream()
+                .map(this::readRequest)
+                .toList();
     }
 
     @Override
@@ -123,9 +134,22 @@ public class JpaJobRepositoryAdapter implements JobRepository {
     @Override
     @Transactional(readOnly = true)
     public Optional<SolveResult> findResult(UUID jobId) {
-        return repository.findById(jobId)
-                .map(PlanJob::getResultJson)
-                .map(this::readResult);
+        return repository.findById(jobId).flatMap(entity -> {
+            if (entity.getResultJson() != null) {
+                SolveResult result = readResult(entity.getResultJson());
+                if (result != null) {
+                    return Optional.of(result);
+                }
+            }
+            if (entity.getStatus() == IEnumJobStatusCode.Types.INFEASIBLE) {
+                Diagnostics diagnostics = entity.getDiagnosticsJson() == null
+                        ? null
+                        : readDiagnostics(entity.getDiagnosticsJson());
+                return Optional.of(new SolveResult(
+                        IEnumSolverStatus.Types.INFEASIBLE, null, List.of(), diagnostics, null));
+            }
+            return Optional.empty();
+        });
     }
 
     @Override
@@ -145,11 +169,35 @@ public class JpaJobRepositoryAdapter implements JobRepository {
         }
     }
 
+    private String writeJson(PlanningRequest request) {
+        try {
+            return objectMapper.writeValueAsString(request);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalStateException("Could not serialize planning request", exception);
+        }
+    }
+
+    private PlanningRequest readRequest(String json) {
+        try {
+            return objectMapper.readValue(json, PlanningRequest.class);
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not deserialize persisted planning request", exception);
+        }
+    }
+
     private SolveResult readResult(String json) {
         try {
             return objectMapper.readValue(json, SolveResult.class);
         } catch (IOException exception) {
             throw new IllegalStateException("Could not deserialize persisted planning result", exception);
+        }
+    }
+
+    private Diagnostics readDiagnostics(String json) {
+        try {
+            return objectMapper.readValue(json, Diagnostics.class);
+        } catch (IOException exception) {
+            throw new IllegalStateException("Could not deserialize persisted planning diagnostics", exception);
         }
     }
 }

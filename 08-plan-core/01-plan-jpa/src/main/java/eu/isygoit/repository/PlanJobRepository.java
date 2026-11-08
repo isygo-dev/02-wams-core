@@ -19,20 +19,30 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
 
     long countByStatus(IEnumJobStatusCode.Types status);
 
+    @Query(value = "select cast(" + SchemaColumnConstantName.C_REQUEST_JSON + " as text)"
+            + " from " + SchemaTableConstantName.T_PLAN_JOB
+            + " where " + SchemaColumnConstantName.C_STATUS + " = 'CREATED' "
+            + "and " + SchemaColumnConstantName.C_REQUEST_JSON + " is not null "
+            + "order by " + SchemaColumnConstantName.C_SUBMITTED_AT + " asc",
+            nativeQuery = true)
+    List<String> findCreatedRequestJson(Pageable pageable);
+
     @Modifying
     @Query(value = "insert into " + SchemaTableConstantName.T_PLAN_JOB
             + " (" + SchemaColumnConstantName.C_JOB_ID
             + ", " + SchemaColumnConstantName.C_STATUS
             + ", " + SchemaColumnConstantName.C_SUBMITTED_AT
             + ", " + SchemaColumnConstantName.C_MESSAGE
+            + ", " + SchemaColumnConstantName.C_REQUEST_JSON
             + ", " + SchemaColumnConstantName.C_VERSION + ") "
-            + "values (:jobId, 'CREATED', :submittedAt, :message, 0) "
+            + "values (:jobId, 'CREATED', :submittedAt, :message, cast(:requestJson as jsonb), 0) "
             + "on conflict (" + SchemaColumnConstantName.C_JOB_ID + ") do nothing",
             nativeQuery = true)
     int insertCreatedIfAbsent(
             @Param("jobId") UUID jobId,
             @Param("submittedAt") Instant submittedAt,
-            @Param("message") String message);
+            @Param("message") String message,
+            @Param("requestJson") String requestJson);
 
     @Modifying(clearAutomatically = true)
     @Query(value = "update " + SchemaTableConstantName.T_PLAN_JOB

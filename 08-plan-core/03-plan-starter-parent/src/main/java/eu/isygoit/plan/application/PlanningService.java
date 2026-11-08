@@ -50,6 +50,7 @@ public class PlanningService {
         PlanningProblem problem = normalizer.normalize(request);
         constraintRegistry.verifyAll(problem);
         objectiveRegistry.verifyAll(problem.objectives());
+        solverRegistry.get(problem.options().engine());
         return problem;
     }
 }

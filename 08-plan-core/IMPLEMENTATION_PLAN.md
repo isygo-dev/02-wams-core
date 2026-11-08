@@ -88,6 +88,20 @@
 - Remaining work: move the rest of the planning services, DTOs, enums and exceptions into the MMS shared/parent package
   conventions; align service/controller inheritance and mapper patterns; review entity schemas and bootstrapping
   configuration. The four-module Maven hierarchy and existing version management remain unchanged.
+- `PlanningService.normalizeAndValidate` now resolves the configured solver before job submission can persist or dispatch
+  the request. A new `PlanningServiceTest` covers request validation, unsupported solver/constraint rejection,
+  required/optional result consistency, capacity and eligibility checks, infeasible/unknown results, and solver errors.
+- Processing claims now stop duplicate workers from solving an already-claimed job, and unexpected solver runtime
+  failures are persisted as terminal failures. Created jobs persist their request JSON and are periodically redispatched
+  in both Kafka and local-executor modes, closing the crash window between creation and initial dispatch.
+- Apply `01-plan-jpa/src/main/resources/db/upgrade/plan-job-request-recovery.sql` before deploying this change; the
+  service uses `ddl-auto: validate` and does not auto-apply the new request-payload column.
+- `SolverOptions` now applies the same documented defaults to omitted fields in a partially specified options object.
+  The README no longer points to a JSON Schema path that is absent from the starter UI module.
+- Infeasible result lookups now reconstruct a `SolveResult` from the persisted diagnostics when no result JSON exists.
+  Generic input maps now retain JSON `null` values instead of failing during defensive copying.
+- Final source review still needs to address other remaining requirements. These changes do not alter the four-module
+  layout.
 - As previously requested, this phase is source-only: do not compile or run tests.
 
 ## Completion record

@@ -4,17 +4,24 @@ import java.util.List;
 
 public record SolverOptions(
         String engine,
-        int maxTimeSeconds,
-        int numWorkers,
-        long seed,
-        boolean logSearch,
+        Integer maxTimeSeconds,
+        Integer numWorkers,
+        Long seed,
+        Boolean logSearch,
         List<String> relaxationLevels) {
 
+    public static final String DEFAULT_ENGINE = "cp_sat";
     public static final int DEFAULT_MAX_TIME_SECONDS = 30;
     public static final int DEFAULT_NUM_WORKERS = 8;
+    public static final long DEFAULT_SEED = 0L;
+    public static final boolean DEFAULT_LOG_SEARCH = false;
 
     public SolverOptions {
-        engine = engine == null || engine.isBlank() ? "cp_sat" : engine;
+        engine = engine == null || engine.isBlank() ? DEFAULT_ENGINE : engine;
+        maxTimeSeconds = maxTimeSeconds == null ? DEFAULT_MAX_TIME_SECONDS : maxTimeSeconds;
+        numWorkers = numWorkers == null ? DEFAULT_NUM_WORKERS : numWorkers;
+        seed = seed == null ? DEFAULT_SEED : seed;
+        logSearch = logSearch == null ? DEFAULT_LOG_SEARCH : logSearch;
         if (maxTimeSeconds < 1) {
             throw new IllegalArgumentException("maxTimeSeconds must be positive");
         }
@@ -25,6 +32,7 @@ public record SolverOptions(
     }
 
     public static SolverOptions defaults() {
-        return new SolverOptions("cp_sat", DEFAULT_MAX_TIME_SECONDS, DEFAULT_NUM_WORKERS, 0L, false, List.of());
+        return new SolverOptions(DEFAULT_ENGINE, DEFAULT_MAX_TIME_SECONDS, DEFAULT_NUM_WORKERS,
+                DEFAULT_SEED, DEFAULT_LOG_SEARCH, List.of());
     }
 }

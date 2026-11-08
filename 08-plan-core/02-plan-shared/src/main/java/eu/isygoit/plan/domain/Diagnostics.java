@@ -10,6 +10,6 @@ public record Diagnostics(
 
     public Diagnostics {
         infeasibilityCore = infeasibilityCore == null ? List.of() : List.copyOf(infeasibilityCore);
-        details = details == null ? Map.of() : Map.copyOf(details);
+        details = ImmutableJsonMap.copyOf(details);
     }
 }

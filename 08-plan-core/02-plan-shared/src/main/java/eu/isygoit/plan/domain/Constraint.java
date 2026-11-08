@@ -14,7 +14,7 @@ public record Constraint(
         int weight) {
 
     public Constraint {
-        params = params == null ? Map.of() : Map.copyOf(params);
+        params = ImmutableJsonMap.copyOf(params);
         if (weight < 0) {
             throw new IllegalArgumentException("Constraint weight must not be negative");
         }

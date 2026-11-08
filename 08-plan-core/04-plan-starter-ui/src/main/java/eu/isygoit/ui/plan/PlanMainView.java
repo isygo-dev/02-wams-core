@@ -17,7 +17,7 @@ import eu.isygoit.enums.IEnumJobStatusCode;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.plan.api.JobDashboardSummary;
 import eu.isygoit.plan.domain.JobStatus;
-import eu.isygoit.remote.plan.PlanService;
+import eu.isygoit.remote.plan.PlanFeignService;
 import eu.isygoit.ui.common.component.*;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.plan.layout.PlanMainLayout;
@@ -42,7 +42,7 @@ public class PlanMainView extends ManagementVerticalView {
     private static final DateTimeFormatter DATE_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 
-    private final PlanService planService;
+    private final PlanFeignService planFeignService;
     private final UI ui;
     private final Grid<JobStatus> jobsGrid = new Grid<>(JobStatus.class, false);
     private final DashboardBreakdownPanel statusPanel;
@@ -53,8 +53,8 @@ public class PlanMainView extends ManagementVerticalView {
     private final TextField jobIdField = new TextField();
 
     @Autowired
-    public PlanMainView(PlanService planService) {
-        this.planService = planService;
+    public PlanMainView(PlanFeignService planFeignService) {
+        this.planFeignService = planFeignService;
         this.ui = UI.getCurrent();
         ui.getPushConfiguration().setPushMode(com.vaadin.flow.shared.communication.PushMode.AUTOMATIC);
 
@@ -181,7 +181,7 @@ public class PlanMainView extends ManagementVerticalView {
     }
 
     private DashboardData fetchDashboardData() {
-        JobDashboardSummary summary = planService.dashboardSummary(RECENT_JOB_LIMIT);
+        JobDashboardSummary summary = planFeignService.dashboardSummary(RECENT_JOB_LIMIT);
         long created = summary.created();
         long processing = summary.accepted() + summary.validating() + summary.normalizing() + summary.solving();
         return new DashboardData(

@@ -19,7 +19,7 @@ import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.enums.IEnumJobStatusCode;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.plan.domain.JobStatus;
-import eu.isygoit.remote.plan.PlanService;
+import eu.isygoit.remote.plan.PlanFeignService;
 import eu.isygoit.ui.common.component.PageHeader;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.plan.layout.PlanMainLayout;
@@ -43,7 +43,7 @@ public class PlanJobView extends ManagementVerticalView
     private static final DateTimeFormatter DATE_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
-    private final PlanService planService;
+    private final PlanFeignService planFeignService;
     private final ObjectMapper objectMapper;
     private final UI ui;
     private final Span statusBadge = new Span();
@@ -57,8 +57,8 @@ public class PlanJobView extends ManagementVerticalView
     private Registration pollRegistration;
 
     @Autowired
-    public PlanJobView(PlanService planService, ObjectMapper objectMapper) {
-        this.planService = planService;
+    public PlanJobView(PlanFeignService planFeignService, ObjectMapper objectMapper) {
+        this.planFeignService = planFeignService;
         this.objectMapper = objectMapper;
         this.ui = UI.getCurrent();
         setSizeFull();
@@ -145,7 +145,7 @@ public class PlanJobView extends ManagementVerticalView
             return;
         }
         try {
-            JobStatus status = planService.status(jobId);
+            JobStatus status = planFeignService.status(jobId);
             statusBadge.setText(status.status().meaning());
             statusBadge.addClassName("plan-job-status");
             for (IEnumJobStatusCode.Types candidate : IEnumJobStatusCode.Types.values()) {
@@ -175,7 +175,7 @@ public class PlanJobView extends ManagementVerticalView
         }
         try {
             resultText.setValue(objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(planService.result(jobId)));
+                    .writeValueAsString(planFeignService.result(jobId)));
         } catch (JsonProcessingException exception) {
             log.error("Unable to format plan result for {}", jobId, exception);
             Notification.show(I18n.t("plan.ui.result.load.error"));

@@ -110,6 +110,7 @@ public interface SchemaColumnConstantName extends ComSchemaColumnConstantName {
     String C_ERROR_CODE = "error_code";
     String C_MESSAGE = "message";
     String C_RESULT_JSON = "result_json";
+    String C_REQUEST_JSON = "request_json";
     String C_DIAGNOSTICS_JSON = "diagnostics_json";
     String C_BUCKET_START = "bucket_start";
     String C_EVENT_TIME = "event_time";

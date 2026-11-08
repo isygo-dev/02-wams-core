@@ -53,6 +53,8 @@ app:
   plan:
     execution:
       kafka-enabled: ${PLAN_KAFKA_ENABLED:true}
+      recovery-interval-ms: ${PLAN_JOB_RECOVERY_INTERVAL_MS:30000}
+      recovery-batch-size: ${PLAN_JOB_RECOVERY_BATCH_SIZE:100}
     cache:
       redis-enabled: false
       ttl: 30m

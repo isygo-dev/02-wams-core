@@ -7,6 +7,7 @@ import eu.isygoit.plan.application.port.JobStatusCache;
 import eu.isygoit.plan.domain.JobStatus;
 import eu.isygoit.plan.exception.JobQueueException;
 import eu.isygoit.plan.port.JobRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 
 @Service
+@Slf4j
 public class JobSubmissionService {
     private final PlanningService planningService;
     private final JobRepository jobRepository;
@@ -52,7 +54,7 @@ public class JobSubmissionService {
 
         JobStatus created = new JobStatus(jobId, IEnumJobStatusCode.Types.CREATED,
                 Instant.now(), null, null, null, "Job created");
-        if (!jobRepository.saveCreated(created)) {
+        if (!jobRepository.saveCreated(created, request)) {
             return jobRepository.findStatus(jobId)
                     .map(exist -> {
                         statusCache.put(exist);
@@ -69,8 +71,7 @@ public class JobSubmissionService {
                 planJobExecutor.execute(() -> jobProcessor.process(request));
             }
         } catch (RuntimeException e) {
-            jobRepository.markFailed(jobId, "JOB_DISPATCH_FAILED", "Job could not be scheduled");
-            statusCache.evict(jobId);
+            log.error("Could not dispatch created planning job {}; recovery will retry", jobId, e);
             throw new JobQueueException(e);
         }
         return created;

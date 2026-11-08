@@ -59,6 +59,10 @@ public class PlanJob extends AuditableEntity<UUID>
     private String message;
 
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb", name = SchemaColumnConstantName.C_REQUEST_JSON)
+    private String requestJson;
+
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb", name = SchemaColumnConstantName.C_RESULT_JSON)
     private String resultJson;
 

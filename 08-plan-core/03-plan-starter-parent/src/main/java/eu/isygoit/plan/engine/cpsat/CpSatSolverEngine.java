@@ -152,7 +152,7 @@ public class CpSatSolverEngine implements SolverEngine {
         solver.getParameters()
                 .setMaxTimeInSeconds(remainingSeconds)
                 .setNumSearchWorkers(options.numWorkers())
-                .setRandomSeed((int) options.seed())
+                .setRandomSeed(options.seed().intValue())
                 .setLogSearchProgress(options.logSearch());
         CpSolverStatus solverStatus = solver.solve(model);
         if (solverStatus == CpSolverStatus.INFEASIBLE) {
