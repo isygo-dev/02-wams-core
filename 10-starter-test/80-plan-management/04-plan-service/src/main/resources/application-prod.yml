@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: ${PLAN_JDBC_URL}
+    username: ${PLAN_JDBC_USERNAME}
+    password: ${PLAN_JDBC_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+  cassandra:
+    contact-points: ${PLAN_CASSANDRA_CONTACT_POINTS}
+    port: ${PLAN_CASSANDRA_PORT:9042}
+    local-datacenter: ${PLAN_CASSANDRA_LOCAL_DATACENTER}
+    keyspace-name: ${PLAN_CASSANDRA_KEYSPACE}
+  data:
+    redis:
+      host: ${PLAN_REDIS_HOST}
+      port: ${PLAN_REDIS_PORT:6379}
+      password: ${PLAN_REDIS_PASSWORD:}
+
+app:
+  plan:
+    cache:
+      redis-enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

@@ -1,0 +1,4 @@
+isygoPlan
+
+${spring.application.name} ${spring.application.version}
+Powered by Spring Boot ${spring-boot.version}

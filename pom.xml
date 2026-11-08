@@ -166,6 +166,7 @@
         <module>05-sms-core</module>
         <module>06-cms-core</module>
         <module>07-bpm-core</module>
+        <module>08-plan-core</module>
         <module>10-starter-test</module>
     </modules>
 

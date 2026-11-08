@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <version>WC-1.0.261007-T1703</version>
+
+    <artifactId>isygo-plan-starter-parent</artifactId>
+    <packaging>jar</packaging>
+
+    <name>isygoPlan Service and Infrastructure</name>
+    <description>isygoPlan Spring Boot Starter</description>
+
+    <parent>
+        <groupId>eu.isygo-it.services</groupId>
+        <artifactId>service-stack-parent</artifactId>
+        <version>WS-1.0.261007-T1703</version>
+    </parent>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>eu.isygo-it.services</groupId>
+                <artifactId>service-core</artifactId>
+                <version>WC-1.0.261007-T1703</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <properties>
+        <ortools.version>9.15.6755</ortools.version>
+        <timefold.version>1.28.0</timefold.version>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>build-dev-localhost</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <cloud.config.service>http://localhost:8088</cloud.config.service>
+                <hazelcast.public.address>localhost</hazelcast.public.address>
+                <hazelcast.public.port>5555</hazelcast.public.port>
+                <hazelcast.port>5701</hazelcast.port>
+            </properties>
+        </profile>
+        <profile>
+            <id>build-docker</id>
+            <properties>
+                <cloud.config.service>http://config-service:8088</cloud.config.service>
+                <hazelcast.public.address>plan-service</hazelcast.public.address>
+                <hazelcast.public.port>5555</hazelcast.public.port>
+                <hazelcast.port>5701</hazelcast.port>
+            </properties>
+        </profile>
+        <profile>
+            <id>build-dev</id>
+            <properties>
+                <cloud.config.service>http://config-service:8088</cloud.config.service>
+                <hazelcast.public.address>plan-service</hazelcast.public.address>
+                <hazelcast.public.port>5555</hazelcast.public.port>
+                <hazelcast.port>5701</hazelcast.port>
+            </properties>
+        </profile>
+        <profile>
+            <id>build-prod</id>
+            <properties>
+                <cloud.config.service>http://config-service:8088</cloud.config.service>
+                <hazelcast.public.address>plan-service</hazelcast.public.address>
+                <hazelcast.public.port>5555</hazelcast.public.port>
+                <hazelcast.port>5701</hazelcast.port>
+            </properties>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>isygo-plan-jpa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>isygo-plan-shared</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>service-stack-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-cassandra</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.google.ortools</groupId>
+            <artifactId>ortools-java</artifactId>
+            <version>${ortools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.timefold.solver</groupId>
+            <artifactId>timefold-solver-core</artifactId>
+            <version>${timefold.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>config/**/*.*</exclude>
+                </excludes>
+            </resource>
+        </resources>
+    </build>
+</project>

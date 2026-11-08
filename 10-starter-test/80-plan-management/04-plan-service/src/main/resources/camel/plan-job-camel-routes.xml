@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes xmlns="http://camel.apache.org/schema/spring">
+    <route id="plan-job-publisher" autoStartup="{{app.plan.execution.kafka-enabled:true}}">
+        <from uri="direct:plan-job-queue"/>
+        <process ref="planJobKafkaProducerProcessor"/>
+    </route>
+
+    <route id="plan-job-consumer" autoStartup="{{app.plan.execution.kafka-enabled:true}}">
+        <from uri="kafka:{{spring.kafka.topics.plan-jobs}}?groupId={{spring.kafka.consumer.group-id}}&amp;allowManualCommit=true&amp;consumersCount=1&amp;maxPollRecords=1&amp;breakOnFirstError=true&amp;autoOffsetReset=earliest"/>
+        <process ref="planJobKafkaConsumerProcessor"/>
+    </route>
+</routes>

@@ -1,0 +1,30 @@
+package eu.isygoit.ui.plan.layout;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.sidenav.SideNav;
+import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.layout.BaseMainLayout;
+
+@CssImport("./styles/plan.scss")
+public class PlanMainLayout extends BaseMainLayout {
+
+    @Override
+    protected String getModuleKey() {
+        return "plan";
+    }
+
+    @Override
+    protected String getTitle() {
+        return I18n.t("plan.ui.layout.title");
+    }
+
+    @Override
+    protected Component createDrawerContent() {
+        SideNav nav = new SideNav();
+        nav.addItem(navItem(I18n.t("plan.ui.nav.dashboard"), "plan", VaadinIcon.HOME));
+        return new Scroller(nav);
+    }
+}

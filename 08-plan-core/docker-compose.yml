@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: isygo_plan
+      POSTGRES_USER: isygo_plan
+      POSTGRES_PASSWORD: ${PLAN_JDBC_PASSWORD:?Set PLAN_JDBC_PASSWORD}
+    volumes:
+      - ./01-plan-jpa/src/main/resources/schema-postgresql.sql:/docker-entrypoint-initdb.d/01-plan-job.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U isygo_plan -d isygo_plan" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  kafka:
+    image: apache/kafka:3.9.0
+    environment:
+      KAFKA_CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    ports:
+      - "9094:9094"
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  cassandra:
+    image: cassandra:5.0
+    environment:
+      CASSANDRA_CLUSTER_NAME: isygo-plan-local
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+    ports:
+      - "9042:9042"
+    healthcheck:
+      test: [ "CMD-SHELL", "cqlsh 127.0.0.1 9042 -e 'DESCRIBE CLUSTER'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  log-schema:
+    image: cassandra:5.0
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./01-plan-jpa/src/main/resources/schema.cql:/schema.cql:ro
+    entrypoint: [ "/bin/bash", "-c" ]
+    command:
+      - "until cqlsh cassandra 9042 -e 'DESCRIBE CLUSTER'; do sleep 2; done; cqlsh cassandra 9042 -e \"CREATE KEYSPACE IF NOT EXISTS isygo_plan WITH replication = {'class':'SimpleStrategy','replication_factor':1}\"; cqlsh cassandra 9042 -f /schema.cql"
+
+  plan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      log-schema:
+        condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      PLAN_JDBC_URL: jdbc:postgresql://postgres:5432/isygo_plan
+      PLAN_JDBC_USERNAME: isygo_plan
+      PLAN_JDBC_PASSWORD: ${PLAN_JDBC_PASSWORD:?Set PLAN_JDBC_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      PLAN_CASSANDRA_CONTACT_POINTS: cassandra
+      PLAN_CASSANDRA_LOCAL_DATACENTER: datacenter1
+      PLAN_CASSANDRA_KEYSPACE: isygo_plan
+    ports:
+      - "8080:8080"

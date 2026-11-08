@@ -142,6 +142,7 @@ public class KmsCustomKeyStore extends AuditableEntity<Long>
     /**
      * Trust anchor certificate for validating the CloudHSM cluster
      */
+    @Lob
     @Column(name = SchemaColumnConstantName.C_TRUST_ANCHOR_CERTIFICATE, columnDefinition = "TEXT")
     private String trustAnchorCertificate;
 
@@ -178,6 +179,7 @@ public class KmsCustomKeyStore extends AuditableEntity<Long>
     /**
      * Store-specific configuration data in JSON format
      */
+    @Lob
     @Column(name = SchemaColumnConstantName.C_STORE_SPECIFIC_DATA, columnDefinition = "TEXT")
     private String customKeyStoreTypeSpecificData;
 
@@ -196,12 +198,14 @@ public class KmsCustomKeyStore extends AuditableEntity<Long>
     /**
      * Additional metadata as JSON
      */
+    @Lob
     @Column(name = SchemaColumnConstantName.C_METADATA, columnDefinition = "TEXT")
     private String metadata;
 
     /**
      * Tags associated with this custom key store (JSON format)
      */
+    @Lob
     @Column(name = SchemaColumnConstantName.C_TAGS, columnDefinition = "TEXT")
     private String tags;
 

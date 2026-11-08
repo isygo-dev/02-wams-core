@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes xmlns="http://camel.apache.org/schema/spring">
+    <!-- Define additional camel routes here file:config/camel/*.xml is automatically
+        scanned -->
+    <route id="send-socket-route" autoStartup="true">
+        <from uri="direct:send-socket-queue"/>
+        <log message="Sending socket message..."/>
+        <process ref="webSocketSenderProcessor"/>
+        <choice>
+            <when>
+                <simple>${header.return} == "true"</simple>
+                <log message="Message sent from ${header.senderId}/${header.senderName} to ${header.receiverId} via endpoint ${header.endpoint}"
+                     loggingLevel="INFO" logName="eu.isygoit"/>
+            </when>
+            <otherwise>
+                <log message="Error: Message was not sent from ${header.senderId}/${header.senderName} to ${header.receiverId}"
+                     loggingLevel="INFO" logName="eu.isygoit"/>
+                <to uri="direct:send-socket-queue"/>
+                <delay>
+                    <constant>60</constant>
+                </delay>
+            </otherwise>
+        </choice>
+    </route>
+
+    <route id="connect-socket-route" autoStartup="true">
+        <from uri="direct:connect-chat-queue"/>
+        <log message="Connect socket message..."/>
+        <process ref="wsChatConnectProcessor"/>
+        <choice>
+            <when>
+                <simple>${header.return} == "true"</simple>
+                <log message="Message connect successfully executed" loggingLevel="INFO" logName="eu.isygoit"/>
+                <to uri="direct:send-socket-queue"/>
+            </when>
+            <otherwise>
+                <log message="Error: Message connect failed" loggingLevel="INFO" logName="eu.isygoit"/>
+                <to uri="direct:connect-chat-queue"/>
+                <delay>
+                    <constant>60</constant>
+                </delay>
+            </otherwise>
+        </choice>
+    </route>
+
+    <route id="subscribe-socket-route" autoStartup="true">
+        <from uri="direct:subscribe-chat-queue"/>
+        <log message="Subscribe socket message..."/>
+        <process ref="wsChatSubscribeProcessor"/>
+        <choice>
+            <when>
+                <simple>${header.return} == "true"</simple>
+                <log message="Message subscribe successfully executed" loggingLevel="INFO" logName="eu.isygoit"/>
+                <to uri="direct:send-socket-queue"/>
+            </when>
+            <otherwise>
+                <log message="Error: Message subscribe failed" loggingLevel="INFO" logName="eu.isygoit"/>
+                <to uri="direct:subscribe-chat-queue"/>
+                <delay>
+                    <constant>60</constant>
+                </delay>
+            </otherwise>
+        </choice>
+    </route>
+</routes>
