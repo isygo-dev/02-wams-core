@@ -2,13 +2,18 @@ package eu.isygoit.ui.plan.views.job.dialog;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.request.PlanningMeta;
 import eu.isygoit.dto.request.PlanningRequest;
+import eu.isygoit.dto.request.SolverOptions;
 import eu.isygoit.dto.response.ValidationReportDto;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.plan.PlanFeignService;
@@ -19,14 +24,16 @@ import eu.isygoit.ui.plan.common.PlanJsonEditor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Create / edit / clone dialog of a planning request, built on the shared {@link AbstractEditionDialog}
  * (title, Cancel and primary Save footer, error line, success notification).
  *
- * <p>The request is edited as JSON for now (a guided editor comes later). The optional client reference is a
- * separate field bound into {@code meta.clientRef}: when filled it wins over the value written in the JSON.
+ * <p>The request is edited as JSON for now (a guided editor comes later). The engine selector takes precedence
+ * over {@code solverOptions.engine} in the JSON. The optional client reference is a separate field bound into
+ * {@code meta.clientRef}: when filled it wins over the value written in the JSON.
  * Before anything is stored the request is validated through {@link PlanFeignService#validate}; the issues
  * (code, message, path) are listed inline in the dialog and nothing is submitted until there are none.</p>
  *
@@ -39,10 +46,13 @@ import java.util.List;
 @Slf4j
 public class PlanJobRequestDialog extends AbstractEditionDialog {
 
+    private static final String ENGINE_TRY_BOTH = "try_both";
+
     private final PlanFeignService service;
     private final ObjectMapper objectMapper;
     private final Long jobId;
     private final TextField clientRefField = new TextField();
+    private final ComboBox<String> engineField = new ComboBox<>();
     private final PlanJsonEditor requestJson;
     private final VerticalLayout issuesSection;
     private final Div issuesList = new Div();
@@ -76,6 +86,32 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
         clientRefField.setWidthFull();
         clientRefField.setValue(clientRef == null ? "" : clientRef);
 
+        SolverOptions requestOptions = request == null ? null : request.solverOptions();
+        String selectedEngine = requestOptions == null
+                ? SolverOptions.DEFAULT_ENGINE
+                : Boolean.TRUE.equals(requestOptions.fallbackToTimefold())
+                ? ENGINE_TRY_BOTH : requestOptions.engine();
+        List<String> engines = new ArrayList<>(List.of(
+                SolverOptions.ENGINE_CP_SAT, SolverOptions.ENGINE_TIMEFOLD, ENGINE_TRY_BOTH));
+        if (!engines.contains(selectedEngine)) {
+            engines.add(selectedEngine);
+        }
+        engineField.setLabel(I18n.t("plan.ui.job.engine"));
+        engineField.setHelperText(I18n.t("plan.ui.job.engine.help"));
+        engineField.setItems(engines);
+        engineField.setItemLabelGenerator(this::engineLabel);
+        engineField.setWidthFull();
+        engineField.setValue(selectedEngine);
+        String engineCriteria = I18n.t("plan.ui.job.engine.criteria");
+        Icon engineHelp = VaadinIcon.QUESTION_CIRCLE.create();
+        engineHelp.setTooltipText(engineCriteria);
+        engineHelp.getElement().setAttribute("aria-label", engineCriteria);
+        engineHelp.getElement().setAttribute("tabindex", "0");
+        HorizontalLayout engineRow = new HorizontalLayout(engineField, engineHelp);
+        engineRow.setWidthFull();
+        engineRow.setAlignItems(FlexComponent.Alignment.CENTER);
+        engineRow.setFlexGrow(1, engineField);
+
         requestJson.setRequired(true);
         DialogLayout.tall(requestJson);
         if (request != null) {
@@ -88,8 +124,17 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
         issuesSection.setVisible(false);
 
         VerticalLayout stack = DialogLayout.stack();
-        stack.add(clientRefField, requestJson, issuesSection);
+        stack.add(clientRefField, engineRow, requestJson, issuesSection);
         addContent(stack);
+    }
+
+    private String engineLabel(String engine) {
+        return switch (engine) {
+            case SolverOptions.ENGINE_CP_SAT -> I18n.t("plan.ui.job.engine.cp_sat");
+            case SolverOptions.ENGINE_TIMEFOLD -> I18n.t("plan.ui.job.engine.timefold");
+            case ENGINE_TRY_BOTH -> I18n.t("plan.ui.job.engine.try_both");
+            default -> engine;
+        };
     }
 
     /**
@@ -153,6 +198,22 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
                 request.constraints(), request.objectives(), request.solverOptions(), request.initialSolution());
     }
 
+    /**
+     * Applies the dialog's engine selection without changing any other solver option.
+     */
+    private static PlanningRequest withEngine(PlanningRequest request, String engine) {
+        SolverOptions current = request.solverOptions();
+        boolean retryWithTimefold = ENGINE_TRY_BOTH.equals(engine);
+        String selectedEngine = retryWithTimefold ? SolverOptions.ENGINE_CP_SAT : engine;
+        SolverOptions updated = current.withEngineAndFallback(selectedEngine, retryWithTimefold);
+        if (updated.equals(current)) {
+            return request;
+        }
+        return new PlanningRequest(request.meta(), request.domain(), request.horizon(), request.slots(),
+                request.calendars(), request.setupMatrices(), request.resources(), request.tasks(),
+                request.constraints(), request.objectives(), updated, request.initialSolution());
+    }
+
     private String format(PlanningRequest request) {
         try {
             return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request);
@@ -190,6 +251,7 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
             return null;
         }
         requestJson.setInvalid(false);
+        request = withEngine(request, engineField.getValue());
 
         String typed = clientRefField.getValue() == null ? "" : clientRefField.getValue().trim();
         String fromJson = clientRefOf(request);

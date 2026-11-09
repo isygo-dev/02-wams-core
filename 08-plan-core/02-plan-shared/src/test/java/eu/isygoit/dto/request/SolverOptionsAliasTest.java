@@ -65,7 +65,15 @@ class SolverOptionsAliasTest {
         assertEquals(Boolean.TRUE, o.explainInfeasibility());
         assertEquals(6, o.explainTimeSeconds(), "min(10, 20% of 30)");
         assertEquals(Boolean.TRUE, o.keepIncumbentOnStop());
+        assertEquals(Boolean.FALSE, o.fallbackToTimefold());
         assertEquals(o, withEngine(null));
+    }
+
+    @Test
+    void fallbackToTimefoldRequiresCpSat() {
+        assertTrue(withEngine(null).withEngineAndFallback("cp_sat", true).fallbackToTimefold());
+        assertThrows(IllegalArgumentException.class,
+                () -> withEngine(null).withEngineAndFallback("timefold", true));
     }
 
     @Test

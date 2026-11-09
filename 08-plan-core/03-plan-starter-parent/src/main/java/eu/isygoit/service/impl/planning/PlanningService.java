@@ -4,6 +4,7 @@ import eu.isygoit.config.PlanLimitsProperties;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.PlanningRequest;
 import eu.isygoit.dto.request.SolverOptions;
+import eu.isygoit.dto.response.DiagnosticIssue;
 import eu.isygoit.dto.response.Diagnostics;
 import eu.isygoit.dto.response.Metrics;
 import eu.isygoit.dto.response.ModelEstimateDto;
@@ -18,6 +19,7 @@ import eu.isygoit.solver.CompiledProblem;
 import eu.isygoit.solver.SolveCancelledException;
 import eu.isygoit.solver.SolveContext;
 import eu.isygoit.solver.SolveListener;
+import eu.isygoit.solver.SolveProgress;
 import eu.isygoit.solver.SolverCancellationToken;
 import eu.isygoit.solver.SolverEngine;
 import eu.isygoit.solver.SolverRegistry;
@@ -189,9 +191,36 @@ public class PlanningService {
         }
         PlanningProblem problem = compiled.problem();
         SolverEngine engine = solverRegistry.get(problem.options().engine());
+        SolverOptions options = problem.options();
+        boolean fallbackEnabled = Boolean.TRUE.equals(options.fallbackToTimefold());
+        long attemptStartNanos = System.nanoTime();
+        long firstAttemptBudgetMillis = fallbackEnabled
+                ? new SolveContext(options, token, progress, startNanos).remainingMillis(attemptStartNanos) / 2L
+                : -1L;
+        SolveContext engineContext = fallbackEnabled
+                ? new SolveContext(options, token, progress, startNanos, attemptStartNanos, firstAttemptBudgetMillis)
+                : new SolveContext(options, token, progress, startNanos);
         SolveResult result;
         try (SolveConcurrencyGuard.Permit ignored = concurrencyGuard.acquire(token)) {
-            result = engine.solve(compiled, new SolveContext(problem.options(), token, progress, startNanos));
+            result = engine.solve(compiled, engineContext);
+            if (fallbackEnabled
+                    && result.status() == IEnumSolverStatus.Types.UNKNOWN
+                    && result.solution() == null
+                    && !token.isCancellationRequested()
+                    && new SolveContext(options, token, progress, startNanos)
+                    .remainingMillis(System.nanoTime()) > 0L) {
+                log.info("CP-SAT returned UNKNOWN without a solution for planning job {}; retrying with Timefold",
+                        jobId);
+                progress.onProgress(new SolveProgress(
+                        (System.nanoTime() - startNanos) / 1_000_000L, 0, null, null, null, 0,
+                        "FALLBACK_TO_TIMEFOLD"));
+                SolverEngine fallbackEngine = solverRegistry.get(SolverOptions.ENGINE_TIMEFOLD);
+                SolverOptions fallbackOptions = options.withEngineAndFallback(
+                        SolverOptions.ENGINE_TIMEFOLD, false);
+                result = fallbackEngine.solve(compiled,
+                        new SolveContext(fallbackOptions, token, progress, startNanos));
+                result = withFallbackNotice(result);
+            }
         } catch (SolveCancelledException exception) {
             return stopped(exception);
         }
@@ -276,6 +305,16 @@ public class PlanningService {
         ProblemVerifier.Verified verified = verifier.verifySemantics(problem, result);
         if (!result.hasErrors()) {
             verifier.checkCapabilities(problem, engine.capabilities(), result);
+            if (Boolean.TRUE.equals(problem.options().fallbackToTimefold())) {
+                SolverEngine fallbackEngine = solverRegistry.find(SolverOptions.ENGINE_TIMEFOLD).orElse(null);
+                if (fallbackEngine == null) {
+                    result.error("UNKNOWN_SOLVER", "solverOptions.fallbackToTimefold",
+                            "Fallback solver 'timefold' is not supported",
+                            Map.of("engine", SolverOptions.ENGINE_TIMEFOLD));
+                } else {
+                    verifier.checkCapabilities(problem, fallbackEngine.capabilities(), result);
+                }
+            }
         }
         throwIfErrors(result);
         if (!result.warnings().isEmpty()) {
@@ -326,7 +365,7 @@ public class PlanningService {
         SolverOptions adjusted = new SolverOptions(engine, options.maxTimeSeconds(), workers, options.seed(),
                 options.logSearch(), options.relaxationLevels(), options.deterministic(), options.objectiveScale(),
                 options.gapTolerance(), options.lexicographicMode(), options.explainInfeasibility(),
-                options.explainTimeSeconds(), options.keepIncumbentOnStop());
+                options.explainTimeSeconds(), options.keepIncumbentOnStop(), options.fallbackToTimefold());
         return new PlanningProblem(problem.jobId(), problem.domainName(), problem.timezone(), problem.horizon(),
                 problem.slots(), problem.calendars(), problem.setupMatrices(), problem.resources(), problem.tasks(),
                 problem.constraints(), problem.objectives(), adjusted, problem.initialSolution());
@@ -375,10 +414,19 @@ public class PlanningService {
             List<ValidationReportDto.Issue> issues = new ArrayList<>();
             capability.issues().forEach(issue -> issues.add(issue.toDto()));
             engineIssues.put(id, issues);
-            if (id.equals(SolverRegistry.canonicalId(requested))) {
-                requestedKnown = true;
+            boolean isRequested = id.equals(SolverRegistry.canonicalId(requested));
+            boolean isFallback = Boolean.TRUE.equals(problem.options().fallbackToTimefold())
+                    && SolverOptions.ENGINE_TIMEFOLD.equals(id);
+            if (isRequested || isFallback) {
+                requestedKnown |= isRequested;
                 all.merge(capability);
             }
+        }
+        if (Boolean.TRUE.equals(problem.options().fallbackToTimefold())
+                && !solverRegistry.supportedEngines().contains(SolverOptions.ENGINE_TIMEFOLD)) {
+            all.error("UNKNOWN_SOLVER", "solverOptions.fallbackToTimefold",
+                    "Fallback solver 'timefold' is not supported",
+                    Map.of("engine", SolverOptions.ENGINE_TIMEFOLD));
         }
         if (!requestedKnown) {
             all.error("UNKNOWN_SOLVER", "solverOptions.engine", "Solver '" + requested
@@ -390,6 +438,27 @@ public class PlanningService {
             estimate = estimateQuietly(problem, verified, all);
         }
         return report(all, request, compatible, engineIssues, estimate, problem);
+    }
+
+    private static SolveResult withFallbackNotice(SolveResult result) {
+        Diagnostics previous = result.diagnostics();
+        List<DiagnosticIssue> warnings = new ArrayList<>(
+                previous == null ? List.of() : previous.warnings());
+        warnings.add(new DiagnosticIssue("ENGINE_FALLBACK", "WARNING", "solverOptions.fallbackToTimefold",
+                "CP-SAT returned UNKNOWN without a solution; Timefold was tried."));
+        Map<String, Object> details = new LinkedHashMap<>();
+        if (previous != null) {
+            details.putAll(previous.details());
+        }
+        details.put("fallbackFromEngine", SolverOptions.ENGINE_CP_SAT);
+        details.put("fallbackToEngine", SolverOptions.ENGINE_TIMEFOLD);
+        String message = previous == null || previous.message() == null
+                ? "Timefold result after CP-SAT returned UNKNOWN without a solution"
+                : previous.message() + " (retried with Timefold after CP-SAT returned UNKNOWN without a solution)";
+        Diagnostics diagnostics = new Diagnostics(message,
+                previous == null ? List.of() : previous.infeasibilityCore(),
+                previous == null ? null : previous.core(), warnings, details);
+        return new SolveResult(result.status(), result.solution(), result.relaxations(), diagnostics, result.metrics());
     }
 
     private ModelEstimateDto estimateQuietly(PlanningProblem problem, ProblemVerifier.Verified verified,

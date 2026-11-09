@@ -27,6 +27,7 @@ import java.util.Locale;
  * @param explainInfeasibility default true: run the explanation pass when INFEASIBLE
  * @param explainTimeSeconds  default {@code min(10, 20% of maxTimeSeconds)}, {@code >= 1}
  * @param keepIncumbentOnStop default true: a stop request with an incumbent yields STOPPED_FEASIBLE
+ * @param fallbackToTimefold default false; when true, retry with Timefold after CP-SAT returns UNKNOWN without a solution
  */
 public record SolverOptions(
         String engine,
@@ -41,7 +42,8 @@ public record SolverOptions(
         LexicographicMode lexicographicMode,
         Boolean explainInfeasibility,
         Integer explainTimeSeconds,
-        Boolean keepIncumbentOnStop) {
+        Boolean keepIncumbentOnStop,
+        Boolean fallbackToTimefold) {
 
     /**
      * How the lexicographic tiers are solved.
@@ -80,6 +82,10 @@ public record SolverOptions(
                 ? Boolean.valueOf(DEFAULT_EXPLAIN_INFEASIBILITY) : explainInfeasibility;
         keepIncumbentOnStop = keepIncumbentOnStop == null
                 ? Boolean.valueOf(DEFAULT_KEEP_INCUMBENT_ON_STOP) : keepIncumbentOnStop;
+        fallbackToTimefold = fallbackToTimefold == null ? Boolean.FALSE : fallbackToTimefold;
+        if (fallbackToTimefold && !ENGINE_CP_SAT.equals(engine)) {
+            throw new IllegalArgumentException("fallbackToTimefold requires the cp_sat engine");
+        }
         if (maxTimeSeconds < 1) {
             throw new IllegalArgumentException("maxTimeSeconds must be positive");
         }
@@ -102,6 +108,26 @@ public record SolverOptions(
             throw new IllegalArgumentException("explainTimeSeconds must be positive");
         }
         relaxationLevels = CollectionCopies.list(relaxationLevels);
+    }
+
+    /**
+     * Backward-compatible constructor; fallback remains disabled unless explicitly requested.
+     */
+    public SolverOptions(String engine, Integer maxTimeSeconds, Integer numWorkers, Long seed, Boolean logSearch,
+                         java.util.List<String> relaxationLevels, Boolean deterministic, Integer objectiveScale,
+                         Double gapTolerance, LexicographicMode lexicographicMode, Boolean explainInfeasibility,
+                         Integer explainTimeSeconds, Boolean keepIncumbentOnStop) {
+        this(engine, maxTimeSeconds, numWorkers, seed, logSearch, relaxationLevels, deterministic, objectiveScale,
+                gapTolerance, lexicographicMode, explainInfeasibility, explainTimeSeconds, keepIncumbentOnStop, null);
+    }
+
+    /**
+     * Returns a copy with the requested primary engine and fallback strategy.
+     */
+    public SolverOptions withEngineAndFallback(String selectedEngine, boolean retryWithTimefold) {
+        return new SolverOptions(selectedEngine, maxTimeSeconds, numWorkers, seed, logSearch, relaxationLevels,
+                deterministic, objectiveScale, gapTolerance, lexicographicMode, explainInfeasibility,
+                explainTimeSeconds, keepIncumbentOnStop, Boolean.valueOf(retryWithTimefold));
     }
 
     /**
