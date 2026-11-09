@@ -12,7 +12,6 @@ import java.util.List;
  * The IR mapper used by the validation endpoint binds with {@code FAIL_ON_UNKNOWN_PROPERTIES=true} (typos must
  * fail); only the stored-job re-read is lenient.
  *
- * @param tenant         overwritten by the controller from the caller's tenant
  * @param meta           {@code meta.version} MUST be "2.0"
  * @param domain         OPTIONAL UI hints (type ids and attribute names); null becomes an empty definition
  * @param horizon        REQUIRED time grid
@@ -27,7 +26,6 @@ import java.util.List;
  * @param initialSolution OPTIONAL warm start / locked assignments (null = none)
  */
 public record PlanningRequest(
-        String tenant,
         PlanningMeta meta,
         DomainDefinition domain,
         Horizon horizon,

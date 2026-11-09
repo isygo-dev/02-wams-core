@@ -136,14 +136,14 @@ class PlanJobServiceTest {
         return family;
     }
 
-    private PlanningRequest request(String tenant, String clientRef) {
-        return request(tenant, clientRef, null);
+    private PlanningRequest request(String clientRef) {
+        return request(clientRef, null);
     }
 
-    private PlanningRequest request(String tenant, String clientRef, String engine) {
+    private PlanningRequest request(String clientRef, String engine) {
         SolverOptions options = engine == null ? null
                 : new SolverOptions(engine, null, null, null, null, null, null, null, null, null, null, null, null);
-        return new PlanningRequest(tenant, new PlanningMeta(clientRef, "2.0", "test", "en", "UTC"),
+        return new PlanningRequest(new PlanningMeta(clientRef, "2.0", "test", "en", "UTC"),
                 null, null, null, null, null, null, null, null, null, options, null);
     }
 
@@ -165,7 +165,7 @@ class PlanJobServiceTest {
                 any(Instant.class), anyString(), anyString(), eq("plan-service"))).thenReturn(Optional.of(5L));
         when(repository.findById(5L)).thenReturn(Optional.of(stored));
 
-        PlanJob result = service.submit(TENANT, request(null, "ref-1"));
+        PlanJob result = service.submit(TENANT, request("ref-1"));
 
         assertSame(stored, result);
         verify(planningService).compile(isNull(), any(PlanningRequest.class), isNull());
@@ -182,11 +182,11 @@ class PlanJobServiceTest {
                 .thenReturn(Optional.of(5L));
         when(repository.findById(5L)).thenReturn(Optional.of(stored));
 
-        service.submit(TENANT, request(TENANT, "ref-1", "TimeFold"));
+        service.submit(TENANT, request("ref-1", "TimeFold"));
         verify(repository).insertCreatedIfAbsent(eq(TENANT), eq("PLN-000001"), eq("ref-1"), eq("timefold"),
                 any(Instant.class), anyString(), anyString(), eq("plan-service"));
 
-        service.submit(TENANT, request(TENANT, "ref-1", "cp-sat"));
+        service.submit(TENANT, request("ref-1", "cp-sat"));
         verify(repository).insertCreatedIfAbsent(eq(TENANT), eq("PLN-000001"), eq("ref-1"), eq("cp_sat"),
                 any(Instant.class), anyString(), anyString(), eq("plan-service"));
     }
@@ -197,7 +197,7 @@ class PlanJobServiceTest {
                 .thenThrow(new InvalidRequestException("ENGINE_UNSUPPORTED_FEATURE", "tasks[0]: FREE_START"));
 
         InvalidRequestException error = assertThrows(InvalidRequestException.class,
-                () -> service.submit(TENANT, request(TENANT, "ref-1", "timefold")));
+                () -> service.submit(TENANT, request("ref-1", "timefold")));
 
         assertEquals("ENGINE_UNSUPPORTED_FEATURE", error.code());
         verify(repository, never()).insertCreatedIfAbsent(any(), any(), any(), any(), any(), any(), any(), any());
@@ -209,7 +209,7 @@ class PlanJobServiceTest {
         PlanJob existing = job(5L, TENANT, IEnumJobStatusCode.Types.SOLVING);
         when(repository.findByTenantAndClientRef(TENANT, "ref-1")).thenReturn(Optional.of(existing));
 
-        PlanJob result = service.submit(TENANT, request(TENANT, "ref-1"));
+        PlanJob result = service.submit(TENANT, request("ref-1"));
 
         assertSame(existing, result);
         verify(repository, never()).insertCreatedIfAbsent(any(), any(), any(), any(), any(), any(), any(), any());
@@ -224,7 +224,7 @@ class PlanJobServiceTest {
                 .thenReturn(Optional.of(6L));
         when(repository.findById(6L)).thenReturn(Optional.of(stored));
 
-        service.submit(TENANT, request(TENANT, null));
+        service.submit(TENANT, request(null));
 
         verify(repository, never()).findByTenantAndClientRef(any(), any());
         verify(dispatchService).dispatch(stored);
@@ -238,16 +238,16 @@ class PlanJobServiceTest {
         when(repository.insertCreatedIfAbsent(any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(Optional.empty());
 
-        assertSame(winner, service.submit(TENANT, request(TENANT, "ref-1")));
+        assertSame(winner, service.submit(TENANT, request("ref-1")));
         verify(dispatchService, never()).dispatch(any(PlanJob.class));
     }
 
     @Test
-    void submitRejectsARequestOfAnotherTenant() {
+    void submitRequiresTheCallerTenant() {
         InvalidRequestException error = assertThrows(InvalidRequestException.class,
-                () -> service.submit(TENANT, request("other", "ref-1")));
+                () -> service.submit(" ", request("ref-1")));
 
-        assertEquals("TENANT_MISMATCH", error.code());
+        assertEquals("TENANT_REQUIRED", error.code());
         verify(repository, never()).insertCreatedIfAbsent(any(), any(), any(), any(), any(), any(), any(), any());
     }
 
@@ -259,7 +259,7 @@ class PlanJobServiceTest {
         when(repository.findById(5L)).thenReturn(Optional.of(stored));
         doThrow(new IllegalStateException("broker unavailable")).when(dispatchService).dispatch(stored);
 
-        assertThrows(JobQueueException.class, () -> service.submit(TENANT, request(TENANT, null)));
+        assertThrows(JobQueueException.class, () -> service.submit(TENANT, request(null)));
 
         verify(repository).releaseDispatchClaim(5L, false);
     }
@@ -286,7 +286,7 @@ class PlanJobServiceTest {
     @Test
     void getRequestReturnsTheStoredRequestWhateverTheStatus() throws Exception {
         PlanJob finished = job(5L, TENANT, IEnumJobStatusCode.Types.SUCCEEDED);
-        finished.setRequestJson(objectMapper.writeValueAsString(request(TENANT, "ref-1")));
+        finished.setRequestJson(objectMapper.writeValueAsString(request("ref-1")));
         owns(finished);
 
         assertEquals("ref-1", service.getRequest(TENANT, 5L).meta().clientRef());
@@ -483,7 +483,7 @@ class PlanJobServiceTest {
     void updateRequestIsOnlyAllowedWhileCreated() {
         owns(job(5L, TENANT, IEnumJobStatusCode.Types.SOLVING));
 
-        assertThrows(ConflictException.class, () -> service.updateRequest(TENANT, 5L, request(TENANT, null)));
+        assertThrows(ConflictException.class, () -> service.updateRequest(TENANT, 5L, request(null)));
         verify(repository, never()).updateCreatedRequest(any(), any());
     }
 
@@ -493,7 +493,7 @@ class PlanJobServiceTest {
         owns(created);
         when(repository.updateCreatedRequest(eq(5L), anyString())).thenReturn(1);
 
-        assertSame(created, service.updateRequest(TENANT, 5L, request(TENANT, null)));
+        assertSame(created, service.updateRequest(TENANT, 5L, request(null)));
         verify(planningService).compile(eq(5L), any(PlanningRequest.class), isNull());
     }
 
@@ -561,9 +561,9 @@ class PlanJobServiceTest {
                 .engineCompatible(Map.of("cp_sat", true, "timefold", false)).build();
         when(planningService.validate(any(PlanningRequest.class), any())).thenReturn(report);
 
-        assertSame(report, service.validate(request(TENANT, null), "timefold"));
-        assertSame(report, service.validate(request(TENANT, null), "  "));
-        assertSame(report, service.validate(request(TENANT, null)));
+        assertSame(report, service.validate(request(null), "timefold"));
+        assertSame(report, service.validate(request(null), "  "));
+        assertSame(report, service.validate(request(null)));
         verify(planningService).validate(any(PlanningRequest.class), eq("timefold"));
         verify(planningService, org.mockito.Mockito.times(2)).validate(any(PlanningRequest.class), isNull());
     }
@@ -576,10 +576,10 @@ class PlanJobServiceTest {
                 .thenThrow(new NullPointerException())
                 .thenReturn(null);
 
-        ValidationReportDto first = service.validate(request(TENANT, null), null);
-        ValidationReportDto second = service.validate(request(TENANT, null), null);
+        ValidationReportDto first = service.validate(request(null), null);
+        ValidationReportDto second = service.validate(request(null), null);
         ValidationReportDto third = service.validate(null, null);
-        ValidationReportDto fourth = service.validate(request(TENANT, null), null);
+        ValidationReportDto fourth = service.validate(request(null), null);
 
         assertFalse(first.isValid());
         assertNull(first.getNormalizedRequest());

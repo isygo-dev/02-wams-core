@@ -24,11 +24,11 @@ import java.util.List;
 public interface IPlanJobService extends ICrudTenantServiceOperations<Long, PlanJob> {
 
     /**
-     * Validates the request, binds it to the tenant, generates the job code, stores a CREATED job and dispatches
+     * Validates the request, scopes it to the caller tenant, generates the job code, stores a CREATED job and dispatches
      * it. Idempotent on {@code (tenant, request.meta().clientRef())} when the reference is present: the existing
      * job is returned and nothing is created.
      *
-     * @throws eu.isygoit.exception.InvalidRequestException when the request is invalid or names another tenant
+     * @throws eu.isygoit.exception.InvalidRequestException when the request is invalid or the caller tenant is missing
      * @throws eu.isygoit.exception.JobQueueException       when the job was stored but could not be dispatched
      *                                                      (the recovery sweep retries it)
      */

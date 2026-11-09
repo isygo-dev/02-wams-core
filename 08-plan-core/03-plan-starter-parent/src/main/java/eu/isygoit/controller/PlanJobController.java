@@ -44,7 +44,7 @@ import java.util.Locale;
  * <ul>
  *     <li><b>Tenant</b>: always resolved from the authenticated caller
  *     ({@code requestContextService().getCurrentContext().getSenderTenant()}, as in the pilot) and passed to the
- *     service; a missing tenant is a 400 {@code TENANT_REQUIRED}. Tenant fields of request bodies are never trusted.</li>
+ *     service; a missing tenant is a 400 {@code TENANT_REQUIRED}. Planning request bodies do not carry tenant identity.</li>
  *     <li><b>Job creation</b> only goes through {@code POST /submit}. The inherited {@code POST ""},
  *     {@code POST /batch} and {@code PUT /{id}} endpoints are {@code final} in the stack base controller and cannot be
  *     overridden, so they are neutralised through the stack's {@code beforeCreate} / {@code beforeUpdate} hooks, which
@@ -97,7 +97,7 @@ public class PlanJobController
     public ResponseEntity<PlanJobDto> submit(PlanningRequest request) {
         try {
             String tenant = requestContextService().getCurrentContext().getSenderTenant(); // an anonymous caller (no resolvable tenant) is rejected like on the other endpoints
-            PlanJob job = planJobs().submit(tenant(), request);
+            PlanJob job = planJobs().submit(tenant, request);
             return ResponseEntity.accepted().body(mapper().entityToDto(job));
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);

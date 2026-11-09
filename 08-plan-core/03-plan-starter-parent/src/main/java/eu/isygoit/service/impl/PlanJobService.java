@@ -163,7 +163,8 @@ public class PlanJobService
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public PlanJob submit(String tenant, PlanningRequest submitted) {
-        PlanningRequest request = TenantScope.bind(tenant, submitted);
+        TenantScope.requireTenant(tenant);
+        PlanningRequest request = submitted;
         // Full pipeline up to the index (structural + semantic + capability + limits): a request the engine could not
         // solve is rejected here, with the code of its first error, instead of failing later in the worker.
         planningService.compile(null, request, null);
@@ -472,7 +473,7 @@ public class PlanJobService
             throw new ConflictException("The request can only be replaced while the job is CREATED (status: "
                     + job.getStatus() + ")");
         }
-        PlanningRequest request = TenantScope.bind(tenant, submitted);
+        PlanningRequest request = submitted;
         planningService.compile(id, request, null);
         String newRef = blankToNull(request.meta().clientRef());
         if (newRef != null && !newRef.equals(job.getClientRef())) {

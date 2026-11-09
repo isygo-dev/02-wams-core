@@ -250,7 +250,7 @@ class ConstraintDefaultsTest {
     @Test
     void planningRequestAndProblemDefaults() {
         PlanningRequest r = new PlanningRequest(null, null, null, null, null, null, null, null, null, null, null,
-                null, null);
+                null);
         assertNotNull(r.domain());
         assertTrue(r.domain().taskTypes().isEmpty());
         assertEquals(SolverOptions.defaults(), r.solverOptions());

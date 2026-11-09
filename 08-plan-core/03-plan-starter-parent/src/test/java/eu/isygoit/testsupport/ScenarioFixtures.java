@@ -59,8 +59,6 @@ public final class ScenarioFixtures {
     /** Monday 2026-09-07 08:00Z, the common start of the workshop scenarios. */
     public static final Instant WORKSHOP_START = Instant.parse("2026-09-07T08:00:00Z");
 
-    private static final String TENANT = "example-tenant";
-
     private ScenarioFixtures() {
     }
 
@@ -153,21 +151,21 @@ public final class ScenarioFixtures {
     }
 
     public static PlanningRequest withOptions(PlanningRequest r, SolverOptions options) {
-        return new PlanningRequest(r.tenant(), r.meta(), r.domain(), r.horizon(), r.slots(), r.calendars(),
+        return new PlanningRequest(r.meta(), r.domain(), r.horizon(), r.slots(), r.calendars(),
                 r.setupMatrices(), r.resources(), r.tasks(), r.constraints(), r.objectives(), options,
                 r.initialSolution());
     }
 
     /** Same request with the constraints replaced. */
     public static PlanningRequest withConstraints(PlanningRequest r, List<Constraint> constraints) {
-        return new PlanningRequest(r.tenant(), r.meta(), r.domain(), r.horizon(), r.slots(), r.calendars(),
+        return new PlanningRequest(r.meta(), r.domain(), r.horizon(), r.slots(), r.calendars(),
                 r.setupMatrices(), r.resources(), r.tasks(), constraints, r.objectives(), r.solverOptions(),
                 r.initialSolution());
     }
 
     /** Same request with the objectives replaced. */
     public static PlanningRequest withObjectives(PlanningRequest r, List<Objective> objectives) {
-        return new PlanningRequest(r.tenant(), r.meta(), r.domain(), r.horizon(), r.slots(), r.calendars(),
+        return new PlanningRequest(r.meta(), r.domain(), r.horizon(), r.slots(), r.calendars(),
                 r.setupMatrices(), r.resources(), r.tasks(), r.constraints(), objectives, r.solverOptions(),
                 r.initialSolution());
     }
@@ -175,7 +173,7 @@ public final class ScenarioFixtures {
     /** Same request with a different {@code meta.clientRef} (idempotency key at job level). */
     public static PlanningRequest withClientRef(PlanningRequest r, String clientRef) {
         PlanningMeta m = r.meta();
-        return new PlanningRequest(r.tenant(), new PlanningMeta(clientRef, m.version(), m.domainName(), m.locale(),
+        return new PlanningRequest(new PlanningMeta(clientRef, m.version(), m.domainName(), m.locale(),
                 m.timezone()), r.domain(), r.horizon(), r.slots(), r.calendars(), r.setupMatrices(), r.resources(),
                 r.tasks(), r.constraints(), r.objectives(), r.solverOptions(), r.initialSolution());
     }
@@ -297,12 +295,11 @@ public final class ScenarioFixtures {
                 null, null, null, null);
     }
 
-    private static PlanningRequest request(String tenant, String clientRef, String domainName, String timezone,
-                                           Horizon horizon, List<Slot> slots, List<SetupMatrix> setups,
+    private static PlanningRequest request(String clientRef, String domainName, String timezone, Horizon horizon,
+                                           List<Slot> slots, List<SetupMatrix> setups,
                                            List<Resource> resources, List<Task> tasks, List<Constraint> constraints,
                                            List<Objective> objectives, SolverOptions options) {
-        return new PlanningRequest(tenant,
-                new PlanningMeta(clientRef, PlanningMeta.SCHEMA_VERSION, domainName, "en-US", timezone),
+        return new PlanningRequest(new PlanningMeta(clientRef, PlanningMeta.SCHEMA_VERSION, domainName, "en-US", timezone),
                 null, horizon, slots, null, setups, resources, tasks, constraints, objectives, options, null);
     }
 
@@ -334,7 +331,7 @@ public final class ScenarioFixtures {
                 task("session-a").startSlots("slot-early", "slot-late").requires("lab", withSkills("lab")).build(),
                 task("session-b").startSlots("slot-early", "slot-late").requires("lab", withSkills("lab")).build(),
                 task("session-c").startSlots("slot-early", "slot-late").requires("lab", withSkills("lab")).build());
-        return request(TENANT, "golden-g1", "lab-sessions", "Europe/Paris", labHorizon(), slots, null,
+        return request("golden-g1", "lab-sessions", "Europe/Paris", labHorizon(), slots, null,
                 List.of(resource("lab-1", "lab", 2, "lab")), tasks, List.of(),
                 List.of(new Objective("prefer-cheap-slots", "minimize_slot_cost", 1)), options(10, 2, false));
     }
@@ -347,7 +344,7 @@ public final class ScenarioFixtures {
         List<Slot> slots = List.of(slot("slot-early", LAB_START, LAB_START.plusSeconds(3600), 0.0));
         List<Task> tasks = List.of(
                 task("weld-job").startSlots("slot-early").requires("welder", withSkills("welding")).build());
-        return request(TENANT, "golden-g2", "lab-sessions", "Europe/Paris", labHorizon(), slots, null,
+        return request("golden-g2", "lab-sessions", "Europe/Paris", labHorizon(), slots, null,
                 List.of(resource("lab-1", "lab", 1, "chemistry")), tasks, List.of(),
                 List.of(new Objective("prefer-cheap-slots", "minimize_slot_cost", 1)), options(10, 2, false));
     }
@@ -363,7 +360,7 @@ public final class ScenarioFixtures {
                         .requires("machine", onResources("M1", "M2")).build(),
                 task("B").duration(10).tags("ab").pin(WORKSHOP_START, "M2")
                         .requires("machine", onResources("M1", "M2")).build());
-        return request(TENANT, "golden-g2b", "workshop", "UTC", workshopHorizon(60), null, null,
+        return request("golden-g2b", "workshop", "UTC", workshopHorizon(60), null, null,
                 List.of(resource("M1", "machine"), resource("M2", "machine")), tasks,
                 List.of(hard("no-overlap-ab", "no_overlap", new ConstraintScope("tag", "ab"), Map.of())),
                 List.of(new Objective("makespan", "minimize_makespan", 1)), options(10, 1, false));
@@ -386,7 +383,7 @@ public final class ScenarioFixtures {
                         .requires("lab", withSkills("lab")).build(),
                 task("optional-low").optional().priority(1).startSlots("slot-1", "slot-2")
                         .requires("lab", withSkills("lab")).build());
-        return request(TENANT, "golden-g3", "lab-sessions", "Europe/Paris", labHorizon(), slots, null,
+        return request("golden-g3", "lab-sessions", "Europe/Paris", labHorizon(), slots, null,
                 List.of(resource("lab-1", "lab", 1, "lab")), tasks, List.of(),
                 List.of(new Objective("prefer-high-priority", "maximize_task_priority", 1)), options(10, 2, false));
     }
@@ -404,7 +401,7 @@ public final class ScenarioFixtures {
                         .after("t1", PrecedenceRef.Type.FINISH_START, 0).build(),
                 task("t3").duration(5).requires("machine", onResources("M1"))
                         .after("t2", PrecedenceRef.Type.FINISH_START, 2).build());
-        return request(TENANT, "golden-g4", "workshop", "UTC", workshopHorizon(60), null, null,
+        return request("golden-g4", "workshop", "UTC", workshopHorizon(60), null, null,
                 List.of(resource("M1", "machine")), tasks, List.of(),
                 List.of(new Objective("makespan", "minimize_makespan", 1)), options(10, 2, true));
     }
@@ -424,7 +421,7 @@ public final class ScenarioFixtures {
                         new ConstraintScope("task", "A"), latestEnd6, new RelaxationPolicy(true, 5, 1.0), 0, null),
                 new Constraint("deadline-B", "time_window", IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION,
                         new ConstraintScope("task", "B"), latestEnd6, new RelaxationPolicy(true, 0, 1.0), 0, null));
-        return request(TENANT, "golden-g5", "workshop", "UTC", workshopHorizon(60), null, null,
+        return request("golden-g5", "workshop", "UTC", workshopHorizon(60), null, null,
                 List.of(resource("M1", "machine")), tasks, constraints,
                 List.of(new Objective("makespan", "minimize_makespan", 1)), options(10, 2, true));
     }
@@ -443,7 +440,7 @@ public final class ScenarioFixtures {
         List<Resource> resources = List.of(
                 costedResource("cheap", "technician", 1.0, new TimeWindow(minute(120), minute(240))),
                 costedResource("expensive", "technician", 3.0));
-        return request(TENANT, "golden-g6", "field-service", "UTC", workshopHorizon(240), null, null, resources, tasks,
+        return request("golden-g6", "field-service", "UTC", workshopHorizon(240), null, null, resources, tasks,
                 List.of(), List.of(new Objective("cost", "minimize_resource_cost", 1)), options(10, 2, false));
     }
 
@@ -492,7 +489,7 @@ public final class ScenarioFixtures {
                 previous = id;
             }
         }
-        return request(TENANT, "golden-g7-" + jobs + "x" + machines, "workshop", "UTC",
+        return request("golden-g7-" + jobs + "x" + machines, "workshop", "UTC",
                 workshopHorizon(Math.toIntExact(totalTicks + 1)), null, null, resources, tasks, List.of(),
                 List.of(new Objective("makespan", "minimize_makespan", 1)),
                 new SolverOptions("cp_sat", maxTimeSeconds, numWorkers, 0L, null, null, null, null, null, null, null,
@@ -533,7 +530,7 @@ public final class ScenarioFixtures {
                 task("B2").duration(15).tags("job-B").requires("machine", onResources("M1")).after("B1").build(),
                 task("C1").duration(20).tags("job-C").requires("machine", onResources("M1")).build(),
                 task("C2").duration(30).tags("job-C").requires("machine", onResources("M2")).after("C1").build());
-        return request("example-workshop", "golden-g8", "workshop", "UTC", workshopHorizon(480), null, null,
+        return request("golden-g8", "workshop", "UTC", workshopHorizon(480), null, null,
                 List.of(resource("M1", "machine"), resource("M2", "machine")), tasks, List.of(),
                 List.of(new Objective("makespan", "minimize_makespan", 1)), options(10, 4, true));
     }
@@ -565,7 +562,7 @@ public final class ScenarioFixtures {
                         Map.of("period", Map.of("unit", "DAY"), "metric", "TICKS", "max", 8)),
                 new Constraint("max-2-days-in-a-row", "max_consecutive", IEnumEnforcement.Types.SOFT,
                         ConstraintScope.all(), Map.of("period", Map.of("unit", "DAY"), "max", 2), null, 10, null));
-        return request("example-hospital", "golden-g9", "roster", "UTC", horizon, null, null, resources, tasks,
+        return request("golden-g9", "roster", "UTC", horizon, null, null, resources, tasks,
                 constraints, List.of(objective("fair", "minimize_max_load", 1, null, Map.of("metric", "TICKS"))),
                 options(10, 2, true));
     }
@@ -585,7 +582,7 @@ public final class ScenarioFixtures {
                 task("D").duration(2).demand(1).requires("crew", pool).after("A").after("B").build(),
                 task("E").duration(1).demand(1).deadline(Instant.parse("2026-09-13T00:00:00Z"))
                         .requires("crew", pool).after("C").after("D").build());
-        return request("example-construction", "golden-g10", "project", "UTC", horizon, null, null,
+        return request("golden-g10", "project", "UTC", horizon, null, null,
                 List.of(resource("crew-pool", "pool", 2)), tasks, List.of(),
                 List.of(new Objective("makespan", "minimize_makespan", 1)), options(10, 2, false));
     }
@@ -602,7 +599,7 @@ public final class ScenarioFixtures {
                 task("P3").duration(240).optional().prize(90).build(),
                 task("P4").duration(90).optional().prize(30).build(),
                 task("P5").duration(150).optional().prize(60).build());
-        return request("example-field-service", "golden-g11", "field-service", "UTC", workshopHorizon(480), null, null,
+        return request("golden-g11", "field-service", "UTC", workshopHorizon(480), null, null,
                 List.of(resource("tech-1", "technician")), tasks, List.of(), List.of(), options(10, 2, false));
     }
 
@@ -618,7 +615,7 @@ public final class ScenarioFixtures {
                 task("A1").duration(10).setupClass("A").requires("machine", onPress).build(),
                 task("A2").duration(10).setupClass("A").requires("machine", onPress).build(),
                 task("B1").duration(10).setupClass("B").requires("machine", onPress).build());
-        return request(TENANT, "golden-g14", "workshop", "UTC", workshopHorizon(120), null,
+        return request("golden-g14", "workshop", "UTC", workshopHorizon(120), null,
                 List.of(new SetupMatrix("paint-setup", 5, 0, List.of())), List.of(press), tasks, List.of(),
                 List.of(objective("makespan", "minimize_makespan", 1, 0, null),
                         objective("setup", "minimize_setup", 1, 1, null)),

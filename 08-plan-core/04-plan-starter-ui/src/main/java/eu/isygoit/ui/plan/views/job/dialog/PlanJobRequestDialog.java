@@ -147,7 +147,7 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
                 meta == null ? null : meta.domainName(),
                 meta == null ? null : meta.locale(),
                 meta == null ? null : meta.timezone());
-        return new PlanningRequest(request.tenant(), updated, request.domain(), request.horizon(), request.slots(),
+        return new PlanningRequest(updated, request.domain(), request.horizon(), request.slots(),
                 request.calendars(), request.setupMatrices(), request.resources(), request.tasks(),
                 request.constraints(), request.objectives(), request.solverOptions(), request.initialSolution());
     }

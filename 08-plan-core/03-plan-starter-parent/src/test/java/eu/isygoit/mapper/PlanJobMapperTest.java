@@ -51,7 +51,7 @@ class PlanJobMapperTest {
     }
 
     private static PlanningRequest request() {
-        return new PlanningRequest("acme", new PlanningMeta("ref-1", "1", "school", "en", "UTC"),
+        return new PlanningRequest(new PlanningMeta("ref-1", "1", "school", "en", "UTC"),
                 null, null, null, null, null, null, null, null, null, null, null);
     }
 

@@ -383,7 +383,7 @@ public final class IndexFixtures {
         }
 
         public PlanningRequest request() {
-            return new PlanningRequest("tenant-a", meta, null, horizon, slots, calendars, matrices, resources, tasks,
+            return new PlanningRequest(meta, null, horizon, slots, calendars, matrices, resources, tasks,
                     constraints, objectives, options, initial);
         }
     }

@@ -439,7 +439,7 @@ public class PlanningService {
             (issue.isError() ? errors : warnings).add(issue.toDto());
         }
         PlanningRequest normalized = request == null || problem == null ? null : new PlanningRequest(
-                request.tenant(), request.meta(), request.domain(), problem.horizon(), problem.slots(),
+                request.meta(), request.domain(), problem.horizon(), problem.slots(),
                 problem.calendars(), problem.setupMatrices(), problem.resources(), problem.tasks(),
                 problem.constraints(), problem.objectives(), problem.options(), problem.initialSolution());
         return ValidationReportDto.builder()

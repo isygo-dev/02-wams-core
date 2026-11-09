@@ -1,5 +1,4 @@
 {
-  "tenant": "example-hospital",
   "meta": { "clientRef": "golden-g9", "version": "2.0", "domainName": "roster", "timezone": "UTC" },
   "horizon": { "start": "2026-09-07T00:00:00Z", "end": "2026-09-10T00:00:00Z", "tickSeconds": 3600 },
   "resources": [

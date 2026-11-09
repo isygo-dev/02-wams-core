@@ -32,7 +32,6 @@ class ObjectivesCpSatTest {
 
     private static final String TARDINESS_JSON = """
             {
-              "tenant": "example-tenant",
               "meta": { "clientRef": "objectives-tardiness", "version": "2.0", "domainName": "workshop", "timezone": "UTC" },
               "horizon": { "start": "2026-09-07T08:00:00Z", "end": "2026-09-07T09:00:00Z", "tickSeconds": 60 },
               "resources": [ { "id": "M1", "typeId": "machine", "capacity": 1 } ],

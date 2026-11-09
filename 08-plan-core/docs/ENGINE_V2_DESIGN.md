@@ -418,7 +418,6 @@ inputs), `long addExact/mulExact` wrappers throwing `ObjectiveRangeException`.
 
 ```json
 {
-  "tenant": "example-school",
   "meta": { "clientRef": "school-timetable-v2", "version": "2.0", "domainName": "school-timetable",
             "locale": "en-US", "timezone": "Europe/Paris" },
   "domain": {
@@ -462,7 +461,6 @@ priced 1.0 -> `2 * 100 = 200` scaled (reported as 2.0). Also runs on Timefold (s
 
 ```json
 {
-  "tenant": "example-workshop",
   "meta": { "clientRef": "jobshop-3x2", "version": "2.0", "domainName": "workshop", "timezone": "UTC" },
   "horizon": { "start": "2026-09-07T08:00:00Z", "end": "2026-09-07T16:00:00Z", "tickSeconds": 60 },
   "resources": [
@@ -491,7 +489,6 @@ makespan 75 ticks (M2 load = 25+20+30 = 75 with no idle: B1[0,25) C2[25,55) A2[5
 
 ```json
 {
-  "tenant": "example-hospital",
   "meta": { "clientRef": "roster-3d", "version": "2.0", "domainName": "roster", "timezone": "UTC" },
   "horizon": { "start": "2026-09-07T00:00:00Z", "end": "2026-09-10T00:00:00Z", "tickSeconds": 3600 },
   "resources": [
@@ -525,7 +522,6 @@ no soft violation, rest and daily rules satisfied (assignment e.g. ana: d0-day +
 
 ```json
 {
-  "tenant": "example-construction",
   "meta": { "clientRef": "project-5", "version": "2.0", "domainName": "project", "timezone": "UTC" },
   "horizon": { "start": "2026-09-01T00:00:00Z", "end": "2026-09-21T00:00:00Z", "tickSeconds": 86400 },
   "resources": [ { "id": "crew-pool", "typeId": "pool", "name": "Excavator crews", "capacity": 2 } ],
@@ -550,7 +546,6 @@ Expected: `OPTIMAL`, makespan 11 ticks (days): pool work + the unavoidable one-u
 
 ```json
 {
-  "tenant": "example-field-service",
   "meta": { "clientRef": "prize-5", "version": "2.0", "domainName": "field-service", "timezone": "UTC" },
   "horizon": { "start": "2026-09-07T08:00:00Z", "end": "2026-09-07T16:00:00Z", "tickSeconds": 60 },
   "resources": [ { "id": "tech-1", "typeId": "technician", "capacity": 1 } ],

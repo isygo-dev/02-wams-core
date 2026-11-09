@@ -54,6 +54,7 @@ class PlanningRequestJsonTest {
         PlanningRequest again = MAPPER.readValue(json, PlanningRequest.class);
         assertEquals(request, again);
         JsonNode first = MAPPER.readTree(json);
+        assertFalse(first.has("tenant"));
         JsonNode second = MAPPER.readTree(MAPPER.writeValueAsString(again));
         assertEquals(first, second);
     }
@@ -61,7 +62,6 @@ class PlanningRequestJsonTest {
     @Test
     void schoolTimetable() throws IOException {
         PlanningRequest r = load("a-school-timetable.json");
-        assertEquals("example-school", r.tenant());
         assertEquals("2.0", r.meta().version());
         assertEquals("Europe/Paris", r.meta().timezone());
         assertEquals(1, r.domain().resourceTypes().size());
@@ -204,8 +204,10 @@ class PlanningRequestJsonTest {
 
     @Test
     void unknownPropertyFails() {
-        String json = "{\"tenant\":\"t\",\"taksks\":[]}";
+        String json = "{\"taksks\":[]}";
         assertThrows(UnrecognizedPropertyException.class, () -> MAPPER.readValue(json, PlanningRequest.class));
+        assertThrows(UnrecognizedPropertyException.class,
+                () -> MAPPER.readValue("{\"tenant\":\"t\"}", PlanningRequest.class));
         String nested = "{\"horizon\":{\"start\":\"2026-09-07T08:00:00Z\",\"end\":\"2026-09-07T16:00:00Z\","
                 + "\"tickSeconds\":60,\"tickSecond\":1}}";
         assertThrows(UnrecognizedPropertyException.class, () -> MAPPER.readValue(nested, PlanningRequest.class));

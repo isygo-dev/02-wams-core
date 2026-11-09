@@ -1,5 +1,4 @@
 {
-  "tenant": "example-school",
   "meta": { "clientRef": "school-timetable-v2", "version": "2.0", "domainName": "school-timetable",
             "locale": "en-US", "timezone": "Europe/Paris" },
   "domain": {

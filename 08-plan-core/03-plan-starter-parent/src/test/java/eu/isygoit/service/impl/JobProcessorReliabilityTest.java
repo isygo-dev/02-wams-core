@@ -314,7 +314,6 @@ class JobProcessorReliabilityTest {
 
     private PlanningRequest request() {
         return new PlanningRequest(
-                "test-tenant",
                 new PlanningMeta("ref-1", "2.0", "test", "en", "UTC"),
                 null, null, null, null, null, null, null, null, null, null, null);
     }

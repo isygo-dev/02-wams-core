@@ -1,5 +1,4 @@
 {
-  "tenant": "example-construction",
   "meta": { "clientRef": "project-5", "version": "2.0", "domainName": "project", "timezone": "UTC" },
   "horizon": { "start": "2026-09-01T00:00:00Z", "end": "2026-09-21T00:00:00Z", "tickSeconds": 86400 },
   "resources": [ { "id": "crew-pool", "typeId": "pool", "name": "Excavator crews", "capacity": 2 } ],
