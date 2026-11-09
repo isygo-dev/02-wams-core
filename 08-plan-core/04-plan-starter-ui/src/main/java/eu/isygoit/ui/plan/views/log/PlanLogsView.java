@@ -12,7 +12,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
@@ -33,6 +32,7 @@ import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.plan.common.PlanEnumTag;
 import eu.isygoit.ui.plan.common.PlanErrors;
 import eu.isygoit.ui.plan.common.PlanFormats;
+import eu.isygoit.ui.plan.common.PlanJsonEditor;
 import eu.isygoit.ui.plan.common.PlanPush;
 import eu.isygoit.ui.plan.layout.PlanMainLayout;
 import jakarta.annotation.security.PermitAll;
@@ -183,10 +183,9 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
     }
 
     private void showDetails(LogEntry entry) {
-        TextArea details = new TextArea();
-        details.setReadOnly(true);
+        PlanJsonEditor details = new PlanJsonEditor(
+                objectMapper, I18n.t("plan.ui.logs.details"), null, true);
         DialogLayout.tall(details);
-        details.addClassName("plan-json-editor");
         try {
             details.setValue(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(entry));
         } catch (JsonProcessingException exception) {

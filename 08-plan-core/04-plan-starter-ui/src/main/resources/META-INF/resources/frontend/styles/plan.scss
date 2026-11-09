@@ -1,6 +1,6 @@
 /*
  * Planning module styles. Cards, chips, tags, dialogs, grids and the filter bar come from the shared
- * styles (styles/scss), so only layout glue and the JSON editor font live here; tokens only.
+ * styles (styles/scss), so only layout glue and the planning JSON editor presentation live here.
  */
 
 .plan-dashboard,
@@ -17,9 +17,98 @@
   flex-wrap: wrap;
 }
 
-/* JSON text areas (request editor, result, log details): monospace on the native textarea */
-.plan-json-editor textarea {
+.plan-json-editor {
+  gap: 0;
+  min-width: 0;
+}
+
+.plan-json-editor__label {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-s);
+  font-weight: 600;
+}
+
+.plan-json-editor__helper {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-xs);
+}
+
+.plan-json-editor__toolbar {
+  padding-block: var(--lumo-space-xs);
+}
+
+.plan-json-editor__surface {
+  position: relative;
+  width: 100%;
+  height: 28rem;
+  min-height: 16rem;
+  overflow: hidden;
+  border-radius: var(--lumo-border-radius-m);
+  background: var(--lumo-contrast-5pct);
+}
+
+.plan-json-editor__highlight,
+.plan-json-editor__field {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   font-family: var(--lumo-font-family-monospace);
+  font-size: var(--lumo-font-size-s);
+  line-height: 1.55;
+  tab-size: 2;
+}
+
+.plan-json-editor__highlight {
+  z-index: 0;
+  overflow: hidden;
+  padding: var(--lumo-space-s);
+  color: var(--lumo-body-text-color);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+
+.plan-json-editor__field {
+  z-index: 1;
+}
+
+.plan-json-editor__field::part(input-field) {
+  height: 100%;
+  background: transparent;
+}
+
+.plan-json-editor__field::part(value) {
+  box-sizing: border-box;
+  height: 100%;
+  padding: var(--lumo-space-s);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--lumo-body-text-color);
+  font-family: var(--lumo-font-family-monospace);
+  font-size: var(--lumo-font-size-s);
+  line-height: 1.55;
+  tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.plan-json-token--key {
+  color: var(--lumo-primary-text-color);
+}
+
+.plan-json-token--string {
+  color: var(--lumo-success-text-color);
+}
+
+.plan-json-token--number {
+  color: var(--lumo-error-text-color);
+}
+
+.plan-json-token--literal {
+  color: var(--lumo-warning-text-color);
 }
 
 /* validation issues listed in the request dialog */
@@ -33,5 +122,9 @@
   .plan-job-lookup {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .plan-json-editor__surface {
+    height: 22rem;
   }
 }

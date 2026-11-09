@@ -11,7 +11,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
@@ -29,6 +28,7 @@ import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.notification.AppNotifications;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
 import eu.isygoit.ui.plan.common.PlanErrors;
+import eu.isygoit.ui.plan.common.PlanJsonEditor;
 import eu.isygoit.ui.plan.common.PlanJobStatusRules;
 import eu.isygoit.ui.plan.common.PlanPush;
 import eu.isygoit.ui.plan.layout.PlanMainLayout;
@@ -64,7 +64,7 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
     private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::refreshStatus);
     private final Div infoHolder = new Div();
     private final HorizontalLayout actionsBar = new HorizontalLayout();
-    private final TextArea resultText = new TextArea();
+    private final PlanJsonEditor resultText;
     private final AtomicBoolean loading = new AtomicBoolean();
     private Long jobId;
     private PlanJobDto current;
@@ -76,6 +76,7 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
         this.service = service;
         this.objectMapper = objectMapper;
         this.actions = new PlanJobActions(service, objectMapper);
+        this.resultText = new PlanJsonEditor(objectMapper, I18n.t("plan.ui.result.title"), null, true);
         PlanPush.ensure(UI.getCurrent());
 
         setSizeFull();
@@ -88,10 +89,6 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
         actionsBar.addClassName("plan-job-actions");
         actionsBar.setWidthFull();
 
-        resultText.setLabel(I18n.t("plan.ui.result.title"));
-        resultText.setReadOnly(true);
-        resultText.setWidthFull();
-        resultText.addClassName("plan-json-editor");
         DialogLayout.tall(resultText);
 
         add(infoHolder, actionsBar, resultText, refreshButton);

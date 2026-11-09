@@ -6,7 +6,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import eu.isygoit.dto.request.PlanningMeta;
 import eu.isygoit.dto.request.PlanningRequest;
@@ -16,6 +15,7 @@ import eu.isygoit.remote.plan.PlanFeignService;
 import eu.isygoit.ui.common.dialog.AbstractEditionDialog;
 import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.plan.common.PlanErrors;
+import eu.isygoit.ui.plan.common.PlanJsonEditor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
@@ -43,7 +43,7 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
     private final ObjectMapper objectMapper;
     private final Long jobId;
     private final TextField clientRefField = new TextField();
-    private final TextArea requestJson = new TextArea();
+    private final PlanJsonEditor requestJson;
     private final VerticalLayout issuesSection;
     private final Div issuesList = new Div();
 
@@ -59,6 +59,10 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
         this.objectMapper = objectMapper;
         this.jobId = jobId;
         boolean editing = jobId != null;
+        requestJson = new PlanJsonEditor(objectMapper,
+                I18n.t("plan.ui.job.request.json"),
+                I18n.t("plan.ui.job.request.help"),
+                false);
 
         DialogLayout.size(this, DialogLayout.WIDTH_L);
         setCloseOnOutsideClick(false);
@@ -72,10 +76,7 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
         clientRefField.setWidthFull();
         clientRefField.setValue(clientRef == null ? "" : clientRef);
 
-        requestJson.setLabel(I18n.t("plan.ui.job.request.json"));
-        requestJson.setHelperText(I18n.t("plan.ui.job.request.help"));
         requestJson.setRequired(true);
-        requestJson.addClassName("plan-json-editor");
         DialogLayout.tall(requestJson);
         if (request != null) {
             requestJson.setValue(format(withClientRef(request, null)));
