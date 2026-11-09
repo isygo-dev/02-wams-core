@@ -1,0 +1,3273 @@
+{
+  "meta" : {
+    "clientRef" : null,
+    "version" : "2.0",
+    "domainName" : "school-timetable",
+    "locale" : "en-US",
+    "timezone" : "Europe/Paris"
+  },
+  "domain" : {
+    "resourceTypes" : [ {
+      "id" : "teacher",
+      "attributes" : [ "name" ]
+    }, {
+      "id" : "room",
+      "attributes" : [ "name" ]
+    } ],
+    "taskTypes" : [ {
+      "id" : "lesson",
+      "attributes" : [ "classId", "subject" ]
+    } ],
+    "slotTypes" : [ {
+      "id" : "period",
+      "attributes" : [ "day", "periodNumber" ]
+    } ]
+  },
+  "horizon" : {
+    "start" : "2026-09-07T06:00:00Z",
+    "end" : "2026-09-11T14:30:00Z",
+    "tickSeconds" : 900
+  },
+  "slots" : [ {
+    "id" : "mon-p1",
+    "typeId" : "period",
+    "label" : "08:00-09:00",
+    "start" : "2026-09-07T06:00:00Z",
+    "end" : "2026-09-07T07:00:00Z",
+    "cost" : 0.0,
+    "attributes" : {
+      "day" : "Monday",
+      "periodNumber" : 1
+    }
+  }, {
+    "id" : "mon-p2",
+    "typeId" : "period",
+    "label" : "09:15-10:15",
+    "start" : "2026-09-07T07:15:00Z",
+    "end" : "2026-09-07T08:15:00Z",
+    "cost" : 0.0,
+    "attributes" : {
+      "day" : "Monday",
+      "periodNumber" : 2
+    }
+  }, {
+    "id" : "mon-p3",
+    "typeId" : "period",
+    "label" : "10:30-11:30",
+    "start" : "2026-09-07T08:30:00Z",
+    "end" : "2026-09-07T09:30:00Z",
+    "cost" : 0.0,
+    "attributes" : {
+      "day" : "Monday",
+      "periodNumber" : 3
+    }
+  }, {
+    "id" : "mon-p4",
+    "typeId" : "period",
+    "label" : "13:00-14:00",
+    "start" : "2026-09-07T11:00:00Z",
+    "end" : "2026-09-07T12:00:00Z",
+    "cost" : 1.0,
+    "attributes" : {
+      "day" : "Monday",
+      "periodNumber" : 4
+    }
+  }, {
+    "id" : "mon-p5",
+    "typeId" : "period",
+    "label" : "14:15-15:15",
+    "start" : "2026-09-07T12:15:00Z",
+    "end" : "2026-09-07T13:15:00Z",
+    "cost" : 1.0,
+    "attributes" : {
+      "day" : "Monday",
+      "periodNumber" : 5
+    }
+  }, {
+    "id" : "mon-p6",
+    "typeId" : "period",
+    "label" : "15:30-16:30",
+    "start" : "2026-09-07T13:30:00Z",
+    "end" : "2026-09-07T14:30:00Z",
+    "cost" : 1.0,
+    "attributes" : {
+      "day" : "Monday",
+      "periodNumber" : 6
+    }
+  }, {
+    "id" : "tue-p1",
+    "typeId" : "period",
+    "label" : "08:00-09:00",
+    "start" : "2026-09-08T06:00:00Z",
+    "end" : "2026-09-08T07:00:00Z",
+    "cost" : 0.0,
+    "attributes" : {
+      "day" : "Tuesday",
+      "periodNumber" : 1
+    }
+  }, {
+    "id" : "tue-p2",
+    "typeId" : "period",
+    "label" : "09:15-10:15",
+    "start" : "2026-09-08T07:15:00Z",
+    "end" : "2026-09-08T08:15:00Z",
+    "cost" : 0.0,
+    "attributes" : {
+      "day" : "Tuesday",
+      "periodNumber" : 2
+    }
+  }, {
+    "id" : "tue-p3",
+    "typeId" : "period",
+    "label" : "10:30-11:30",
+    "start" : "2026-09-08T08:30:00Z",
+    "end" : "2026-09-08T09:30:00Z",
+    "cost" : 0.0,
+    "attributes" : {
+      "day" : "Tuesday",
+      "periodNumber" : 3
+    }
+  }, {
+    "id" : "tue-p4",
+    "typeId" : "period",
+    "label" : "13:00-14:00",
+    "start" : "2026-09-08T11:00:00Z",
+    "end" : "2026-09-08T12:00:00Z",
+    "cost" : 1.0,
+    "attributes" : {
+      "day" : "Tuesday",
+      "periodNumber" : 4
+    }
+  }, {
+    "id" : "tue-p5",
+    "typeId" : "period",
+    "label" : "14:15-15:15",
+    "start" : "2026-09-08T12:15:00Z",
+    "end" : "2026-09-08T13:15:00Z",
+    "cost" : 1.0,
+    "attributes" : {
+      "day" : "Tuesday",
+      "periodNumber" : 5
+    }
+  }, {
+    "id" : "tue-p6",
+    "typeId" : "period",
+    "label" : "15:30-16:30",
+    "start" : "2026-09-08T13:30:00Z",
+    "end" : "2026-09-08T14:30:00Z",
+    "cost" : 1.0,
+    "attributes" : {
+      "day" : "Tuesday",
+      "periodNumber" : 6
+    }
+  }, {
+    "id" : "wed-p1",
+    "typeId" : "period",
+    "label" : "08:00-09:00",
+    "start" : "2026-09-09T06:00:00Z",
+    "end" : "2026-09-09T07:00:00Z",
+    "cost" : 1.0,
+    "attributes" : {
+      "day" : "Wednesday",
+      "periodNumber" : 1
+    }
+  }, {
+    "id" : "wed-p2",
+    "typeId" : "period",
+    "label" : "09:15-10:15",
+    "start" : "2026-09-09T07:15:00Z",
+    "end" : "2026-09-09T08:15:00Z",
+    "cost" : 1.0,
+    "attributes" : {
+      "day" : "Wednesday",
+      "periodNumber" : 2
+    }
+  }, {
+    "id" : "wed-p3",
+    "typeId" : "period",
+    "label" : "10:30-11:30",
+    "start" : "2026-09-09T08:30:00Z",
+    "end" : "2026-09-09T09:30:00Z",
+    "cost" : 1.0,
+    "attributes" : {
+      "day" : "Wednesday",
+      "periodNumber" : 3
+    }
+  }, {
+    "id" : "wed-p4",
+    "typeId" : "period",
+    "label" : "13:00-14:00",
+    "start" : "2026-09-09T11:00:00Z",
+    "end" : "2026-09-09T12:00:00Z",
+    "cost" : 2.0,
+    "attributes" : {
+      "day" : "Wednesday",
+      "periodNumber" : 4
+    }
+  }, {
+    "id" : "wed-p5",
+    "typeId" : "period",
+    "label" : "14:15-15:15",
+    "start" : "2026-09-09T12:15:00Z",
+    "end" : "2026-09-09T13:15:00Z",
+    "cost" : 2.0,
+    "attributes" : {
+      "day" : "Wednesday",
+      "periodNumber" : 5
+    }
+  }, {
+    "id" : "wed-p6",
+    "typeId" : "period",
+    "label" : "15:30-16:30",
+    "start" : "2026-09-09T13:30:00Z",
+    "end" : "2026-09-09T14:30:00Z",
+    "cost" : 2.0,
+    "attributes" : {
+      "day" : "Wednesday",
+      "periodNumber" : 6
+    }
+  }, {
+    "id" : "thu-p1",
+    "typeId" : "period",
+    "label" : "08:00-09:00",
+    "start" : "2026-09-10T06:00:00Z",
+    "end" : "2026-09-10T07:00:00Z",
+    "cost" : 2.0,
+    "attributes" : {
+      "day" : "Thursday",
+      "periodNumber" : 1
+    }
+  }, {
+    "id" : "thu-p2",
+    "typeId" : "period",
+    "label" : "09:15-10:15",
+    "start" : "2026-09-10T07:15:00Z",
+    "end" : "2026-09-10T08:15:00Z",
+    "cost" : 2.0,
+    "attributes" : {
+      "day" : "Thursday",
+      "periodNumber" : 2
+    }
+  }, {
+    "id" : "thu-p3",
+    "typeId" : "period",
+    "label" : "10:30-11:30",
+    "start" : "2026-09-10T08:30:00Z",
+    "end" : "2026-09-10T09:30:00Z",
+    "cost" : 2.0,
+    "attributes" : {
+      "day" : "Thursday",
+      "periodNumber" : 3
+    }
+  }, {
+    "id" : "thu-p4",
+    "typeId" : "period",
+    "label" : "13:00-14:00",
+    "start" : "2026-09-10T11:00:00Z",
+    "end" : "2026-09-10T12:00:00Z",
+    "cost" : 3.0,
+    "attributes" : {
+      "day" : "Thursday",
+      "periodNumber" : 4
+    }
+  }, {
+    "id" : "thu-p5",
+    "typeId" : "period",
+    "label" : "14:15-15:15",
+    "start" : "2026-09-10T12:15:00Z",
+    "end" : "2026-09-10T13:15:00Z",
+    "cost" : 3.0,
+    "attributes" : {
+      "day" : "Thursday",
+      "periodNumber" : 5
+    }
+  }, {
+    "id" : "thu-p6",
+    "typeId" : "period",
+    "label" : "15:30-16:30",
+    "start" : "2026-09-10T13:30:00Z",
+    "end" : "2026-09-10T14:30:00Z",
+    "cost" : 3.0,
+    "attributes" : {
+      "day" : "Thursday",
+      "periodNumber" : 6
+    }
+  }, {
+    "id" : "fri-p1",
+    "typeId" : "period",
+    "label" : "08:00-09:00",
+    "start" : "2026-09-11T06:00:00Z",
+    "end" : "2026-09-11T07:00:00Z",
+    "cost" : 3.0,
+    "attributes" : {
+      "day" : "Friday",
+      "periodNumber" : 1
+    }
+  }, {
+    "id" : "fri-p2",
+    "typeId" : "period",
+    "label" : "09:15-10:15",
+    "start" : "2026-09-11T07:15:00Z",
+    "end" : "2026-09-11T08:15:00Z",
+    "cost" : 3.0,
+    "attributes" : {
+      "day" : "Friday",
+      "periodNumber" : 2
+    }
+  }, {
+    "id" : "fri-p3",
+    "typeId" : "period",
+    "label" : "10:30-11:30",
+    "start" : "2026-09-11T08:30:00Z",
+    "end" : "2026-09-11T09:30:00Z",
+    "cost" : 3.0,
+    "attributes" : {
+      "day" : "Friday",
+      "periodNumber" : 3
+    }
+  }, {
+    "id" : "fri-p4",
+    "typeId" : "period",
+    "label" : "13:00-14:00",
+    "start" : "2026-09-11T11:00:00Z",
+    "end" : "2026-09-11T12:00:00Z",
+    "cost" : 4.0,
+    "attributes" : {
+      "day" : "Friday",
+      "periodNumber" : 4
+    }
+  }, {
+    "id" : "fri-p5",
+    "typeId" : "period",
+    "label" : "14:15-15:15",
+    "start" : "2026-09-11T12:15:00Z",
+    "end" : "2026-09-11T13:15:00Z",
+    "cost" : 4.0,
+    "attributes" : {
+      "day" : "Friday",
+      "periodNumber" : 5
+    }
+  }, {
+    "id" : "fri-p6",
+    "typeId" : "period",
+    "label" : "15:30-16:30",
+    "start" : "2026-09-11T13:30:00Z",
+    "end" : "2026-09-11T14:30:00Z",
+    "cost" : 4.0,
+    "attributes" : {
+      "day" : "Friday",
+      "periodNumber" : 6
+    }
+  } ],
+  "calendars" : [ ],
+  "setupMatrices" : [ ],
+  "resources" : [ {
+    "id" : "t-alice",
+    "typeId" : "teacher",
+    "name" : "Alice Martin",
+    "capacity" : 1,
+    "skills" : [ "math" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-bob",
+    "typeId" : "teacher",
+    "name" : "Bob Laurent",
+    "capacity" : 1,
+    "skills" : [ "physics" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-clara",
+    "typeId" : "teacher",
+    "name" : "Clara Dubois",
+    "capacity" : 1,
+    "skills" : [ "chem" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-david",
+    "typeId" : "teacher",
+    "name" : "David Moreau",
+    "capacity" : 1,
+    "skills" : [ "bio" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-emma",
+    "typeId" : "teacher",
+    "name" : "Emma Petit",
+    "capacity" : 1,
+    "skills" : [ "french" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-francois",
+    "typeId" : "teacher",
+    "name" : "François Roux",
+    "capacity" : 1,
+    "skills" : [ "english" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-gabrielle",
+    "typeId" : "teacher",
+    "name" : "Gabrielle Fournier",
+    "capacity" : 1,
+    "skills" : [ "german" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-henri",
+    "typeId" : "teacher",
+    "name" : "Henri Girard",
+    "capacity" : 1,
+    "skills" : [ "spanish" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-isabelle",
+    "typeId" : "teacher",
+    "name" : "Isabelle Bonnet",
+    "capacity" : 1,
+    "skills" : [ "history" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-jacques",
+    "typeId" : "teacher",
+    "name" : "Jacques Dupont",
+    "capacity" : 1,
+    "skills" : [ "geography" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-karine",
+    "typeId" : "teacher",
+    "name" : "Karine Lambert",
+    "capacity" : 1,
+    "skills" : [ "philosophy" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-luc",
+    "typeId" : "teacher",
+    "name" : "Luc Fontaine",
+    "capacity" : 1,
+    "skills" : [ "sports" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-marie",
+    "typeId" : "teacher",
+    "name" : "Marie Rousseau",
+    "capacity" : 1,
+    "skills" : [ "art" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-nicolas",
+    "typeId" : "teacher",
+    "name" : "Nicolas Vincent",
+    "capacity" : 1,
+    "skills" : [ "music" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-olivia",
+    "typeId" : "teacher",
+    "name" : "Olivia Mercier",
+    "capacity" : 1,
+    "skills" : [ "computers" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-paul",
+    "typeId" : "teacher",
+    "name" : "Paul Lefebvre",
+    "capacity" : 1,
+    "skills" : [ "physics", "math" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-quentin",
+    "typeId" : "teacher",
+    "name" : "Quentin Garnier",
+    "capacity" : 1,
+    "skills" : [ "chem", "bio" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-rachel",
+    "typeId" : "teacher",
+    "name" : "Rachel Faure",
+    "capacity" : 1,
+    "skills" : [ "philosophy", "french" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-sophie",
+    "typeId" : "teacher",
+    "name" : "Sophie André",
+    "capacity" : 1,
+    "skills" : [ "german", "english" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "t-thomas",
+    "typeId" : "teacher",
+    "name" : "Thomas Lemoine",
+    "capacity" : 1,
+    "skills" : [ "geography", "history" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "room-101",
+    "typeId" : "room",
+    "name" : "Room 101",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "room-102",
+    "typeId" : "room",
+    "name" : "Room 102",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "room-103",
+    "typeId" : "room",
+    "name" : "Room 103",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "room-104",
+    "typeId" : "room",
+    "name" : "Room 104",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "room-105",
+    "typeId" : "room",
+    "name" : "Room 105",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "room-106",
+    "typeId" : "room",
+    "name" : "Room 106",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "room-107",
+    "typeId" : "room",
+    "name" : "Room 107",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "room-108",
+    "typeId" : "room",
+    "name" : "Room 108",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "room-201",
+    "typeId" : "room",
+    "name" : "Room 201",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "room-202",
+    "typeId" : "room",
+    "name" : "Room 202",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "lab-1",
+    "typeId" : "room",
+    "name" : "Lab 1",
+    "capacity" : 1,
+    "skills" : [ "lab" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "lab-2",
+    "typeId" : "room",
+    "name" : "Lab 2",
+    "capacity" : 1,
+    "skills" : [ "lab" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "lab-3",
+    "typeId" : "room",
+    "name" : "Lab 3",
+    "capacity" : 1,
+    "skills" : [ "lab" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "gym",
+    "typeId" : "room",
+    "name" : "Gymnasium",
+    "capacity" : 1,
+    "skills" : [ "sports" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "art-1",
+    "typeId" : "room",
+    "name" : "Art Studio 1",
+    "capacity" : 1,
+    "skills" : [ "art" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "art-2",
+    "typeId" : "room",
+    "name" : "Art Studio 2",
+    "capacity" : 1,
+    "skills" : [ "art" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "music-room",
+    "typeId" : "room",
+    "name" : "Music Room",
+    "capacity" : 1,
+    "skills" : [ "music" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "comp-1",
+    "typeId" : "room",
+    "name" : "Computer Lab 1",
+    "capacity" : 1,
+    "skills" : [ "computers" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "comp-2",
+    "typeId" : "room",
+    "name" : "Computer Lab 2",
+    "capacity" : 1,
+    "skills" : [ "computers" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  }, {
+    "id" : "auditorium",
+    "typeId" : "room",
+    "name" : "Auditorium",
+    "capacity" : 1,
+    "skills" : [ "general" ],
+    "tags" : [ ],
+    "calendarId" : null,
+    "unavailable" : [ ],
+    "costPerTick" : 0.0,
+    "costPerUse" : 0.0,
+    "maxLoadTicks" : null,
+    "setupMatrixId" : null,
+    "attributes" : { }
+  } ],
+  "tasks" : [ {
+    "id" : "6a-math",
+    "typeId" : "lesson",
+    "name" : "6A Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-6A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "6A",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "6a-french",
+    "typeId" : "lesson",
+    "name" : "6A French",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "french" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-6A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "6A",
+      "subject" : "French"
+    }
+  }, {
+    "id" : "6b-math",
+    "typeId" : "lesson",
+    "name" : "6B Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-6B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "6B",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "6b-english",
+    "typeId" : "lesson",
+    "name" : "6B English",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "english" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-6B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "6B",
+      "subject" : "English"
+    }
+  }, {
+    "id" : "6c-french",
+    "typeId" : "lesson",
+    "name" : "6C French",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "french" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-6C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "6C",
+      "subject" : "French"
+    }
+  }, {
+    "id" : "6c-music",
+    "typeId" : "lesson",
+    "name" : "6C Music",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "music" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "music" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-6C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "6C",
+      "subject" : "Music"
+    }
+  }, {
+    "id" : "6d-math",
+    "typeId" : "lesson",
+    "name" : "6D Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-6D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "6D",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "6d-art",
+    "typeId" : "lesson",
+    "name" : "6D Art",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "art" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "art" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-6D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "6D",
+      "subject" : "Art"
+    }
+  }, {
+    "id" : "7a-math",
+    "typeId" : "lesson",
+    "name" : "7A Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-7A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "7A",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "7a-spanish",
+    "typeId" : "lesson",
+    "name" : "7A Spanish",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "spanish" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-7A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "7A",
+      "subject" : "Spanish"
+    }
+  }, {
+    "id" : "7b-french",
+    "typeId" : "lesson",
+    "name" : "7B French",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "french" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-7B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "7B",
+      "subject" : "French"
+    }
+  }, {
+    "id" : "7b-history",
+    "typeId" : "lesson",
+    "name" : "7B History",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "history" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-7B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "7B",
+      "subject" : "History"
+    }
+  }, {
+    "id" : "7c-english",
+    "typeId" : "lesson",
+    "name" : "7C English",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "english" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-7C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "7C",
+      "subject" : "English"
+    }
+  }, {
+    "id" : "7c-bio",
+    "typeId" : "lesson",
+    "name" : "7C Biology",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "bio" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "lab" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-7C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "7C",
+      "subject" : "Biology"
+    }
+  }, {
+    "id" : "7d-math",
+    "typeId" : "lesson",
+    "name" : "7D Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-7D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "7D",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "7d-pe",
+    "typeId" : "lesson",
+    "name" : "7D PE",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "sports" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "sports" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-7D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "7D",
+      "subject" : "Physical Education"
+    }
+  }, {
+    "id" : "8a-math",
+    "typeId" : "lesson",
+    "name" : "8A Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-8A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "8A",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "8a-physics",
+    "typeId" : "lesson",
+    "name" : "8A Physics",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "physics" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "lab" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-8A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "8A",
+      "subject" : "Physics"
+    }
+  }, {
+    "id" : "8b-english",
+    "typeId" : "lesson",
+    "name" : "8B English",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "english" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-8B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "8B",
+      "subject" : "English"
+    }
+  }, {
+    "id" : "8b-bio",
+    "typeId" : "lesson",
+    "name" : "8B Biology",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "bio" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "lab" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-8B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "8B",
+      "subject" : "Biology"
+    }
+  }, {
+    "id" : "8c-history",
+    "typeId" : "lesson",
+    "name" : "8C History",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "history" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-8C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "8C",
+      "subject" : "History"
+    }
+  }, {
+    "id" : "8c-geo",
+    "typeId" : "lesson",
+    "name" : "8C Geography",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "geography" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-8C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "8C",
+      "subject" : "Geography"
+    }
+  }, {
+    "id" : "8d-french",
+    "typeId" : "lesson",
+    "name" : "8D French",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "french" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-8D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "8D",
+      "subject" : "French"
+    }
+  }, {
+    "id" : "8d-art",
+    "typeId" : "lesson",
+    "name" : "8D Art",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "art" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "art" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-8D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "8D",
+      "subject" : "Art"
+    }
+  }, {
+    "id" : "9a-math",
+    "typeId" : "lesson",
+    "name" : "9A Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-9A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "9A",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "9a-physics",
+    "typeId" : "lesson",
+    "name" : "9A Physics",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "physics" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "lab" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-9A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "9A",
+      "subject" : "Physics"
+    }
+  }, {
+    "id" : "9b-bio",
+    "typeId" : "lesson",
+    "name" : "9B Biology",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "bio" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "lab" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-9B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "9B",
+      "subject" : "Biology"
+    }
+  }, {
+    "id" : "9b-english",
+    "typeId" : "lesson",
+    "name" : "9B English",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "english" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-9B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "9B",
+      "subject" : "English"
+    }
+  }, {
+    "id" : "9c-math",
+    "typeId" : "lesson",
+    "name" : "9C Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-9C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "9C",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "9c-cs",
+    "typeId" : "lesson",
+    "name" : "9C Computer Science",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "computers" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "computers" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-9C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "9C",
+      "subject" : "Computer Science"
+    }
+  }, {
+    "id" : "9d-french",
+    "typeId" : "lesson",
+    "name" : "9D French",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "french" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-9D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "9D",
+      "subject" : "French"
+    }
+  }, {
+    "id" : "9d-german",
+    "typeId" : "lesson",
+    "name" : "9D German",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "german" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-9D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "9D",
+      "subject" : "German"
+    }
+  }, {
+    "id" : "10a-math",
+    "typeId" : "lesson",
+    "name" : "10A Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-10A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "10A",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "10a-philo",
+    "typeId" : "lesson",
+    "name" : "10A Philosophy",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "philosophy" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-10A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "10A",
+      "subject" : "Philosophy"
+    }
+  }, {
+    "id" : "10b-philo",
+    "typeId" : "lesson",
+    "name" : "10B Philosophy",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "philosophy" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-10B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "10B",
+      "subject" : "Philosophy"
+    }
+  }, {
+    "id" : "10b-chem",
+    "typeId" : "lesson",
+    "name" : "10B Chemistry",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "chem" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "lab" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-10B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "10B",
+      "subject" : "Chemistry"
+    }
+  }, {
+    "id" : "10c-math",
+    "typeId" : "lesson",
+    "name" : "10C Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-10C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "10C",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "10c-cs",
+    "typeId" : "lesson",
+    "name" : "10C Computer Science",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "computers" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "computers" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-10C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "10C",
+      "subject" : "Computer Science"
+    }
+  }, {
+    "id" : "10d-pe",
+    "typeId" : "lesson",
+    "name" : "10D PE",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "sports" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "sports" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-10D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "10D",
+      "subject" : "Physical Education"
+    }
+  }, {
+    "id" : "10d-physics",
+    "typeId" : "lesson",
+    "name" : "10D Physics",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "physics" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "lab" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-10D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "10D",
+      "subject" : "Physics"
+    }
+  }, {
+    "id" : "11a-math",
+    "typeId" : "lesson",
+    "name" : "11A Math",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "math" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-11A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "11A",
+      "subject" : "Math"
+    }
+  }, {
+    "id" : "11a-philo",
+    "typeId" : "lesson",
+    "name" : "11A Philosophy",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "philosophy" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-11A" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "11A",
+      "subject" : "Philosophy"
+    }
+  }, {
+    "id" : "11b-philo",
+    "typeId" : "lesson",
+    "name" : "11B Philosophy",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "philosophy" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-11B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "11B",
+      "subject" : "Philosophy"
+    }
+  }, {
+    "id" : "11b-bio",
+    "typeId" : "lesson",
+    "name" : "11B Biology",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "bio" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "lab" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-11B" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "11B",
+      "subject" : "Biology"
+    }
+  }, {
+    "id" : "11c-english",
+    "typeId" : "lesson",
+    "name" : "11C English",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "english" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-11C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "11C",
+      "subject" : "English"
+    }
+  }, {
+    "id" : "11c-philo",
+    "typeId" : "lesson",
+    "name" : "11C Philosophy",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "philosophy" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-11C" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "11C",
+      "subject" : "Philosophy"
+    }
+  }, {
+    "id" : "11d-geo",
+    "typeId" : "lesson",
+    "name" : "11D Geography",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "geography" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-11D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "11D",
+      "subject" : "Geography"
+    }
+  }, {
+    "id" : "11d-spanish",
+    "typeId" : "lesson",
+    "name" : "11D Spanish",
+    "duration" : 4,
+    "resourceDurations" : { },
+    "demand" : 1,
+    "priority" : 0,
+    "required" : true,
+    "prize" : null,
+    "requirements" : [ {
+      "role" : "teacher",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "spanish" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    }, {
+      "role" : "room",
+      "selector" : {
+        "resourceIds" : [ ],
+        "resourceTypeIds" : [ ],
+        "skills" : [ "general" ],
+        "anySkills" : [ ],
+        "tags" : [ ],
+        "excludeResourceIds" : [ ]
+      },
+      "count" : 1,
+      "amount" : null
+    } ],
+    "release" : null,
+    "deadline" : null,
+    "dueDate" : null,
+    "startSlots" : [ "mon-p1", "mon-p2", "mon-p3", "mon-p4", "mon-p5", "mon-p6", "tue-p1", "tue-p2", "tue-p3", "tue-p4", "tue-p5", "tue-p6", "wed-p1", "wed-p2", "wed-p3", "wed-p4", "wed-p5", "wed-p6", "thu-p1", "thu-p2", "thu-p3", "thu-p4", "thu-p5", "thu-p6", "fri-p1", "fri-p2", "fri-p3", "fri-p4", "fri-p5", "fri-p6" ],
+    "pin" : null,
+    "predecessors" : [ ],
+    "setupClass" : null,
+    "tags" : [ "class-11D" ],
+    "preferences" : [ ],
+    "attributes" : {
+      "classId" : "11D",
+      "subject" : "Spanish"
+    }
+  } ],
+  "constraints" : [ {
+    "id" : "class-no-overlap",
+    "type" : "no_overlap",
+    "enforcement" : "STRICTLY_REQUIRED",
+    "scope" : {
+      "kind" : "all",
+      "value" : null
+    },
+    "params" : {
+      "groupByTagPrefix" : "class-"
+    },
+    "relaxation" : null,
+    "weight" : 0,
+    "tier" : 0
+  } ],
+  "objectives" : [ {
+    "id" : "prefer-earlier-week-slots",
+    "type" : "minimize_slot_cost",
+    "weight" : 1,
+    "tier" : 0,
+    "scale" : null,
+    "scope" : {
+      "kind" : "all",
+      "value" : null
+    },
+    "params" : { }
+  } ],
+  "solverOptions" : {
+    "engine" : "cp_sat",
+    "maxTimeSeconds" : 120,
+    "numWorkers" : 8,
+    "seed" : 42,
+    "logSearch" : false,
+    "relaxationLevels" : [ ],
+    "deterministic" : false,
+    "objectiveScale" : 100,
+    "gapTolerance" : 0.0,
+    "lexicographicMode" : "AUTO",
+    "explainInfeasibility" : true,
+    "explainTimeSeconds" : 10,
+    "keepIncumbentOnStop" : true
+  },
+  "initialSolution" : null
+}
