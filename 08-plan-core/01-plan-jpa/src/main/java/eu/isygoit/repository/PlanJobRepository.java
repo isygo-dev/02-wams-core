@@ -41,7 +41,8 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
             + ", " + SchemaColumnConstantName.C_MESSAGE
             + ", " + SchemaColumnConstantName.C_REQUEST_JSON
             + ", " + SchemaColumnConstantName.C_VERSION + ") "
-            + "values (:jobId, 'CREATED', :submittedAt, :message, cast(:requestJson as jsonb), 0) "
+            + "values (:jobId, 'CREATED', :submittedAt, to_jsonb(cast(:message as text)), "
+            + "cast(:requestJson as jsonb), 0) "
             + "on conflict (" + SchemaColumnConstantName.C_JOB_ID + ") do nothing",
             nativeQuery = true)
     int insertCreatedIfAbsent(
@@ -54,7 +55,7 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
     @Query(value = "update " + SchemaTableConstantName.T_PLAN_JOB
             + " set " + SchemaColumnConstantName.C_STATUS + " = 'NORMALIZING', "
             + SchemaColumnConstantName.C_STARTED_AT + " = :startedAt, "
-            + SchemaColumnConstantName.C_MESSAGE + " = 'Normalizing request', "
+            + SchemaColumnConstantName.C_MESSAGE + " = to_jsonb(cast('Normalizing request' as text)), "
             + SchemaColumnConstantName.C_VERSION + " = " + SchemaColumnConstantName.C_VERSION + " + 1 "
             + "where " + SchemaColumnConstantName.C_JOB_ID + " = :jobId "
             + "and " + SchemaColumnConstantName.C_STATUS + " = 'CREATED'",
@@ -64,7 +65,7 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
     @Modifying(clearAutomatically = true)
     @Query(value = "update " + SchemaTableConstantName.T_PLAN_JOB
             + " set " + SchemaColumnConstantName.C_REQUEST_JSON + " = cast(:requestJson as jsonb), "
-            + SchemaColumnConstantName.C_MESSAGE + " = 'Job updated', "
+            + SchemaColumnConstantName.C_MESSAGE + " = to_jsonb(cast('Job updated' as text)), "
             + SchemaColumnConstantName.C_VERSION + " = " + SchemaColumnConstantName.C_VERSION + " + 1 "
             + "where " + SchemaColumnConstantName.C_JOB_ID + " = :jobId "
             + "and " + SchemaColumnConstantName.C_STATUS + " = 'CREATED'",
@@ -74,7 +75,7 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
     @Modifying(clearAutomatically = true)
     @Query(value = "update " + SchemaTableConstantName.T_PLAN_JOB
             + " set " + SchemaColumnConstantName.C_STATUS + " = 'SOLVING', "
-            + SchemaColumnConstantName.C_MESSAGE + " = :message, "
+            + SchemaColumnConstantName.C_MESSAGE + " = to_jsonb(cast(:message as text)), "
             + SchemaColumnConstantName.C_VERSION + " = " + SchemaColumnConstantName.C_VERSION + " + 1 "
             + "where " + SchemaColumnConstantName.C_JOB_ID + " = :jobId "
             + "and " + SchemaColumnConstantName.C_STATUS + " = 'NORMALIZING'",
@@ -87,7 +88,7 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
             + SchemaColumnConstantName.C_RESULT_JSON + " = cast(:resultJson as jsonb), "
             + SchemaColumnConstantName.C_COMPLETED_AT + " = :finishedAt, "
             + SchemaColumnConstantName.C_ERROR_CODE + " = :errorCode, "
-            + SchemaColumnConstantName.C_MESSAGE + " = :message, "
+            + SchemaColumnConstantName.C_MESSAGE + " = to_jsonb(cast(:message as text)), "
             + SchemaColumnConstantName.C_VERSION + " = " + SchemaColumnConstantName.C_VERSION + " + 1 "
             + "where " + SchemaColumnConstantName.C_JOB_ID + " = :jobId "
             + "and " + SchemaColumnConstantName.C_STATUS + " = 'SOLVING'",
@@ -105,7 +106,7 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
             + " set " + SchemaColumnConstantName.C_STATUS + " = 'FAILED', "
             + SchemaColumnConstantName.C_COMPLETED_AT + " = current_timestamp, "
             + SchemaColumnConstantName.C_ERROR_CODE + " = :errorCode, "
-            + SchemaColumnConstantName.C_MESSAGE + " = :message, "
+            + SchemaColumnConstantName.C_MESSAGE + " = to_jsonb(cast(:message as text)), "
             + SchemaColumnConstantName.C_VERSION + " = " + SchemaColumnConstantName.C_VERSION + " + 1 "
             + "where " + SchemaColumnConstantName.C_JOB_ID + " = :jobId "
             + "and " + SchemaColumnConstantName.C_STATUS + " = 'SOLVING'",
@@ -120,7 +121,7 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
             + " set " + SchemaColumnConstantName.C_STATUS + " = 'INFEASIBLE', "
             + SchemaColumnConstantName.C_COMPLETED_AT + " = current_timestamp, "
             + SchemaColumnConstantName.C_ERROR_CODE + " = 'INFEASIBLE', "
-            + SchemaColumnConstantName.C_MESSAGE + " = :message, "
+            + SchemaColumnConstantName.C_MESSAGE + " = to_jsonb(cast(:message as text)), "
             + SchemaColumnConstantName.C_DIAGNOSTICS_JSON + " = cast(:diagnostics as jsonb), "
             + SchemaColumnConstantName.C_VERSION + " = " + SchemaColumnConstantName.C_VERSION + " + 1 "
             + "where " + SchemaColumnConstantName.C_JOB_ID + " = :jobId "
@@ -135,7 +136,7 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
     @Query(value = "update " + SchemaTableConstantName.T_PLAN_JOB
             + " set " + SchemaColumnConstantName.C_STATUS + " = 'CANCELLED', "
             + SchemaColumnConstantName.C_COMPLETED_AT + " = current_timestamp, "
-            + SchemaColumnConstantName.C_MESSAGE + " = 'Cancelled', "
+            + SchemaColumnConstantName.C_MESSAGE + " = to_jsonb(cast('Cancelled' as text)), "
             + SchemaColumnConstantName.C_VERSION + " = " + SchemaColumnConstantName.C_VERSION + " + 1 "
             + "where " + SchemaColumnConstantName.C_JOB_ID + " = :jobId "
             + "and " + SchemaColumnConstantName.C_STATUS + " = 'CREATED'",
@@ -145,7 +146,7 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
     @Modifying(clearAutomatically = true)
     @Query(value = "update " + SchemaTableConstantName.T_PLAN_JOB
             + " set " + SchemaColumnConstantName.C_STATUS + " = 'STOPPING', "
-            + SchemaColumnConstantName.C_MESSAGE + " = 'Stop requested', "
+            + SchemaColumnConstantName.C_MESSAGE + " = to_jsonb(cast('Stop requested' as text)), "
             + SchemaColumnConstantName.C_VERSION + " = " + SchemaColumnConstantName.C_VERSION + " + 1 "
             + "where " + SchemaColumnConstantName.C_JOB_ID + " = :jobId "
             + "and " + SchemaColumnConstantName.C_STATUS + " in ('NORMALIZING', 'SOLVING')",
@@ -163,7 +164,7 @@ public interface PlanJobRepository extends JpaPagingAndSortingTenantAssignableRe
     @Query(value = "update " + SchemaTableConstantName.T_PLAN_JOB
             + " set " + SchemaColumnConstantName.C_STATUS + " = 'CANCELLED', "
             + SchemaColumnConstantName.C_COMPLETED_AT + " = current_timestamp, "
-            + SchemaColumnConstantName.C_MESSAGE + " = 'Cancelled', "
+            + SchemaColumnConstantName.C_MESSAGE + " = to_jsonb(cast('Cancelled' as text)), "
             + SchemaColumnConstantName.C_VERSION + " = " + SchemaColumnConstantName.C_VERSION + " + 1 "
             + "where " + SchemaColumnConstantName.C_JOB_ID + " = :jobId "
             + "and " + SchemaColumnConstantName.C_STATUS + " = 'STOPPING'",

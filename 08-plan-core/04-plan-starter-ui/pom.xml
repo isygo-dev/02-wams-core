@@ -8,8 +8,8 @@
     <artifactId>plan-management-starter-ui</artifactId>
     <packaging>jar</packaging>
 
-    <name>isygoPlan Starter UI</name>
-    <description>isygoPlan Vaadin management UI components</description>
+    <name>Plan Starter UI</name>
+    <description>Plan Vaadin management UI components</description>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>
@@ -77,31 +77,37 @@
             <artifactId>wams-starter-ui</artifactId>
             <version>WC-1.0.261007-T1703</version>
         </dependency>
+
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-web</artifactId>
         </dependency>
+
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>plan-management-shared</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-boot-starter</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-spring-boot-starter</artifactId>
-        </dependency>
     </dependencies>
+
     <build>
         <resources>
             <resource>
@@ -112,6 +118,7 @@
                 </excludes>
             </resource>
         </resources>
+
         <plugins>
         </plugins>
     </build>

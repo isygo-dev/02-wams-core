@@ -8,8 +8,8 @@
     <artifactId>plan-management-starter-parent</artifactId>
     <packaging>jar</packaging>
 
-    <name>isygoPlan Service and Infrastructure</name>
-    <description>isygoPlan Spring Boot Starter</description>
+    <name>Plan Service and Infrastructure</name>
+    <description>Plan Spring Boot Starter</description>
 
     <parent>
         <groupId>eu.isygo-it.services</groupId>

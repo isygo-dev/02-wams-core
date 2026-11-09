@@ -44,7 +44,8 @@ public class LandingView extends BaseLandingView implements BeforeEnterObserver 
             new ModuleInfo("MMS", "mms", VaadinIcon.ENVELOPE),
             new ModuleInfo("DMS", "dms", VaadinIcon.FILE_O),
             new ModuleInfo("SMS", "sms", VaadinIcon.DATABASE),
-            new ModuleInfo("CMS", "cms", VaadinIcon.CALENDAR)
+            new ModuleInfo("CMS", "cms", VaadinIcon.CALENDAR),
+            new ModuleInfo("PLAN", "plan", VaadinIcon.TREE_TABLE)
     );
 
     @Override

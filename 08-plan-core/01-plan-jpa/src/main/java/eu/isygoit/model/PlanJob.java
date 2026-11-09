@@ -54,8 +54,8 @@ public class PlanJob extends AuditableEntity<UUID>
     @Column(name = SchemaColumnConstantName.C_ERROR_CODE, length = SchemaConstantSize.PLAN_ERROR_CODE)
     private String errorCode;
 
-    @Lob
-    @Column(name = SchemaColumnConstantName.C_MESSAGE)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb", name = SchemaColumnConstantName.C_MESSAGE)
     private String message;
 
     @JdbcTypeCode(SqlTypes.JSON)

@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 
 @FeignClient(
         configuration = FeignConfig.class,
-        name = "isygo-plan",
+        name = "plan-service",
         contextId = "plan-jobs",
         path = "/api/v1/private/plans")
 public interface PlanFeignService extends PlanServiceApi {
