@@ -1,7 +1,7 @@
 package eu.isygoit.model;
 
 import eu.isygoit.enums.IEnumLogLevel;
-import eu.isygoit.model.jakarta.AbstractEntity;
+import eu.isygoit.model.cassandra.AbstractEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaTableConstantName;
 import lombok.AllArgsConstructor;
@@ -20,6 +20,12 @@ import org.springframework.data.cassandra.core.mapping.Table;
 @Table(SchemaTableConstantName.T_PLAN_LOG_ENTRIES)
 @ToString(callSuper = true)
 public class PlanLog extends AbstractEntity<PlanLogKey> {
+
+    /**
+     * Retention of a log row: applied as the Cassandra TTL (30 days) when the adapter writes it.
+     */
+    public static final int LOG_TTL_SECONDS = 2_592_000;
+
     @PrimaryKey
     private PlanLogKey id;
 

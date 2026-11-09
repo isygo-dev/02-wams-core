@@ -1,90 +1,84 @@
 package eu.isygoit.config;
 
 import eu.isygoit.i18n.helper.LocaleResolver;
-import feign.codec.Encoder;
-import feign.form.spring.SpringFormEncoder;
-import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import lombok.extern.slf4j.Slf4j;
+import org.jasypt.digest.StringDigester;
+import org.jasypt.encryption.StringEncryptor;
+import org.jasypt.util.password.PasswordEncryptor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cloud.openfeign.support.SpringEncoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.javamail.JavaMailSender;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * The type App config.
  */
+@Slf4j
 @Configuration
 @EnableCaching //https://docs.spring.io/spring-framework/reference/integration/cache/annotations.html
 @EnableConfigurationProperties(AppProperties.class)
 public class AppConfig {
 
-    private final AppProperties appProperties;
-
     /**
-     * Instantiates a new App config.
+     * Local resolver locale resolver.
      *
-     * @param appProperties the app properties
-     */
-    public AppConfig(AppProperties appProperties) {
-        this.appProperties = appProperties;
-    }
-
-    /**
-     * Gets local resolver.
-     *
-     * @return the local resolver
+     * @return the locale resolver
      */
     @Bean(name = "localResolver")
-    public LocaleResolver getLocalResolver() {
+    public LocaleResolver localResolver() {
         return new LocaleResolver();
     }
 
     /**
-     * Gets extended message map.
-     *
-     * @return the extended message map
-     */
-    @Bean("extendedMessageMap")
-    public Map<String, String> getExtendedMessageMap() {
-        return new HashMap<>();
-    }
-
-    /**
-     * Gets message map.
-     *
-     * @return the message map
-     */
-    @Bean("messageMap")
-    public Map<String, String> getMessageMap() {
-        return new HashMap<>();
-    }
-
-    /**
-     * Mail senders map.
+     * Extended message map map.
      *
      * @return the map
      */
-    @Bean
-    public Map<String, MailSender> mailSenders() {
+    @Bean("extendedMessageMap")
+    public Map<String, String> extendedMessageMap() {
         return new HashMap<>();
     }
 
     /**
-     * Feign form encoder encoder.
+     * Message map map.
      *
-     * @param converters the converters
-     * @return the encoder
+     * @return the map
      */
-    @Bean
-    Encoder feignFormEncoder(ObjectFactory<HttpMessageConverters> converters) {
-        //TODO try to add HashmapEncoder
-        return new SpringFormEncoder(new SpringEncoder(converters));
+    @Bean("messageMap")
+    public Map<String, String> messageMap() {
+        return new HashMap<>();
+    }
+
+    /**
+     * Peb encriptor map map.
+     *
+     * @return the map
+     */
+    @Bean("pebEncriptorMap")
+    public Map<String, StringEncryptor> pebEncriptorMap() {
+        return new HashMap<>();
+    }
+
+    /**
+     * Digest encriptor map map.
+     *
+     * @return the map
+     */
+    @Bean("digestEncriptorMap")
+    public Map<String, StringDigester> digestEncriptorMap() {
+        return new HashMap<>();
+    }
+
+    /**
+     * Password encriptor map map.
+     *
+     * @return the map
+     */
+    @Bean("passwordEncriptorMap")
+    public Map<String, PasswordEncryptor> passwordEncriptorMap() {
+        return new HashMap<>();
     }
 }

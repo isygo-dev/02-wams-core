@@ -1,0 +1,42 @@
+{
+  "tenant": "example-school",
+  "meta": {
+    "clientRef": "school-timetable-v2",
+    "version": "2.0",
+    "domainName": "school-timetable",
+    "locale": "en-US",
+    "timezone": "Europe/Paris"
+  },
+  "domain": {
+    "resourceTypes": [{ "id": "teacher", "attributes": ["name"] }],
+    "taskTypes": [{ "id": "lesson", "attributes": ["classId", "subject"] }],
+    "slotTypes": [{ "id": "period", "attributes": ["day"] }]
+  },
+  "horizon": { "start": "2026-09-07T06:00:00Z", "end": "2026-09-08T08:15:00Z", "tickSeconds": 900 },
+  "slots": [
+    { "id": "mon-p1", "typeId": "period", "label": "Mon 08:00", "start": "2026-09-07T06:00:00Z", "end": "2026-09-07T07:00:00Z", "cost": 0.0 },
+    { "id": "mon-p2", "typeId": "period", "label": "Mon 09:15", "start": "2026-09-07T07:15:00Z", "end": "2026-09-07T08:15:00Z", "cost": 0.0 },
+    { "id": "tue-p1", "typeId": "period", "label": "Tue 08:00", "start": "2026-09-08T06:00:00Z", "end": "2026-09-08T07:00:00Z", "cost": 1.0 },
+    { "id": "tue-p2", "typeId": "period", "label": "Tue 09:15", "start": "2026-09-08T07:15:00Z", "end": "2026-09-08T08:15:00Z", "cost": 1.0 }
+  ],
+  "resources": [
+    { "id": "teacher-alice", "typeId": "teacher", "name": "Alice Martin", "capacity": 1, "skills": ["math"] },
+    { "id": "teacher-bob",   "typeId": "teacher", "name": "Bob Laurent",  "capacity": 1, "skills": ["science"] }
+  ],
+  "tasks": [
+    { "id": "7a-math",    "typeId": "lesson", "tags": ["class-7A"], "startSlots": ["mon-p1", "tue-p1"],
+      "requirements": [{ "role": "teacher", "selector": { "skills": ["math"] } }] },
+    { "id": "7b-math",    "typeId": "lesson", "tags": ["class-7B"], "startSlots": ["mon-p1", "tue-p1"],
+      "requirements": [{ "role": "teacher", "selector": { "skills": ["math"] } }] },
+    { "id": "7a-science", "typeId": "lesson", "tags": ["class-7A"], "startSlots": ["mon-p2", "tue-p2"],
+      "requirements": [{ "role": "teacher", "selector": { "skills": ["science"] } }] },
+    { "id": "7b-science", "typeId": "lesson", "tags": ["class-7B"], "startSlots": ["mon-p2", "tue-p2"],
+      "requirements": [{ "role": "teacher", "selector": { "skills": ["science"] } }] }
+  ],
+  "constraints": [
+    { "id": "class-no-overlap", "type": "no_overlap", "enforcement": "STRICTLY_REQUIRED",
+      "scope": { "kind": "all" }, "params": { "groupByTagPrefix": "class-" } }
+  ],
+  "objectives": [ { "id": "slot-cost", "type": "minimize_slot_cost", "weight": 1 } ],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 2, "seed": 0 }
+}

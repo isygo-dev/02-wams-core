@@ -1,12 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <routes xmlns="http://camel.apache.org/schema/spring">
-    <route id="plan-log-publisher" autoStartup="true">
-        <from uri="direct:plan-log-queue"/>
-        <process ref="planLogKafkaProducerProcessor"/>
-    </route>
 
+    <!--
+        Offset is committed manually by PlanLogKafkaConsumerProcessor only after the Cassandra write succeeded.
+        Log persistence is best-effort: poison messages go straight to spring.kafka.topics.plan-logs-dlq, failed
+        Cassandra writes are retried with bounded exponential backoff (app.plan.kafka.retry.*) and then dead-lettered;
+        planLogDeadLetterProcessor commits the offset afterwards (even if the dead-letter publish fails) so logs never
+        stall. Batching the Cassandra writes is a possible future improvement.
+    -->
     <route id="plan-log-consumer" autoStartup="true">
-        <from uri="kafka:{{spring.kafka.topics.plan-logs}}?groupId={{spring.kafka.consumer.group-id}}-logs&amp;allowManualCommit=true&amp;consumersCount=1&amp;maxPollRecords=1&amp;breakOnFirstError=true&amp;autoOffsetReset=earliest"/>
+        <from uri="kafka:{{spring.kafka.topics.plan-logs}}?groupId={{spring.kafka.consumer.group-id}}-logs&amp;autoCommitEnable=false&amp;allowManualCommit=true&amp;consumersCount=1&amp;maxPollRecords=1&amp;maxPollIntervalMs={{app.plan.kafka.log-max-poll-interval-ms:300000}}&amp;breakOnFirstError=true&amp;autoOffsetReset=earliest"/>
+        <onException>
+            <exception>com.fasterxml.jackson.core.JsonProcessingException</exception>
+            <exception>eu.isygoit.async.camel.processor.PoisonMessageException</exception>
+            <exception>org.apache.camel.InvalidPayloadException</exception>
+            <exception>org.apache.camel.NoTypeConversionAvailableException</exception>
+            <redeliveryPolicy maximumRedeliveries="0"/>
+            <handled>
+                <constant>true</constant>
+            </handled>
+            <process ref="planLogDeadLetterProcessor"/>
+        </onException>
+        <onException>
+            <exception>java.lang.Exception</exception>
+            <redeliveryPolicy maximumRedeliveries="{{app.plan.kafka.retry.max-redeliveries:3}}"
+                              redeliveryDelay="{{app.plan.kafka.retry.initial-delay-ms:1000}}"
+                              useExponentialBackOff="true"
+                              backOffMultiplier="{{app.plan.kafka.retry.multiplier:2}}"
+                              maximumRedeliveryDelay="{{app.plan.kafka.retry.max-delay-ms:30000}}"
+                              logStackTrace="false"
+                              logRetryAttempted="true"
+                              retryAttemptedLogLevel="WARN"/>
+            <handled>
+                <constant>true</constant>
+            </handled>
+            <process ref="planLogDeadLetterProcessor"/>
+        </onException>
         <process ref="planLogKafkaConsumerProcessor"/>
     </route>
 </routes>

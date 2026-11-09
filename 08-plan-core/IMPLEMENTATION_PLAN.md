@@ -1,128 +1,184 @@
 # isygoPlan Implementation Plan
 
+## Authority: Edyra Pilot
+
+The reference is the Edyra Pilot (`10-edyra/03-edyra-pilot`, central config
+`10-edyra/09-docker/config-files/edyra-pilot-service.yml`, host `10-edyra/10-starter-test/03-edyra-pilot/01-pilot-service`).
+Where this document differs from the Edyra Pilot implementation (package layout, base classes, DTO/mapper/service/
+controller patterns, ApiPermission registration, Kafka mail/chat senders, cache config, next-code generation, security
+config, host starter), **the Edyra Pilot wins** and the plan code is refactored to it. This plan is subordinate to the
+pilot and any earlier statement in it that contradicts the pilot ("no API-permission model", "do not copy MMS-only
+mail/messaging") is superseded by this section. Only the parts without a pilot equivalent stay plan-specific: the
+solver/engine, the job/log Kafka-Camel pipeline and the Cassandra log store. Ports: plan-service `40417`, plan-ui `60607`.
+
+### Roadmap
+
+| Phase | Content | Status |
+|-------|---------|--------|
+| 0 | Make it run (host jar, Docker/Compose, central config aligned to the pilot, ports) | Done (written, unverified) |
+| 1 | Safety / reliability (limits, solve guard, retry/DLQ, dispatch claims, graceful shutdown, tenant scoping) | Done (written, unverified) |
+| 2 | Architecture refactor to the pilot (packages, base classes, DTO/mapper/service/controller, job identity, REST API, messaging, UI, docs; waves 1-4) | Done (written, unverified) |
+| 3 | Engine v2 | Todo |
+| 4 | UI | Todo |
+| 5 | Tests / operations | Todo |
+
+Nothing compiled yet: first build pending. Phases 0 to 2 were written by reading and editing sources only; no build,
+test, Docker or smoke run has happened.
+
 ## Scope and constraints
 
-- Replace the copied MMS service contents in `08-plan-core` with the generic planning service described in the request.
-- Preserve the MMS-style four-module layout: `01-plan-jpa`, `02-plan-shared`, `03-plan-starter-parent`, and
-  `04-plan-starter-ui`. Refactor package roots and class relationships to follow MMS: JPA models/repositories, shared
-  DTOs/APIs, parent services/controllers/mappers/configuration, and a thin UI starter with resources. Do not retain the
-  current `plan`-prefixed hexagonal package architecture as the final structure.
-- Use MMS stack inheritance and base classes where they fit the planning service's semantics, including
-  `AuditableEntity`/`AbstractEntity`, stack repository bases, shared service APIs, and mapped controller/service
-  patterns. Keep solver and planning behavior generic; do not copy MMS-only mail, tenancy, or messaging features.
+- The generic planning service replaces the copied MMS business content of `08-plan-core`.
+- Four-module layout, like the pilot: `01-plan-jpa`, `02-plan-shared`, `03-plan-starter-parent`, `04-plan-starter-ui`,
+  plus the runnable host `10-starter-test/80-plan-management/04-plan-service`.
+- Use the Edyra Pilot stack inheritance and base classes (`AuditableEntity`/`AbstractEntity`, stack repository bases,
+  shared service APIs, mapped controller/service/mapper patterns, ApiPermission registration, Kafka mail/chat senders,
+  Hazelcast cache config, next-code generation, security config). Solver and planning behavior stay generic.
 - Preserve the repository's existing Java and dependency-version management. Do not change the root `service-core` POM
-  or existing dependency versions; add versions only for newly introduced libraries that have no existing managed
-  version.
-- Keep solver-specific classes out of domain and application modules, process each Kafka job sequentially, persist
-  before acknowledging, and keep log persistence off the solve path.
-- Remove MMS-only packages, resources, and generated build output from this copied module.
-- Do not compile or run tests. Finish with source/configuration review only.
+  or existing dependency versions; add versions only for newly introduced libraries with no managed version.
+- Keep solver-specific classes out of the API/shared modules, process each Kafka job sequentially, persist before
+  acknowledging, and keep log persistence off the solve path.
+- Source/configuration review only until the first build: do not compile or run tests yet.
 
-## Ordered implementation steps
+## Target architecture (state after Phase 2)
 
-1. **Inventory the template** — compare the copied module with MMS, inspect its POMs, package layout, application entry
-   points, and inherited version management. Identify the minimum existing infrastructure that is genuinely reusable.
-2. **Adapt the existing four Maven modules** — retain JPA/shared/starter-parent/starter-UI, replace their MMS artifact
-   identities/dependencies, and keep the existing parent/version values.
-3. **Implement the planning IR** — add immutable generic task/resource/slot/constraint/objective/request/result models,
-   enforcement and relaxation policy types, options, validation errors, and a solver-independent solution model in the
-   shared module.
-4. **Implement shared APIs and services** — expose request/result DTOs and service APIs through MMS-style shared
-   packages; place implementation services and solver contracts in the starter-parent module.
-5. **Implement solver adapters** — add independent CP-SAT and Timefold packages in the starter-parent module, generic
-   supported constraint/objective handlers, optional-task selection, model validation, solver limits, and sequential
-   relaxation that never removes strictly-required constraints.
-6. **Implement persistence and messaging** — place entities and repositories in MMS-style `eu.isygoit.model` and
-   `eu.isygoit.repository` packages, then add Caffeine status cache, optional Redis behavior, and Camel-based Kafka
-   producers/consumers. Concrete Kafka producers must extend the shared `eu.isygoit.com.event` producer types; Camel
-   direct routes dispatch to typed processors that invoke those inherited producer methods, following the
-   `KafkaEmailSenderConsumerProcessor` pattern. Keep job processing sequential with manual acknowledgement after
-   persistence, make log publication best-effort, use a separate log consumer, and persist logs in Cassandra.
-7. **Implement controllers and bootstrap** — place shared service APIs in `eu.isygoit.api`, mapped controllers in the
-   starter-parent module, and a thin Spring Boot service runner/entry point in starter-ui, following MMS patterns where
-   compatible. Add service-specific resources modeled on `10-starter-test/80-plan-management/04-plan-service` (filtered
-   application metadata, optional Config Server import, banner, localization and logging resources), plus schemas,
-   examples, Spring profiles, native OR-Tools loading, Docker/Compose artifacts, README, and smoke-test script. Define
-   Camel routes in classpath XML and keep only route processors in Java; do not copy unrelated Hazelcast, mail,
-   WebSocket, upload, or template resources.
-8. **Remove copied MMS residue** — delete unrelated MMS UI, messaging, mail, WebSocket, model, resource, and
-   generated-target content; verify no MMS package or artifact references remain under `08-plan-core`.
-9. **Review against requirements** — inspect dependency directions, version changes, generic behavior, Camel-to-Kafka
-   route wiring and commit ordering, service runner/resource wiring, cache loader setup, Cassandra key/TTL/compaction
-   choices, production endpoint profile, and deliverable inventory. Do not compile or execute tests.
-10. **Refactor to MMS architecture** — migrate the existing planning implementation into the package and inheritance
-    conventions above without changing the four-module Maven hierarchy or losing planning behavior; remove obsolete
-    hexagonal package roots after their responsibilities have been relocated.
+### Identity model
+
+`PlanJob` has a `Long` id (surrogate key, used in REST paths, Kafka messages and the UI), a business `code`
+(`PLN-000001`, generated by the next-code service, unique per tenant) and an optional `clientRef` (idempotency key per
+tenant; `PlanningMeta.jobId` was renamed `clientRef`, at most 128 characters). Submitting an existing `clientRef` returns
+the existing job. All reads and writes are tenant-scoped (`TenantScope`).
+
+### Module and package map
+
+| Module | Packages |
+|--------|----------|
+| `01-plan-jpa` | `eu.isygoit.model` (`PlanJob`, `PlanLog`, `PlanLogKey`, `AppNextCode`, `ApiPermission`, `schema` constants), `eu.isygoit.repository` |
+| `02-plan-shared` | `eu.isygoit.api` (`PlanJobServiceApi`), `eu.isygoit.dto.request` (planning input), `eu.isygoit.dto.response` (results, capabilities, validation report, dashboard), `eu.isygoit.dto.data` (`PlanJobDto`, `PlanJobMinDto`, `LogEntry`, `LogBucket`), `eu.isygoit.enums`, `eu.isygoit.exception` (`JobNotFoundException`), `eu.isygoit.util` |
+| `03-plan-starter-parent` | `eu.isygoit.controller`, `eu.isygoit.service` and `.impl` / `.impl.planning`, `eu.isygoit.mapper`, `eu.isygoit.dto.tech`, `eu.isygoit.exception` and `.handler`, `eu.isygoit.config`, `eu.isygoit.solver` with `.cpsat` / `.timefold` / `.handler`, `eu.isygoit.async.kafka`, `eu.isygoit.async.camel.processor`, `eu.isygoit.remote`, `eu.isygoit.security.config` |
+| `04-plan-starter-ui` | Vaadin views, `PlanFeignService extends PlanJobServiceApi`, i18n bundles `i18n/plan/messages*.properties` |
+| host `04-plan-service` | `PlanStarter`, `application*.yml`, `camel/*.xml` consumer routes, `cache/hazelcast.xml`, `i18n`, `uploads` |
+
+There are no ports/adapters and no `JobStatus` type: services call the repositories directly and the status is
+`IEnumJobStatusCode.Types` (`CREATED`, `ACCEPTED`, `VALIDATING`, `NORMALIZING`, `SOLVING`, `STOPPING`, `SUCCEEDED`,
+`INFEASIBLE`, `FAILED`, `CANCELLED`).
+
+### REST API
+
+`eu.isygoit.api.PlanJobServiceApi` (`IMappedCrudApi<Long, PlanJobMinDto, PlanJobDto>`), served by `PlanJobController`
+at `/api/v1/private/plan/job`:
+
+| Endpoint | Purpose |
+|----------|---------|
+| inherited `GET` (paged), `/list`, `/filter`, `/{id}` | paged lists, filter, get one |
+| inherited `DELETE /{id}` | delete, terminal jobs only |
+| `POST /submit` | validate, persist (`CREATED`), dispatch; `202` with `PlanJobDto` |
+| `GET /{id}/request`, `PUT /{id}/request` | read / replace the request (replace only while `CREATED`) |
+| `GET /{id}/result` | solve result |
+| `GET /{id}/result/export?format=json\|csv` | result download |
+| `GET /{id}/logs?from&to&minLevel&limit` | job logs |
+| `POST /{id}/stop`, `POST /{id}/cancel` | stop an active solve / cancel a queued job |
+| `POST /validate` | validate without creating a job |
+| `GET /capabilities` | solvers, constraint and objective types |
+| `GET /dashboard?limit` | status counts and recent jobs |
+
+Generic create/update through the inherited CRUD are rejected with `405` (`OperationNotSupportedException`). Errors are
+rendered as `ApiError` by `PlanExceptionHandler` (extends the stack `ControllerExceptionHandler`; managed exceptions use
+their `@MsgLocale` keys resolved from the plan i18n bundles).
+
+### Messaging
+
+Job topic `isygo.plan.jobs`: key = job id, body `{"jobId":123,"tenant":"x"}` only; the worker loads the persisted
+request, so the request never travels on Kafka. Log topic `isygo.plan.logs` carries `LogEntry` JSON. Dead-letter topics
+`isygo.plan.jobs.dlq` and `isygo.plan.logs.dlq`. Producers are Spring beans (`PlanJobKafkaProducer`,
+`PlanLogKafkaProducer`, `PlanDeadLetterProducer`, plus the pilot e-mail and API-permission producers); the Camel routes
+in the host are consumer routes only (XML), dispatching to `PlanJobKafkaConsumerProcessor`,
+`PlanLogKafkaConsumerProcessor` and the dead-letter processors. The former publisher routes (`direct:plan-job-queue`,
+`direct:plan-log-queue`) were removed. Retry is bounded exponential backoff (`app.plan.kafka.retry.*`), then DLQ.
+
+### Caching
+
+The job status cache (Caffeine/Redis) was removed; PostgreSQL is read directly. The only cache infrastructure left is
+the pilot JCache over Hazelcast (`spring.cache.jcache.provider`, `cache/hazelcast.xml`) and the `CacheConfig`
+`CaffeineCacheManager` (no named caches declared). The Redis starter and all `app.plan.cache.*` / `spring.data.redis`
+/ Redis health settings were removed from the POM, the central config and Docker Compose.
+
+### Schema management
+
+Hibernate `ddl-auto: update` for the `plan` PostgreSQL schema (created by Hikari `connection-init-sql`), Spring Data
+`create-if-not-exists` (keyspace included) for Cassandra. No SQL/CQL/Flyway scripts. Log retention of 30 days is applied
+on every write through the Cassandra TTL (`InsertOptions`). Flyway is planned before the first production deployment
+(see Phase 5).
+
+### Phase 0/1 behaviours (unchanged)
+
+Request limits (`app.plan.limits.*`), solve concurrency guard, bounded retry with DLQ, dispatch claims and redispatch
+recovery, stale-job sweep, active-stop monitor, graceful shutdown and tenant scoping still apply.
+
+## Phase 2 waves
+
+- Wave 1: mechanical package relocation to the pilot layout (DTOs, enums, exceptions, config, solver, async, services).
+- Wave 2: schema management (Hibernate/Spring Data only; Flyway, SQL/CQL scripts and the compose `log-schema` service
+  removed), job identity (`Long` id + `PLN-` code via next-code service + optional `clientRef`).
+- Wave 3: service layer on repositories directly (ports/adapters and status cache removed), `PlanJobServiceApi` and
+  `PlanJobController`, slim Kafka job message, log TTL on write, publisher routes removed, `PlanExceptionHandler`
+  merged into the pilot exception mechanism.
+- Wave 4: UI on `PlanFeignService extends PlanJobServiceApi`; documentation, examples (smoke tests use
+  `POST /submit`, `meta.clientRef`, id polling, plus `/validate` and `/capabilities`), central config, POM, Compose and
+  i18n alignment (managed-exception keys added to the plan bundles).
+
+## Phase 0 - make it run (written, unverified)
+
+Goal: the host `10-starter-test/80-plan-management/04-plan-service` builds into a runnable jar and the whole stack
+starts with Docker Compose. Nothing below has been compiled, built or executed; verification was by reading only.
+
+- `09-docker/core-plan.Dockerfile` (in `02-wams-core` and `10-edyra`) copies the prebuilt host jar plus `target/uploads`
+  and `target/camel` (produced by the host POM), glibc `eclipse-temurin:17-jre` (OR-Tools natives), `MaxRAMPercentage=60`,
+  `/actuator/health` healthcheck.
+- Ports `40417` (plan-service) and `60607` (plan-ui); `plan.server.port=40417` in the cloud profiles.
+- `docker-compose.yml`: PostgreSQL, KRaft Kafka with `kafka-init` (`isygo.plan.jobs`, `.jobs.dlq`, `.logs`, `.logs.dlq`),
+  Cassandra, the plan service; named volumes, healthchecks, `service_healthy` dependencies; config mounted from
+  `10-edyra/09-docker/config-files/plan-service.yml`.
+- `plan-service.yml` / `plan-ui.yml` aligned to the Edyra Pilot (Hazelcast/JCache, pilot Kafka topics, `app.password`,
+  `app.create`, jasypt, JWT; no `spring.mail`, no Quartz).
+- README and `examples/` (smoke-test.ps1/.sh, golden scenarios G1 to G3).
+
+Remaining before Phase 0 can be called verified:
+
+- First build of the host jar and run of the compose stack; confirm `/actuator/health` is `UP`.
+- Run the smoke test and confirm G1 `OPTIMAL`, G2 `INFEASIBLE`, G3 `OPTIMAL`.
+- Confirm how the `/api/v1/private` JWT filter behaves with the mounted config (token requirement).
+- Decide whether the UI starter is added to a UI host.
+
+## Phase 5 / ops roadmap
+
+- Introduce a migration tool (Flyway) before the first production deployment, replacing Hibernate `ddl-auto: update`
+  (switch to `validate`) and provisioning the Cassandra keyspace with a production replication strategy.
+- Unit and integration tests, CI, observability.
 
 ## Known compatibility decisions
 
-- The current repository parent sets Java 17 and Spring Boot `3.0.7`. Those existing values are preserved as requested
-  rather than rewriting the parent to the separately listed future-version matrix.
-- The starter-parent and starter-ui POMs follow the MMS hierarchy: they inherit `service-stack-parent` and import
-  `service-core` dependency management. The JPA/shared modules inherit `plan-core`; solver version properties therefore
-  live in the starter-parent POM.
-- `maxRelaxation` is a binary setting: only `0` and `1` are valid; `1` authorizes dropping the whole constraint during
-  ordered relaxation, not partial violation. Keep request validation and the JSON schema aligned with this contract.
-- The new solver libraries will use the requested Java-17-compatible versions unless an already managed repository
-  version is found during inventory.
+- The `service-core` POM keeps a legacy `spring-boot.version` property of `3.0.7` (Java 17); the effective runtime
+  version is Spring Boot `3.5.16`, inherited through `service-stack-parent`.
+- The starter-parent and starter-ui POMs inherit `service-stack-parent` and import `service-core` dependency
+  management; the JPA/shared modules inherit `plan-core`; solver version properties live in the starter-parent POM.
+- `maxRelaxation` is binary: only `0` and `1` are valid; `1` authorizes dropping the whole constraint during ordered
+  relaxation.
 - Local/container services and cloud brokers are not assumed to be available during implementation.
-
-## MMS architecture refactor progress
-
-- JPA/Cassandra models and repository interfaces have started moving to `eu.isygoit.model` and `eu.isygoit.repository`;
-  the PostgreSQL job entity now uses the stack `AuditableEntity` base, and the Cassandra log model uses
-  `AbstractEntity`.
-- Persistence adapters have moved to the starter-parent `eu.isygoit.service.impl` package. The REST contract is now in
-  shared `eu.isygoit.api`, its controller and exception handler are in the starter-parent, and the UI entry point is now
-  the root-package `PlanStarter`.
-- The starter now has filtered application version metadata, optional Config Server import, a plan-specific banner,
-  OpenAPI metadata, and console plus rolling-file Logback configuration. These are selectively adapted from
-  `80-plan-management/04-plan-service`; no `ServiceStarter` API-extraction hook was added because this service has no
-  API-permission model or extractor.
-- `10-starter-test/80-plan-management/04-plan-service` is the runnable plan API and messaging host. It depends on
-  `plan-management-starter-parent`, uses the root-package Spring Boot entry point without the unrelated API-extractor hook,
-  and loads job/log publisher-consumer routes from `camel/plan-*-camel-routes.xml`. The duplicate route resources were
-  removed from `04-plan-starter-ui` so the same Kafka consumers are not started by both runtimes.
-- Java `RouteBuilder` classes were removed; typed producer/consumer processors retain serialization, persistence, and
-  manual-ack behavior, while Camel route definitions remain XML-only.
-- Remaining work: move the rest of the planning services, DTOs, enums and exceptions into the MMS shared/parent package
-  conventions; align service/controller inheritance and mapper patterns; review entity schemas and bootstrapping
-  configuration. The four-module Maven hierarchy and existing version management remain unchanged.
-- `PlanningService.normalizeAndValidate` now resolves the configured solver before job submission can persist or dispatch
-  the request. A new `PlanningServiceTest` covers request validation, unsupported solver/constraint rejection,
-  required/optional result consistency, capacity and eligibility checks, infeasible/unknown results, and solver errors.
-- Processing claims now stop duplicate workers from solving an already-claimed job, and unexpected solver runtime
-  failures are persisted as terminal failures. Created jobs persist their request JSON and are periodically redispatched
-  in both Kafka and local-executor modes, closing the crash window between creation and initial dispatch.
-- Apply `01-plan-jpa/src/main/resources/db/upgrade/plan-job-request-recovery.sql` before deploying this change; the
-  service uses `ddl-auto: validate` and does not auto-apply the new request-payload column.
-- `SolverOptions` now applies the same documented defaults to omitted fields in a partially specified options object.
-  The README no longer points to a JSON Schema path that is absent from the starter UI module.
-- Infeasible result lookups now reconstruct a `SolveResult` from the persisted diagnostics when no result JSON exists.
-  Generic input maps now retain JSON `null` values instead of failing during defensive copying.
-- The plan UI now follows the MMS starter pattern with dashboard shortcuts, a jobs grid/card management view, request
-  submission/edit dialogs, status-gated cancel/stop/delete actions, and a per-job log grid with a details dialog. The
-  runnable plan host has its own navigation provider, while the combined UI includes the plan targets in its registry.
-- Job edits are persisted only while `CREATED`; workers load the canonical persisted request after claiming the job.
-  Active solver stops use persisted `STOPPING` state, a scheduled cross-instance monitor, and CP-SAT/Timefold stop hooks.
-  Terminal deletion is a separate endpoint, preserving the existing queued-job `DELETE` cancellation contract; deleted
-  jobs' Cassandra logs are inaccessible through the API and expire under the 30-day TTL.
-- Added focused tests for job-state management and stop transitions. As previously requested, this phase is source-only:
-  do not compile or run tests.
-- Final source review still needs to address other remaining requirements. These changes do not alter the four-module
-  layout.
 
 ## Completion record
 
-| Step                                          | Status      |
-|-----------------------------------------------|-------------|
-| 1. Inventory the template                     | Done        |
-| 2. Adapt the existing four Maven modules      | Done        |
-| 3. Implement the planning IR                  | Done        |
-| 4. Implement application and engine contracts | Done        |
-| 5. Implement solver adapters                  | In progress |
-| 6. Implement infrastructure                   | In progress |
-| 7. Implement API and bootstrap                | In progress |
-| 8. Remove copied MMS residue                  | Done        |
-| 9. Review against requirements                | In progress |
-| 10. Refactor to MMS architecture              | In progress |
+| Step                                          | Status                     |
+|-----------------------------------------------|----------------------------|
+| 1. Inventory the template                     | Done                       |
+| 2. Adapt the existing four Maven modules      | Done                       |
+| 3. Implement the planning IR                  | Done                       |
+| 4. Implement application and engine contracts | Done                       |
+| 5. Implement solver adapters                  | Done (written, unverified) |
+| 6. Implement infrastructure                   | Done (written, unverified) |
+| 7. Implement API and bootstrap                | Done (written, unverified) |
+| 8. Remove copied MMS residue                  | Done                       |
+| 9. Review against requirements                | Pending first build        |
+| 10. Refactor to the pilot architecture        | Done (written, unverified) |
+| Phase 0. Make it run                          | Done (written, unverified) |
+| Phase 1. Safety / reliability                 | Done (written, unverified) |
+| Phase 2. Architecture refactor (waves 1-4)    | Done (written, unverified) |

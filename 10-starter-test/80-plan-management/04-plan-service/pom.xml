@@ -18,6 +18,11 @@
         <version>WS-1.0.261007-T1703</version>
     </parent>
 
+    <properties>
+        <!-- ortools-java 9.15 needs protobuf-java 4.x; the Spring Boot BOM would otherwise manage 3.25.x -->
+        <protobuf-java.version>4.33.1</protobuf-java.version>
+    </properties>
+
     <profiles>
         <profile>
             <id>build-dev-localhost</id>
@@ -63,10 +68,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>eu.isygo-it.services</groupId>
-                <artifactId>plan-management-starter-parent</artifactId>
-                <version>WC-1.0.261007-T1703</version>
-                <scope>import</scope>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf-java.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -78,17 +82,24 @@
             <version>WC-1.0.261007-T1703</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf-java.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
+        <!-- Produces target/plan-management-service-<version>.jar (executable Spring Boot jar) -->
+        <finalName>${project.artifactId}-${project.version}</finalName>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
                 <excludes>
+                    <!-- copied next to the jar below (Docker image copies target/uploads and target/camel) -->
                     <exclude>uploads/**/*.*</exclude>
-                    <!--                    <exclude>camel/**/*.*</exclude>-->
-                    <exclude>msgtemplate/**/*.*</exclude>
                 </excludes>
             </resource>
             <resource>
@@ -96,15 +107,11 @@
                 <filtering>true</filtering>
                 <targetPath>../uploads</targetPath>
             </resource>
-            <!--<resource>
+            <!-- the routes stay on the classpath too (camel.springboot.routes-include-pattern: classpath:camel/*.xml) -->
+            <resource>
                 <directory>src/main/resources/camel</directory>
                 <filtering>true</filtering>
                 <targetPath>../camel</targetPath>
-            </resource>-->
-            <resource>
-                <directory>src/main/resources/msgtemplate</directory>
-                <filtering>true</filtering>
-                <targetPath>../msgtemplate</targetPath>
             </resource>
         </resources>
 
@@ -114,19 +121,6 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
-                <configuration>
-                    <additionalClasspathElements>
-                        <additionalClasspathElement>../uploads/</additionalClasspathElement>
-                        <additionalClasspathElement>../camel/</additionalClasspathElement>
-                        <additionalClasspathElement>../template/</additionalClasspathElement>
-                    </additionalClasspathElements>
                 </configuration>
             </plugin>
 
@@ -152,11 +146,16 @@
                 <configuration>
                     <mainClass>eu.isygoit.PlanStarter</mainClass>
                     <executable>true</executable>
-                    <workingDirectory>target</workingDirectory>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
-
-
 </project>

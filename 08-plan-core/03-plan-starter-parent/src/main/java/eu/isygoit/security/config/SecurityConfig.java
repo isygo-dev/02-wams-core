@@ -3,8 +3,10 @@ package eu.isygoit.security.config;
 import eu.isygoit.jwt.filter.JwtKmsClientAuthFilter;
 import eu.isygoit.repository.ApiPermissionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,7 +17,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * The type Security config.
+ * Security configuration: stateless JWT authentication. Only probes, API docs and the error page are public;
+ * every other endpoint (notably {@code /api/**}) requires an authenticated caller.
  */
 @Configuration
 @EnableWebSecurity
@@ -24,7 +27,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class SecurityConfig {
 
     private final JwtKmsClientAuthFilter jwtAuthFilter;
+    // As in the pilot (the per-API role mapping built from t_api_permission is kept disabled there as well).
     private final ApiPermissionRepository apiPermissionRepository;
+
+    /**
+     * Comma separated list of origins allowed by CORS (never '*').
+     */
+    @Value("${app.security.cors-allowed-origins:http://localhost:8080,http://localhost:3000}")
+    private String[] corsAllowedOrigins;
 
     /**
      * Security filter chain security filter chain.
@@ -36,65 +46,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf()
-                .disable()
-                .authorizeHttpRequests()
-                .requestMatchers(
-                        "/api/v1/auth/**",
-                        "/v2/api-docs",
-                        "/v3/api-docs",
-                        "/v3/api-docs/**",
-                        "/swagger-resources",
-                        "/swagger-resources/**",
-                        "/configuration/ui",
-                        "/configuration/security",
-                        "/swagger-ui/**",
-                        "/webjars/**",
-                        "/swagger-ui.html"
-                )
-                .permitAll()
-                .requestMatchers("**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                /*.logout()
-                .logoutUrl("/api/v1/auth/logout")
-                .addLogoutHandler(logoutHandler)*/;
-
-        /*http.authorizeHttpRequests((authz) -> {
-                    //permit
-                    authz.requestMatchers(
-                                    "/api/v1/auth/**",
-                                    "/v2/api-docs",
-                                    "/v3/api-docs",
-                                    "/v3/api-docs/**",
-                                    "/swagger-resources",
-                                    "/swagger-resources/**",
-                                    "/configuration/ui",
-                                    "/configuration/security",
-                                    "/swagger-ui/**",
-                                    "/webjars/**",
-                                    "/swagger-ui.html",
-                                    "/public/**"
-                            ).permitAll()
-                            .requestMatchers("**")
-                            .permitAll();
-                    //permit authenticated
-                    List<ApiPermission> listApis = apiPermissionRepository.findAll();
-                    if (!CollectionUtils.isEmpty(listApis)) {
-                        listApis.stream().forEach(apiPermission -> {
-                            authz.requestMatchers(apiPermission.getPath()).hasRole(apiPermission.getRole());
-                        });
-                    }
-                    authz.anyRequest().authenticated();
-                }
-        ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-         */
+                .cors(Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/health/**",
+                                "/actuator/info",
+                                "/error",
+                                "/v2/api-docs",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/swagger-resources",
+                                "/swagger-resources/**",
+                                "/configuration/ui",
+                                "/configuration/security",
+                                "/swagger-ui/**",
+                                "/webjars/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -105,15 +79,14 @@ public class SecurityConfig {
      */
     @Bean
     public WebMvcConfigurer configure() {
+        final String[] origins = corsAllowedOrigins.clone();
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry reg) {
                 reg.addMapping("/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("*")
-                        .allowedHeaders("*")
-                ;
-
+                        .allowedOrigins(origins)
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("Authorization", "Content-Type", "Accept", "X-Requested-With");
             }
         };
     }

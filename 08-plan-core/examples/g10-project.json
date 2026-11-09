@@ -1,0 +1,18 @@
+{
+  "tenant": "example-construction",
+  "meta": { "clientRef": "golden-g10", "version": "2.0", "domainName": "project", "timezone": "UTC" },
+  "horizon": { "start": "2026-09-01T00:00:00Z", "end": "2026-09-21T00:00:00Z", "tickSeconds": 86400 },
+  "resources": [ { "id": "crew-pool", "typeId": "pool", "name": "Excavator crews", "capacity": 2 } ],
+  "tasks": [
+    { "id": "A", "name": "Survey north", "duration": 4, "demand": 1, "requirements": [{ "role": "crew", "selector": { "resourceIds": ["crew-pool"] } }] },
+    { "id": "B", "name": "Survey south", "duration": 4, "demand": 1, "requirements": [{ "role": "crew", "selector": { "resourceIds": ["crew-pool"] } }] },
+    { "id": "C", "name": "Heavy digging", "duration": 4, "demand": 2, "requirements": [{ "role": "crew", "selector": { "resourceIds": ["crew-pool"] } }] },
+    { "id": "D", "name": "Backfill", "duration": 2, "demand": 1, "requirements": [{ "role": "crew", "selector": { "resourceIds": ["crew-pool"] } }],
+      "predecessors": [{ "taskId": "A" }, { "taskId": "B" }] },
+    { "id": "E", "name": "Inspection", "duration": 1, "demand": 1, "deadline": "2026-09-13T00:00:00Z",
+      "requirements": [{ "role": "crew", "selector": { "resourceIds": ["crew-pool"] } }],
+      "predecessors": [{ "taskId": "C", "minLag": 0 }, { "taskId": "D", "minLag": 0 }] }
+  ],
+  "objectives": [ { "id": "makespan", "type": "minimize_makespan", "weight": 1 } ],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 2 }
+}

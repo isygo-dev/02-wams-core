@@ -10,7 +10,7 @@
  *   --module-accent-strong   text/icon colour on light tints (AA contrast)
  *   --wams-module-accent(-gradient)
  *
- * Each of the 12 modules has its own hue (no two share an accent). To add a module, add one row to $wams-modules.
+ * Each of the 13 modules has its own hue (no two share an accent). To add a module, add one row to $wams-modules.
  */
 
 // key: (accent, light stop of the gradient, strong text colour, strong text colour in dark mode)
@@ -26,7 +26,8 @@ $wams-modules: (
         "edyra-pilot": (#f59e0b, #fbbf24, #b45309, #fcd34d),
         "edyra-radar": (#84cc16, #a3e635, #4d7c0f, #bef264),
         "edyra-spark": (#3b82f6, #60a5fa, #1d4ed8, #93c5fd),
-        "edyra-hub": (#f97316, #fb923c, #c2410c, #fdba74)
+        "edyra-hub": (#f97316, #fb923c, #c2410c, #fdba74),
+        "plan": (#eab308, #facc15, #a16207, #fde047)
 );
 
 @each $key, $c in $wams-modules {

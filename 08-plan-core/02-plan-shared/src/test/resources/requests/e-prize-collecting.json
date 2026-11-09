@@ -1,0 +1,16 @@
+{
+  "tenant": "example-field-service",
+  "meta": { "clientRef": "prize-5", "version": "2.0", "domainName": "field-service", "timezone": "UTC" },
+  "horizon": { "start": "2026-09-07T08:00:00Z", "end": "2026-09-07T16:00:00Z", "tickSeconds": 60 },
+  "resources": [ { "id": "tech-1", "typeId": "technician", "capacity": 1 } ],
+  "tasks": [
+    { "id": "P1", "duration": 120, "required": false, "prize": 50 },
+    { "id": "P2", "duration": 180, "required": false, "prize": 80 },
+    { "id": "P3", "duration": 240, "required": false, "prize": 90 },
+    { "id": "P4", "duration":  90, "required": false, "prize": 30 },
+    { "id": "P5", "duration": 150, "required": false, "prize": 60 }
+  ],
+  "constraints": [],
+  "objectives": [],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 2 }
+}

@@ -1,0 +1,32 @@
+{
+  "tenant": "example-tenant",
+  "meta": {
+    "clientRef": "golden-g5",
+    "version": "2.0",
+    "domainName": "workshop",
+    "locale": "en-US",
+    "timezone": "UTC"
+  },
+  "horizon": { "start": "2026-09-07T08:00:00Z", "end": "2026-09-07T09:00:00Z", "tickSeconds": 60 },
+  "resources": [
+    { "id": "M1", "typeId": "machine", "name": "Machine 1", "capacity": 1 }
+  ],
+  "tasks": [
+    { "id": "A", "duration": 4, "requirements": [{ "role": "machine", "selector": { "resourceIds": ["M1"] } }] },
+    { "id": "B", "duration": 4, "requirements": [{ "role": "machine", "selector": { "resourceIds": ["M1"] } }] }
+  ],
+  "constraints": [
+    { "id": "deadline-A", "type": "time_window", "enforcement": "RELAXABLE_WITH_AUTHORIZATION",
+      "scope": { "kind": "task", "value": "A" },
+      "params": { "latestEnd": "2026-09-07T08:06:00Z" },
+      "relaxation": { "authorized": true, "priority": 5, "maxRelaxation": 1.0 } },
+    { "id": "deadline-B", "type": "time_window", "enforcement": "RELAXABLE_WITH_AUTHORIZATION",
+      "scope": { "kind": "task", "value": "B" },
+      "params": { "latestEnd": "2026-09-07T08:06:00Z" },
+      "relaxation": { "authorized": true, "priority": 0, "maxRelaxation": 1.0 } }
+  ],
+  "objectives": [
+    { "id": "makespan", "type": "minimize_makespan", "weight": 1 }
+  ],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 2, "seed": 0, "deterministic": true }
+}

@@ -1,6 +1,8 @@
 package eu.isygoit;
 
 import eu.isygoit.annotation.IgnoreRepository;
+import eu.isygoit.api.IApiExtractor;
+import eu.isygoit.app.ApplicationContextService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.boot.SpringApplication;
@@ -31,7 +33,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "classpath:i18n/messages.properties",
         "classpath:i18n/plan/messages.properties"
 })
-public class PlanStarter {
+public class PlanStarter extends ServiceStarter {
+
+    protected PlanStarter(ApplicationContextService applicationContextService, IApiExtractor apiExtractor) {
+        super(applicationContextService, apiExtractor);
+    }
 
     /**
      * The entry point of application.

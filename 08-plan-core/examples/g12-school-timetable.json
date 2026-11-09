@@ -1,0 +1,56 @@
+{
+  "tenant": "example-school",
+  "meta": {
+    "clientRef": "school-timetable-v2",
+    "version": "2.0",
+    "domainName": "school-timetable",
+    "locale": "en-US",
+    "timezone": "Europe/Paris"
+  },
+  "domain": {
+    "resourceTypes": [{ "id": "teacher", "attributes": ["name"] }],
+    "taskTypes": [{ "id": "lesson", "attributes": ["classId", "subject"] }],
+    "slotTypes": [{ "id": "period", "attributes": ["day", "periodNumber"] }]
+  },
+  "horizon": { "start": "2026-09-07T06:00:00Z", "end": "2026-09-08T08:15:00Z", "tickSeconds": 900 },
+  "slots": [
+    { "id": "mon-p1", "typeId": "period", "label": "08:00-09:00", "start": "2026-09-07T06:00:00Z", "end": "2026-09-07T07:00:00Z", "cost": 0.0,
+      "attributes": { "day": "Monday", "periodNumber": 1 } },
+    { "id": "mon-p2", "typeId": "period", "label": "09:15-10:15", "start": "2026-09-07T07:15:00Z", "end": "2026-09-07T08:15:00Z", "cost": 0.0,
+      "attributes": { "day": "Monday", "periodNumber": 2 } },
+    { "id": "tue-p1", "typeId": "period", "label": "08:00-09:00", "start": "2026-09-08T06:00:00Z", "end": "2026-09-08T07:00:00Z", "cost": 1.0,
+      "attributes": { "day": "Tuesday", "periodNumber": 1 } },
+    { "id": "tue-p2", "typeId": "period", "label": "09:15-10:15", "start": "2026-09-08T07:15:00Z", "end": "2026-09-08T08:15:00Z", "cost": 1.0,
+      "attributes": { "day": "Tuesday", "periodNumber": 2 } }
+  ],
+  "resources": [
+    { "id": "teacher-alice", "typeId": "teacher", "name": "Alice Martin", "capacity": 1, "skills": ["math"] },
+    { "id": "teacher-bob", "typeId": "teacher", "name": "Bob Laurent", "capacity": 1, "skills": ["science"] }
+  ],
+  "tasks": [
+    { "id": "7a-math", "typeId": "lesson", "name": "7A Math", "duration": 4, "tags": ["class-7A"],
+      "startSlots": ["mon-p1", "tue-p1"],
+      "requirements": [{ "role": "teacher", "selector": { "skills": ["math"] } }],
+      "attributes": { "classId": "7A", "subject": "Math" } },
+    { "id": "7b-math", "typeId": "lesson", "name": "7B Math", "duration": 4, "tags": ["class-7B"],
+      "startSlots": ["mon-p1", "tue-p1"],
+      "requirements": [{ "role": "teacher", "selector": { "skills": ["math"] } }],
+      "attributes": { "classId": "7B", "subject": "Math" } },
+    { "id": "7a-science", "typeId": "lesson", "name": "7A Science", "duration": 4, "tags": ["class-7A"],
+      "startSlots": ["mon-p2", "tue-p2"],
+      "requirements": [{ "role": "teacher", "selector": { "skills": ["science"] } }],
+      "attributes": { "classId": "7A", "subject": "Science" } },
+    { "id": "7b-science", "typeId": "lesson", "name": "7B Science", "duration": 4, "tags": ["class-7B"],
+      "startSlots": ["mon-p2", "tue-p2"],
+      "requirements": [{ "role": "teacher", "selector": { "skills": ["science"] } }],
+      "attributes": { "classId": "7B", "subject": "Science" } }
+  ],
+  "constraints": [
+    { "id": "class-no-overlap", "type": "no_overlap", "enforcement": "STRICTLY_REQUIRED",
+      "scope": { "kind": "all" }, "params": { "groupByTagPrefix": "class-" } }
+  ],
+  "objectives": [
+    { "id": "prefer-earlier-week-slots", "type": "minimize_slot_cost", "weight": 1 }
+  ],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 30, "numWorkers": 4, "seed": 0 }
+}

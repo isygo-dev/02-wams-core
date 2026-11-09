@@ -8,6 +8,9 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.layout.BaseMainLayout;
 
+/**
+ * Planning module shell: header, drawer navigation (dashboard, jobs, logs) and the {@code plan} module accent.
+ */
 @CssImport("./styles/plan.scss")
 public class PlanMainLayout extends BaseMainLayout {
 

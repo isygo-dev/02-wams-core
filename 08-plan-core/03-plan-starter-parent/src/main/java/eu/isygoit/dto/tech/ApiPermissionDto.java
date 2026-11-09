@@ -1,0 +1,16 @@
+package eu.isygoit.dto.tech;
+
+import eu.isygoit.dto.extendable.ApiPermissionModelDto;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+@Data
+@SuperBuilder
+@AllArgsConstructor
+@NoArgsConstructor
+public class ApiPermissionDto extends ApiPermissionModelDto<Long> {
+
+    private Long id;
+}

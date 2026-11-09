@@ -1,0 +1,22 @@
+{
+  "tenant": "example-workshop",
+  "meta": { "clientRef": "jobshop-3x2", "version": "2.0", "domainName": "workshop", "timezone": "UTC" },
+  "horizon": { "start": "2026-09-07T08:00:00Z", "end": "2026-09-07T16:00:00Z", "tickSeconds": 60 },
+  "resources": [
+    { "id": "M1", "typeId": "machine", "name": "Cutting", "capacity": 1 },
+    { "id": "M2", "typeId": "machine", "name": "Assembly", "capacity": 1 }
+  ],
+  "tasks": [
+    { "id": "A1", "duration": 30, "tags": ["job-A"], "requirements": [{ "role": "machine", "selector": { "resourceIds": ["M1"] } }] },
+    { "id": "A2", "duration": 20, "tags": ["job-A"], "requirements": [{ "role": "machine", "selector": { "resourceIds": ["M2"] } }],
+      "predecessors": [{ "taskId": "A1", "type": "FINISH_START", "minLag": 0 }] },
+    { "id": "B1", "duration": 25, "tags": ["job-B"], "requirements": [{ "role": "machine", "selector": { "resourceIds": ["M2"] } }] },
+    { "id": "B2", "duration": 15, "tags": ["job-B"], "requirements": [{ "role": "machine", "selector": { "resourceIds": ["M1"] } }],
+      "predecessors": [{ "taskId": "B1" }] },
+    { "id": "C1", "duration": 20, "tags": ["job-C"], "requirements": [{ "role": "machine", "selector": { "resourceIds": ["M1"] } }] },
+    { "id": "C2", "duration": 30, "tags": ["job-C"], "requirements": [{ "role": "machine", "selector": { "resourceIds": ["M2"] } }],
+      "predecessors": [{ "taskId": "C1" }] }
+  ],
+  "objectives": [ { "id": "makespan", "type": "minimize_makespan", "weight": 1 } ],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 4, "deterministic": true }
+}

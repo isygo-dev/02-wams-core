@@ -1,0 +1,28 @@
+{
+  "tenant": "example-tenant",
+  "meta": {
+    "clientRef": "golden-g14",
+    "version": "2.0",
+    "domainName": "workshop",
+    "locale": "en-US",
+    "timezone": "UTC"
+  },
+  "horizon": { "start": "2026-09-07T08:00:00Z", "end": "2026-09-07T10:00:00Z", "tickSeconds": 60 },
+  "setupMatrices": [
+    { "id": "paint-setup", "defaultTicks": 5, "sameClassTicks": 0, "entries": [] }
+  ],
+  "resources": [
+    { "id": "press-1", "typeId": "machine", "name": "Press 1", "capacity": 1, "setupMatrixId": "paint-setup" }
+  ],
+  "tasks": [
+    { "id": "A1", "duration": 10, "setupClass": "A", "requirements": [{ "role": "machine", "selector": { "resourceIds": ["press-1"] } }] },
+    { "id": "A2", "duration": 10, "setupClass": "A", "requirements": [{ "role": "machine", "selector": { "resourceIds": ["press-1"] } }] },
+    { "id": "B1", "duration": 10, "setupClass": "B", "requirements": [{ "role": "machine", "selector": { "resourceIds": ["press-1"] } }] }
+  ],
+  "constraints": [],
+  "objectives": [
+    { "id": "makespan", "type": "minimize_makespan", "weight": 1, "tier": 0 },
+    { "id": "setup", "type": "minimize_setup", "weight": 1, "tier": 1 }
+  ],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 2, "seed": 0, "deterministic": true }
+}

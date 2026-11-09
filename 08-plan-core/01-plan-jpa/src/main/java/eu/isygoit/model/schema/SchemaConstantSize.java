@@ -7,15 +7,9 @@ import eu.isygoit.enums.IEnumJobStatusCode;
  */
 public interface SchemaConstantSize extends ComSchemaConstantSize {
 
-    /**
-     * The constant CHAT_MESSAGE.
-     */
-    int CHAT_MESSAGE = 512;
-    /**
-     * The constant FROM_FULL_NAME.
-     */
-    int FROM_FULL_NAME = 128;
-
     int PLAN_JOB_STATUS = IEnumJobStatusCode.STR_ENUM_SIZE;
     int PLAN_ERROR_CODE = 128;
+    int PLAN_MESSAGE = 1000;
+    int PLAN_CLIENT_REF = 128;
+    int PLAN_ENGINE = 64;
 }

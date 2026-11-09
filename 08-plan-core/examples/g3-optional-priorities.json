@@ -1,0 +1,42 @@
+{
+  "tenant": "example-tenant",
+  "meta": {
+    "clientRef": "golden-g3",
+    "version": "2.0",
+    "domainName": "lab-sessions",
+    "locale": "en-US",
+    "timezone": "Europe/Paris"
+  },
+  "domain": {
+    "resourceTypes": [{ "id": "lab", "attributes": ["name"] }],
+    "taskTypes": [{ "id": "session", "attributes": ["name"] }],
+    "slotTypes": [{ "id": "period", "attributes": ["label"] }]
+  },
+  "horizon": { "start": "2026-09-07T06:00:00Z", "end": "2026-09-07T08:00:00Z", "tickSeconds": 3600 },
+  "slots": [
+    { "id": "slot-1", "typeId": "period", "label": "Mon 08:00", "start": "2026-09-07T06:00:00Z", "end": "2026-09-07T07:00:00Z", "cost": 0.0 },
+    { "id": "slot-2", "typeId": "period", "label": "Mon 09:00", "start": "2026-09-07T07:00:00Z", "end": "2026-09-07T08:00:00Z", "cost": 0.0 }
+  ],
+  "resources": [
+    { "id": "lab-1", "typeId": "lab", "name": "Lab 1", "capacity": 1, "skills": ["lab"] }
+  ],
+  "tasks": [
+    { "id": "mandatory-session", "typeId": "session", "name": "Mandatory session", "required": true,
+      "startSlots": ["slot-1", "slot-2"],
+      "requirements": [{ "role": "lab", "selector": { "skills": ["lab"] } }] },
+    { "id": "optional-high", "typeId": "session", "name": "Optional, priority 9", "required": false, "priority": 9,
+      "startSlots": ["slot-1", "slot-2"],
+      "requirements": [{ "role": "lab", "selector": { "skills": ["lab"] } }] },
+    { "id": "optional-medium", "typeId": "session", "name": "Optional, priority 5", "required": false, "priority": 5,
+      "startSlots": ["slot-1", "slot-2"],
+      "requirements": [{ "role": "lab", "selector": { "skills": ["lab"] } }] },
+    { "id": "optional-low", "typeId": "session", "name": "Optional, priority 1", "required": false, "priority": 1,
+      "startSlots": ["slot-1", "slot-2"],
+      "requirements": [{ "role": "lab", "selector": { "skills": ["lab"] } }] }
+  ],
+  "constraints": [],
+  "objectives": [
+    { "id": "prefer-high-priority", "type": "maximize_task_priority", "weight": 1 }
+  ],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 2, "seed": 0 }
+}

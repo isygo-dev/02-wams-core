@@ -1,0 +1,27 @@
+{
+  "tenant": "example-hospital",
+  "meta": { "clientRef": "golden-g9", "version": "2.0", "domainName": "roster", "timezone": "UTC" },
+  "horizon": { "start": "2026-09-07T00:00:00Z", "end": "2026-09-10T00:00:00Z", "tickSeconds": 3600 },
+  "resources": [
+    { "id": "ana",  "typeId": "nurse", "skills": ["nurse", "icu"] },
+    { "id": "ben",  "typeId": "nurse", "skills": ["nurse"] },
+    { "id": "cleo", "typeId": "nurse", "skills": ["nurse"],
+      "unavailable": [{ "start": "2026-09-07T08:00:00Z", "end": "2026-09-07T16:00:00Z" }] }
+  ],
+  "tasks": [
+    { "id": "d0-day",   "duration": 8, "pin": { "start": "2026-09-07T08:00:00Z" }, "requirements": [{ "role": "nurse", "selector": { "skills": ["nurse"] } }] },
+    { "id": "d0-night", "duration": 8, "pin": { "start": "2026-09-07T22:00:00Z" }, "requirements": [{ "role": "nurse", "selector": { "skills": ["nurse"] } }] },
+    { "id": "d1-day",   "duration": 8, "pin": { "start": "2026-09-08T08:00:00Z" }, "requirements": [{ "role": "nurse", "selector": { "skills": ["nurse"] } }] },
+    { "id": "d1-night", "duration": 8, "pin": { "start": "2026-09-08T22:00:00Z" }, "requirements": [{ "role": "nurse", "selector": { "skills": ["nurse", "icu"] } }] },
+    { "id": "d2-day",   "duration": 8, "pin": { "start": "2026-09-09T08:00:00Z" }, "requirements": [{ "role": "nurse", "selector": { "skills": ["nurse"] } }] }
+  ],
+  "constraints": [
+    { "id": "rest-11h", "type": "min_rest", "enforcement": "STRICTLY_REQUIRED", "scope": { "kind": "all" }, "params": { "minRestTicks": 11 } },
+    { "id": "one-shift-per-day", "type": "max_load_per_period", "enforcement": "STRICTLY_REQUIRED", "scope": { "kind": "all" },
+      "params": { "period": { "unit": "DAY" }, "metric": "TICKS", "max": 8 } },
+    { "id": "max-2-days-in-a-row", "type": "max_consecutive", "enforcement": "SOFT", "weight": 10, "scope": { "kind": "all" },
+      "params": { "period": { "unit": "DAY" }, "max": 2 } }
+  ],
+  "objectives": [ { "id": "fair", "type": "minimize_max_load", "weight": 1, "params": { "metric": "TICKS" } } ],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 2, "deterministic": true }
+}

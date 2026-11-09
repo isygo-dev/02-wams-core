@@ -27,7 +27,7 @@ public class PlanLogKey implements Serializable, ITenantAssignable {
             ordinal = 1,
             type = PrimaryKeyType.PARTITIONED
     )
-    private UUID jobId;
+    private Long jobId;
 
     @PrimaryKeyColumn(
             name = SchemaColumnConstantName.C_TENANT,

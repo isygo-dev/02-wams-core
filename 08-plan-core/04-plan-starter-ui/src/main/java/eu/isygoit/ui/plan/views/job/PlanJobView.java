@@ -2,78 +2,99 @@ package eu.isygoit.ui.plan.views.job;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
+import eu.isygoit.async.ContextAwareAsync;
+import eu.isygoit.dto.data.PlanJobDto;
 import eu.isygoit.enums.IEnumJobStatusCode;
 import eu.isygoit.i18n.I18n;
-import eu.isygoit.plan.domain.JobStatus;
 import eu.isygoit.remote.plan.PlanFeignService;
+import eu.isygoit.ui.common.component.FloatingRefreshButton;
 import eu.isygoit.ui.common.component.PageHeader;
+import eu.isygoit.ui.common.dialog.DialogLayout;
+import eu.isygoit.ui.common.notification.AppNotifications;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.plan.common.PlanErrors;
+import eu.isygoit.ui.plan.common.PlanJobStatusRules;
+import eu.isygoit.ui.plan.common.PlanPush;
 import eu.isygoit.ui.plan.layout.PlanMainLayout;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Full page of one planning job (route {@code plan/job/:id}): the same information as the details dialog
+ * (shared {@link PlanJobInfo} grids), the status-gated actions of the cards ({@link PlanJobActions} and
+ * {@link PlanJobStatusRules}) and the raw JSON result. The refresh action is the shared floating button.
+ *
+ * <p><b>Polling.</b> While the job is not finished the page polls its status every few seconds. The UI-wide poll
+ * interval is shared by the whole UI, so this view sets it only while it is attached and the job is running,
+ * removes its own poll listener and resets the interval on detach (and only when it was the one that set it),
+ * so a stale instance can never leave polling switched on. The contract has no lighter status call, so the
+ * poll reads the job through {@code findById}.</p>
+ */
 @Slf4j
 @SpringComponent
 @RouteScope
 @Route(value = "plan/job", layout = PlanMainLayout.class)
 @PermitAll
-public class PlanJobView extends ManagementVerticalView
-        implements HasUrlParameter<String>, BeforeLeaveObserver {
-    private static final int POLL_INTERVAL_MILLIS = 3000;
-    private static final DateTimeFormatter DATE_FORMAT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
+public class PlanJobView extends ManagementVerticalView implements HasUrlParameter<String> {
 
-    private final PlanFeignService planFeignService;
+    private static final int POLL_INTERVAL_MILLIS = 3000;
+
+    private final PlanFeignService service;
     private final ObjectMapper objectMapper;
-    private final UI ui;
-    private final Span statusBadge = new Span();
-    private final Span jobIdValue = new Span();
-    private final Span submittedValue = new Span();
-    private final Span startedValue = new Span();
-    private final Span completedValue = new Span();
-    private final Span messageValue = new Span();
+    private final PlanJobActions actions;
+    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::refreshStatus);
+    private final Div infoHolder = new Div();
+    private final HorizontalLayout actionsBar = new HorizontalLayout();
     private final TextArea resultText = new TextArea();
-    private UUID jobId;
+    private final AtomicBoolean loading = new AtomicBoolean();
+    private Long jobId;
+    private PlanJobDto current;
     private Registration pollRegistration;
+    private UI pollUi;
 
     @Autowired
-    public PlanJobView(PlanFeignService planFeignService, ObjectMapper objectMapper) {
-        this.planFeignService = planFeignService;
+    public PlanJobView(PlanFeignService service, ObjectMapper objectMapper) {
+        this.service = service;
         this.objectMapper = objectMapper;
-        this.ui = UI.getCurrent();
+        this.actions = new PlanJobActions(service, objectMapper);
+        PlanPush.ensure(UI.getCurrent());
+
         setSizeFull();
         setPadding(true);
         setSpacing(true);
         addClassName("plan-job-view");
         add(new PageHeader("plan.ui.job.title", "plan.ui.job.subtitle"));
-        add(buildSummary());
-        add(buildActions());
+
+        infoHolder.setWidthFull();
+        actionsBar.addClassName("plan-job-actions");
+        actionsBar.setWidthFull();
+
         resultText.setLabel(I18n.t("plan.ui.result.title"));
         resultText.setReadOnly(true);
         resultText.setWidthFull();
-        resultText.setMinHeight("24rem");
-        resultText.addClassName("plan-job-result");
-        add(resultText);
+        resultText.addClassName("plan-json-editor");
+        DialogLayout.tall(resultText);
+
+        add(infoHolder, actionsBar, resultText, refreshButton);
     }
 
     @Override
@@ -83,89 +104,95 @@ public class PlanJobView extends ManagementVerticalView
 
     @Override
     public void setParameter(BeforeEvent event, String parameter) {
+        Long parsed;
         try {
-            jobId = UUID.fromString(parameter);
-            jobIdValue.setText(jobId.toString());
-            resultText.setValue("");
-            startPolling();
-            refreshStatus();
-        } catch (IllegalArgumentException exception) {
-            Notification.show(I18n.t("plan.ui.job.id.invalid"));
-        }
-    }
-
-    @Override
-    public void beforeLeave(BeforeLeaveEvent event) {
-        stopPolling();
-    }
-
-    private Div buildSummary() {
-        Div summary = new Div();
-        summary.addClassName("plan-job-summary");
-        summary.add(summaryRow(I18n.t("plan.ui.jobs.id"), jobIdValue));
-        summary.add(summaryRow(I18n.t("plan.ui.jobs.status"), statusBadge));
-        summary.add(summaryRow(I18n.t("plan.ui.jobs.submitted"), submittedValue));
-        summary.add(summaryRow(I18n.t("plan.ui.jobs.started"), startedValue));
-        summary.add(summaryRow(I18n.t("plan.ui.jobs.completed"), completedValue));
-        summary.add(new H3(I18n.t("plan.ui.jobs.message")));
-        summary.add(messageValue);
-        return summary;
-    }
-
-    private HorizontalLayout summaryRow(String label, Span value) {
-        Span key = new Span(label);
-        key.addClassName("plan-job-summary__label");
-        value.addClassName("plan-job-summary__value");
-        HorizontalLayout row = new HorizontalLayout(key, value);
-        row.setWidthFull();
-        row.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
-        row.addClassName("plan-job-summary__row");
-        return row;
-    }
-
-    private HorizontalLayout buildActions() {
-        Button refresh = new Button(I18n.t("plan.ui.job.refresh"), VaadinIcon.REFRESH.create());
-        refresh.addClickListener(event -> refreshStatus());
-        Button loadResult = new Button(I18n.t("plan.ui.result.load"), VaadinIcon.FILE_TEXT.create());
-        loadResult.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        loadResult.addClickListener(event -> loadResult());
-        Button logs = new Button(I18n.t("plan.ui.logs.open"), VaadinIcon.LIST.create());
-        logs.addClickListener(event -> {
-            if (jobId != null) {
-                getUI().ifPresent(ui -> ui.navigate("plan/logs?jobId=" + jobId));
-            }
-        });
-        HorizontalLayout actions = new HorizontalLayout(refresh, loadResult, logs);
-        actions.addClassName("plan-job-actions");
-        return actions;
-    }
-
-    private void refreshStatus() {
-        if (jobId == null) {
+            parsed = Long.valueOf(parameter == null ? "" : parameter.trim());
+        } catch (NumberFormatException exception) {
+            AppNotifications.error(I18n.t("plan.ui.job.id.invalid"));
             return;
         }
-        try {
-            JobStatus status = planFeignService.status(jobId);
-            statusBadge.setText(status.status().meaning());
-            statusBadge.addClassName("plan-job-status");
-            for (IEnumJobStatusCode.Types candidate : IEnumJobStatusCode.Types.values()) {
-                statusBadge.removeClassName("plan-job-status--" + candidate.name().toLowerCase(Locale.ROOT));
+        if (!parsed.equals(jobId)) {
+            stopPolling();
+            loading.set(false);
+            current = null;
+            resultText.setValue("");
+            infoHolder.removeAll();
+            actionsBar.removeAll();
+        }
+        jobId = parsed;
+        refreshStatus();
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Loading
+    // ══════════════════════════════════════════════════════════════
+
+    private void refreshStatus() {
+        if (jobId == null || !loading.compareAndSet(false, true)) {
+            return;
+        }
+        UI ui = getUI().orElseGet(UI::getCurrent);
+        Long requested = jobId;
+        refreshButton.setLoading(true);
+        ContextAwareAsync.supplyAsync(() -> service.findById(requested)).whenComplete((response, failure) -> ui.access(() -> {
+            loading.set(false);
+            refreshButton.setLoading(false);
+            if (!requested.equals(jobId)) {
+                return;
             }
-            statusBadge.addClassName("plan-job-status--" + status.status().name().toLowerCase(Locale.ROOT));
-            submittedValue.setText(format(status.submittedAt()));
-            startedValue.setText(format(status.startedAt()));
-            completedValue.setText(format(status.finishedAt()));
-            messageValue.setText(status.message() == null ? "" : status.message());
-            if (isTerminal(status.status())) {
+            if (failure != null) {
+                log.error("Unable to load plan job {}", requested, failure);
+                AppNotifications.error(I18n.t("plan.ui.job.load.error") + " " + PlanErrors.describe(failure));
                 stopPolling();
-                if (status.status() == IEnumJobStatusCode.Types.SUCCEEDED
-                        && resultText.getValue().isBlank()) {
-                    loadResult();
-                }
+            } else if (response == null || !response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                AppNotifications.error(I18n.t("plan.ui.job.load.error"));
+                stopPolling();
+            } else {
+                apply(response.getBody());
             }
-        } catch (RuntimeException exception) {
-            log.error("Unable to load plan job status for {}", jobId, exception);
-            Notification.show(I18n.t("plan.ui.job.load.error"));
+        }));
+    }
+
+    private void apply(PlanJobDto job) {
+        current = job;
+        infoHolder.removeAll();
+        infoHolder.add(buildInfo(job));
+        rebuildActions(job);
+
+        if (PlanJobStatusRules.isTerminal(job.getStatus())) {
+            stopPolling();
+            if (job.getResult() != null && resultText.getValue().isBlank()) {
+                showResult(job.getResult());
+            }
+        } else {
+            startPolling();
+        }
+    }
+
+    private Div buildInfo(PlanJobDto job) {
+        Div holder = new Div();
+        VerticalLayout stack = DialogLayout.stack();
+        VerticalLayout identity = DialogLayout.section(I18n.t("plan.ui.job.details.section.identity"), VaadinIcon.INFO_CIRCLE);
+        identity.add(PlanJobInfo.identity(job));
+        VerticalLayout timing = DialogLayout.section(I18n.t("plan.ui.job.details.section.timing"), VaadinIcon.CLOCK);
+        timing.add(PlanJobInfo.timing(job));
+        stack.add(identity, timing);
+        Div failure = PlanJobInfo.failure(job);
+        if (failure != null) {
+            VerticalLayout error = DialogLayout.section(I18n.t("plan.ui.job.details.section.error"), VaadinIcon.WARNING);
+            error.add(failure);
+            stack.add(error);
+        }
+        holder.add(stack);
+        return holder;
+    }
+
+    private void showResult(Object result) {
+        try {
+            resultText.setValue(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result));
+        } catch (JsonProcessingException exception) {
+            log.error("Unable to format plan result for {}", jobId, exception);
+            AppNotifications.error(I18n.t("plan.ui.result.load.error"));
         }
     }
 
@@ -173,41 +200,111 @@ public class PlanJobView extends ManagementVerticalView
         if (jobId == null) {
             return;
         }
-        try {
-            resultText.setValue(objectMapper.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(planFeignService.result(jobId)));
-        } catch (JsonProcessingException exception) {
-            log.error("Unable to format plan result for {}", jobId, exception);
-            Notification.show(I18n.t("plan.ui.result.load.error"));
-        } catch (RuntimeException exception) {
-            log.error("Unable to load plan result for {}", jobId, exception);
-            Notification.show(I18n.t("plan.ui.result.unavailable"));
+        UI ui = getUI().orElseGet(UI::getCurrent);
+        Long requested = jobId;
+        ContextAwareAsync.supplyAsync(() -> service.getResult(requested)).whenComplete((response, failure) -> ui.access(() -> {
+            if (failure != null) {
+                log.error("Unable to load plan result for {}", requested, failure);
+                AppNotifications.warning(I18n.t("plan.ui.result.unavailable"));
+            } else if (response == null || response.getBody() == null) {
+                AppNotifications.warning(I18n.t("plan.ui.result.unavailable"));
+            } else {
+                showResult(response.getBody());
+            }
+        }));
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Actions (same gating as the cards)
+    // ══════════════════════════════════════════════════════════════
+
+    private void rebuildActions(PlanJobDto job) {
+        actionsBar.removeAll();
+        IEnumJobStatusCode.Types status = job.getStatus();
+
+        if (PlanJobStatusRules.isExportable(status)) {
+            Button result = button("plan.ui.result.load", VaadinIcon.FILE_TEXT, this::loadResult);
+            result.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            actionsBar.add(result);
+        }
+        if (PlanJobStatusRules.isEditable(status)) {
+            actionsBar.add(button("plan.ui.action.edit", VaadinIcon.EDIT, () -> actions.openEdit(job, this::refreshStatus)));
+        }
+        actionsBar.add(button("plan.ui.action.clone", VaadinIcon.COPY, () -> actions.openClone(job, this::openList)));
+        actionsBar.add(button("plan.ui.logs.open", VaadinIcon.FILE_TEXT_O, () -> actions.openLogs(job.getId())));
+        if (PlanJobStatusRules.isStoppable(status)) {
+            actionsBar.add(button("plan.ui.action.stop", VaadinIcon.STOP,
+                    () -> actions.confirmStop(job, this::refreshStatus, null)));
+        }
+        if (PlanJobStatusRules.isCancellable(status)) {
+            actionsBar.add(button("plan.ui.action.cancel", VaadinIcon.CLOSE_CIRCLE_O,
+                    () -> actions.confirmCancel(job, this::refreshStatus, null)));
+        }
+        if (PlanJobStatusRules.isExportable(status)) {
+            actionsBar.add(button("plan.ui.action.export", VaadinIcon.DOWNLOAD, () -> actions.exportResult(job)));
+        }
+        if (PlanJobStatusRules.isDeletable(status)) {
+            Button delete = button("plan.ui.action.delete", VaadinIcon.TRASH,
+                    () -> actions.confirmDelete(job, this::openList, null));
+            delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
+            actionsBar.add(delete);
         }
     }
 
-    private String format(java.time.Instant instant) {
-        return instant == null ? I18n.t("plan.ui.value.not.available") : DATE_FORMAT.format(instant);
+    private Button button(String labelKey, VaadinIcon icon, Runnable onClick) {
+        Button button = new Button(I18n.t(labelKey), icon.create());
+        button.addClickListener(event -> onClick.run());
+        return button;
+    }
+
+    private void openList() {
+        getUI().ifPresent(ui -> ui.navigate("plan/jobs"));
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Polling (scoped to this view)
+    // ══════════════════════════════════════════════════════════════
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (current != null && !PlanJobStatusRules.isTerminal(current.getStatus())) {
+            startPolling();
+        }
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        stopPolling();
+        super.onDetach(detachEvent);
     }
 
     private void startPolling() {
-        if (pollRegistration == null) {
-            pollRegistration = ui.addPollListener(event -> refreshStatus());
+        if (pollRegistration != null) {
+            return;
         }
+        UI ui = getUI().orElse(null);
+        if (ui == null) {
+            return;   // not attached yet: onAttach starts it
+        }
+        pollUi = ui;
+        pollRegistration = ui.addPollListener(event -> {
+            if (isAttached()) {
+                refreshStatus();
+            }
+        });
         ui.setPollInterval(POLL_INTERVAL_MILLIS);
     }
 
     private void stopPolling() {
-        if (pollRegistration != null) {
-            pollRegistration.remove();
-            pollRegistration = null;
+        if (pollRegistration == null) {
+            return;
         }
-        ui.setPollInterval(-1);
-    }
-
-    private boolean isTerminal(IEnumJobStatusCode.Types status) {
-        return status == IEnumJobStatusCode.Types.SUCCEEDED
-                || status == IEnumJobStatusCode.Types.INFEASIBLE
-                || status == IEnumJobStatusCode.Types.FAILED
-                || status == IEnumJobStatusCode.Types.CANCELLED;
+        pollRegistration.remove();
+        pollRegistration = null;
+        if (pollUi != null) {
+            pollUi.setPollInterval(-1);
+            pollUi = null;
+        }
     }
 }

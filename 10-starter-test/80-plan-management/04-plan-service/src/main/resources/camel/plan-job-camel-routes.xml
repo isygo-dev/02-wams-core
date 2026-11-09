@@ -1,12 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <routes xmlns="http://camel.apache.org/schema/spring">
-    <route id="plan-job-publisher" autoStartup="{{app.plan.execution.kafka-enabled:true}}">
-        <from uri="direct:plan-job-queue"/>
-        <process ref="planJobKafkaProducerProcessor"/>
-    </route>
 
+    <!--
+        Sequential consumer (one record at a time): the offset is committed manually by
+        PlanJobKafkaConsumerProcessor only after the terminal job state/result has been persisted.
+        maxPollIntervalMs must exceed the longest possible solve (solver time limit + margin), otherwise the
+        broker evicts the consumer from the group while a solve is still running (this is the documented "long solve"
+        protection; no pause/resume is implemented).
+
+        Failure handling (both onException blocks are route scoped and handled, so the consumer never sees a failed
+        exchange unless the dead-letter publish itself fails; in that case the offset stays uncommitted and
+        breakOnFirstError re-polls the record):
+          1. Non-retryable errors (JSON parse/mapping, empty message, missing job id) skip retries and go
+             straight to the dead-letter topic.
+          2. Every other error is redelivered with bounded exponential backoff
+             (app.plan.kafka.retry.*), then dead-lettered.
+        planJobDeadLetterProcessor publishes payload + failure headers to spring.kafka.topics.plan-jobs-dlq, tries to
+        mark the job FAILED and commits the offset.
+    -->
     <route id="plan-job-consumer" autoStartup="{{app.plan.execution.kafka-enabled:true}}">
-        <from uri="kafka:{{spring.kafka.topics.plan-jobs}}?groupId={{spring.kafka.consumer.group-id}}&amp;allowManualCommit=true&amp;consumersCount=1&amp;maxPollRecords=1&amp;breakOnFirstError=true&amp;autoOffsetReset=earliest"/>
+        <from uri="kafka:{{spring.kafka.topics.plan-jobs}}?groupId={{spring.kafka.consumer.group-id}}&amp;autoCommitEnable=false&amp;allowManualCommit=true&amp;consumersCount=1&amp;maxPollRecords=1&amp;maxPollIntervalMs={{app.plan.kafka.max-poll-interval-ms:900000}}&amp;breakOnFirstError=true&amp;autoOffsetReset=earliest"/>
+        <onException>
+            <exception>com.fasterxml.jackson.core.JsonProcessingException</exception>
+            <exception>eu.isygoit.async.camel.processor.PoisonMessageException</exception>
+            <exception>org.apache.camel.InvalidPayloadException</exception>
+            <exception>org.apache.camel.NoTypeConversionAvailableException</exception>
+            <redeliveryPolicy maximumRedeliveries="0"/>
+            <handled>
+                <constant>true</constant>
+            </handled>
+            <process ref="planJobDeadLetterProcessor"/>
+        </onException>
+        <onException>
+            <exception>java.lang.Exception</exception>
+            <redeliveryPolicy maximumRedeliveries="{{app.plan.kafka.retry.max-redeliveries:3}}"
+                              redeliveryDelay="{{app.plan.kafka.retry.initial-delay-ms:1000}}"
+                              useExponentialBackOff="true"
+                              backOffMultiplier="{{app.plan.kafka.retry.multiplier:2}}"
+                              maximumRedeliveryDelay="{{app.plan.kafka.retry.max-delay-ms:30000}}"
+                              logStackTrace="false"
+                              logRetryAttempted="true"
+                              retryAttemptedLogLevel="WARN"/>
+            <handled>
+                <constant>true</constant>
+            </handled>
+            <process ref="planJobDeadLetterProcessor"/>
+        </onException>
         <process ref="planJobKafkaConsumerProcessor"/>
     </route>
 </routes>

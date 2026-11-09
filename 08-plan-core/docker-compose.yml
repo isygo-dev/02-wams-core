@@ -1,3 +1,17 @@
+# Local plan-service stack: PostgreSQL + Kafka (KRaft) + Cassandra + plan-service.
+#
+# 1. Build the runnable host jar first (from 02-wams-core, nothing is built inside Docker):
+#      mvn -pl 10-starter-test/80-plan-management/04-plan-service -am package -DskipTests
+# 2. Start the stack (from 02-wams-core/08-plan-core):
+#      PLAN_JDBC_PASSWORD=change-me docker compose up --build
+#
+# The service listens on 40417 (Dockerfile ../09-docker/core-plan.Dockerfile, build context 02-wams-core).
+# Config: plan-service.yml from 10-edyra/09-docker/config-files is mounted at /config and imported with
+# SPRING_CONFIG_IMPORT; connection settings of that file (localhost) are overridden by the env vars below.
+# Schema is managed by the application: Hibernate (ddl-auto update) for PostgreSQL schema "plan", Spring Data
+# (create-if-not-exists, keyspace included) for Cassandra. No init script is mounted. Reset with `docker compose down -v`.
+name: isygo-plan
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -6,7 +20,7 @@ services:
       POSTGRES_USER: isygo_plan
       POSTGRES_PASSWORD: ${PLAN_JDBC_PASSWORD:?Set PLAN_JDBC_PASSWORD}
     volumes:
-      - ./01-plan-jpa/src/main/resources/schema-postgresql.sql:/docker-entrypoint-initdb.d/01-plan-job.sql:ro
+      - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
@@ -31,6 +45,9 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
     ports:
       - "9094:9094"
     healthcheck:
@@ -40,12 +57,33 @@ services:
       retries: 20
       start_period: 20s
 
+  # One-shot topic bootstrap (names = spring.kafka.topics.plan-jobs / plan-logs and their -dlq dead-letter topics).
+  # plan-jobs has a single partition: jobs are processed strictly sequentially.
+  kafka-init:
+    image: apache/kafka:3.9.0
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: [ "/bin/bash", "-c" ]
+    command:
+      - |
+        set -e
+        T=/opt/kafka/bin/kafka-topics.sh
+        $$T --bootstrap-server kafka:9092 --create --if-not-exists --topic isygo.plan.jobs --partitions 1 --replication-factor 1
+        $$T --bootstrap-server kafka:9092 --create --if-not-exists --topic isygo.plan.jobs.dlq --partitions 1 --replication-factor 1
+        $$T --bootstrap-server kafka:9092 --create --if-not-exists --topic isygo.plan.logs --partitions 1 --replication-factor 1
+        $$T --bootstrap-server kafka:9092 --create --if-not-exists --topic isygo.plan.logs.dlq --partitions 1 --replication-factor 1
+        $$T --bootstrap-server kafka:9092 --list
+    restart: "no"
+
   cassandra:
     image: cassandra:5.0
     environment:
       CASSANDRA_CLUSTER_NAME: plan-management-local
       CASSANDRA_DC: datacenter1
       CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+    volumes:
+      - cassandra-data:/var/lib/cassandra
     ports:
       - "9042:9042"
     healthcheck:
@@ -53,37 +91,72 @@ services:
       interval: 10s
       timeout: 5s
       retries: 30
+      start_period: 40s
 
-  log-schema:
-    image: cassandra:5.0
-    depends_on:
-      cassandra:
-        condition: service_healthy
-    volumes:
-      - ./01-plan-jpa/src/main/resources/schema.cql:/schema.cql:ro
-    entrypoint: [ "/bin/bash", "-c" ]
-    command:
-      - "until cqlsh cassandra 9042 -e 'DESCRIBE CLUSTER'; do sleep 2; done; cqlsh cassandra 9042 -e \"CREATE KEYSPACE IF NOT EXISTS isygo_plan WITH replication = {'class':'SimpleStrategy','replication_factor':1}\"; cqlsh cassandra 9042 -f /schema.cql"
 
   plan:
     build:
-      context: .
-      dockerfile: Dockerfile
+      # context = 02-wams-core so that the Dockerfile COPY paths (10-starter-test/...) resolve
+      context: ..
+      dockerfile: 09-docker/core-plan.Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
-      log-schema:
-        condition: service_completed_successfully
       kafka:
         condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+      cassandra:
+        condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: local
-      PLAN_JDBC_URL: jdbc:postgresql://postgres:5432/isygo_plan
+      # No Spring profile: configuration comes from the mounted central config file (see volumes), not from the Config server
+      SPRING_CONFIG_IMPORT: optional:file:/config/plan-service.yml
+      SERVER_PORT: "40417"
+      JAVA_OPTS: "-XX:MaxRAMPercentage=60"
+      # Standalone: no config server / discovery inside this stack
+      SPRING_CLOUD_CONFIG_ENABLED: "false"
+      SPRING_CLOUD_CONFIG_FAIL_FAST: "false"
+      EUREKA_CLIENT_ENABLED: "false"
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health
+      MANAGEMENT_HEALTH_MAIL_ENABLED: "false"
+      # Property names read by the application-prod.yml / local profile of the host
+      PLAN_JDBC_URL: jdbc:postgresql://postgres:5432/isygo_plan?currentSchema=plan
       PLAN_JDBC_USERNAME: isygo_plan
       PLAN_JDBC_PASSWORD: ${PLAN_JDBC_PASSWORD:?Set PLAN_JDBC_PASSWORD}
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       PLAN_CASSANDRA_CONTACT_POINTS: cassandra
+      PLAN_CASSANDRA_PORT: "9042"
       PLAN_CASSANDRA_LOCAL_DATACENTER: datacenter1
-      PLAN_CASSANDRA_KEYSPACE: isygo_plan
+      PLAN_CASSANDRA_KEYSPACE: isygoit
+      PLAN_KAFKA_ENABLED: ${PLAN_KAFKA_ENABLED:-true}
+      # Spring-native equivalents (environment overrides yml, keeps the container working whatever the profile maps)
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/isygo_plan?currentSchema=plan
+      SPRING_DATASOURCE_USERNAME: isygo_plan
+      SPRING_DATASOURCE_PASSWORD: ${PLAN_JDBC_PASSWORD:?Set PLAN_JDBC_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_TOPICS_PLAN_JOBS: isygo.plan.jobs
+      SPRING_KAFKA_TOPICS_PLAN_LOGS: isygo.plan.logs
+      SPRING_KAFKA_CONSUMER_GROUP_ID: isygo-plan
+      SPRING_CASSANDRA_CONTACT_POINTS: cassandra
+      SPRING_CASSANDRA_PORT: "9042"
+      SPRING_CASSANDRA_LOCAL_DATACENTER: datacenter1
+      SPRING_CASSANDRA_KEYSPACE_NAME: isygoit
+      APP_PLAN_EXECUTION_KAFKA_ENABLED: ${PLAN_KAFKA_ENABLED:-true}
+    volumes:
+      - ../../10-edyra/09-docker/config-files/plan-service.yml:/config/plan-service.yml:ro
+    mem_limit: ${PLAN_MEM_LIMIT:-3g}
     ports:
-      - "8080:8080"
+      - "40417:40417"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:40417/actuator/health || exit 1" ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+
+volumes:
+  postgres-data:
+  kafka-data:
+  cassandra-data:

@@ -5,6 +5,9 @@ import eu.isygoit.ui.common.component.INavRegistry;
 
 import java.util.List;
 
+/**
+ * Navigation targets of the planning module, used by the global search and the landing page.
+ */
 public final class PlanNavRegistry implements INavRegistry {
     private static final List<NavTarget> ALL = List.of(
             new NavTarget("plan.ui.nav.dashboard", "plan", VaadinIcon.HOME, "plan"),

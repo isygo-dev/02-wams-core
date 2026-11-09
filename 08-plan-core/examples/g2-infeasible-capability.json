@@ -1,0 +1,31 @@
+{
+  "tenant": "example-tenant",
+  "meta": {
+    "clientRef": "golden-g2",
+    "version": "2.0",
+    "domainName": "lab-sessions",
+    "locale": "en-US",
+    "timezone": "Europe/Paris"
+  },
+  "domain": {
+    "resourceTypes": [{ "id": "lab", "attributes": ["name"] }],
+    "taskTypes": [{ "id": "job", "attributes": ["name"] }],
+    "slotTypes": [{ "id": "period", "attributes": ["label"] }]
+  },
+  "horizon": { "start": "2026-09-07T06:00:00Z", "end": "2026-09-07T08:00:00Z", "tickSeconds": 3600 },
+  "slots": [
+    { "id": "slot-early", "typeId": "period", "label": "Mon 08:00", "start": "2026-09-07T06:00:00Z", "end": "2026-09-07T07:00:00Z", "cost": 0.0 }
+  ],
+  "resources": [
+    { "id": "lab-1", "typeId": "lab", "name": "Lab 1", "capacity": 1, "skills": ["chemistry"] }
+  ],
+  "tasks": [
+    { "id": "weld-job", "typeId": "job", "name": "Welding job", "startSlots": ["slot-early"],
+      "requirements": [{ "role": "welder", "selector": { "skills": ["welding"] } }] }
+  ],
+  "constraints": [],
+  "objectives": [
+    { "id": "prefer-cheap-slots", "type": "minimize_slot_cost", "weight": 1 }
+  ],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 2, "seed": 0 }
+}

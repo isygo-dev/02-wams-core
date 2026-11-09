@@ -4,6 +4,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
+/**
+ * Translation provider of the planning module: the shared {@code common} bundles plus {@code plan}, in the six
+ * supported languages.
+ */
 @Component
 public class PlanI18nProvider extends AbstractI18nProvider {
     private static final Locale[] SUPPORTED_LOCALES = {

@@ -1,6 +1,10 @@
+/*
+ * Planning module styles. Cards, chips, tags, dialogs, grids and the filter bar come from the shared
+ * styles (styles/scss), so only layout glue and the JSON editor font live here; tokens only.
+ */
+
 .plan-dashboard,
 .plan-job-view,
-.plan-jobs-view,
 .plan-logs-view {
   gap: var(--lumo-space-m);
 }
@@ -9,109 +13,25 @@
   align-items: end;
 }
 
-.plan-job-status,
-.plan-log-level {
-  display: inline-flex;
-  align-items: center;
-  border-radius: var(--lumo-border-radius-pill);
-  padding: 0.2rem 0.65rem;
-  font-size: var(--lumo-font-size-xs);
-  font-weight: 600;
-  background: var(--lumo-contrast-10pct);
-  color: var(--lumo-secondary-text-color);
+.plan-job-actions {
+  flex-wrap: wrap;
 }
 
-.plan-job-status--succeeded,
-.plan-log-level--info {
-  background: var(--lumo-success-color-10pct);
-  color: var(--lumo-success-text-color);
-}
-
-.plan-job-status--created,
-.plan-job-status--accepted,
-.plan-job-status--normalizing,
-.plan-job-status--validating,
-.plan-job-status--solving,
-.plan-log-level--warn {
-  background: var(--lumo-primary-color-10pct);
-  color: var(--lumo-primary-text-color);
-}
-
-.plan-job-status--stopping {
-  background: var(--lumo-warning-color-10pct);
-  color: var(--lumo-warning-text-color);
-}
-
-.plan-job-status--failed,
-.plan-job-status--infeasible,
-.plan-log-level--error {
-  background: var(--lumo-error-color-10pct);
-  color: var(--lumo-error-text-color);
-}
-
-.plan-job-status--cancelled {
-  background: var(--lumo-contrast-10pct);
-  color: var(--lumo-secondary-text-color);
-}
-
-.plan-job-summary {
-  width: 100%;
-  max-width: 64rem;
-  padding: var(--lumo-space-l);
-  border: 1px solid var(--lumo-contrast-10pct);
-  border-radius: var(--lumo-border-radius-l);
-  background: var(--lumo-base-color);
-}
-
-.plan-job-summary__row {
-  padding: var(--lumo-space-xs) 0;
-  border-bottom: 1px solid var(--lumo-contrast-5pct);
-}
-
-.plan-job-summary__label {
-  width: 10rem;
-  flex: 0 0 10rem;
-  color: var(--lumo-secondary-text-color);
-}
-
-.plan-job-summary__value {
-  overflow-wrap: anywhere;
-}
-
-.plan-job-result {
+/* JSON text areas (request editor, result, log details): monospace on the native textarea */
+.plan-json-editor textarea {
   font-family: var(--lumo-font-family-monospace);
 }
 
-.plan-job-card {
-  border: 1px solid var(--lumo-contrast-10pct);
-  border-radius: var(--lumo-border-radius-l);
-  background: var(--lumo-base-color);
-  min-width: 0;
-}
-
-.plan-job-card__id {
-  overflow-wrap: anywhere;
-  font-size: var(--lumo-font-size-m);
-}
-
-.plan-job-card__message {
-  min-height: 2.5rem;
-  overflow-wrap: anywhere;
-  color: var(--lumo-secondary-text-color);
+/* validation issues listed in the request dialog */
+.plan-issues {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lumo-space-xs);
 }
 
 @media (max-width: 640px) {
   .plan-job-lookup {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .plan-job-summary__label {
-    width: 7rem;
-    flex-basis: 7rem;
-  }
-
-  .plan-jobs-toolbar {
-    flex-wrap: wrap;
   }
 }

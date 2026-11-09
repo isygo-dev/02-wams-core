@@ -1,0 +1,26 @@
+{
+  "tenant": "example-tenant",
+  "meta": {
+    "clientRef": "golden-g6",
+    "version": "2.0",
+    "domainName": "field-service",
+    "locale": "en-US",
+    "timezone": "UTC"
+  },
+  "horizon": { "start": "2026-09-07T08:00:00Z", "end": "2026-09-07T12:00:00Z", "tickSeconds": 60 },
+  "resources": [
+    { "id": "cheap", "typeId": "technician", "name": "Cheap technician", "capacity": 1, "costPerTick": 1.0,
+      "unavailable": [{ "start": "2026-09-07T10:00:00Z", "end": "2026-09-07T12:00:00Z" }] },
+    { "id": "expensive", "typeId": "technician", "name": "Expensive technician", "capacity": 1, "costPerTick": 3.0 }
+  ],
+  "tasks": [
+    { "id": "job-1", "duration": 60, "requirements": [{ "role": "technician", "selector": { "resourceIds": ["cheap", "expensive"] } }] },
+    { "id": "job-2", "duration": 60, "requirements": [{ "role": "technician", "selector": { "resourceIds": ["cheap", "expensive"] } }] },
+    { "id": "job-3", "duration": 60, "requirements": [{ "role": "technician", "selector": { "resourceIds": ["cheap", "expensive"] } }] }
+  ],
+  "constraints": [],
+  "objectives": [
+    { "id": "cost", "type": "minimize_resource_cost", "weight": 1 }
+  ],
+  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 2, "seed": 0 }
+}
