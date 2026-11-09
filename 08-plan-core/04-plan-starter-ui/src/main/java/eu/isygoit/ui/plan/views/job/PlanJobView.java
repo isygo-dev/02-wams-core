@@ -151,18 +151,35 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
     }
 
     private void apply(PlanJobDto job) {
+        PlanJobDto previous = current;
         current = job;
         infoHolder.removeAll();
         infoHolder.add(buildInfo(job));
         rebuildActions(job);
 
         if (PlanJobStatusRules.isTerminal(job.getStatus())) {
+            notifyTerminalStatus(previous, job.getStatus());
             stopPolling();
             if (job.getResult() != null && resultText.getValue().isBlank()) {
                 showResult(job.getResult());
             }
         } else {
             startPolling();
+        }
+    }
+
+    private void notifyTerminalStatus(PlanJobDto previous, IEnumJobStatusCode.Types status) {
+        if (previous == null || PlanJobStatusRules.isTerminal(previous.getStatus())) {
+            return;
+        }
+
+        switch (status) {
+            case SUCCEEDED -> AppNotifications.success(I18n.t("plan.ui.job.terminal.succeeded"));
+            case INFEASIBLE -> AppNotifications.warning(I18n.t("plan.ui.job.terminal.infeasible"));
+            case CANCELLED -> AppNotifications.warning(I18n.t("plan.ui.job.terminal.cancelled"));
+            case FAILED -> AppNotifications.error(I18n.t("plan.ui.job.terminal.failed"));
+            default -> {
+            }
         }
     }
 
