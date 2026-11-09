@@ -40,6 +40,8 @@ public class PlanJobActions {
 
     private final PlanFeignService service;
     private final ObjectMapper objectMapper;
+    private Anchor downloadAnchor;
+    private UI downloadUi;
 
     public PlanJobActions(PlanFeignService service, ObjectMapper objectMapper) {
         this.service = service;
@@ -151,10 +153,17 @@ public class PlanJobActions {
     private void download(UI ui, String fileName, byte[] content) {
         StreamResource resource = new StreamResource(fileName, () -> new ByteArrayInputStream(content));
         resource.setContentType("application/json");
-        Anchor anchor = new Anchor(resource, fileName);
-        anchor.getElement().setAttribute("download", true);
-        anchor.getStyle().set("display", "none");
-        ui.add(anchor);
-        anchor.getElement().executeJs("this.click()").then(result -> anchor.getElement().removeFromParent());
+        resource.setCacheTime(0);
+
+        if (downloadAnchor == null || downloadUi != ui || downloadAnchor.getUI().orElse(null) != ui) {
+            downloadAnchor = new Anchor();
+            downloadAnchor.getStyle().set("display", "none");
+            ui.add(downloadAnchor);
+            downloadUi = ui;
+        }
+
+        downloadAnchor.setHref(resource);
+        downloadAnchor.getElement().setAttribute("download", fileName);
+        downloadAnchor.getElement().executeJs("this.click()");
     }
 }
