@@ -5,6 +5,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import elemental.json.JsonObject;
 import eu.isygoit.i18n.I18n;
@@ -90,6 +91,7 @@ public class OtpInput extends Component implements HasComponents {
 
         for (int index = 0; index < requestedLength; index++) {
             TextField field = new TextField();
+            field.addThemeVariants(TextFieldVariant.LUMO_ALIGN_CENTER);
             field.setLabel(I18n.t("auth.otp.field.digit.label", index + 1, requestedLength));
             field.setRequiredIndicatorVisible(true);
             field.setMaxLength(index == 0 ? requestedLength : 1);

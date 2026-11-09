@@ -2,7 +2,7 @@
 
 auth-otp-input {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   gap: clamp(0.2rem, 1.5vw, 0.5rem);
   width: 100%;
@@ -32,5 +32,6 @@ auth-otp-input vaadin-text-field::part(input-field) {
 auth-otp-input vaadin-text-field::part(value) {
   font-size: 1.25rem;
   font-weight: 700;
-  text-align: center;
+  text-align: center !important;
+  text-indent: 0;
 }

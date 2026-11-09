@@ -29,18 +29,22 @@ public class PlanJsonEditor extends VerticalLayout {
     private static final String BIND_HIGHLIGHT =
             "const surface=this;"
                     + "const field=surface.querySelector('.plan-json-editor__field');"
-                    + "const input=field&&field.shadowRoot&&field.shadowRoot.querySelector('textarea');"
                     + "const output=surface.querySelector('.plan-json-editor__highlight');"
-                    + "if(!input||!output)return;"
+                    + "if(!field||!output)return;"
                     + "const escapeHtml=s=>s.replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));"
+                    + "const bind=()=>{"
+                    + "const input=field.shadowRoot&&field.shadowRoot.querySelector('textarea');"
+                    + "if(!input)return false;"
+                    + "if(surface.__planJsonInput===input){surface.__planJsonPaint();return true;}"
                     + "const paint=()=>{"
-                    + "const text=input.value||'';const token=/\"(?:\\\\.|[^\"\\\\])*\"|-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?|\\b(?:true|false|null)\\b/g;"
+                    + "const text=input.value||'';const token=/\"(?:\\\\.|[^\"\\\\])*\"|-?\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?|\\b(?:true|false|null)\\b|[{}\\[\\],:]/g;"
                     + "let html='',last=0,match;"
                     + "while((match=token.exec(text))!==null){"
                     + "const value=match[0];html+=escapeHtml(text.slice(last,match.index));"
                     + "let kind='literal';"
                     + "if(value.charAt(0)==='\"')kind=/^\\s*:/.test(text.slice(token.lastIndex))?'key':'string';"
                     + "else if(/^-?\\d/.test(value))kind='number';"
+                    + "else if(/^[{}\\[\\],:]$/.test(value))kind='punctuation';"
                     + "html+='<span class=\"plan-json-token--'+kind+'\">'+escapeHtml(value)+'</span>';last=token.lastIndex;"
                     + "}"
                     + "html+=escapeHtml(text.slice(last));output.innerHTML=html||' ';"
@@ -48,7 +52,15 @@ public class PlanJsonEditor extends VerticalLayout {
                     + "};"
                     + "input.addEventListener('input',paint);"
                     + "input.addEventListener('scroll',()=>{output.scrollTop=input.scrollTop;output.scrollLeft=input.scrollLeft;});"
-                    + "surface.__planJsonPaint=paint;paint();";
+                    + "surface.__planJsonInput=input;surface.__planJsonPaint=paint;"
+                    + "surface.classList.add('plan-json-editor--highlight-ready');paint();return true;"
+                    + "};"
+                    + "surface.__planJsonBind=bind;"
+                    + "let attempts=40;"
+                    + "const retry=()=>{if(bind())return;if(attempts-->0)setTimeout(retry,50);else console.warn('Plan JSON syntax highlighting could not bind to the text area.');};"
+                    + "const start=()=>retry();"
+                    + "if(customElements.get('vaadin-text-area'))start();"
+                    + "else customElements.whenDefined('vaadin-text-area').then(start);";
     private static final String COPY_TO_CLIPBOARD =
             "const text=$0;"
                     + "if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text);}"
@@ -164,10 +176,7 @@ public class PlanJsonEditor extends VerticalLayout {
 
     private void refreshHighlight() {
         surface.getElement().executeJs(
-                "if(this.__planJsonPaint)this.__planJsonPaint();"
-                        + "else{const field=this.querySelector('.plan-json-editor__field');"
-                        + "if(field&&field.shadowRoot){const input=field.shadowRoot.querySelector('textarea');"
-                        + "const output=this.querySelector('.plan-json-editor__highlight');"
-                        + "if(input&&output)output.textContent=input.value||' ';}}");
+                "if(this.__planJsonBind)this.__planJsonBind();"
+                        + "else if(this.__planJsonPaint)this.__planJsonPaint();");
     }
 }
