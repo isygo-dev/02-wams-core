@@ -221,7 +221,7 @@ public record Task(
 
 /** One resource demand of a task. */
 public record ResourceRequirement(
-        String role,                         // label echoed in the result ("teacher", "operator"); unique per task; default "default"
+        String role,                         // label echoed in the result; matching resource type ids are inferred when selector has no type filter
         ResourceSelector selector,           // who may fulfil it
         Integer count,                       // number of distinct resources, >= 1, default 1
         Integer amount) {}                   // capacity amount consumed on each, >= 1, null -> task.demand

@@ -8,6 +8,7 @@ import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.PlanningRequest;
 import eu.isygoit.dto.request.Resource;
 import eu.isygoit.dto.request.ResourceRequirement;
+import eu.isygoit.dto.request.ResourceSelector;
 import eu.isygoit.dto.request.SetupMatrix;
 import eu.isygoit.dto.request.Slot;
 import eu.isygoit.dto.request.SolverOptions;
@@ -39,7 +40,8 @@ import java.util.Set;
  * applied as task rewrites in request order, on the tasks AS DECLARED (before defaults), then the constraint stays in
  * the problem (the compile step marks it inactive); (2) task defaults are materialised: one requirement per task
  * (implicit {@code default} requirement when none), requirement amount = task demand when null, duration from the
- * common slot length when null (slot mode), {@code startSlots} containing {@code ALL} normalised to exactly
+ * common slot length when null (slot mode), matching requirement roles to known resource types when no type filter
+ * was supplied, {@code startSlots} containing {@code ALL} normalised to exactly
  * {@code ["ALL"]}, {@code dueDate} clipped into the horizon; (3) {@link AutoObjectives#inject} adds the automatic
  * selection objective, then every objective gets its tier and {@code scale} (default
  * {@code solverOptions.objectiveScale}); (4) calendars without time zone get the problem zone; (5) setup matrices whose
@@ -96,9 +98,15 @@ public class DomainNormalizer {
         String timezone = request.meta().timezone();
 
         List<Task> rewritten = applyRewriters(request);
+        Set<String> resourceTypeIds = new HashSet<>();
+        for (Resource resource : request.resources()) {
+            if (resource.typeId() != null && !resource.typeId().isBlank()) {
+                resourceTypeIds.add(resource.typeId());
+            }
+        }
         List<Task> tasks = new ArrayList<>(rewritten.size());
         for (Task task : rewritten) {
-            tasks.add(materialise(task, request.slots(), horizon));
+            tasks.add(materialise(task, request.slots(), horizon, resourceTypeIds));
         }
 
         List<Objective> injected = AutoObjectives.inject(tasks, request.objectives());
@@ -174,12 +182,11 @@ public class DomainNormalizer {
 
     // ------------------------------------------------------------------------------------------ defaults
 
-    private Task materialise(Task task, List<Slot> slots, Horizon horizon) {
+    private Task materialise(Task task, List<Slot> slots, Horizon horizon, Set<String> resourceTypeIds) {
         int demand = task.demand() == null ? 1 : task.demand();
         List<ResourceRequirement> requirements = new ArrayList<>();
         for (ResourceRequirement requirement : task.effectiveRequirements()) {
-            requirements.add(new ResourceRequirement(requirement.role(), requirement.selector(), requirement.count(),
-                    requirement.amount() == null ? demand : requirement.amount()));
+            requirements.add(materialiseRequirement(requirement, demand, resourceTypeIds));
         }
         List<String> startSlots = task.startSlots();
         if (startSlots.stream().anyMatch(ALL::equalsIgnoreCase)) {
@@ -205,6 +212,17 @@ public class DomainNormalizer {
                 task.priority(), task.required(), task.prize(), requirements, task.release(), task.deadline(), dueDate,
                 startSlots, task.pin(), task.predecessors(), task.setupClass(), task.tags(), task.preferences(),
                 task.attributes());
+    }
+
+    private static ResourceRequirement materialiseRequirement(ResourceRequirement requirement, int demand,
+                                                              Set<String> resourceTypeIds) {
+        ResourceSelector selector = requirement.selector();
+        if (selector.resourceTypeIds().isEmpty() && resourceTypeIds.contains(requirement.role())) {
+            selector = new ResourceSelector(selector.resourceIds(), List.of(requirement.role()), selector.skills(),
+                    selector.anySkills(), selector.tags(), selector.excludeResourceIds());
+        }
+        return new ResourceRequirement(requirement.role(), selector, requirement.count(),
+                requirement.amount() == null ? demand : requirement.amount());
     }
 
     /** Common length in ticks of the listed slots, or {@code null} when none or different. */

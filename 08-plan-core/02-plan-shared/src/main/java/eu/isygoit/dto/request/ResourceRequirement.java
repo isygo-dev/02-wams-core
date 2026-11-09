@@ -9,9 +9,11 @@ package eu.isygoit.dto.request;
  * }</pre>
  * Defaults applied here: {@code role} = {@value #DEFAULT_ROLE}, {@code selector} = every resource,
  * {@code count} = 1. {@code amount} stays null (null means "the task demand"; resolved by the normalizer).
+ * During normalization, when the role exactly matches a type id present on a resource and the selector has no
+ * {@code resourceTypeIds}, that type is inferred. Supply {@code resourceTypeIds} explicitly to override inference.
  * Range checks (count/amount {@code >= 1}, unique roles) belong to the request validator.
  *
- * @param role     label echoed in the result; unique per task
+ * @param role     label echoed in the result; matching resource type ids are inferred when selector types are omitted
  * @param selector who may fulfil it
  * @param count    number of distinct resources, {@code >= 1}
  * @param amount   capacity amount consumed on each, {@code >= 1}; null = {@code Task.demand}
