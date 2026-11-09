@@ -15,15 +15,19 @@ public interface JobRepository {
 
     List<PlanningRequest> findCreatedRequests(int limit);
 
-    void upsert(UUID jobId, SolveResult result);
+    Optional<PlanningRequest> findRequest(UUID jobId);
 
-    void updateStatus(JobStatus status);
+    boolean updateCreatedRequest(UUID jobId, PlanningRequest request);
 
     boolean claimForProcessing(UUID jobId, Instant startedAt);
 
-    void markFailed(UUID jobId, String errorCode, String message);
+    boolean markSolving(UUID jobId, JobStatus status);
 
-    void markInfeasible(UUID jobId, String message, String diagnostics);
+    boolean completeSolving(UUID jobId, JobStatus status, SolveResult result);
+
+    boolean markFailedIfSolving(UUID jobId, String errorCode, String message);
+
+    boolean markInfeasibleIfSolving(UUID jobId, String message, String diagnostics);
 
     Optional<JobStatus> findStatus(UUID jobId);
 
@@ -36,4 +40,12 @@ public interface JobRepository {
     Optional<SolveResult> findResult(UUID jobId);
 
     boolean cancelIfRunning(UUID jobId);
+
+    boolean stopIfProcessing(UUID jobId);
+
+    List<UUID> findStoppingJobIds(int limit);
+
+    boolean completeStopped(UUID jobId);
+
+    boolean deleteIfTerminal(UUID jobId);
 }

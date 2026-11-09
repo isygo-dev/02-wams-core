@@ -1,14 +1,16 @@
 package eu.isygoit.i18n;
 
 import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Primary;
 
 import java.util.Locale;
 
 @Component
+@Primary
 public class I18nProvider extends AbstractI18nProvider {
 
     private static final String[] MODULES = {
-            "common", "auth", "ims", "kms", "dms", "mms", "sms", "cms"
+            "common", "auth", "ims", "kms", "dms", "mms", "sms", "cms", "plan"
     };
 
     private static final Locale[] SUPPORTED_LOCALES = {

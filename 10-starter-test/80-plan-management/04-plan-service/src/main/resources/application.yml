@@ -1,70 +1,13 @@
 spring:
-  profiles:
-    default: local
   application:
-    name: isygo-plan
+    name: plan-service
     version: @project.version@ #pom: project.version
   banner:
     location: classpath:banner.txt
   config:
     import: "optional:configserver:@cloud.config.service@"
-  datasource:
-    url: ${PLAN_JDBC_URL:jdbc:postgresql://localhost:5432/isygo_plan}
-    username: ${PLAN_JDBC_USERNAME:isygo_plan}
-    password: ${PLAN_JDBC_PASSWORD:}
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    open-in-view: false
-  kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
-    producer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
-    consumer:
-      group-id: ${PLAN_KAFKA_GROUP_ID:isygo-plan}
-    topics:
-      plan-jobs: ${PLAN_KAFKA_JOBS_TOPIC:isygo.plan.jobs}
-      plan-logs: ${PLAN_KAFKA_LOGS_TOPIC:isygo.plan.logs}
-  cassandra:
-    contact-points: ${PLAN_CASSANDRA_CONTACT_POINTS:localhost}
-    port: ${PLAN_CASSANDRA_PORT:9042}
-    local-datacenter: ${PLAN_CASSANDRA_LOCAL_DATACENTER:datacenter1}
-    keyspace-name: ${PLAN_CASSANDRA_KEYSPACE:isygo_plan}
-  main:
-    allow-bean-definition-overriding: false
   servlet:
     multipart:
       max-file-size: -1
       max-request-size: -1
 
-camel:
-  component:
-    kafka:
-      brokers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
-  springboot:
-    routes-include-pattern: classpath:camel/plan-*-camel-routes.xml
-
-app:
-  i18n:
-    enabled: true
-    location: classpath:i18n/plan/messages
-  plan:
-    execution:
-      kafka-enabled: ${PLAN_KAFKA_ENABLED:true}
-      recovery-interval-ms: ${PLAN_JOB_RECOVERY_INTERVAL_MS:30000}
-      recovery-batch-size: ${PLAN_JOB_RECOVERY_BATCH_SIZE:100}
-    cache:
-      redis-enabled: false
-      ttl: 30m
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      probes:
-        enabled: true

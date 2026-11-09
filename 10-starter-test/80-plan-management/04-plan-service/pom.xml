@@ -60,33 +60,23 @@
         </profile>
     </profiles>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>eu.isygo-it.services</groupId>
+                <artifactId>plan-management-starter-parent</artifactId>
+                <version>WC-1.0.261007-T1703</version>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
-            <artifactId>isygo-plan-starter-parent</artifactId>
+            <artifactId>plan-management-starter-parent</artifactId>
             <version>WC-1.0.261007-T1703</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>eu.isygo-it.services</groupId>
-            <artifactId>isygo-plan-starter-ui</artifactId>
-            <version>WC-1.0.261007-T1703</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-validation</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
     </dependencies>
 

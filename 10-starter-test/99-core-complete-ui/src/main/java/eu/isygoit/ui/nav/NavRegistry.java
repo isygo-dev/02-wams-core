@@ -7,6 +7,7 @@ import eu.isygoit.ui.dms.nav.DmsNavRegistry;
 import eu.isygoit.ui.ims.nav.ImsNavRegistry;
 import eu.isygoit.ui.kms.nav.KmsNavRegistry;
 import eu.isygoit.ui.mms.nav.MmsNavRegistry;
+import eu.isygoit.ui.plan.nav.PlanNavRegistry;
 import eu.isygoit.ui.sms.nav.SmsNavRegistry;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public final class NavRegistry implements INavRegistry {
                     new SmsNavRegistry().getAll(),
                     new CmsNavRegistry().getAll(),
                     new MmsNavRegistry().getAll(),
+                    new PlanNavRegistry().getAll(),
                     new KmsNavRegistry().getAll()
             ).flatMap(List::stream)
             .toList();

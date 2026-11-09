@@ -10,6 +10,7 @@ import eu.isygoit.plan.domain.*;
 import eu.isygoit.plan.engine.ConstraintRegistry;
 import eu.isygoit.plan.engine.ObjectiveRegistry;
 import eu.isygoit.plan.engine.SolverEngine;
+import eu.isygoit.plan.engine.SolverCancellationToken;
 import eu.isygoit.plan.exception.InvalidRequestException;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +38,14 @@ public class TimefoldSolverEngine implements SolverEngine {
 
     @Override
     public SolveResult solve(PlanningProblem problem, SolverOptions options) {
+        return solve(problem, options, new SolverCancellationToken());
+    }
+
+    @Override
+    public SolveResult solve(
+            PlanningProblem problem,
+            SolverOptions options,
+            SolverCancellationToken cancellationToken) {
         Instant started = Instant.now();
         if (problem.tasks().isEmpty()) {
             return new SolveResult(
@@ -57,12 +66,16 @@ public class TimefoldSolverEngine implements SolverEngine {
         Set<String> relaxedIds = new HashSet<>();
 
         for (int relaxationCount = 0; relaxationCount <= relaxable.size(); relaxationCount++) {
+            if (cancellationToken.isCancellationRequested()) {
+                return unknown(started, options, "Solver stop was requested");
+            }
             long remainingSeconds = options.maxTimeSeconds()
                     - Duration.between(started, Instant.now()).toSeconds();
             if (remainingSeconds <= 0) {
                 return unknown(started, options, "Solver time limit was reached");
             }
-            SolveResult result = solveAttempt(problem, options, relaxedIds, remainingSeconds, started);
+            SolveResult result = solveAttempt(
+                    problem, options, relaxedIds, remainingSeconds, started, cancellationToken);
             if (result.status() != IEnumSolverStatus.Types.INFEASIBLE) {
                 return withRelaxations(result, relaxable.subList(0, relaxationCount));
             }
@@ -84,7 +97,8 @@ public class TimefoldSolverEngine implements SolverEngine {
             SolverOptions options,
             Set<String> relaxedIds,
             long remainingSeconds,
-            Instant started) {
+            Instant started,
+            SolverCancellationToken cancellationToken) {
         if (problem.resources().isEmpty() || problem.slots().isEmpty()) {
             List<String> requiredTaskIds = problem.tasks().stream()
                     .filter(Task::requiredTask)
@@ -169,8 +183,12 @@ public class TimefoldSolverEngine implements SolverEngine {
                 .withTerminationSpentLimit(Duration.ofSeconds(remainingSeconds))
                 .withRandomSeed(options.seed());
         Solver<TimefoldPlan> solver = SolverFactory.<TimefoldPlan>create(config).buildSolver();
-        TimefoldPlan solved = solver.solve(new TimefoldPlan(
-                problem.resources(), problem.slots(), entities));
+        TimefoldPlan solved;
+        try (SolverCancellationToken.Registration ignored =
+                     cancellationToken.onCancellation(solver::terminateEarly)) {
+            solved = solver.solve(new TimefoldPlan(
+                    problem.resources(), problem.slots(), entities));
+        }
         HardSoftScore score = solved.getScore();
         if (score == null) {
             return unknown(started, options, "Timefold returned no score");

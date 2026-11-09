@@ -46,6 +46,6 @@ class JobSubmissionServiceTest {
         assertThrows(JobQueueException.class, () -> submissionService.submit(request));
 
         verify(jobRepository).saveCreated(any(JobStatus.class), eq(request));
-        verify(jobRepository, never()).markFailed(any(), any(), any());
+        verify(jobRepository, never()).markFailedIfSolving(any(), any(), any());
     }
 }

@@ -66,7 +66,11 @@ public class PlanMainView extends ManagementVerticalView {
         add(new PageHeader("plan.ui.dashboard.title", "plan.ui.dashboard.subtitle"));
         add(new DashboardShortcutsBar(I18n.t("plan.ui.dashboard.quick.actions"), List.of(
                 new DashboardShortcutsBar.Shortcut(VaadinIcon.REFRESH,
-                        I18n.t("plan.ui.dashboard.refresh"), this::loadDashboard)
+                        I18n.t("plan.ui.dashboard.refresh"), this::loadDashboard),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.LIST,
+                        I18n.t("plan.ui.nav.jobs"), this::openJobs),
+                new DashboardShortcutsBar.Shortcut(VaadinIcon.LIST,
+                        I18n.t("plan.ui.nav.logs"), this::openLogs)
         )));
 
         totalJobsCard = new StatCard(VaadinIcon.LIST, StatCard.Variant.PRIMARY,
@@ -170,6 +174,7 @@ public class PlanMainView extends ManagementVerticalView {
                     statusPanel.setItems(List.of(
                             new DashboardBreakdownPanel.Item(I18n.t("plan.ui.status.created"), data.created()),
                             new DashboardBreakdownPanel.Item(I18n.t("plan.ui.status.processing"), data.processing()),
+                            new DashboardBreakdownPanel.Item(I18n.t("plan.ui.status.stopping"), data.stopping()),
                             new DashboardBreakdownPanel.Item(I18n.t("plan.ui.status.succeeded"), data.succeeded()),
                             new DashboardBreakdownPanel.Item(I18n.t("plan.ui.status.infeasible"), data.infeasible()),
                             new DashboardBreakdownPanel.Item(I18n.t("plan.ui.status.failed"), data.failed()),
@@ -186,11 +191,12 @@ public class PlanMainView extends ManagementVerticalView {
         long processing = summary.accepted() + summary.validating() + summary.normalizing() + summary.solving();
         return new DashboardData(
                 summary.total(),
-                created + processing,
+                created + processing + summary.stopping(),
                 summary.succeeded(),
                 summary.failed() + summary.infeasible(),
                 created,
                 processing,
+                summary.stopping(),
                 summary.infeasible(),
                 summary.failed(),
                 summary.cancelled(),
@@ -204,9 +210,18 @@ public class PlanMainView extends ManagementVerticalView {
             long attention,
             long created,
             long processing,
+            long stopping,
             long infeasible,
             long failed,
             long cancelled,
             List<JobStatus> recentJobs) {
+    }
+
+    private void openJobs() {
+        ui.navigate("plan/jobs");
+    }
+
+    private void openLogs() {
+        ui.navigate("plan/logs");
     }
 }

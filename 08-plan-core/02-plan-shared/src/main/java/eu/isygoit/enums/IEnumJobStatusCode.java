@@ -19,6 +19,7 @@ public interface IEnumJobStatusCode {
         VALIDATING("Validating"),
         NORMALIZING("Normalizing"),
         SOLVING("Solving"),
+        STOPPING("Stopping"),
         SUCCEEDED("Succeeded"),
         INFEASIBLE("Infeasible"),
         FAILED("Failed"),

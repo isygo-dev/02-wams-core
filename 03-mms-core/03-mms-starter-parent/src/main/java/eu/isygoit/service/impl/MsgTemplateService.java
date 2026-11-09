@@ -63,6 +63,7 @@ public class MsgTemplateService extends FileTenantService<Long, MsgTemplate, Msg
     @Autowired
     private SenderConfigRepository senderConfigRepository;
 
+    //TODO use ImsTenantService instead of ImsPublicService to get tenant info
     @Autowired
     private ImsPublicService imsPublicService;
 

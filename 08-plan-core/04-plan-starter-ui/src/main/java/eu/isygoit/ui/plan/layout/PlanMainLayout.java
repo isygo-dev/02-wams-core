@@ -25,6 +25,8 @@ public class PlanMainLayout extends BaseMainLayout {
     protected Component createDrawerContent() {
         SideNav nav = new SideNav();
         nav.addItem(navItem(I18n.t("plan.ui.nav.dashboard"), "plan", VaadinIcon.HOME));
+        nav.addItem(navItem(I18n.t("plan.ui.nav.jobs"), "plan/jobs", VaadinIcon.LIST));
+        nav.addItem(navItem(I18n.t("plan.ui.nav.logs"), "plan/logs", VaadinIcon.LIST));
         return new Scroller(nav);
     }
 }

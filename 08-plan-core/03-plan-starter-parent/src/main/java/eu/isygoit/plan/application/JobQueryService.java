@@ -2,6 +2,7 @@ package eu.isygoit.plan.application;
 
 import eu.isygoit.enums.IEnumJobStatusCode;
 import eu.isygoit.plan.api.JobDashboardSummary;
+import eu.isygoit.plan.api.PlanningRequest;
 import eu.isygoit.plan.application.port.JobStatusCache;
 import eu.isygoit.plan.domain.JobStatus;
 import eu.isygoit.plan.domain.SolveResult;
@@ -11,16 +12,22 @@ import eu.isygoit.plan.port.JobRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class JobQueryService {
     private final JobRepository jobRepository;
     private final JobStatusCache statusCache;
+    private final PlanningService planningService;
 
-    public JobQueryService(JobRepository jobRepository, JobStatusCache statusCache) {
+    public JobQueryService(
+            JobRepository jobRepository,
+            JobStatusCache statusCache,
+            PlanningService planningService) {
         this.jobRepository = jobRepository;
         this.statusCache = statusCache;
+        this.planningService = planningService;
     }
 
     public JobStatus status(UUID jobId) {
@@ -68,6 +75,7 @@ public class JobQueryService {
                 countByStatus(IEnumJobStatusCode.Types.VALIDATING),
                 countByStatus(IEnumJobStatusCode.Types.NORMALIZING),
                 countByStatus(IEnumJobStatusCode.Types.SOLVING),
+                countByStatus(IEnumJobStatusCode.Types.STOPPING),
                 countByStatus(IEnumJobStatusCode.Types.SUCCEEDED),
                 countByStatus(IEnumJobStatusCode.Types.INFEASIBLE),
                 countByStatus(IEnumJobStatusCode.Types.FAILED),
@@ -76,9 +84,55 @@ public class JobQueryService {
     }
 
     public boolean cancel(UUID jobId) {
-        status(jobId);
+        refreshStatus(jobId);
         boolean cancelled = jobRepository.cancelIfRunning(jobId);
         statusCache.evict(jobId);
         return cancelled;
+    }
+
+    public Optional<PlanningRequest> request(UUID jobId) {
+        JobStatus current = refreshStatus(jobId);
+        if (current.status() != IEnumJobStatusCode.Types.CREATED) {
+            return Optional.empty();
+        }
+        return jobRepository.findRequest(jobId);
+    }
+
+    public boolean updateRequest(UUID jobId, PlanningRequest request) {
+        JobStatus current = refreshStatus(jobId);
+        if (current.status() != IEnumJobStatusCode.Types.CREATED) {
+            return false;
+        }
+        if (request == null || request.meta() == null || !jobId.equals(request.meta().jobId())) {
+            throw new InvalidRequestException(
+                    "JOB_ID_MISMATCH", "The request job ID must match the target job");
+        }
+        planningService.normalizeAndValidate(request);
+        if (!jobRepository.updateCreatedRequest(jobId, request)) {
+            statusCache.evict(jobId);
+            return false;
+        }
+        statusCache.evict(jobId);
+        refreshStatus(jobId);
+        return true;
+    }
+
+    public boolean stop(UUID jobId) {
+        refreshStatus(jobId);
+        boolean stopping = jobRepository.stopIfProcessing(jobId);
+        statusCache.evict(jobId);
+        if (stopping) {
+            refreshStatus(jobId);
+        }
+        return stopping;
+    }
+
+    public boolean delete(UUID jobId) {
+        refreshStatus(jobId);
+        boolean deleted = jobRepository.deleteIfTerminal(jobId);
+        if (deleted) {
+            statusCache.evict(jobId);
+        }
+        return deleted;
     }
 }

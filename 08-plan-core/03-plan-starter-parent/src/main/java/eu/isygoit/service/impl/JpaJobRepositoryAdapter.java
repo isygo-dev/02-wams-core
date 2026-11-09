@@ -4,12 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.isygoit.enums.IEnumJobStatusCode;
 import eu.isygoit.enums.IEnumSolverStatus;
-import eu.isygoit.model.PlanJob;
 import eu.isygoit.plan.api.PlanningRequest;
 import eu.isygoit.plan.domain.Diagnostics;
 import eu.isygoit.plan.domain.JobStatus;
 import eu.isygoit.plan.domain.SolveResult;
-import eu.isygoit.plan.exception.JobNotFoundException;
 import eu.isygoit.plan.port.JobRepository;
 import eu.isygoit.repository.PlanJobRepository;
 import org.springframework.data.domain.PageRequest;
@@ -48,21 +46,14 @@ public class JpaJobRepositoryAdapter implements JobRepository {
     }
 
     @Override
-    public void upsert(UUID jobId, SolveResult result) {
-        PlanJob entity = getEntity(jobId);
-        entity.setResultJson(writeJson(result));
-        repository.save(entity);
+    @Transactional(readOnly = true)
+    public Optional<PlanningRequest> findRequest(UUID jobId) {
+        return Optional.ofNullable(repository.findRequestJson(jobId)).map(this::readRequest);
     }
 
     @Override
-    public void updateStatus(JobStatus status) {
-        PlanJob entity = getEntity(status.jobId());
-        entity.setStatus(status.status());
-        entity.setStartedAt(status.startedAt());
-        entity.setCompletedAt(status.finishedAt());
-        entity.setErrorCode(status.errorCode());
-        entity.setMessage(status.message());
-        repository.save(entity);
+    public boolean updateCreatedRequest(UUID jobId, PlanningRequest request) {
+        return repository.updateCreatedRequest(jobId, writeJson(request)) > 0;
     }
 
     @Override
@@ -71,24 +62,29 @@ public class JpaJobRepositoryAdapter implements JobRepository {
     }
 
     @Override
-    public void markFailed(UUID jobId, String errorCode, String message) {
-        PlanJob entity = getEntity(jobId);
-        entity.setStatus(IEnumJobStatusCode.Types.FAILED);
-        entity.setCompletedAt(Instant.now());
-        entity.setErrorCode(errorCode);
-        entity.setMessage(message);
-        repository.save(entity);
+    public boolean markSolving(UUID jobId, JobStatus status) {
+        return repository.markSolving(jobId, status.message()) > 0;
     }
 
     @Override
-    public void markInfeasible(UUID jobId, String message, String diagnostics) {
-        PlanJob entity = getEntity(jobId);
-        entity.setStatus(IEnumJobStatusCode.Types.INFEASIBLE);
-        entity.setCompletedAt(Instant.now());
-        entity.setErrorCode("INFEASIBLE");
-        entity.setMessage(message);
-        entity.setDiagnosticsJson(diagnostics);
-        repository.save(entity);
+    public boolean completeSolving(UUID jobId, JobStatus status, SolveResult result) {
+        return repository.completeSolving(
+                jobId,
+                status.status().name(),
+                writeJson(result),
+                status.finishedAt(),
+                status.errorCode(),
+                status.message()) > 0;
+    }
+
+    @Override
+    public boolean markFailedIfSolving(UUID jobId, String errorCode, String message) {
+        return repository.markFailedIfSolving(jobId, errorCode, message) > 0;
+    }
+
+    @Override
+    public boolean markInfeasibleIfSolving(UUID jobId, String message, String diagnostics) {
+        return repository.markInfeasibleIfSolving(jobId, message, diagnostics) > 0;
     }
 
     @Override
@@ -157,8 +153,25 @@ public class JpaJobRepositoryAdapter implements JobRepository {
         return repository.cancelIfRunning(jobId) > 0;
     }
 
-    private PlanJob getEntity(UUID jobId) {
-        return repository.findById(jobId).orElseThrow(() -> new JobNotFoundException(jobId));
+    @Override
+    public boolean stopIfProcessing(UUID jobId) {
+        return repository.stopIfProcessing(jobId) > 0;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UUID> findStoppingJobIds(int limit) {
+        return repository.findStoppingJobIds(PageRequest.of(0, limit));
+    }
+
+    @Override
+    public boolean completeStopped(UUID jobId) {
+        return repository.completeStopped(jobId) > 0;
+    }
+
+    @Override
+    public boolean deleteIfTerminal(UUID jobId) {
+        return repository.deleteIfTerminal(jobId) > 0;
     }
 
     private String writeJson(SolveResult result) {

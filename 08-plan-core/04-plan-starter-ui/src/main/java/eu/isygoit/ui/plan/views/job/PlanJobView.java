@@ -132,7 +132,7 @@ public class PlanJobView extends ManagementVerticalView
         Button logs = new Button(I18n.t("plan.ui.logs.open"), VaadinIcon.LIST.create());
         logs.addClickListener(event -> {
             if (jobId != null) {
-                getUI().ifPresent(ui -> ui.navigate("plan/logs/" + jobId));
+                getUI().ifPresent(ui -> ui.navigate("plan/logs?jobId=" + jobId));
             }
         });
         HorizontalLayout actions = new HorizontalLayout(refresh, loadResult, logs);

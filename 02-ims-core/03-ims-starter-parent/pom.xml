@@ -87,18 +87,6 @@
             <artifactId>service-stack-web</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>eu.isygo-it.services</groupId>
-            <artifactId>key-management-shared</artifactId>
-            <version>WC-1.0.261007-T1703</version>
-        </dependency>
-
-        <dependency>
-            <groupId>eu.isygo-it.services</groupId>
-            <artifactId>messaging-management-shared</artifactId>
-            <version>WC-1.0.261007-T1703</version>
-        </dependency>
-
 
         <dependency>
             <groupId>eu.isygo-it.services</groupId>

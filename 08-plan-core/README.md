@@ -76,6 +76,9 @@ environment variables. Do not rely on the local Cassandra `SimpleStrategy` keysp
 - `POST /api/v1/private/plans/jobs` — submit a `PlanningRequest`; returns `202 Accepted` with `CREATED` status in either
   execution mode.
 - `GET /api/v1/private/plans/jobs/{jobId}` — fetch the persisted job status.
+- `GET /api/v1/private/plans/jobs/{jobId}/request` — fetch the request for a job while it is still `CREATED`.
+- `PUT /api/v1/private/plans/jobs/{jobId}` — replace a job request while it is `CREATED`; the request's `meta.jobId`
+  must match the path.
 - `GET /api/v1/private/plans/jobs/summary?limit=50` — fetch total/status counts and recent jobs for the management
   dashboard.
 - `GET /api/v1/private/plans/jobs/{jobId}/result` — fetch the result after completion.
@@ -83,14 +86,19 @@ environment variables. Do not rely on the local Cassandra `SimpleStrategy` keysp
   optional `minLevel` and `limit` parameters.
 - `DELETE /api/v1/private/plans/jobs/{jobId}` — cancel a queued job; returns `409` if it is already processing or
   terminal.
+- `POST /api/v1/private/plans/jobs/{jobId}/stop` — request cancellation of a `NORMALIZING` or `SOLVING` job; the
+  status moves through `STOPPING` before becoming `CANCELLED`.
+- `DELETE /api/v1/private/plans/jobs/{jobId}/record` — delete a terminal job record; active jobs cannot be deleted.
+  Associated Cassandra logs become inaccessible through the API and expire under the existing 30-day TTL.
 
 ## Management UI
 
 The Vaadin UI is implemented in `04-plan-starter-ui`, following the MMS starter UI layout and shared dashboard
 components. The runnable host `10-starter-test/80-plan-management/04-plan-service` includes this UI starter and its
 views call the plan API through a Feign client rather than using persistence services directly. Open `/plan` for the
-dashboard, status summary, recent jobs, and job-ID lookup. Open a job from the grid to follow status updates and inspect
-its result; the job view links to the job's recent logs.
+dashboard, status summary, recent jobs, and job-ID lookup. `/plan/jobs` provides grid/card views, job submission,
+created-job editing/cancellation, active-solver stopping, and terminal-job deletion. `/plan/logs` shows a selected
+job's logs with a details action. Open a job to follow status updates and inspect its result.
 
 - `GET /actuator/health` — health/liveness endpoint.
 

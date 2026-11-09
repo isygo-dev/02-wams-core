@@ -9,6 +9,7 @@ import eu.isygoit.plan.domain.Constraint;
 import eu.isygoit.plan.engine.ConstraintRegistry;
 import eu.isygoit.plan.engine.ObjectiveRegistry;
 import eu.isygoit.plan.engine.SolverEngine;
+import eu.isygoit.plan.engine.SolverCancellationToken;
 import eu.isygoit.plan.exception.InvalidRequestException;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +38,14 @@ public class CpSatSolverEngine implements SolverEngine {
 
     @Override
     public SolveResult solve(PlanningProblem problem, SolverOptions options) {
+        return solve(problem, options, new SolverCancellationToken());
+    }
+
+    @Override
+    public SolveResult solve(
+            PlanningProblem problem,
+            SolverOptions options,
+            SolverCancellationToken cancellationToken) {
         Instant started = Instant.now();
         List<Constraint> relaxable = problem.constraints().stream()
                 .filter(constraint -> constraint.enforcement() == IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION)
@@ -50,12 +59,16 @@ public class CpSatSolverEngine implements SolverEngine {
         Set<String> relaxedIds = new HashSet<>();
         SolveResult lastResult = null;
         for (int relaxationCount = 0; relaxationCount <= relaxable.size(); relaxationCount++) {
+            if (cancellationToken.isCancellationRequested()) {
+                return unknownResult(started, options, relaxedIds, "Solver stop was requested");
+            }
             long remainingSeconds = options.maxTimeSeconds()
                     - Duration.between(started, Instant.now()).toSeconds();
             if (remainingSeconds <= 0) {
                 return unknownResult(started, options, relaxedIds, "Solver time limit was reached");
             }
-            lastResult = solveAttempt(problem, options, relaxedIds, remainingSeconds, started);
+            lastResult = solveAttempt(
+                    problem, options, relaxedIds, remainingSeconds, started, cancellationToken);
             if (lastResult.status() != IEnumSolverStatus.Types.INFEASIBLE) {
                 return withRelaxations(lastResult, relaxable.subList(0, relaxationCount));
             }
@@ -71,7 +84,8 @@ public class CpSatSolverEngine implements SolverEngine {
             SolverOptions options,
             Set<String> relaxedIds,
             long remainingSeconds,
-            Instant started) {
+            Instant started,
+            SolverCancellationToken cancellationToken) {
         CpModel model = new CpModel();
         List<Choice> choices = new ArrayList<>();
         Map<String, List<BoolVar>> variablesByTask = new HashMap<>();
@@ -154,7 +168,11 @@ public class CpSatSolverEngine implements SolverEngine {
                 .setNumSearchWorkers(options.numWorkers())
                 .setRandomSeed(options.seed().intValue())
                 .setLogSearchProgress(options.logSearch());
-        CpSolverStatus solverStatus = solver.solve(model);
+        CpSolverStatus solverStatus;
+        try (SolverCancellationToken.Registration ignored =
+                     cancellationToken.onCancellation(solver::stopSearch)) {
+            solverStatus = solver.solve(model);
+        }
         if (solverStatus == CpSolverStatus.INFEASIBLE) {
             return infeasibleResult(started, options,
                     problem.constraints().stream()

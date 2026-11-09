@@ -5,6 +5,7 @@ import eu.isygoit.plan.domain.PlanningProblem;
 import eu.isygoit.plan.domain.SolveResult;
 import eu.isygoit.plan.engine.ConstraintRegistry;
 import eu.isygoit.plan.engine.ObjectiveRegistry;
+import eu.isygoit.plan.engine.SolverCancellationToken;
 import eu.isygoit.plan.engine.SolverRegistry;
 import eu.isygoit.plan.exception.InfeasibleException;
 import org.springframework.stereotype.Service;
@@ -34,8 +35,13 @@ public class PlanningService {
     }
 
     public SolveResult solve(PlanningRequest request) {
+        return solve(request, new SolverCancellationToken());
+    }
+
+    public SolveResult solve(PlanningRequest request, SolverCancellationToken cancellationToken) {
         PlanningProblem problem = normalizeAndValidate(request);
-        SolveResult result = solverRegistry.get(problem.options().engine()).solve(problem, problem.options());
+        SolveResult result = solverRegistry.get(problem.options().engine())
+                .solve(problem, problem.options(), cancellationToken);
         if (result.status() == eu.isygoit.enums.IEnumSolverStatus.Types.INFEASIBLE) {
             throw new InfeasibleException(result.diagnostics());
         }

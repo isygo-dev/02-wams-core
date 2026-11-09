@@ -1,5 +1,6 @@
 .plan-dashboard,
 .plan-job-view,
+.plan-jobs-view,
 .plan-logs-view {
   gap: var(--lumo-space-m);
 }
@@ -34,6 +35,11 @@
 .plan-log-level--warn {
   background: var(--lumo-primary-color-10pct);
   color: var(--lumo-primary-text-color);
+}
+
+.plan-job-status--stopping {
+  background: var(--lumo-warning-color-10pct);
+  color: var(--lumo-warning-text-color);
 }
 
 .plan-job-status--failed,
@@ -76,6 +82,24 @@
   font-family: var(--lumo-font-family-monospace);
 }
 
+.plan-job-card {
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-l);
+  background: var(--lumo-base-color);
+  min-width: 0;
+}
+
+.plan-job-card__id {
+  overflow-wrap: anywhere;
+  font-size: var(--lumo-font-size-m);
+}
+
+.plan-job-card__message {
+  min-height: 2.5rem;
+  overflow-wrap: anywhere;
+  color: var(--lumo-secondary-text-color);
+}
+
 @media (max-width: 640px) {
   .plan-job-lookup {
     flex-direction: column;
@@ -85,5 +109,9 @@
   .plan-job-summary__label {
     width: 7rem;
     flex-basis: 7rem;
+  }
+
+  .plan-jobs-toolbar {
+    flex-wrap: wrap;
   }
 }

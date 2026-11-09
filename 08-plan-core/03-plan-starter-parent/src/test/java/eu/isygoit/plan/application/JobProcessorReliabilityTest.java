@@ -7,6 +7,7 @@ import eu.isygoit.plan.api.PlanningRequest;
 import eu.isygoit.plan.application.port.JobStatusCache;
 import eu.isygoit.plan.application.port.LogProducer;
 import eu.isygoit.plan.domain.JobStatus;
+import eu.isygoit.plan.engine.SolverCancellationToken;
 import eu.isygoit.plan.port.JobRepository;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,8 @@ class JobProcessorReliabilityTest {
     private final JobStatusCache statusCache = mock(JobStatusCache.class);
     private final LogProducer logProducer = mock(LogProducer.class);
     private final JobProcessor jobProcessor = new JobProcessor(
-            planningService, jobRepository, statusCache, logProducer, new ObjectMapper());
+            planningService, jobRepository, statusCache, logProducer,
+            new ObjectMapper(), new JobCancellationRegistry());
 
     @Test
     void doesNotProcessJobWhenAnotherWorkerOwnsTheClaim() {
@@ -40,9 +42,26 @@ class JobProcessorReliabilityTest {
 
         jobProcessor.process(request);
 
-        verify(planningService, never()).solve(request);
-        verify(jobRepository, never()).updateStatus(any());
-        verify(jobRepository, never()).markFailed(any(), any(), any());
+        verify(planningService, never()).solve(eq(request), any(SolverCancellationToken.class));
+        verify(jobRepository, never()).markSolving(any(), any());
+        verify(jobRepository, never()).markFailedIfSolving(any(), any(), any());
+    }
+
+    @Test
+    void completesStopRequestBeforeStartingTheSolver() {
+        PlanningRequest request = request();
+        UUID jobId = request.meta().jobId();
+        when(jobRepository.findStatus(jobId)).thenReturn(Optional.of(createdStatus(jobId)));
+        when(jobRepository.claimForProcessing(eq(jobId), any(Instant.class))).thenReturn(true);
+        when(jobRepository.markSolving(eq(jobId), any())).thenReturn(false);
+        when(jobRepository.completeStopped(jobId)).thenReturn(true);
+
+        jobProcessor.process(request);
+
+        verify(planningService, never()).solve(eq(request), any(SolverCancellationToken.class));
+        verify(jobRepository).completeStopped(jobId);
+        verify(statusCache).put(org.mockito.ArgumentMatchers.argThat(
+                (JobStatus status) -> status.status() == IEnumJobStatusCode.Types.CANCELLED));
     }
 
     @Test
@@ -51,12 +70,15 @@ class JobProcessorReliabilityTest {
         UUID jobId = request.meta().jobId();
         when(jobRepository.findStatus(jobId)).thenReturn(Optional.of(createdStatus(jobId)));
         when(jobRepository.claimForProcessing(eq(jobId), any(Instant.class))).thenReturn(true);
+        when(jobRepository.markSolving(eq(jobId), any())).thenReturn(true);
         doThrow(new IllegalStateException("solver crashed"))
-                .when(planningService).solve(request);
+                .when(planningService).solve(eq(request), any(SolverCancellationToken.class));
+        when(jobRepository.markFailedIfSolving(
+                eq(jobId), eq("JOB_PROCESSING_FAILED"), any())).thenReturn(true);
 
         jobProcessor.process(request);
 
-        verify(jobRepository).markFailed(jobId, "JOB_PROCESSING_FAILED",
+        verify(jobRepository).markFailedIfSolving(jobId, "JOB_PROCESSING_FAILED",
                 "Planning job failed unexpectedly");
         verify(statusCache).put(org.mockito.ArgumentMatchers.argThat(
                 (JobStatus status) -> status.status() == IEnumJobStatusCode.Types.FAILED

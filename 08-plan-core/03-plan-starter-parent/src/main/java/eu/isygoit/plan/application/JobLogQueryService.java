@@ -27,7 +27,7 @@ public class JobLogQueryService {
         if (limit < 1 || limit > 1000) {
             throw new InvalidRequestException("INVALID_LOG_LIMIT", "limit must be between 1 and 1000");
         }
-        jobQueryService.status(jobId);
+        jobQueryService.refreshStatus(jobId);
         if (from == null && to == null) {
             return logEntryRepository.findLatest(jobId, limit);
         }

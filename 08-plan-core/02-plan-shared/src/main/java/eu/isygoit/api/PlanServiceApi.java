@@ -23,6 +23,12 @@ public interface PlanServiceApi {
     @GetMapping("/jobs/{jobId}")
     JobStatus status(@PathVariable UUID jobId);
 
+    @GetMapping("/jobs/{jobId}/request")
+    ResponseEntity<PlanningRequest> request(@PathVariable UUID jobId);
+
+    @PutMapping("/jobs/{jobId}")
+    ResponseEntity<JobStatus> update(@PathVariable UUID jobId, @RequestBody PlanningRequest request);
+
     @GetMapping("/jobs/{jobId}/logs")
     List<LogEntry> logs(
             @PathVariable UUID jobId,
@@ -36,4 +42,10 @@ public interface PlanServiceApi {
 
     @DeleteMapping("/jobs/{jobId}")
     ResponseEntity<Void> cancel(@PathVariable UUID jobId);
+
+    @PostMapping("/jobs/{jobId}/stop")
+    ResponseEntity<Void> stop(@PathVariable UUID jobId);
+
+    @DeleteMapping("/jobs/{jobId}/record")
+    ResponseEntity<Void> delete(@PathVariable UUID jobId);
 }

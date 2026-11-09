@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <version>WC-1.0.261007-T1703</version>
 
-    <artifactId>isygo-plan-starter-parent</artifactId>
+    <artifactId>plan-management-starter-parent</artifactId>
     <packaging>jar</packaging>
 
     <name>isygoPlan Service and Infrastructure</name>
@@ -51,7 +51,7 @@
             <id>build-docker</id>
             <properties>
                 <cloud.config.service>http://config-service:8088</cloud.config.service>
-                <hazelcast.public.address>plan-service</hazelcast.public.address>
+                <hazelcast.public.address>key-service</hazelcast.public.address>
                 <hazelcast.public.port>5555</hazelcast.public.port>
                 <hazelcast.port>5701</hazelcast.port>
             </properties>
@@ -60,7 +60,7 @@
             <id>build-dev</id>
             <properties>
                 <cloud.config.service>http://config-service:8088</cloud.config.service>
-                <hazelcast.public.address>plan-service</hazelcast.public.address>
+                <hazelcast.public.address>key-service</hazelcast.public.address>
                 <hazelcast.public.port>5555</hazelcast.public.port>
                 <hazelcast.port>5701</hazelcast.port>
             </properties>
@@ -69,7 +69,7 @@
             <id>build-prod</id>
             <properties>
                 <cloud.config.service>http://config-service:8088</cloud.config.service>
-                <hazelcast.public.address>plan-service</hazelcast.public.address>
+                <hazelcast.public.address>key-service</hazelcast.public.address>
                 <hazelcast.public.port>5555</hazelcast.public.port>
                 <hazelcast.port>5701</hazelcast.port>
             </properties>
@@ -79,46 +79,71 @@
     <dependencies>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
-            <artifactId>isygo-plan-jpa</artifactId>
+            <artifactId>plan-management-jpa</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
-            <artifactId>isygo-plan-shared</artifactId>
+            <artifactId>plan-management-shared</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>service-stack-web</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>key-management-shared</artifactId>
+            <version>WC-1.0.261007-T1703</version>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>identity-management-shared</artifactId>
+            <version>WC-1.0.261007-T1703</version>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>messaging-management-shared</artifactId>
+            <version>WC-1.0.261007-T1703</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-cassandra</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.google.ortools</groupId>
-            <artifactId>ortools-java</artifactId>
-            <version>${ortools.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ai.timefold.solver</groupId>
-            <artifactId>timefold-solver-core</artifactId>
-            <version>${timefold.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>ai.timefold.solver</groupId>
+            <artifactId>timefold-solver-core</artifactId>
+            <version>${timefold.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.ortools</groupId>
+            <artifactId>ortools-java</artifactId>
+            <version>${ortools.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

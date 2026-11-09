@@ -51,6 +51,21 @@ public class PlanController implements PlanServiceApi {
     }
 
     @Override
+    public ResponseEntity<PlanningRequest> request(UUID jobId) {
+        return queryService.request(jobId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.CONFLICT).build());
+    }
+
+    @Override
+    public ResponseEntity<JobStatus> update(UUID jobId, PlanningRequest request) {
+        if (!queryService.updateRequest(jobId, request)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+        return ResponseEntity.ok(queryService.refreshStatus(jobId));
+    }
+
+    @Override
     public List<LogEntry> logs(
             UUID jobId,
             Instant from,
@@ -68,6 +83,20 @@ public class PlanController implements PlanServiceApi {
     @Override
     public ResponseEntity<Void> cancel(UUID jobId) {
         return queryService.cancel(jobId)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+
+    @Override
+    public ResponseEntity<Void> stop(UUID jobId) {
+        return queryService.stop(jobId)
+                ? ResponseEntity.accepted().build()
+                : ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+
+    @Override
+    public ResponseEntity<Void> delete(UUID jobId) {
+        return queryService.delete(jobId)
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.status(HttpStatus.CONFLICT).build();
     }

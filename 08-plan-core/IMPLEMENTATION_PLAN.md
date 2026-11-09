@@ -80,7 +80,7 @@
   `80-plan-management/04-plan-service`; no `ServiceStarter` API-extraction hook was added because this service has no
   API-permission model or extractor.
 - `10-starter-test/80-plan-management/04-plan-service` is the runnable plan API and messaging host. It depends on
-  `isygo-plan-starter-parent`, uses the root-package Spring Boot entry point without the unrelated API-extractor hook,
+  `plan-management-starter-parent`, uses the root-package Spring Boot entry point without the unrelated API-extractor hook,
   and loads job/log publisher-consumer routes from `camel/plan-*-camel-routes.xml`. The duplicate route resources were
   removed from `04-plan-starter-ui` so the same Kafka consumers are not started by both runtimes.
 - Java `RouteBuilder` classes were removed; typed producer/consumer processors retain serialization, persistence, and
@@ -100,9 +100,17 @@
   The README no longer points to a JSON Schema path that is absent from the starter UI module.
 - Infeasible result lookups now reconstruct a `SolveResult` from the persisted diagnostics when no result JSON exists.
   Generic input maps now retain JSON `null` values instead of failing during defensive copying.
+- The plan UI now follows the MMS starter pattern with dashboard shortcuts, a jobs grid/card management view, request
+  submission/edit dialogs, status-gated cancel/stop/delete actions, and a per-job log grid with a details dialog. The
+  runnable plan host has its own navigation provider, while the combined UI includes the plan targets in its registry.
+- Job edits are persisted only while `CREATED`; workers load the canonical persisted request after claiming the job.
+  Active solver stops use persisted `STOPPING` state, a scheduled cross-instance monitor, and CP-SAT/Timefold stop hooks.
+  Terminal deletion is a separate endpoint, preserving the existing queued-job `DELETE` cancellation contract; deleted
+  jobs' Cassandra logs are inaccessible through the API and expire under the 30-day TTL.
+- Added focused tests for job-state management and stop transitions. As previously requested, this phase is source-only:
+  do not compile or run tests.
 - Final source review still needs to address other remaining requirements. These changes do not alter the four-module
   layout.
-- As previously requested, this phase is source-only: do not compile or run tests.
 
 ## Completion record
 

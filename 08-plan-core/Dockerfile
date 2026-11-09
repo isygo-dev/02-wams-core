@@ -2,7 +2,7 @@ FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /workspace
 COPY . .
 RUN mvn -B -pl 04-plan-starter-ui -am package -DskipTests \
-    && cp 04-plan-starter-ui/target/isygo-plan-starter-ui-*.jar /tmp/isygo-plan.jar
+    && cp 04-plan-starter-ui/target/plan-management-starter-ui-*.jar /tmp/isygo-plan.jar
 
 FROM eclipse-temurin:17-jre
 WORKDIR /app

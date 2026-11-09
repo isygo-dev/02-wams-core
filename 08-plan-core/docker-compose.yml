@@ -43,7 +43,7 @@ services:
   cassandra:
     image: cassandra:5.0
     environment:
-      CASSANDRA_CLUSTER_NAME: isygo-plan-local
+      CASSANDRA_CLUSTER_NAME: plan-management-local
       CASSANDRA_DC: datacenter1
       CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
     ports:

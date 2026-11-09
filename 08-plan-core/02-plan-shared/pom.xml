@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <version>WC-1.0.261007-T1703</version>
 
-    <artifactId>isygo-plan-shared</artifactId>
+    <artifactId>plan-management-shared</artifactId>
     <packaging>jar</packaging>
 
     <name>Plan Management Shared</name>

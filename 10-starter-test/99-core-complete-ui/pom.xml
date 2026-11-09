@@ -63,6 +63,13 @@
     <dependencies>
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
+            <artifactId>plan-management-starter-ui</artifactId>
+            <version>WC-1.0.261007-T1703</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
             <artifactId>key-management-starter-ui</artifactId>
             <version>WC-1.0.261007-T1703</version>
             <scope>compile</scope>
@@ -99,6 +106,13 @@
         <dependency>
             <groupId>eu.isygo-it.services</groupId>
             <artifactId>calendar-management-starter-ui</artifactId>
+            <version>WC-1.0.261007-T1703</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.isygo-it.services</groupId>
+            <artifactId>plan-management-starter-ui</artifactId>
             <version>WC-1.0.261007-T1703</version>
             <scope>compile</scope>
         </dependency>
@@ -182,5 +196,4 @@
         </plugins>
     </build>
 </project>
-
 

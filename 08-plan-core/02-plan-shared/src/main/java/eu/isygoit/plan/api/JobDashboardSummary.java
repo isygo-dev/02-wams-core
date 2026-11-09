@@ -11,6 +11,7 @@ public record JobDashboardSummary(
         long validating,
         long normalizing,
         long solving,
+        long stopping,
         long succeeded,
         long infeasible,
         long failed,
