@@ -50,6 +50,6 @@ public interface TenantRepository extends JpaPagingAndSortingTenantAndCodeAssign
      *
      * @return the admin status
      */
-    @Query("select d.adminStatus from Tenant d where lower(d.name) = lower(:tenant)")
+    @Query("select d.adminStatus from Tenant d where lower(d.name) = lower(coalesce(:tenant, ''))")
     IEnumEnabledBinaryStatus.Types getAdminStatus(@Param("tenant") String tenant);
 }

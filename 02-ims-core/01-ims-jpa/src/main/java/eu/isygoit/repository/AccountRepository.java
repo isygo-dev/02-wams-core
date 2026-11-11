@@ -56,7 +56,7 @@ public interface AccountRepository extends JpaPagingAndSortingTenantAndCodeAssig
      * @param tenant the tenant
      * @return the list
      */
-    @Query("select distinct a.email from Account a where lower(a.tenant) = lower(:tenant)")
+    @Query("select distinct a.email from Account a where lower(a.tenant) = lower(coalesce(:tenant, ''))")
     List<String> findDistinctEmailsByTenant(@Param("tenant") String tenant);
 
     /**
@@ -69,7 +69,7 @@ public interface AccountRepository extends JpaPagingAndSortingTenantAndCodeAssig
 
     @Query(value = "select count(distinct a.code) from t_account a " +
             "inner join t_connection_tracking tct on a.code=tct.account_code " +
-            "where lower(a.tenant) = lower(:tenant) and a.origin like :origin", nativeQuery = true)
+            "where lower(a.tenant) = lower(coalesce(:tenant, '')) and a.origin like :origin", nativeQuery = true)
     Long countByTenantAndOrigin(@Param("tenant") String tenant, @Param("origin") String origin);
 
     @Query(value = "select count(distinct a.code) from t_account a " +
