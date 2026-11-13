@@ -569,16 +569,16 @@ public class FilterBar extends Div {
 
     private String labelForEnum(String fieldName, Enum<?> value) {
         String i18nKey = "filter.field." + fieldName + "." + value.name().toLowerCase();
-        String translated = I18n.t(i18nKey);
-        if (!translated.equals(i18nKey)) return translated;
+        // a missing key comes back as "!key!": test for the key instead of comparing the text
+        if (I18n.hasKey(i18nKey)) return I18n.t(i18nKey);
+        if (I18n.hasKey("enum." + value.name())) return I18n.t("enum." + value.name());
         if (value instanceof IEnum ienum) return ienum.meaning();
         return value.name();
     }
 
     private String resolveLabel(String name) {
         String key = "filter.field." + name;
-        String translated = I18n.t(key);
-        return translated.equals(key) ? humanize(name) : translated;
+        return I18n.hasKey(key) ? I18n.t(key) : humanize(name);
     }
 
     private String humanize(String name) {
