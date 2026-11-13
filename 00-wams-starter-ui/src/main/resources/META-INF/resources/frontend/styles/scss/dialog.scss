@@ -532,3 +532,15 @@ vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sm
   font-weight: 500;
   color: var(--lumo-body-text-color);
 }
+
+// File type of a row in the "Files & documents" lists (extension / mime subtype).
+.file-row__type {
+  flex: none;
+  padding: 0 var(--lumo-space-s);
+  border-radius: var(--lumo-border-radius-s);
+  background: var(--lumo-contrast-10pct);
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-xxs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}

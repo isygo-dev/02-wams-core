@@ -333,6 +333,15 @@ public class AdditionalFilesManager<F extends LinkedFileMinDto<Long>> extends Ve
         fileSize.addClassName("file-row__size");
 
         row.add(fileIcon, fileName, fileSize);
+        // file type: the extension, else the subtype of the mime type ("pdf" of "application/pdf")
+        String type = file.getExtension() != null && !file.getExtension().isBlank() ? file.getExtension()
+                : file.getMimetype() != null && file.getMimetype().contains("/")
+                ? file.getMimetype().substring(file.getMimetype().indexOf('/') + 1) : file.getMimetype();
+        if (type != null && !type.isBlank()) {
+            Span typeChip = new Span(type.replaceFirst("^\\.", "").toUpperCase());
+            typeChip.addClassName("file-row__type");
+            row.add(typeChip);
+        }
 
         HorizontalLayout actions = new HorizontalLayout();
         actions.setSpacing(true);

@@ -59,6 +59,8 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
     private final TextField jobIdField = new TextField();
     private final ComboBox<IEnumLogLevel.Types> minLevelCombo = new ComboBox<>();
     private final Grid<LogEntry> logsGrid = new Grid<>(LogEntry.class, false);
+    private final eu.isygoit.ui.common.component.GridPager<LogEntry> logsPager =
+            new eu.isygoit.ui.common.component.GridPager<>(logsGrid);
     private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::loadLogs);
 
     public PlanLogsView(PlanFeignService planFeignService, ObjectMapper objectMapper) {
@@ -121,7 +123,7 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
 
     private void configureGrid() {
         logsGrid.setWidthFull();
-        logsGrid.setHeight("calc(100vh - 18rem)");
+        logsGrid.setHeight("calc(100vh - 24rem)");
         logsGrid.addColumn(entry -> PlanFormats.dateTimeSeconds(entry.eventTime()))
                 .setHeader(I18n.t("plan.ui.logs.time"))
                 .setAutoWidth(true);
@@ -178,7 +180,7 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
                         return;
                     }
                     List<LogEntry> entries = response == null ? null : response.getBody();
-                    logsGrid.setItems(entries == null ? List.<LogEntry>of() : entries);
+                    logsPager.setItems(entries == null ? List.<LogEntry>of() : entries);
                 }));
     }
 

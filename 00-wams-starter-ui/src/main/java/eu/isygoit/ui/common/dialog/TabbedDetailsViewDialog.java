@@ -107,19 +107,29 @@ public abstract class TabbedDetailsViewDialog extends DetailsViewDialog {
     }
 
     /**
-     * File metadata tab for entities carrying a primary file (FileEntityDto).
+     * The "Files & documents" tab: every file of the object as a list (name, size, type, download), made by the
+     * caller from its file managers. It replaces the old file metadata tab (file name, original name, path,
+     * extension, type, category), which is no longer shown.
      */
+    protected final void addFilesTab(Component... fileLists) {
+        com.vaadin.flow.component.orderedlayout.VerticalLayout content =
+                new com.vaadin.flow.component.orderedlayout.VerticalLayout(fileLists);
+        content.setPadding(false);
+        content.setSpacing(true);
+        content.setWidthFull();
+        addTab(I18n.t("common.details.section.files"),
+                createSection(I18n.t("common.details.section.files"), content));
+    }
+
+    /**
+     * File metadata tab for entities carrying a primary file (FileEntityDto).
+     * @deprecated no longer shown: use {@link #addFilesTab(Component...)}; kept so older callers keep compiling.
+     */
+    @Deprecated
+    @SuppressWarnings("unused")
     protected final void addFileMetadataTab(String fileName, String originalFileName, String path,
                                             String extension, String type, String category) {
-        Div grid = createDetailGrid();
-        addFieldToGrid(grid, VaadinIcon.FILE_TEXT, I18n.t("common.file.name"), dash(fileName));
-        addFieldToGrid(grid, VaadinIcon.FILE_TEXT_O, I18n.t("common.file.originalName"), dash(originalFileName));
-        addFieldToGrid(grid, VaadinIcon.FOLDER, I18n.t("common.file.path"), dash(path));
-        addFieldToGrid(grid, VaadinIcon.FILE_TEXT, I18n.t("common.file.extension"), dash(extension));
-        addFieldToGrid(grid, VaadinIcon.TAG, I18n.t("common.file.type"), dash(type));
-        addFieldToGrid(grid, VaadinIcon.TAG, I18n.t("common.file.category"), dash(category));
-        addTab(I18n.t("common.details.section.fileMetadata"),
-                createSection(I18n.t("common.details.section.fileMetadata"), grid));
+        // intentionally empty: the file metadata is not displayed any more
     }
 
     private TabSheet findTabSheet() {

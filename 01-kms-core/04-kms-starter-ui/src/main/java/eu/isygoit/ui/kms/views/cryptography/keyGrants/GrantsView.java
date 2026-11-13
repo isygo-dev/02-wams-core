@@ -165,6 +165,7 @@ public class GrantsView extends ManagementVerticalView {
 
     private void buildGrantsGrid() {
         grantsList.setWidthFull();
+        grantsList.pageSize(20);
         grantsList.cardFactory(this::buildGrantCard);
 
         add(grantsList);

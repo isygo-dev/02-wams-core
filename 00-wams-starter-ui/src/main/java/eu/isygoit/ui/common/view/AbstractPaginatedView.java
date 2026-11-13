@@ -434,7 +434,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
                 currentPage = 0;
             }
             applyLocalFilter();
-            paginationBar.update(currentPage, totalPages);
+            paginationBar.update(currentPage, totalPages, totalElements, pageSize);
             onPageLoaded();
         } catch (Exception e) {
             log.error("Error loading page {} of {}", page, getClass().getSimpleName(), e);
@@ -461,7 +461,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         grid.setVisible(!show && showingGrid());
         createButton.setEnabled(!show);
         refreshFab.setLoading(show);
-        paginationBar.setVisible(!show && totalPages > 0);
+        paginationBar.setVisible(!show && totalElements > 0);
     }
 
     /**
@@ -631,13 +631,35 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
             addClassName("pagination-bar");
         }
 
+        /** Kept for subclasses: page buttons only, no record count. */
         public void update(int current, int total) {
+            update(current, total, 0, 0);
+        }
+
+        /**
+         * Total record count ("Showing 1 to 20 of 134") on the left, page buttons on the right when there is more
+         * than one page. Hidden when there is nothing to show.
+         */
+        public void update(int current, int total, long totalRecords, int size) {
             removeAll();
-            if (total <= 1) {
+            boolean showCount = totalRecords > 0 && size > 0;
+            if (total <= 1 && !showCount) {
                 setVisible(false);
                 return;
             }
             setVisible(true);
+            if (showCount) {
+                long first = (long) current * size + 1;
+                long last = Math.min(totalRecords, (long) (current + 1) * size);
+                Span summary = new Span(String.format(I18n.t("common.pagination.showing"), first, last, totalRecords));
+                summary.addClassName("pagination-summary");
+                add(summary);
+                setJustifyContentMode(total > 1
+                        ? FlexComponent.JustifyContentMode.BETWEEN : FlexComponent.JustifyContentMode.START);
+            }
+            if (total <= 1) {
+                return;
+            }
 
             add(createNavButton(VaadinIcon.ANGLE_DOUBLE_LEFT, 0, current == 0));
             add(createNavButton(VaadinIcon.ANGLE_LEFT, Math.max(0, current - 1), current == 0));

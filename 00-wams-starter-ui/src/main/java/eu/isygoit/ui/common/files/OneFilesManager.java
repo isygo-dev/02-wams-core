@@ -176,6 +176,12 @@ public class OneFilesManager extends VerticalLayout {
         nameSpan.setTitle(fileName);
 
         existingFileRow.add(icon, nameSpan);
+        if (fileType != null && !fileType.isBlank()) {
+            Span typeChip = new Span((fileType.contains("/") ? fileType.substring(fileType.indexOf('/') + 1) : fileType)
+                    .toUpperCase());
+            typeChip.addClassName("file-row__type");
+            existingFileRow.add(typeChip);
+        }
 
         if (downloader != null && fileId != null) {
             Anchor download = new Anchor(buildDownloadResource(), "");

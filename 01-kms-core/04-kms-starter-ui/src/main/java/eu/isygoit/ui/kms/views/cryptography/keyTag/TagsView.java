@@ -72,6 +72,7 @@ public class TagsView extends ManagementVerticalView {
 
         // Tags grid
         tagsList.setWidthFull();
+        tagsList.pageSize(20);
         tagsList.cardFactory(tag -> RowCard.create()
                 .title(tag.getTagKey())
                 .fact(I18n.t("kms.tags.view.grid.column.value"), tag.getTagValue())
