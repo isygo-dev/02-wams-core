@@ -2,7 +2,10 @@ package eu.isygoit.ui.common.card;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Span;
@@ -37,6 +40,9 @@ import java.util.List;
  */
 @CssImport("./styles/scss/common.scss")
 public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
+
+    /** Actions shown as buttons in the footer; the others are listed in the "..." menu. */
+    protected static final int MAX_VISIBLE_ACTIONS = 4;
 
     // ── Infrastructure ────────────────────────────────────────────────────────
 
@@ -124,8 +130,14 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
      * Optional status tag displayed at the left side of the footer.
      */
     protected Span buildStatusTag() {
-        return null;
+        return footerStatusTag;
     }
+
+    /**
+     * Status chip a subclass built while assembling its title: instead of staying in the title it is shown at the
+     * left of the footer (the default {@link #buildStatusTag()}). Set it from {@link #buildTitle()}.
+     */
+    protected Span footerStatusTag;
 
     // ── Enum-tags hook ────────────────────────────────────────────────────────
 
@@ -217,7 +229,7 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
             buttonBar.setAlignItems(FlexComponent.Alignment.CENTER);
             buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
             buttonBar.addClassName("wams-card__button-bar");
-            buttons.forEach(buttonBar::add);
+            addActions(buttonBar, buttons);
         }
 
         footerRow = new HorizontalLayout();
@@ -234,6 +246,39 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         if (buttonBar != null) {
             footerRow.add(buttonBar);
         }
+    }
+
+    /**
+     * Shows at most {@link #MAX_VISIBLE_ACTIONS} actions in the footer; any further action goes to a "..." menu,
+     * in the same order (so the destructive action, listed last, ends up in the menu). Each menu entry keeps the
+     * icon, the tooltip as label, and runs the button's own click listeners.
+     */
+    protected void addActions(HorizontalLayout bar, List<Button> buttons) {
+        if (buttons.size() <= MAX_VISIBLE_ACTIONS) {
+            buttons.forEach(bar::add);
+            return;
+        }
+        buttons.subList(0, MAX_VISIBLE_ACTIONS).forEach(bar::add);
+
+        Button more = new Button(VaadinIcon.ELLIPSIS_DOTS_H.create());
+        more.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SMALL);
+        more.addClassName("wams-card__more-button");
+        more.setAriaLabel("...");
+        ContextMenu menu = new ContextMenu(more);
+        menu.setOpenOnClick(true);
+        for (Button action : buttons.subList(MAX_VISIBLE_ACTIONS, buttons.size())) {
+            String label = action.getTooltip() != null && action.getTooltip().getText() != null
+                    ? action.getTooltip().getText() : action.getText();
+            Div entry = new Div();
+            entry.addClassName("wams-card__menu-entry");
+            entry.add(new Span(label == null ? "" : label));
+            if (action.getThemeNames().contains("error")) {
+                entry.addClassName("wams-card__menu-entry--danger");
+            }
+            menu.addItem(entry, event -> ComponentUtil.fireEvent(action,
+                    new com.vaadin.flow.component.ClickEvent<Button>(action)));
+        }
+        bar.add(more);
     }
 
     // ── Rearrangement into header / body / enum-tags / footer ────────────────

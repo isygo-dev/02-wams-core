@@ -54,7 +54,7 @@ public abstract class BaseStatusCard<V extends Component, S> extends BaseCard<V,
         buttonBar.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         buttonBar.addClassName("wams-card__button-bar");
         if (buttons != null) {
-            buttons.forEach(buttonBar::add);
+            addActions(buttonBar, buttons);
         }
 
         // Footer row: [ status tag | .... | button bar ]
