@@ -69,7 +69,6 @@ public class EditMsgTemplateDialog extends AbstractMsgTemplateFormDialog {
     }
 
     private void prefillData() {
-        codeField.setValue(template.getCode() != null ? template.getCode() : "");
         tenantField.setValue(template.getTenant() != null ? template.getTenant() : "");
         nameCombo.setValue(template.getName() != null ?
                 IEnumEmailTemplate.Types.valueOf(template.getName()) : null);

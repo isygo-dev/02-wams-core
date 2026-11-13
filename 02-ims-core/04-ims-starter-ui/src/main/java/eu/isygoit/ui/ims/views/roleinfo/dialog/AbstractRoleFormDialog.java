@@ -56,7 +56,6 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
     private final String messagePrefix;
 
     /* basic info */
-    TextField codeField;
     TextField nameField;
     IntegerField levelField;
     TextField tenantField;
@@ -146,8 +145,6 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
     }
 
     private void buildBasicFields() {
-        codeField = new TextField(I18n.t("ims.role.details.field.code"));
-        codeField.setReadOnly(true);
 
         nameField = new TextField(I18n.t("ims.role.dialog.field.name"));
         nameField.setRequiredIndicatorVisible(true);
@@ -165,7 +162,7 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
         VerticalLayout section = DialogLayout.section(
                 I18n.t("ims.role.details.section.identity"), VaadinIcon.KEY);
         FormLayout form = DialogLayout.responsiveForm();
-        form.add(nameField, codeField);
+        form.add(nameField);
         form.add(levelField, tenantField);
         form.add(templateCodeField, 2);
         form.add(descriptionField, 2);
@@ -395,7 +392,6 @@ abstract class AbstractRoleFormDialog extends ImsActionDialog {
      * Fills the basic fields from the DTO (update flow).
      */
     final void fillBasicFrom(RoleInfoDto dto) {
-        codeField.setValue(dto.getCode() != null ? dto.getCode() : "");
         nameField.setValue(dto.getName() != null ? dto.getName() : "");
         levelField.setValue(dto.getLevel());
         tenantField.setValue(dto.getTenant() != null ? dto.getTenant() : "");

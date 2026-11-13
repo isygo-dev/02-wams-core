@@ -58,7 +58,6 @@ public class EditSenderConfigDialog extends AbstractSenderConfigFormDialog {
 
     private void prefillData() {
         tenantField.setValue(config.getTenant() != null ? config.getTenant() : "");
-        codeField.setValue(config.getCode() != null ? config.getCode() : "");
         nameField.setValue(config.getName() != null ? config.getName() : "");
         descriptionField.setValue(config.getDescription() != null ? config.getDescription() : "");
         hostField.setValue(config.getHost() != null ? config.getHost() : "");

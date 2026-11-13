@@ -36,7 +36,6 @@ abstract class AbstractPEBConfigFormDialog extends KmsActionDialog {
     private final String statusFailedKey;
     private final String errorKey;
 
-    TextField codeField;
     TextField tenantField;
     ComboBox<IEnumAlgoPEBConfig.Types> algorithmCombo;
     IntegerField iterationsField;
@@ -78,10 +77,9 @@ abstract class AbstractPEBConfigFormDialog extends KmsActionDialog {
                 I18n.t("kms.peb.details.section.identity"), VaadinIcon.TAG);
         FormLayout form = DialogLayout.responsiveForm();
 
-        codeField = SecretsDialogSupport.readOnlyField(I18n.t("kms.peb.dialog.field.code"));
         tenantField = SecretsDialogSupport.readOnlyField(I18n.t("kms.peb.details.field.tenant"));
 
-        form.add(codeField, tenantField);
+        form.add(tenantField);
         section.add(form);
         return section;
     }
@@ -153,7 +151,6 @@ abstract class AbstractPEBConfigFormDialog extends KmsActionDialog {
      * Fills the form from an existing configuration.
      */
     final void fillFrom(PEBConfigDto dto) {
-        SecretsDialogSupport.setText(codeField, dto.getCode());
         SecretsDialogSupport.setText(tenantField, dto.getTenant());
         algorithmCombo.setValue(dto.getAlgorithm());
         iterationsField.setValue(dto.getKeyObtentionIterations());

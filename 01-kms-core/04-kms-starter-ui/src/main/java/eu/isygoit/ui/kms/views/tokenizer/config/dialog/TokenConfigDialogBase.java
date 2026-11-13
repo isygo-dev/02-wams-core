@@ -90,7 +90,6 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
     protected VerticalLayout customKeyLayout;
 
     // Identity / metadata fields
-    protected TextField codeField;
     protected TextField tenantField;
     protected ComboBox<IEnumToken.Types> tokenTypeCombo;
     protected TextField issuerField;
@@ -127,7 +126,6 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
     }
 
     private void buildComponents() {
-        codeField = SecretsDialogSupport.readOnlyField(I18n.t("kms.dialog.token.code"));
         tenantField = SecretsDialogSupport.readOnlyField(I18n.t("kms.token.details.field.tenant"));
 
         // Token type
@@ -249,7 +247,7 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
         VerticalLayout section = DialogLayout.section(I18n.t("kms.dialog.token.metadata"), VaadinIcon.KEY);
         FormLayout form = DialogLayout.responsiveForm();
 
-        form.add(codeField, tenantField, tokenTypeCombo, issuerField, audienceInput,
+        form.add(tenantField, tokenTypeCombo, issuerField, audienceInput,
                 lifeTimeValueField, lifeTimeUnitCombo, noExpirationCheckbox);
         form.setColspan(audienceInput, 2);
         form.setColspan(noExpirationCheckbox, 2);
@@ -508,7 +506,6 @@ public abstract class TokenConfigDialogBase extends KmsActionDialog {
      * Fills the read-only identity fields ({@code code}, {@code tenant}) from a loaded DTO.
      */
     protected final void bindIdentity(TokenConfigDto dto) {
-        SecretsDialogSupport.setText(codeField, dto.getCode());
         SecretsDialogSupport.setText(tenantField, dto.getTenant());
     }
 

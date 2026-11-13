@@ -41,7 +41,6 @@ abstract class AbstractTenantFormDialog extends AbstractImsFormDialog {
     private final String messagePrefix;
 
     /* identity */
-    TextField codeField;
     TextField nameField;
     TextField industryField;
     ComboBox<IEnumEnabledBinaryStatus.Types> adminStatusCombo;
@@ -139,8 +138,6 @@ abstract class AbstractTenantFormDialog extends AbstractImsFormDialog {
         nameField.setRequiredIndicatorVisible(true);
         nameField.setPlaceholder(I18n.t("ims.tenant.dialog.field.name.placeholder"));
 
-        codeField = new TextField(I18n.t("ims.tenant.details.field.code"));
-        codeField.setReadOnly(true);
 
         industryField = new TextField(I18n.t("ims.tenant.dialog.field.industry"));
         industryField.setPlaceholder(I18n.t("ims.tenant.dialog.field.industry.placeholder"));
@@ -153,7 +150,7 @@ abstract class AbstractTenantFormDialog extends AbstractImsFormDialog {
         descriptionField = DialogLayout.tall(new TextArea(I18n.t("ims.tenant.dialog.field.description")));
         descriptionField.setPlaceholder(I18n.t("ims.tenant.dialog.field.description.placeholder"));
 
-        form.add(nameField, codeField);
+        form.add(nameField);
         form.add(industryField, adminStatusCombo);
         form.add(descriptionField, 2);
 
@@ -213,7 +210,6 @@ abstract class AbstractTenantFormDialog extends AbstractImsFormDialog {
     }
 
     final void fillFrom(TenantDto dto) {
-        codeField.setValue(nvl(dto.getCode()));
         nameField.setValue(nvl(dto.getName()));
         industryField.setValue(nvl(dto.getIndustry()));
         adminStatusCombo.setValue(dto.getAdminStatus());

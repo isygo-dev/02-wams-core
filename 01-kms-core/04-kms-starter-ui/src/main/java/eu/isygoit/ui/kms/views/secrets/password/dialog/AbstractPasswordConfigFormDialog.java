@@ -33,7 +33,6 @@ abstract class AbstractPasswordConfigFormDialog extends KmsActionDialog {
     private final String statusFailedKey;
     private final String errorKey;
 
-    TextField codeField;
     TextField tenantField;
     ComboBox<IEnumAuth.Types> typeCombo;
     TextField patternField;
@@ -75,10 +74,9 @@ abstract class AbstractPasswordConfigFormDialog extends KmsActionDialog {
                 I18n.t("kms.password.details.section.identity"), VaadinIcon.TAG);
         FormLayout form = DialogLayout.responsiveForm();
 
-        codeField = SecretsDialogSupport.readOnlyField(I18n.t("kms.password.dialog.field.code"));
         tenantField = SecretsDialogSupport.readOnlyField(I18n.t("kms.password.details.field.tenant"));
 
-        form.add(codeField, tenantField);
+        form.add(tenantField);
         section.add(form);
         return section;
     }
@@ -138,7 +136,6 @@ abstract class AbstractPasswordConfigFormDialog extends KmsActionDialog {
      * Fills the form from an existing configuration.
      */
     final void fillFrom(PasswordConfigDto dto) {
-        SecretsDialogSupport.setText(codeField, dto.getCode());
         SecretsDialogSupport.setText(tenantField, dto.getTenant());
         typeCombo.setValue(dto.getType());
         SecretsDialogSupport.setText(patternField, dto.getPattern());

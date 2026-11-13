@@ -41,7 +41,6 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
     private final CategoryService categoryService;
 
     private DmsUploadPanel uploadPanel;
-    private TextField codeField;
     private TextField tagsField;
     private TextField pathField;
     private ComboBox<String> categoryComboBox;
@@ -84,10 +83,6 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
     private void buildForm() {
         uploadPanel = new DmsUploadPanel(this::enableOkButton);
 
-        codeField = new TextField(I18n.t("dms.linkedfile.dialog.field.code"));
-        codeField.setReadOnly(true);
-        codeField.setHelperText(I18n.t("dms.linkedfile.dialog.field.code.helper"));
-        codeField.setWidthFull();
 
         categoryComboBox = new ComboBox<>(I18n.t("dms.linkedfile.dialog.field.category"));
         categoryComboBox.setPlaceholder(I18n.t("dms.linkedfile.dialog.field.category.placeholder"));
@@ -112,7 +107,7 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
         tagsField.setWidthFull();
 
         FormLayout form = DialogLayout.responsiveForm();
-        form.add(categoryComboBox, codeField, pathField, tagsField);
+        form.add(categoryComboBox, pathField, tagsField);
         form.setColspan(pathField, 2);
         form.setColspan(tagsField, 2);
 

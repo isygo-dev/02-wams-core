@@ -41,7 +41,6 @@ abstract class AbstractMsgTemplateFormDialog extends BaseMsgTemplateDialog {
 
     private final String messagePrefix;
 
-    TextField codeField;
     TextField tenantField;
     ComboBox<IEnumEmailTemplate.Types> nameCombo;
     TextArea descriptionField;
@@ -105,9 +104,6 @@ abstract class AbstractMsgTemplateFormDialog extends BaseMsgTemplateDialog {
                 I18n.t("mms.msgtemplate.dialog.view.section.identity"), VaadinIcon.FILE_TEXT);
         FormLayout form = DialogLayout.responsiveForm();
 
-        codeField = new TextField(I18n.t(key(".field.code")));
-        codeField.setReadOnly(true);
-        codeField.setWidthFull();
 
         tenantField = new TextField(I18n.t(key(".field.tenant")));
         tenantField.setPlaceholder(I18n.t(key(".field.tenant.placeholder")));
@@ -128,7 +124,7 @@ abstract class AbstractMsgTemplateFormDialog extends BaseMsgTemplateDialog {
         descriptionField = DialogLayout.tall(new TextArea(I18n.t(key(".field.description"))));
         descriptionField.setPlaceholder(I18n.t(key(".field.description.placeholder")));
 
-        form.add(codeField, tenantField, nameCombo, languageCombo, descriptionField);
+        form.add(tenantField, nameCombo, languageCombo, descriptionField);
         form.setColspan(descriptionField, 2);
         section.add(form);
         return section;

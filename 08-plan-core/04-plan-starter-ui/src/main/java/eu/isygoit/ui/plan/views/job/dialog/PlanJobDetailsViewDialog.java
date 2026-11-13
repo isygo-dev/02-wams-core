@@ -120,7 +120,7 @@ public class PlanJobDetailsViewDialog extends DetailsViewDialog {
             addFieldToGrid(grid, VaadinIcon.EXCLAMATION_CIRCLE, I18n.t("plan.ui.result.unassigned"),
                     String.valueOf(size(solution.unassignedTasks())), false);
             addFieldToGrid(grid, VaadinIcon.STAR, I18n.t("plan.ui.result.quality"),
-                    NumberFormat.getPercentInstance(I18n.getCurrentLocale()).format(solution.qualityScore()), false);
+                    NumberFormat.getPercentInstance(eu.isygoit.ui.common.component.NumberStyle.localize(I18n.getCurrentLocale())).format(solution.qualityScore()), false);
         }
         Metrics metrics = result.metrics();
         if (metrics != null) {

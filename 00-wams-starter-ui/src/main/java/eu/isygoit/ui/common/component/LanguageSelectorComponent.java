@@ -173,7 +173,8 @@ public class LanguageSelectorComponent extends HorizontalLayout {
         flagPrefixSpan.setTitle(getLanguageName(locale));
 
         I18n.setLocale(locale);
-        VaadinSession.getCurrent().setAttribute("locale", locale);
+        // remembered for this session and, in a cookie, for the next visits
+        eu.isygoit.ui.common.layout.UserLanguage.remember(UI.getCurrent(), locale);
         UI.getCurrent().getPage().reload();
     }
 

@@ -65,7 +65,6 @@ abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
 
     ComboBox<String> tenantCombo;
     ComboBox<String> accountTypeCombo;
-    TextField codeField;
     EmailField emailField;
     TextField firstNameField;
     TextField lastNameField;
@@ -179,8 +178,6 @@ abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
                 I18n.t("ims.account.dialog.section.identity"), VaadinIcon.USER);
         FormLayout form = DialogLayout.responsiveForm();
 
-        codeField = new TextField(I18n.t("ims.account.dialog.field.code"));
-        codeField.setReadOnly(true);
 
         emailField = new EmailField(I18n.t("ims.account.dialog.field.email"));
         emailField.setRequiredIndicatorVisible(true);
@@ -200,7 +197,7 @@ abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
         languageCombo.setItemLabelGenerator(language -> ImsEnumTag.label(language, "ims.enum.language"));
         languageCombo.setRenderer(ImsEnumTag.renderer("ims.enum.language"));
 
-        form.add(codeField, emailField, firstNameField, lastNameField, phoneNumberField, languageCombo);
+        form.add(emailField, firstNameField, lastNameField, phoneNumberField, languageCombo);
         section.add(form);
         return section;
     }
@@ -318,7 +315,6 @@ abstract class AbstractAccountFormDialog extends AbstractImsFormDialog {
     final void fillFrom(AccountDto dto) {
         tenantCombo.setValue(dto.getTenant());
         accountTypeCombo.setValue(dto.getAccountType());
-        codeField.setValue(dto.getCode() != null ? dto.getCode() : "");
         emailField.setValue(dto.getEmail() != null ? dto.getEmail() : "");
         phoneNumberField.setValue(dto.getPhoneNumber() != null ? dto.getPhoneNumber() : "");
         languageCombo.setValue(dto.getLanguage());

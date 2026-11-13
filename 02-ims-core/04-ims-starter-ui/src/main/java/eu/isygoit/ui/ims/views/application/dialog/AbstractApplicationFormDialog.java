@@ -41,7 +41,6 @@ abstract class AbstractApplicationFormDialog extends ImsActionDialog {
 
     TextField nameField;
     TextField titleField;
-    TextField codeField;
     TextField tenantField;
     TextField categoryField;
     TextField urlField;
@@ -116,16 +115,13 @@ abstract class AbstractApplicationFormDialog extends ImsActionDialog {
         titleField.setPlaceholder(I18n.t("ims.app.dialog.field.title.placeholder"));
         titleField.setWidthFull();
 
-        codeField = new TextField(I18n.t("ims.app.dialog.field.code"));
-        codeField.setReadOnly(true);
-        codeField.setWidthFull();
 
         tenantField = new TextField(I18n.t("ims.app.dialog.field.tenant"));
         tenantField.setPlaceholder(I18n.t("ims.app.dialog.field.tenant.placeholder"));
         tenantField.setReadOnly(isTenantReadOnly());
         tenantField.setWidthFull();
 
-        form.add(nameField, titleField, codeField, tenantField);
+        form.add(nameField, titleField, tenantField);
         section.add(form);
         return section;
     }
@@ -176,7 +172,6 @@ abstract class AbstractApplicationFormDialog extends ImsActionDialog {
     final void fillFrom(ApplicationDto dto) {
         nameField.setValue(dto.getName() != null ? dto.getName() : "");
         titleField.setValue(dto.getTitle() != null ? dto.getTitle() : "");
-        codeField.setValue(dto.getCode() != null ? dto.getCode() : "");
         tenantField.setValue(dto.getTenant() != null ? dto.getTenant() : "");
         categoryField.setValue(dto.getCategory() != null ? dto.getCategory() : "");
         urlField.setValue(dto.getUrl() != null ? dto.getUrl() : "");

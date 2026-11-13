@@ -29,7 +29,6 @@ abstract class AbstractVCalendarFormDialog extends BaseActionDialog {
     private final String messagePrefix;
 
     TextField tenantField;
-    TextField codeField;
     TextField nameField;
     TextField icsPathField;
     Checkbox lockedCheckbox;
@@ -76,9 +75,6 @@ abstract class AbstractVCalendarFormDialog extends BaseActionDialog {
         tenantField.setPlaceholder(I18n.t("cms.calendar.dialog.field.tenant.placeholder"));
         tenantField.setWidthFull();
 
-        codeField = new TextField(I18n.t("cms.calendar.dialog.field.code"));
-        codeField.setReadOnly(true);
-        codeField.setWidthFull();
 
         nameField = new TextField(I18n.t("cms.calendar.dialog.field.name"));
         nameField.setRequired(true);
@@ -90,7 +86,7 @@ abstract class AbstractVCalendarFormDialog extends BaseActionDialog {
         icsPathField.setPlaceholder(I18n.t("cms.calendar.dialog.field.ics.path.placeholder"));
         icsPathField.setWidthFull();
 
-        form.add(tenantField, codeField, nameField, icsPathField);
+        form.add(tenantField, nameField, icsPathField);
         section.add(form);
         return section;
     }
@@ -117,7 +113,6 @@ abstract class AbstractVCalendarFormDialog extends BaseActionDialog {
      */
     final void fillFrom(VCalendarDto dto) {
         tenantField.setValue(dto.getTenant() != null ? dto.getTenant() : "");
-        codeField.setValue(dto.getCode() != null ? dto.getCode() : "");
         nameField.setValue(dto.getName() != null ? dto.getName() : "");
         icsPathField.setValue(dto.getIcsPath() != null ? dto.getIcsPath() : "");
         lockedCheckbox.setValue(Boolean.TRUE.equals(dto.getLocked()));

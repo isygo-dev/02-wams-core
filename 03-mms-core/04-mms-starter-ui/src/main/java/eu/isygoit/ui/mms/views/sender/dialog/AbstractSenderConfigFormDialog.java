@@ -33,7 +33,6 @@ abstract class AbstractSenderConfigFormDialog extends BaseSenderConfigDialog {
     private final String messagePrefix;
 
     TextField tenantField;
-    TextField codeField;
     TextField nameField;
     TextArea descriptionField;
     TextField hostField;
@@ -114,9 +113,6 @@ abstract class AbstractSenderConfigFormDialog extends BaseSenderConfigDialog {
             tenantField.setReadOnly(true);
         }
 
-        codeField = new TextField(I18n.t(key(".field.code")));
-        codeField.setReadOnly(true);
-        codeField.setWidthFull();
 
         nameField = new TextField(I18n.t(key(".field.name")));
         nameField.setPlaceholder(I18n.t(key(".field.name.placeholder")));
@@ -126,7 +122,7 @@ abstract class AbstractSenderConfigFormDialog extends BaseSenderConfigDialog {
         descriptionField = DialogLayout.tall(new TextArea(I18n.t(key(".field.description"))));
         descriptionField.setPlaceholder(I18n.t(key(".field.description.placeholder")));
 
-        form.add(tenantField, codeField, nameField, descriptionField);
+        form.add(tenantField, nameField, descriptionField);
         form.setColspan(descriptionField, 2);
         return form;
     }

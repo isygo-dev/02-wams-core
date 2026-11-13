@@ -25,10 +25,16 @@ public class VaadinConfig implements VaadinServiceInitListener {
         return i18nProvider;
     }
 
+    /** The institution's default language, when the application has one (optional). */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private eu.isygoit.i18n.DefaultLanguageProvider defaultLanguage;
+
     @Override
     public void serviceInit(ServiceInitEvent event) {
         event.getSource().addUIInitListener(uiInitEvent -> {
             var ui = uiInitEvent.getUI();
+            // language: the user's own choice, else the institution default
+            eu.isygoit.ui.common.layout.UserLanguage.applyInitial(ui, defaultLanguage);
             ui.getLoadingIndicatorConfiguration().setApplyDefaultTheme(false);
             // Direction (Arabic = rtl), language and Lumo light/dark theme; layouts and sign-in views apply the
             // same settings again when they are shown.
