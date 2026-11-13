@@ -57,6 +57,8 @@ public class FilterBar extends Div {
 
     private final Map<String, Class<? extends Enum<?>>> enumRegistry = new LinkedHashMap<>();
     private final Map<String, Class<? extends Enum<?>>> fieldEnumHints = new LinkedHashMap<>();
+    /** Per field: bundle prefix of its enum labels, e.g. {@code status -> enrollment.status}. */
+    private final Map<String, String> enumLabelPrefixes = new LinkedHashMap<>();
 
     // ─── Manual-mode state ─────────────────────────────────────────
     private final List<Runnable> manualClearers = new ArrayList<>();
@@ -567,7 +569,20 @@ public class FilterBar extends Div {
         };
     }
 
+    /**
+     * Says where the labels of the values of an enum field are: {@code prefix + "." + NAME}. Needed when the same
+     * field name means different enums in different views (the {@code status} of a student or of an enrollment).
+     */
+    public FilterBar setEnumLabelPrefix(String fieldName, String prefix) {
+        enumLabelPrefixes.put(fieldName, prefix);
+        return this;
+    }
+
     private String labelForEnum(String fieldName, Enum<?> value) {
+        String prefix = enumLabelPrefixes.get(fieldName);
+        if (prefix != null && I18n.hasKey(prefix + "." + value.name())) {
+            return I18n.t(prefix + "." + value.name());
+        }
         String i18nKey = "filter.field." + fieldName + "." + value.name().toLowerCase();
         // a missing key comes back as "!key!": test for the key instead of comparing the text
         if (I18n.hasKey(i18nKey)) return I18n.t(i18nKey);
