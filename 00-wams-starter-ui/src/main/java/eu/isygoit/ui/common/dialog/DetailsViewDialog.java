@@ -10,7 +10,16 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import eu.isygoit.dto.extendable.AuditableCancelableDto;
+import eu.isygoit.dto.extendable.AuditableDto;
+import eu.isygoit.dto.extendable.AuditableIdAssignableDto;
+import eu.isygoit.i18n.I18n;
+import eu.isygoit.ui.common.component.BidiLtr;
 import eu.isygoit.ui.common.component.ClipboardCopyButton;
+import eu.isygoit.ui.common.component.LocaleAwareDateFormat;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Shared base for every read-only "…DetailsViewDialog" in the app: a
@@ -31,6 +40,81 @@ public abstract class DetailsViewDialog extends NoActionDialog {
 
     protected DetailsViewDialog(String title) {
         super(title);
+    }
+
+    // ── Audit cartouche ───────────────────────────────────────────────────────
+
+    /** Audit cartouche of an {@link AuditableDto}; see {@link #setAudit(String, Object, String, Object)}. */
+    protected final void setAudit(AuditableDto dto) {
+        if (dto != null) {
+            setAudit(dto.getCreatedBy(), dto.getCreateDate(), dto.getUpdatedBy(), dto.getUpdateDate());
+        }
+    }
+
+    /** Audit cartouche of an {@link AuditableIdAssignableDto}. */
+    protected final void setAudit(AuditableIdAssignableDto<?> dto) {
+        if (dto != null) {
+            setAudit(dto.getCreatedBy(), dto.getCreateDate(), dto.getUpdatedBy(), dto.getUpdateDate());
+        }
+    }
+
+    /** Audit cartouche of an {@link AuditableCancelableDto}. */
+    protected final void setAudit(AuditableCancelableDto<?> dto) {
+        if (dto != null) {
+            setAudit(dto.getCreatedBy(), dto.getCreateDate(), dto.getUpdatedBy(), dto.getUpdateDate());
+        }
+    }
+
+    /**
+     * The audit cartouche: who created and last updated the record, and when, as one compact line at the bottom of
+     * the dialog (left of the close button), the same in every details dialog. Blank values are left out and the
+     * cartouche is not shown at all when there is nothing to say.
+     */
+    protected final void setAudit(String createdBy, Object createDate, String updatedBy, Object updateDate) {
+        Div cartouche = new Div();
+        cartouche.addClassName("wams-audit-cartouche");
+        addAuditItem(cartouche, "common.audit.createdBy", createdBy);
+        addAuditItem(cartouche, "common.audit.createdAt", createDate);
+        addAuditItem(cartouche, "common.audit.updatedBy", updatedBy);
+        addAuditItem(cartouche, "common.audit.updatedAt", updateDate);
+        setFooterInfo(cartouche.getChildren().findAny().isPresent() ? cartouche : null);
+    }
+
+    private static void addAuditItem(Div cartouche, String labelKey, Object value) {
+        String text = auditText(value);
+        if (text == null) {
+            return;
+        }
+        Span label = new Span(I18n.t(labelKey));
+        label.addClassName("wams-audit-cartouche__label");
+        Span content = new Span(text);
+        content.addClassName("wams-audit-cartouche__value");
+        Span item = new Span(label, content);
+        item.addClassName("wams-audit-cartouche__item");
+        cartouche.add(item);
+    }
+
+    private static String auditText(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String text;
+        if (value instanceof LocalDateTime dateTime) {
+            text = BidiLtr.wrap(LocaleAwareDateFormat.format(dateTime));
+        } else if (value instanceof java.time.Instant instant) {
+            text = BidiLtr.wrap(LocaleAwareDateFormat.format(
+                    LocalDateTime.ofInstant(instant, java.time.ZoneId.systemDefault())));
+        } else if (value instanceof java.util.Date date) {
+            text = BidiLtr.wrap(LocaleAwareDateFormat.format(
+                    LocalDateTime.ofInstant(date.toInstant(), java.time.ZoneId.systemDefault())));
+        } else if (value instanceof LocalDate date) {
+            text = BidiLtr.wrap(LocaleAwareDateFormat.format(date));
+        } else {
+            text = value.toString();
+        }
+        // callers may pass an already formatted value, with a dash standing for "no value"
+        String trimmed = text.trim();
+        return trimmed.isEmpty() || trimmed.equals("-") || trimmed.equals("—") ? null : text;
     }
 
     /**

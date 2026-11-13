@@ -27,8 +27,8 @@ public class BucketDetailsDialog extends SmsDetailsDialog {
         Div grid = createDetailGrid();
         addFieldToGrid(grid, VaadinIcon.FOLDER, I18n.t("sms.buckets.details.field.name"),
                 dash(bucket.getName()), true);
-        addFieldToGrid(grid, VaadinIcon.CALENDAR, I18n.t("sms.buckets.details.field.created"),
-                dash(SmsDialogSupport.formatDateTime(bucket.getCreationDate())));
+        // creation date: audit cartouche at the bottom of the dialog (the bucket carries no other audit data)
+        setAudit(null, bucket.getCreationDate(), null, null);
         addFieldToGrid(grid, VaadinIcon.GLOBE, I18n.t("sms.buckets.details.field.region"),
                 dash(bucket.getBucketRegion()));
         addFieldToGrid(grid, VaadinIcon.CODE, I18n.t("sms.buckets.details.field.arn"),

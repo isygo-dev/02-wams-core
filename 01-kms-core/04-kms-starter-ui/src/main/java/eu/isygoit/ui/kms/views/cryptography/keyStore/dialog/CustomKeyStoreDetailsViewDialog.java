@@ -114,13 +114,8 @@ public class CustomKeyStoreDetailsViewDialog extends KmsDetailsDialog {
         addTab(I18n.t("kms.keystore.details.section.metadata"),
                 createSection(I18n.t("kms.keystore.details.section.metadata"), metaGrid));
 
-        // Audit
-        Div auditGrid = createDetailGrid();
-        addFieldToGrid(auditGrid, VaadinIcon.CALENDAR, I18n.t("kms.keystore.details.field.created"),
-                store.getCreateDate() != null ? DateHelper.formatToHumanReadable(store.getCreateDate()) : null);
-        addFieldToGrid(auditGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.keystore.details.field.updated"),
-                store.getUpdateDate() != null ? DateHelper.formatToHumanReadable(store.getUpdateDate()) : null);
-        addTab(I18n.t("kms.keystore.details.section.audit"),
-                createSection(I18n.t("kms.keystore.details.section.audit"), auditGrid));
+        // Audit cartouche at the bottom of the dialog
+        setAudit(null, store.getCreateDate() != null ? DateHelper.formatToHumanReadable(store.getCreateDate()) : null,
+                null, store.getUpdateDate() != null ? DateHelper.formatToHumanReadable(store.getUpdateDate()) : null);
     }
 }

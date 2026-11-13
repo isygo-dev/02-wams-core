@@ -196,10 +196,8 @@ public class KeyDetailsViewDialog extends KmsDetailsDialog {
      */
     private Component buildDatesGrid() {
         Div grid = createDetailGrid();
-        addFieldToGrid(grid, VaadinIcon.CALENDAR, I18n.t("kms.key.dialog.describe.field.creation.date"),
-                metadata.getCreateDate() != null ? metadata.getCreateDate().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
-        addFieldToGrid(grid, VaadinIcon.CALENDAR_O, I18n.t("kms.key.dialog.describe.field.updated.date"),
-                metadata.getUpdateDate() != null ? metadata.getUpdateDate().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
+        // Creation / update: audit cartouche at the bottom of the dialog
+        setAudit(null, metadata.getCreateDate(), null, metadata.getUpdateDate());
         addFieldToGrid(grid, VaadinIcon.CALENDAR_CLOCK, I18n.t("kms.key.dialog.describe.field.valid.until"),
                 metadata.getValidTo() != null ? metadata.getValidTo().toString() : I18n.t("kms.key.dialog.describe.placeholder"));
 

@@ -508,3 +508,27 @@ vaadin-dialog-overlay:is(.kms-dialog, .ims-dialog, .mms-dialog, .dms-dialog, .sm
     min-width: 0;
   }
 }
+// Audit cartouche of the details dialogs: one compact line in the footer, left of the close button.
+.wams-audit-cartouche {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--lumo-space-xs) var(--lumo-space-m);
+  min-width: 0;
+  font-size: var(--lumo-font-size-xs);
+  color: var(--lumo-secondary-text-color);
+}
+
+.wams-audit-cartouche__item {
+  display: inline-flex;
+  gap: var(--lumo-space-xs);
+  white-space: nowrap;
+}
+
+.wams-audit-cartouche__label {
+  color: var(--lumo-tertiary-text-color);
+}
+
+.wams-audit-cartouche__value {
+  font-weight: 500;
+  color: var(--lumo-body-text-color);
+}

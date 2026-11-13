@@ -46,12 +46,8 @@ public class AliasDetailsViewDialog extends KmsDetailsDialog {
         identitySection.setPadding(false);
         identitySection.setSpacing(true);
 
-        // Dates — creation / last-updated timestamps.
-        Div datesGrid = createDetailGrid();
-        addFieldToGrid(datesGrid, VaadinIcon.CALENDAR, I18n.t("kms.alias.details.field.created"), entry.getCreateDate());
-        addFieldToGrid(datesGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.alias.details.field.updated"), entry.getUpdateDate());
-        addTab(I18n.t("kms.alias.details.section.dates"),
-                createSection(I18n.t("kms.alias.details.section.dates"), datesGrid));
+        // Creation / last-updated timestamps: audit cartouche at the bottom of the dialog.
+        setAudit(null, entry.getCreateDate(), null, entry.getUpdateDate());
 
         if (Boolean.TRUE.equals(entry.getPrimaryKey())) {
             HorizontalLayout warningRow = new HorizontalLayout();

@@ -39,7 +39,7 @@ public final class ManagementGridSupport {
     /**
      * Number of actions shown as icon buttons before the rest go into the "…" menu.
      */
-    public static final int MAX_VISIBLE_ACTIONS = 4;
+    public static final int MAX_VISIBLE_ACTIONS = 3;
 
     /**
      * Key of the leading image column, so a view that already added its own photo column is not given a second one.

@@ -86,11 +86,12 @@ public class GrantDetailsViewDialog extends KmsDetailsDialog {
             addTab(I18n.t("kms.grant.details.section.constraints"), constraintsSection);
         }
 
+        // Creation / update: audit cartouche at the bottom of the dialog
+        setAudit(null, grant.getCreateDate() != null ? DateHelper.formatToHumanReadable(grant.getCreateDate()) : null,
+                null, grant.getUpdateDate());
+
         // Dates: lifecycle timestamps of the grant (empty values are skipped by the grid)
         Div datesGrid = createDetailGrid();
-        addFieldToGrid(datesGrid, VaadinIcon.CALENDAR, I18n.t("kms.grant.details.field.creation.date"),
-                grant.getCreateDate() != null ? DateHelper.formatToHumanReadable(grant.getCreateDate()) : null);
-        addFieldToGrid(datesGrid, VaadinIcon.CALENDAR_O, I18n.t("kms.grant.details.field.update.date"), grant.getUpdateDate());
         addFieldToGrid(datesGrid, VaadinIcon.CALENDAR_CLOCK, I18n.t("kms.grant.details.field.revocation.date"),
                 grant.getRevocationDate() != null ? DateHelper.formatToHumanReadable(grant.getRevocationDate()) : null);
         addFieldToGrid(datesGrid, VaadinIcon.CALENDAR_CLOCK, I18n.t("kms.grant.details.field.retirement.date"),

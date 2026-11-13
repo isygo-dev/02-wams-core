@@ -98,16 +98,12 @@ public abstract class TabbedDetailsViewDialog extends DetailsViewDialog {
     }
 
     /**
-     * Audit tab: who created / updated the record, and when.
+     * Audit: who created / updated the record, and when. It is no longer a tab: the values go to the audit
+     * cartouche at the bottom of the dialog ({@link #setAudit(String, Object, String, Object)}), so existing
+     * callers keep working unchanged.
      */
     protected final void addAuditTab(String createdBy, Object createDate, String updatedBy, Object updateDate) {
-        Div grid = createDetailGrid();
-        addFieldToGrid(grid, VaadinIcon.USER, I18n.t("common.audit.createdBy"), dash(createdBy));
-        addFieldToGrid(grid, VaadinIcon.CALENDAR, I18n.t("common.audit.createdAt"), dash(createDate));
-        addFieldToGrid(grid, VaadinIcon.USER, I18n.t("common.audit.updatedBy"), dash(updatedBy));
-        addFieldToGrid(grid, VaadinIcon.CALENDAR, I18n.t("common.audit.updatedAt"), dash(updateDate));
-        addTab(I18n.t("common.details.section.audit"),
-                createSection(I18n.t("common.details.section.audit"), grid));
+        setAudit(createdBy, createDate, updatedBy, updateDate);
     }
 
     /**

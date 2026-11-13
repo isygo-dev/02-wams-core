@@ -42,7 +42,7 @@ import java.util.List;
 public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
     /** Actions shown as buttons in the footer; the others are listed in the "..." menu. */
-    protected static final int MAX_VISIBLE_ACTIONS = 4;
+    protected static final int MAX_VISIBLE_ACTIONS = 3;
 
     // ── Infrastructure ────────────────────────────────────────────────────────
 

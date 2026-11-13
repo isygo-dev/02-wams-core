@@ -71,6 +71,7 @@ public class PlanJobDetailsViewDialog extends DetailsViewDialog {
         main.add(openPage);
         addDangerActions(main);
         add(main);
+        setAudit(job);
     }
 
     /**
