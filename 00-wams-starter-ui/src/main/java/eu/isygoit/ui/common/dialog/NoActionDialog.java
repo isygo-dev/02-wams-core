@@ -1,5 +1,6 @@
 package eu.isygoit.ui.common.dialog;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -26,6 +27,8 @@ public class NoActionDialog extends Dialog {
     private final VerticalLayout contentWrapper;
     private final Button closeButton;
     private final Span errorSpan;
+    private final HorizontalLayout footerLayout;
+    private Component footerInfo;
 
     public NoActionDialog(String title) {
         setHeaderTitle(title);
@@ -54,7 +57,7 @@ public class NoActionDialog extends Dialog {
         closeButton = new Button(I18n.t("common.dialog.noaction.close"), e -> close());
         closeButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
-        HorizontalLayout footerLayout = new HorizontalLayout(errorSpan, closeButton);
+        footerLayout = new HorizontalLayout(errorSpan, closeButton);
         footerLayout.setWidthFull();
         footerLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         footerLayout.setAlignItems(FlexComponent.Alignment.CENTER);
@@ -64,6 +67,22 @@ public class NoActionDialog extends Dialog {
 
         getFooter().removeAll();
         getFooter().add(footerLayout);
+    }
+
+    /**
+     * Puts an information block at the left of the footer (e.g. the audit cartouche of a details dialog); it takes
+     * the free width, so the error message and the close button stay on the right. Replaces any previous block;
+     * {@code null} removes it.
+     */
+    protected final void setFooterInfo(Component info) {
+        if (footerInfo != null) {
+            footerLayout.remove(footerInfo);
+        }
+        footerInfo = info;
+        if (info != null) {
+            footerLayout.addComponentAsFirst(info);
+            footerLayout.expand(info);
+        }
     }
 
     /**
