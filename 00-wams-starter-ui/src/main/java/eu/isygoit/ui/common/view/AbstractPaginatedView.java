@@ -653,25 +653,39 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
                 long last = Math.min(totalRecords, (long) (current + 1) * size);
                 Span summary = new Span(String.format(I18n.t("common.pagination.showing"), first, last, totalRecords));
                 summary.addClassName("pagination-summary");
+                summary.getStyle().set("flex", "1");
                 add(summary);
-                setJustifyContentMode(total > 1
-                        ? FlexComponent.JustifyContentMode.BETWEEN : FlexComponent.JustifyContentMode.START);
             }
+            setJustifyContentMode(showCount ? FlexComponent.JustifyContentMode.START
+                    : FlexComponent.JustifyContentMode.CENTER);
             if (total <= 1) {
                 return;
             }
 
-            add(createNavButton(VaadinIcon.ANGLE_DOUBLE_LEFT, 0, current == 0));
-            add(createNavButton(VaadinIcon.ANGLE_LEFT, Math.max(0, current - 1), current == 0));
+            // the buttons form one group, centred, with a small gap between them
+            HorizontalLayout group = new HorizontalLayout();
+            group.setSpacing(false);
+            group.setPadding(false);
+            group.setAlignItems(FlexComponent.Alignment.CENTER);
+            group.getStyle().set("gap", "6px");
+            group.add(createNavButton(VaadinIcon.ANGLE_DOUBLE_LEFT, 0, current == 0));
+            group.add(createNavButton(VaadinIcon.ANGLE_LEFT, Math.max(0, current - 1), current == 0));
 
             for (int p : computePageNumbers(current, total)) {
-                add(p == -1 ? createEllipsis() : createPageButton(p, p == current));
+                group.add(p == -1 ? createEllipsis() : createPageButton(p, p == current));
             }
 
-            add(createNavButton(VaadinIcon.ANGLE_RIGHT, Math.min(total - 1, current + 1),
+            group.add(createNavButton(VaadinIcon.ANGLE_RIGHT, Math.min(total - 1, current + 1),
                     current == total - 1));
-            add(createNavButton(VaadinIcon.ANGLE_DOUBLE_RIGHT, total - 1,
+            group.add(createNavButton(VaadinIcon.ANGLE_DOUBLE_RIGHT, total - 1,
                     current == total - 1));
+            add(group);
+            if (showCount) {
+                // mirrors the summary so the group stays in the middle
+                Span balance = new Span();
+                balance.getStyle().set("flex", "1");
+                add(balance);
+            }
         }
 
         protected Button createNavButton(VaadinIcon icon, int targetPage, boolean disabled) {
