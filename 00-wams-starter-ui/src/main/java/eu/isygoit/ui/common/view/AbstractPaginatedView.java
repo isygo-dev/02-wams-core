@@ -291,6 +291,7 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         if (gridSupported) {
             viewModeSwitch = new ManagementViewModeSwitch(getClass().getName(), this::setGridMode);
             gridMode = viewModeSwitch.isTableMode();
+            configureViewModes(viewModeSwitch);
         }
 
         // ─── Panel shell ───────────────────────────────────────────
@@ -457,11 +458,25 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
 
     public void showLoading(boolean show) {
         loadingBar.setVisible(show);
-        cardsContainer.setVisible(!show && !showingGrid());
-        grid.setVisible(!show && showingGrid());
+        cardsContainer.setVisible(!show && !showingGrid() && !customModeActive);
+        grid.setVisible(!show && showingGrid() && !customModeActive);
         createButton.setEnabled(!show);
         refreshFab.setLoading(show);
-        paginationBar.setVisible(!show && totalElements > 0);
+        paginationBar.setVisible(!show && totalElements > 0 && !customModeActive);
+    }
+
+    /**
+     * True while an extra view mode added in {@link #configureViewModes} (e.g. a Kanban board) replaces the cards,
+     * the table and the pagination: the base class then leaves those three hidden. The view that set it shows its
+     * own component.
+     */
+    protected boolean customModeActive;
+
+    /**
+     * Hook to add modes after Cards and Table ({@link ManagementViewModeSwitch#addMode}); only called when the view
+     * offers a table. Default: none.
+     */
+    protected void configureViewModes(ManagementViewModeSwitch switchBar) {
     }
 
     /**
@@ -530,8 +545,8 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
                 cardsContainer.add(renderItem(item));
             }
         }
-        cardsContainer.setVisible(!showingGrid());
-        grid.setVisible(showingGrid());
+        cardsContainer.setVisible(!showingGrid() && !customModeActive);
+        grid.setVisible(showingGrid() && !customModeActive);
     }
 
     private boolean showingGrid() {
