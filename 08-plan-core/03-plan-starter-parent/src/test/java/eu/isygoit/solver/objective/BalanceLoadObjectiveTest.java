@@ -5,11 +5,12 @@ import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.params.LoadMetric;
 import eu.isygoit.dto.request.params.LoadObjectiveParams;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static eu.isygoit.solver.index.IndexFixtures.task;
+import static eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -18,8 +19,10 @@ class BalanceLoadObjectiveTest {
     private final BalanceLoadObjective family = new BalanceLoadObjective();
 
     private PlanningProblem scenario() {
-        return problem(List.of(task("a").duration(10).build(), task("b").duration(6).build(),
-                task("c").duration(4).build()), List.of(resource("r1"), resource("r2"), resource("r3")));
+        return problem(
+                List.of(task("a").duration(10).build(), task("b").duration(6).build(), task("c").duration(4).build()),
+                List.of(resource("r1"), resource("r2"), resource("r3"))
+        );
     }
 
     @Test

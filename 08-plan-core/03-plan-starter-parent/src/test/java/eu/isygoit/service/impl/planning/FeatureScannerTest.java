@@ -3,15 +3,13 @@ package eu.isygoit.service.impl.planning;
 import eu.isygoit.dto.request.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.EngineCapabilities.Feature;
-import eu.isygoit.solver.index.IndexFixtures.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 
 import static eu.isygoit.solver.EngineCapabilities.Feature.*;
-import static eu.isygoit.solver.index.IndexFixtures.problem;
-import static eu.isygoit.solver.index.IndexFixtures.resource;
+import static eu.isygoit.solver.index.IndexFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FeatureScannerTest {

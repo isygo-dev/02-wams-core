@@ -10,8 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static eu.isygoit.solver.check.TestProblems.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class StructuralSolutionCheckerTest {
 
@@ -233,7 +232,7 @@ class StructuralSolutionCheckerTest {
                 List.of(new int[]{40, 50}, new int[]{10, 20}, new int[]{15, 30}));
         assertEquals(List.of(0, 10, 30, 40, 50, 100), java.util.Arrays.stream(runs).boxed().toList());
         assertTrue(StructuralSolutionChecker.insideOneRun(runs, 30, 40));
-        assertTrue(!StructuralSolutionChecker.insideOneRun(runs, 35, 45));
-        assertTrue(!StructuralSolutionChecker.insideOneRun(runs, 12, 14));
+        assertFalse(StructuralSolutionChecker.insideOneRun(runs, 35, 45));
+        assertFalse(StructuralSolutionChecker.insideOneRun(runs, 12, 14));
     }
 }

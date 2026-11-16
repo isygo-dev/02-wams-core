@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -54,8 +54,8 @@ class JobDispatchRecoveryTest {
         org.mockito.ArgumentCaptor<Instant> now = org.mockito.ArgumentCaptor.forClass(Instant.class);
         org.mockito.ArgumentCaptor<Instant> stale = org.mockito.ArgumentCaptor.forClass(Instant.class);
         verify(jobRepository).claimForDispatch(now.capture(), stale.capture(), eq(5), eq(100));
-        assertTrue(!now.getValue().isBefore(before));
-        assertTrue(stale.getValue().equals(now.getValue().minusSeconds(300)));
+        assertFalse(now.getValue().isBefore(before));
+        assertEquals(stale.getValue(), now.getValue().minusSeconds(300));
     }
 
     @Test

@@ -4,6 +4,7 @@ import eu.isygoit.repository.PlanJobRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -44,6 +45,6 @@ class JobWorkerShutdownTest {
     void stopWithoutStartDoesNothing() {
         new JobWorkerShutdown(registry, jobRepository, mock(PlatformTransactionManager.class), 0).stop();
 
-        assertTrue(!registry.isShuttingDown());
+        assertFalse(registry.isShuttingDown());
     }
 }

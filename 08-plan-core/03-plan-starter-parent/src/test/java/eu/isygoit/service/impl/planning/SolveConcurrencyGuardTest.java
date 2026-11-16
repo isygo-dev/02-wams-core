@@ -56,7 +56,7 @@ class SolveConcurrencyGuardTest {
             Thread.sleep(300);
             waiting.cancel();
             Throwable failure = outcome.get(5, TimeUnit.SECONDS);
-            assertTrue(failure instanceof SolveCancelledException, "waiter must stop on cancellation");
+            assertInstanceOf(SolveCancelledException.class, failure, "waiter must stop on cancellation");
         }
         assertEquals(1, guard.availablePermits());
     }

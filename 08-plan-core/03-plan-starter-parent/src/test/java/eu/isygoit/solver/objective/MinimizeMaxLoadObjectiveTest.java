@@ -5,11 +5,11 @@ import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.params.LoadMetric;
 import eu.isygoit.dto.request.params.LoadObjectiveParams;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 

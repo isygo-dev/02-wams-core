@@ -3,12 +3,12 @@ package eu.isygoit.solver.objective;
 import eu.isygoit.dto.request.ConstraintScope;
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import eu.isygoit.solver.spi.ModelCost;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MinimizeMakespanObjectiveTest {

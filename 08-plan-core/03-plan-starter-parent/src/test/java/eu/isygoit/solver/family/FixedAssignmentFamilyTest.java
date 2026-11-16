@@ -114,15 +114,15 @@ class FixedAssignmentFamilyTest {
         CandidateIndexBuilder.Mutable mutable = Mockito.mock(CandidateIndexBuilder.Mutable.class, inv -> {
             switch (inv.getMethod().getName()) {
                 case "resourceIdx":
-                    return v.resourceIdx((String) inv.getArgument(0));
+                    return v.resourceIdx(inv.getArgument(0));
                 case "candidateBegin":
-                    return v.candidateBegin((Integer) inv.getArgument(0));
+                    return v.candidateBegin(inv.getArgument(0));
                 case "candidateEnd":
-                    return v.candidateEnd((Integer) inv.getArgument(0));
+                    return v.candidateEnd(inv.getArgument(0));
                 case "candidateResource":
-                    return v.candidateResource((Integer) inv.getArgument(0));
+                    return v.candidateResource(inv.getArgument(0));
                 case "candidateRole":
-                    return v.roleOf((Integer) inv.getArgument(0));
+                    return v.roleOf(inv.getArgument(0));
                 default:
                     return null;
             }

@@ -221,116 +221,71 @@ class RegistriesTest {
 
     // ------------------------------------------------------------------ objective families
 
-    static class StubObjective implements ObjectiveFamily {
-        private final String type;
-
-        StubObjective(String type) {
-            this.type = type;
-        }
-
-        public String type() {
-            return type;
-        }
+    record StubObjective(String type) implements ObjectiveFamily {
 
         public Class<?> paramsType() {
-            return Void.class;
-        }
+                return Void.class;
+            }
 
-        public String descriptionKey() {
-            return "plan.objective." + type + ".description";
-        }
+            public String descriptionKey() {
+                return "plan.objective." + type + ".description";
+            }
 
-        public List<String> paramsHint() {
-            return List.of();
-        }
+            public List<String> paramsHint() {
+                return List.of();
+            }
 
-        public boolean reward() {
-            return false;
-        }
+            public boolean reward() {
+                return false;
+            }
 
-        public void validate(ValidationContext ctx, Objective objective, Object params) {
-        }
+            public void validate(ValidationContext ctx, Objective objective, Object params) {
+            }
 
-        public ModelCost estimate(CandidateIndexView index, Objective objective, Object params) {
-            return ModelCost.ZERO;
-        }
+            public ModelCost estimate(CandidateIndexView index, Objective objective, Object params) {
+                return ModelCost.ZERO;
+            }
 
-        public ObjectiveEvaluator evaluator() {
-            return (ctx, objective, params) -> 0L;
+            public ObjectiveEvaluator evaluator() {
+                return (ctx, objective, params) -> 0L;
+            }
         }
-    }
 
     // ------------------------------------------------------------------ contributors
 
-    static class CpConstraint implements CpSatConstraintContributor {
-        private final String type;
-
-        CpConstraint(String type) {
-            this.type = type;
-        }
-
-        public String type() {
-            return type;
-        }
+    record CpConstraint(String type) implements CpSatConstraintContributor {
 
         public EnforcementSupport support() {
-            return EnforcementSupport.HARD_ONLY;
+                return EnforcementSupport.HARD_ONLY;
+            }
+
+            public void apply(CpModelContext ctx, CompiledConstraint constraint, Enforcer enforcer) {
+            }
         }
 
-        public void apply(CpModelContext ctx, CompiledConstraint constraint, Enforcer enforcer) {
-        }
-    }
-
-    static class CpObjective implements CpSatObjectiveContributor {
-        private final String type;
-
-        CpObjective(String type) {
-            this.type = type;
-        }
-
-        public String type() {
-            return type;
-        }
+    record CpObjective(String type) implements CpSatObjectiveContributor {
 
         public void contribute(CpModelContext ctx, CompiledObjective objective, ObjectiveSink sink) {
+            }
         }
-    }
 
     // ------------------------------------------------------------------ solver registry and aliases
 
-    static class TfConstraint implements TimefoldConstraintContributor {
-        private final String type;
-
-        TfConstraint(String type) {
-            this.type = type;
-        }
-
-        public String type() {
-            return type;
-        }
+    record TfConstraint(String type) implements TimefoldConstraintContributor {
 
         public EnforcementSupport support() {
-            return EnforcementSupport.HARD_ONLY;
+                return EnforcementSupport.HARD_ONLY;
+            }
+
+            public void contribute(TimefoldBuildContext ctx, CompiledConstraint constraint) {
+            }
         }
 
-        public void contribute(TimefoldBuildContext ctx, CompiledConstraint constraint) {
-        }
-    }
-
-    static class TfObjective implements TimefoldObjectiveContributor {
-        private final String type;
-
-        TfObjective(String type) {
-            this.type = type;
-        }
-
-        public String type() {
-            return type;
-        }
+    record TfObjective(String type) implements TimefoldObjectiveContributor {
 
         public void contribute(TimefoldBuildContext ctx, CompiledObjective objective) {
+            }
         }
-    }
 
     static class StubEngine implements SolverEngine {
         private final String name;

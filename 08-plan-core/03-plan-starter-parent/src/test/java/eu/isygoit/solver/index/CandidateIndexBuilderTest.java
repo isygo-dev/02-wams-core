@@ -8,7 +8,6 @@ import eu.isygoit.exception.LimitExceededException;
 import eu.isygoit.solver.CompiledConstraint;
 import eu.isygoit.solver.SolveCancelledException;
 import eu.isygoit.solver.SolverCancellationToken;
-import eu.isygoit.solver.index.IndexFixtures.*;
 import eu.isygoit.solver.spi.ModelCost;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +15,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
+import static eu.isygoit.solver.index.IndexFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;

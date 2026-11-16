@@ -4,12 +4,12 @@ import eu.isygoit.dto.request.InitialAssignment;
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.params.PlanChangeParams;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 
+import static eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MinimizePlanChangesObjectiveTest {

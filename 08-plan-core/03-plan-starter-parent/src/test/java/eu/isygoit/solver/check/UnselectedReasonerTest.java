@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import static eu.isygoit.solver.check.TestProblems.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class UnselectedReasonerTest {
 
@@ -83,6 +82,6 @@ class UnselectedReasonerTest {
         UnassignedTask out = reasons(p, index).get(0);
         assertEquals(UnselectedReasoner.NO_ELIGIBLE_RESOURCE, out.reasonCode());
         assertTrue(out.suggestion().contains("elig-1"));
-        assertTrue(!out.suggestion().contains("elig-soft"));
+        assertFalse(out.suggestion().contains("elig-soft"));
     }
 }

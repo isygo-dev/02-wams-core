@@ -4,11 +4,11 @@ import eu.isygoit.dto.request.ConstraintScope;
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.exception.ObjectiveRangeException;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MinimizeResourceCostObjectiveTest {

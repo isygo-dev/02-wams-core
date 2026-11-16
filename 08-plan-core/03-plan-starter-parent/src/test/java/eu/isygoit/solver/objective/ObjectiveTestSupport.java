@@ -57,7 +57,7 @@ final class ObjectiveTestSupport {
     static PlanningProblem problem(List<Task> tasks, List<Resource> resources, List<Slot> slots,
                                    List<SetupMatrix> matrices, InitialSolution initial, List<Objective> objectives) {
         return new PlanningProblem(1L, "test", "UTC", horizon(), slots, List.of(), matrices, resources, tasks,
-                List.<Constraint>of(), objectives, SolverOptions.defaults(), initial);
+                List.of(), objectives, SolverOptions.defaults(), initial);
     }
 
     static InitialSolution initial(InitialAssignment... assignments) {
@@ -109,8 +109,8 @@ final class ObjectiveTestSupport {
         private Long prize;
         private Instant dueDate;
         private String setupClass;
-        private Set<String> tags = new LinkedHashSet<>();
-        private List<Preference> preferences = new ArrayList<>();
+        private final Set<String> tags = new LinkedHashSet<>();
+        private final List<Preference> preferences = new ArrayList<>();
 
         private TaskBuilder(String id) {
             this.id = id;

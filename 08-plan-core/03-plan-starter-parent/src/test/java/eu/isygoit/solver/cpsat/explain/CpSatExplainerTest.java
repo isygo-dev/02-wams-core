@@ -95,7 +95,7 @@ class CpSatExplainerTest {
                 constraint("relax-1", IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION));
         AtomicInteger calls = new AtomicInteger();
         InfeasibilityCore core = new CpSatExplainer().explain(problem, context(2, true),
-                (CpSatExplainer.ModelFactory) (p, c) -> {
+                (p, c) -> {
                     calls.incrementAndGet();
                     throw new IllegalStateException("model too large");
                 });
@@ -110,7 +110,7 @@ class CpSatExplainerTest {
     void noAssumptionsMeansFallback() {
         CompiledProblem problem = compiled(constraint("hard-1", IEnumEnforcement.Types.STRICTLY_REQUIRED));
         InfeasibilityCore core = new CpSatExplainer().explain(problem, context(2, true),
-                (CpSatExplainer.ModelFactory) (p, c) -> new CpSatExplainer.ExplainModel(null, List.of()));
+                (p, c) -> new CpSatExplainer.ExplainModel(null, List.of()));
         assertEquals(CoreItems.METHOD_NONE, core.method());
         assertEquals(List.of("hard-1"), ids(core));
     }
@@ -120,7 +120,7 @@ class CpSatExplainerTest {
         CompiledProblem problem = compiled(constraint("hard-1", IEnumEnforcement.Types.STRICTLY_REQUIRED));
         AtomicInteger calls = new AtomicInteger();
         InfeasibilityCore core = new CpSatExplainer().explain(problem, context(2, false),
-                (CpSatExplainer.ModelFactory) (p, c) -> {
+                (p, c) -> {
                     calls.incrementAndGet();
                     return null;
                 });
@@ -135,7 +135,7 @@ class CpSatExplainerTest {
         CompiledProblem problem = compiled(constraint("hard-1", IEnumEnforcement.Types.STRICTLY_REQUIRED));
         SolveContext original = context(7, true);
         SolveContext[] seen = new SolveContext[1];
-        new CpSatExplainer().explain(problem, original, (CpSatExplainer.ModelFactory) (p, c) -> {
+        new CpSatExplainer().explain(problem, original, (p, c) -> {
             seen[0] = c;
             return null;
         });
@@ -151,7 +151,7 @@ class CpSatExplainerTest {
         CompiledProblem problem = compiled(constraint("c-a", IEnumEnforcement.Types.STRICTLY_REQUIRED),
                 constraint("c-c", IEnumEnforcement.Types.STRICTLY_REQUIRED));
         InfeasibilityCore core = new CpSatExplainer().explain(problem, context(5, true),
-                (CpSatExplainer.ModelFactory) (p, c) -> conflictingModel(true));
+                (p, c) -> conflictingModel(true));
         // T-EXPLAIN: if this fails with method NONE, the OR-Tools build returned an empty assumption core
         assertEquals(CoreItems.METHOD_ASSUMPTIONS_SHRUNK, core.method(), "core was " + core);
         assertTrue(core.minimal());
@@ -166,7 +166,7 @@ class CpSatExplainerTest {
         Assumptions.assumeTrue(nativesAvailable(), "OR-Tools natives are not available");
         CompiledProblem problem = compiled(constraint("c-a", IEnumEnforcement.Types.STRICTLY_REQUIRED));
         InfeasibilityCore core = new CpSatExplainer().explain(problem, context(5, true),
-                (CpSatExplainer.ModelFactory) (p, c) -> conflictingModel(false));
+                (p, c) -> conflictingModel(false));
         assertEquals(CoreItems.METHOD_NONE, core.method());
         assertFalse(core.minimal());
         assertEquals(List.of("c-a"), ids(core));
@@ -179,7 +179,7 @@ class CpSatExplainerTest {
         SolveContext ctx = context(5, true);
         ctx.cancellation().cancel();
         InfeasibilityCore core = new CpSatExplainer().explain(problem, ctx,
-                (CpSatExplainer.ModelFactory) (p, c) -> conflictingModel(true));
+                (p, c) -> conflictingModel(true));
         assertTrue(core.method().equals(CoreItems.METHOD_NONE)
                         || core.method().startsWith("ASSUMPTIONS"),
                 "never an exception; a stopped solve yields the fallback");

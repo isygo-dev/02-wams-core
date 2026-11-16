@@ -47,7 +47,7 @@ class ResourceCapacityContributorTest {
         assertTrue(contributor.support().hard());
         assertTrue(contributor.support().relaxable());
         assertFalse(contributor.support().soft());
-        assertTrue(contributor.type().equals("resource_capacity"));
+        assertEquals("resource_capacity", contributor.type());
     }
 
     @Test

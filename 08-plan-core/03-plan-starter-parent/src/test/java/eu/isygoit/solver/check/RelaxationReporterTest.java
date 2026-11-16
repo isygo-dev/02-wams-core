@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RelaxationReporterTest {
 
@@ -67,7 +66,7 @@ class RelaxationReporterTest {
         violations.violation(null, null, "REST", "c", 1);
         List<ConstraintViolation> out = reporter.hardViolations(RELAXABLE, violations);
         assertEquals(3, out.size());
-        assertEquals(null, out.get(0).taskId());
+        assertNull(out.get(0).taskId());
         assertEquals("t1", out.get(1).taskId());
         assertEquals(7.0, out.get(1).impact());
         assertEquals("t2", out.get(2).taskId());
@@ -81,6 +80,6 @@ class RelaxationReporterTest {
         violations.violation("b", null, "X", "m", 6);
         assertEquals(11L, violations.totalMeasure());
         assertEquals(2, violations.count());
-        assertTrue(!violations.isEmpty());
+        assertFalse(violations.isEmpty());
     }
 }

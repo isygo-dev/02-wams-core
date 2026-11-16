@@ -25,7 +25,7 @@ class MultiResourceRequirementFamilyTest {
     }
 
     private Task rewrite(Task task, Constraint c) {
-        return ((TaskRewriter) family).rewrite(task, c, FamilyKit.bind(family, c));
+        return family.rewrite(task, c, FamilyKit.bind(family, c));
     }
 
     @Test

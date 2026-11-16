@@ -100,7 +100,7 @@ public final class TestProblems {
     public static final class TaskB {
         private final String id;
         private final List<PrecedenceRef> predecessors = new ArrayList<>();
-        private Integer duration;
+        private final Integer duration;
         private int demand = 1;
         private boolean required = true;
         private Long prize;
