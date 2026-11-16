@@ -31,6 +31,19 @@ public abstract class AbstractPlanDeadLetterProcessor implements Processor {
         this.commitWhenDeadLetterFails = commitWhenDeadLetterFails;
     }
 
+    private static void putIfPresent(Map<String, String> headers, String name, Object value) {
+        if (value != null) {
+            headers.put(name, String.valueOf(value));
+        }
+    }
+
+    private static String truncate(String message) {
+        if (message == null) {
+            return "";
+        }
+        return message.length() <= MAX_MESSAGE_LENGTH ? message : message.substring(0, MAX_MESSAGE_LENGTH);
+    }
+
     @Override
     public void process(Exchange exchange) {
         Throwable failure = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Throwable.class);
@@ -58,7 +71,9 @@ public abstract class AbstractPlanDeadLetterProcessor implements Processor {
         PlanKafkaCommit.commit(exchange);
     }
 
-    /** Hook run after the dead-letter publish and before the commit; failures are logged and swallowed. */
+    /**
+     * Hook run after the dead-letter publish and before the commit; failures are logged and swallowed.
+     */
     protected void afterDeadLetter(byte[] payload, String key, Throwable failure) {
     }
 
@@ -78,18 +93,5 @@ public abstract class AbstractPlanDeadLetterProcessor implements Processor {
         headers.put(PlanDeadLetterProducer.HEADER_ATTEMPTS,
                 String.valueOf((redeliveries == null ? 0 : redeliveries) + 1));
         return headers;
-    }
-
-    private static void putIfPresent(Map<String, String> headers, String name, Object value) {
-        if (value != null) {
-            headers.put(name, String.valueOf(value));
-        }
-    }
-
-    private static String truncate(String message) {
-        if (message == null) {
-            return "";
-        }
-        return message.length() <= MAX_MESSAGE_LENGTH ? message : message.substring(0, MAX_MESSAGE_LENGTH);
     }
 }

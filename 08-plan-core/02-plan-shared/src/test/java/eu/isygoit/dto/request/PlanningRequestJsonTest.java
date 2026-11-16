@@ -7,13 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import eu.isygoit.dto.request.params.LoadMetric;
-import eu.isygoit.dto.request.params.LoadObjectiveParams;
-import eu.isygoit.dto.request.params.MaxConsecutiveParams;
-import eu.isygoit.dto.request.params.MaxLoadPerPeriodParams;
-import eu.isygoit.dto.request.params.MinRestParams;
-import eu.isygoit.dto.request.params.NoOverlapParams;
-import eu.isygoit.dto.request.params.PeriodSpec;
+import eu.isygoit.dto.request.params.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.util.ParamsBinder;
 import org.junit.jupiter.api.Test;
@@ -23,12 +17,7 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Deserializes the five complete examples of the design (section 2.6) with FAIL_ON_UNKNOWN_PROPERTIES and checks

@@ -22,7 +22,9 @@ public class PagerBar extends HorizontalLayout {
 
     private final IntConsumer onPage;
 
-    /** @param onPage called with the 0-based page the user asks for */
+    /**
+     * @param onPage called with the 0-based page the user asks for
+     */
     public PagerBar(IntConsumer onPage) {
         this.onPage = onPage;
         setWidthFull();

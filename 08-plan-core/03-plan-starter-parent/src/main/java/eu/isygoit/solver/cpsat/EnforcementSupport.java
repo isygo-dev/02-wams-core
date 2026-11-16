@@ -15,16 +15,24 @@ import eu.isygoit.enums.IEnumEnforcement;
  */
 public record EnforcementSupport(boolean hard, boolean soft, boolean relaxable) {
 
-    /** Hard enforcement only. */
+    /**
+     * Hard enforcement only.
+     */
     public static final EnforcementSupport HARD_ONLY = new EnforcementSupport(true, false, false);
 
-    /** Hard, soft and relaxable. */
+    /**
+     * Hard, soft and relaxable.
+     */
     public static final EnforcementSupport ALL = new EnforcementSupport(true, true, true);
 
-    /** Nothing supported. */
+    /**
+     * Nothing supported.
+     */
     public static final EnforcementSupport NONE = new EnforcementSupport(false, false, false);
 
-    /** @return the component-wise AND of this and {@code o} */
+    /**
+     * @return the component-wise AND of this and {@code o}
+     */
     public EnforcementSupport and(EnforcementSupport o) {
         return new EnforcementSupport(hard && o.hard, soft && o.soft, relaxable && o.relaxable);
     }

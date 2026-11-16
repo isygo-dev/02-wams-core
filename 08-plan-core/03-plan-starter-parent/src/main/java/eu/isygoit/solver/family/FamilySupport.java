@@ -13,13 +13,7 @@ import eu.isygoit.solver.spi.ValidationContext;
 
 import java.time.DateTimeException;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Shared, stateless helpers of the WP4b constraint families and their CP-SAT contributors: enforcement sets, validation
@@ -31,16 +25,22 @@ import java.util.TreeMap;
  */
 public final class FamilySupport {
 
-    /** HARD only (STRICTLY_REQUIRED, CONFIGURABLE_HARD). */
+    /**
+     * HARD only (STRICTLY_REQUIRED, CONFIGURABLE_HARD).
+     */
     public static final Set<IEnumEnforcement.Types> HARD_ONLY = Set.of(
             IEnumEnforcement.Types.STRICTLY_REQUIRED, IEnumEnforcement.Types.CONFIGURABLE_HARD);
 
-    /** HARD and RELAXABLE_WITH_AUTHORIZATION (no soft form). */
+    /**
+     * HARD and RELAXABLE_WITH_AUTHORIZATION (no soft form).
+     */
     public static final Set<IEnumEnforcement.Types> HARD_RELAXABLE = Set.of(
             IEnumEnforcement.Types.STRICTLY_REQUIRED, IEnumEnforcement.Types.CONFIGURABLE_HARD,
             IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION);
 
-    /** HARD, SOFT and RELAXABLE_WITH_AUTHORIZATION. */
+    /**
+     * HARD, SOFT and RELAXABLE_WITH_AUTHORIZATION.
+     */
     public static final Set<IEnumEnforcement.Types> ALL_ENFORCEMENTS = Set.of(
             IEnumEnforcement.Types.STRICTLY_REQUIRED, IEnumEnforcement.Types.CONFIGURABLE_HARD,
             IEnumEnforcement.Types.SOFT, IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION);
@@ -205,7 +205,9 @@ public final class FamilySupport {
         return Arrays.copyOf(tmp, size);
     }
 
-    /** @return true when the sorted-or-not array contains the value */
+    /**
+     * @return true when the sorted-or-not array contains the value
+     */
     public static boolean contains(int[] values, int value) {
         for (int v : values) {
             if (v == value) {

@@ -4,25 +4,13 @@ import eu.isygoit.config.PlanLimitsProperties;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.PlanningRequest;
 import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.dto.response.DiagnosticIssue;
-import eu.isygoit.dto.response.Diagnostics;
-import eu.isygoit.dto.response.Metrics;
-import eu.isygoit.dto.response.ModelEstimateDto;
-import eu.isygoit.dto.response.SolveResult;
-import eu.isygoit.dto.response.ValidationReportDto;
+import eu.isygoit.dto.response.*;
 import eu.isygoit.enums.IEnumSolverStatus;
 import eu.isygoit.exception.InfeasibleException;
 import eu.isygoit.exception.InvalidRequestException;
 import eu.isygoit.exception.LimitExceededException;
 import eu.isygoit.exception.RequestValidationException;
-import eu.isygoit.solver.CompiledProblem;
-import eu.isygoit.solver.SolveCancelledException;
-import eu.isygoit.solver.SolveContext;
-import eu.isygoit.solver.SolveListener;
-import eu.isygoit.solver.SolveProgress;
-import eu.isygoit.solver.SolverCancellationToken;
-import eu.isygoit.solver.SolverEngine;
-import eu.isygoit.solver.SolverRegistry;
+import eu.isygoit.solver.*;
 import eu.isygoit.solver.diag.PreSolveAnalyzer;
 import eu.isygoit.solver.index.CandidateIndex;
 import eu.isygoit.solver.index.CandidateIndexBuilder;
@@ -33,11 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Orchestrates the v2 planning pipeline (design 0.3 / 10.3):
@@ -139,7 +123,43 @@ public class PlanningService {
     // solve
     // ==================================================================================================
 
-    /** Solves a request that is not bound to a persisted job. */
+    private static SolveResult stopped(SolveCancelledException exception) {
+        return new SolveResult(IEnumSolverStatus.Types.UNKNOWN, null, List.of(),
+                new Diagnostics(exception.getMessage(), List.of(), null, List.of(), Map.of()),
+                new Metrics(0, 0, 0, null, 0, null, null, List.of()));
+    }
+
+    private static SolveResult withFallbackNotice(SolveResult result) {
+        Diagnostics previous = result.diagnostics();
+        List<DiagnosticIssue> warnings = new ArrayList<>(
+                previous == null ? List.of() : previous.warnings());
+        warnings.add(new DiagnosticIssue("ENGINE_FALLBACK", "WARNING", "solverOptions.fallbackToTimefold",
+                "CP-SAT returned UNKNOWN without a solution; Timefold was tried."));
+        Map<String, Object> details = new LinkedHashMap<>();
+        if (previous != null) {
+            details.putAll(previous.details());
+        }
+        details.put("fallbackFromEngine", SolverOptions.ENGINE_CP_SAT);
+        details.put("fallbackToEngine", SolverOptions.ENGINE_TIMEFOLD);
+        String message = previous == null || previous.message() == null
+                ? "Timefold result after CP-SAT returned UNKNOWN without a solution"
+                : previous.message() + " (retried with Timefold after CP-SAT returned UNKNOWN without a solution)";
+        Diagnostics diagnostics = new Diagnostics(message,
+                previous == null ? List.of() : previous.infeasibilityCore(),
+                previous == null ? null : previous.core(), warnings, details);
+        return new SolveResult(result.status(), result.solution(), result.relaxations(), diagnostics, result.metrics());
+    }
+
+    private static void limitIssue(ValidationResult all, LimitExceededException e) {
+        Map<String, Object> args = new LinkedHashMap<>();
+        args.put("limit", e.limitName());
+        args.put("max", e.limit());
+        all.error(LimitExceededException.CODE, "", e.getMessage(), args);
+    }
+
+    /**
+     * Solves a request that is not bound to a persisted job.
+     */
     public SolveResult solve(PlanningRequest request) {
         return solve(request, new SolverCancellationToken());
     }
@@ -152,6 +172,10 @@ public class PlanningService {
     public SolveResult solve(PlanningRequest request, SolverCancellationToken cancellationToken) {
         return solve(null, request, cancellationToken);
     }
+
+    // ==================================================================================================
+    // compile / normalize
+    // ==================================================================================================
 
     /**
      * Validates, normalizes and solves the request of a persisted job (no progress listener).
@@ -171,8 +195,8 @@ public class PlanningService {
      * @param cancellationToken cancellation token of the job
      * @param listener          progress and incumbent listener ({@code null} = none)
      * @return the validated, enriched result; status {@code UNKNOWN} when stopped before the engine produced anything
-     * @throws InfeasibleException                       when the problem is infeasible (diagnostics attached)
-     * @throws eu.isygoit.exception.SolverBusyException  when no solver slot became free in time (transient)
+     * @throws InfeasibleException                      when the problem is infeasible (diagnostics attached)
+     * @throws eu.isygoit.exception.SolverBusyException when no solver slot became free in time (transient)
      */
     public SolveResult solve(Long jobId, PlanningRequest request, SolverCancellationToken cancellationToken,
                              SolveListener listener) {
@@ -233,22 +257,12 @@ public class PlanningService {
         return result;
     }
 
-    private static SolveResult stopped(SolveCancelledException exception) {
-        return new SolveResult(IEnumSolverStatus.Types.UNKNOWN, null, List.of(),
-                new Diagnostics(exception.getMessage(), List.of(), null, List.of(), Map.of()),
-                new Metrics(0, 0, 0, null, 0, null, null, List.of()));
-    }
-
-    // ==================================================================================================
-    // compile / normalize
-    // ==================================================================================================
-
     /**
      * Validates, normalizes and verifies a request without building the index (cheap: used at submit time).
      *
      * @return the normalized problem
-     * @throws LimitExceededException      when a size limit is crossed
-     * @throws RequestValidationException  when validation found errors
+     * @throws LimitExceededException     when a size limit is crossed
+     * @throws RequestValidationException when validation found errors
      */
     public PlanningProblem normalizeAndValidate(PlanningRequest request) {
         return normalizeAndValidate(null, request);
@@ -270,9 +284,9 @@ public class PlanningService {
      * @param request        the request
      * @param engineOverride engine id or alias replacing {@code solverOptions.engine}, or {@code null}
      * @return the compiled problem
-     * @throws LimitExceededException      when a size limit is crossed
-     * @throws RequestValidationException  when validation found errors
-     * @throws SolveCancelledException     never with the default token
+     * @throws LimitExceededException     when a size limit is crossed
+     * @throws RequestValidationException when validation found errors
+     * @throws SolveCancelledException    never with the default token
      */
     public CompiledProblem compile(Long jobId, PlanningRequest request, String engineOverride) {
         return compile(jobId, request, engineOverride, new SolverCancellationToken());
@@ -292,9 +306,6 @@ public class PlanningService {
         estimator.enforce(cost, index);
         return new CompiledProblem(prepared.problem(), index, cost, prepared.verified().constraints(),
                 prepared.verified().objectives());
-    }
-
-    private record Prepared(PlanningProblem problem, ProblemVerifier.Verified verified) {
     }
 
     private Prepared prepare(Long jobId, PlanningRequest request, String engineOverride) {
@@ -323,7 +334,9 @@ public class PlanningService {
         return new Prepared(problem, verified);
     }
 
-    /** Maps the first error to the Phase 1 exception types, otherwise raises {@link RequestValidationException}. */
+    /**
+     * Maps the first error to the Phase 1 exception types, otherwise raises {@link RequestValidationException}.
+     */
     private void throwIfErrors(ValidationResult result) {
         if (!result.hasErrors()) {
             return;
@@ -349,6 +362,10 @@ public class PlanningService {
         throw new RequestValidationException(result);
     }
 
+    // ==================================================================================================
+    // validate (POST /validate)
+    // ==================================================================================================
+
     private PlanningProblem adjust(PlanningProblem problem, String engineOverride) {
         SolverOptions options = problem.options();
         String engine = engineOverride == null || engineOverride.isBlank()
@@ -370,10 +387,6 @@ public class PlanningService {
                 problem.slots(), problem.calendars(), problem.setupMatrices(), problem.resources(), problem.tasks(),
                 problem.constraints(), problem.objectives(), adjusted, problem.initialSolution());
     }
-
-    // ==================================================================================================
-    // validate (POST /validate)
-    // ==================================================================================================
 
     /**
      * Validates a request and reports every issue, the compatibility with every engine and the model estimate.
@@ -430,7 +443,7 @@ public class PlanningService {
         }
         if (!requestedKnown) {
             all.error("UNKNOWN_SOLVER", "solverOptions.engine", "Solver '" + requested
-                    + "' is not supported. Supported solvers: " + solverRegistry.supportedEngines(),
+                            + "' is not supported. Supported solvers: " + solverRegistry.supportedEngines(),
                     Map.of("engine", requested));
         }
         ModelEstimateDto estimate = null;
@@ -438,27 +451,6 @@ public class PlanningService {
             estimate = estimateQuietly(problem, verified, all);
         }
         return report(all, request, compatible, engineIssues, estimate, problem);
-    }
-
-    private static SolveResult withFallbackNotice(SolveResult result) {
-        Diagnostics previous = result.diagnostics();
-        List<DiagnosticIssue> warnings = new ArrayList<>(
-                previous == null ? List.of() : previous.warnings());
-        warnings.add(new DiagnosticIssue("ENGINE_FALLBACK", "WARNING", "solverOptions.fallbackToTimefold",
-                "CP-SAT returned UNKNOWN without a solution; Timefold was tried."));
-        Map<String, Object> details = new LinkedHashMap<>();
-        if (previous != null) {
-            details.putAll(previous.details());
-        }
-        details.put("fallbackFromEngine", SolverOptions.ENGINE_CP_SAT);
-        details.put("fallbackToEngine", SolverOptions.ENGINE_TIMEFOLD);
-        String message = previous == null || previous.message() == null
-                ? "Timefold result after CP-SAT returned UNKNOWN without a solution"
-                : previous.message() + " (retried with Timefold after CP-SAT returned UNKNOWN without a solution)";
-        Diagnostics diagnostics = new Diagnostics(message,
-                previous == null ? List.of() : previous.infeasibilityCore(),
-                previous == null ? null : previous.core(), warnings, details);
-        return new SolveResult(result.status(), result.solution(), result.relaxations(), diagnostics, result.metrics());
     }
 
     private ModelEstimateDto estimateQuietly(PlanningProblem problem, ProblemVerifier.Verified verified,
@@ -482,13 +474,6 @@ public class PlanningService {
             all.warning("ESTIMATE_INTERRUPTED", "", e.getMessage());
         }
         return null;
-    }
-
-    private static void limitIssue(ValidationResult all, LimitExceededException e) {
-        Map<String, Object> args = new LinkedHashMap<>();
-        args.put("limit", e.limitName());
-        args.put("max", e.limit());
-        all.error(LimitExceededException.CODE, "", e.getMessage(), args);
     }
 
     private ValidationReportDto report(ValidationResult all, PlanningRequest request,
@@ -520,5 +505,8 @@ public class PlanningService {
                 .engineIssues(new java.util.HashMap<>(engineIssues))
                 .estimate(estimate)
                 .build();
+    }
+
+    private record Prepared(PlanningProblem problem, ProblemVerifier.Verified verified) {
     }
 }

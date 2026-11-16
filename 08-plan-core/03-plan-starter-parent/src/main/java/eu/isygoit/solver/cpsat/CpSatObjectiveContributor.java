@@ -11,7 +11,9 @@ import eu.isygoit.solver.CompiledObjective;
  */
 public interface CpSatObjectiveContributor {
 
-    /** @return the same id as the {@code ObjectiveFamily} it formulates */
+    /**
+     * @return the same id as the {@code ObjectiveFamily} it formulates
+     */
     String type();
 
     /**

@@ -10,12 +10,18 @@ package eu.isygoit.solver.cpsat;
  */
 public interface CpSatStructuralModule {
 
-    /** @return a unique module name (for logs) */
+    /**
+     * @return a unique module name (for logs)
+     */
     String name();
 
-    /** @return the position: modules run in ascending order, ties by name */
+    /**
+     * @return the position: modules run in ascending order, ties by name
+     */
     int order();
 
-    /** Adds the module's model parts to {@code ctx.model()}; allocations must call {@code ctx.count(..)}. */
+    /**
+     * Adds the module's model parts to {@code ctx.model()}; allocations must call {@code ctx.count(..)}.
+     */
     void apply(CpModelContext ctx);
 }

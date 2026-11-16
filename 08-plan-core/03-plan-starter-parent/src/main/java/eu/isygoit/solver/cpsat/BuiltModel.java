@@ -50,72 +50,100 @@ public final class BuiltModel {
         this.buildNanos = buildNanos;
     }
 
-    /** @return the CP-SAT model */
+    /**
+     * @return the CP-SAT model
+     */
     public CpModel model() {
         return context.model();
     }
 
-    /** @return the model context holding the variable arrays */
+    /**
+     * @return the model context holding the variable arrays
+     */
     public CpModelContext context() {
         return context;
     }
 
-    /** @return SOLVE or EXPLAIN */
+    /**
+     * @return SOLVE or EXPLAIN
+     */
     public BuildMode mode() {
         return mode;
     }
 
-    /** @return the assumption descriptors (empty in SOLVE builds) */
+    /**
+     * @return the assumption descriptors (empty in SOLVE builds)
+     */
     public List<AssumptionRef> assumptions() {
         return context.assumptions == null ? List.of() : context.assumptions.refs();
     }
 
-    /** @return the assumption registry of an EXPLAIN build, {@code null} for SOLVE builds */
+    /**
+     * @return the assumption registry of an EXPLAIN build, {@code null} for SOLVE builds
+     */
     public AssumptionRegistry assumptionRegistry() {
         return context.assumptions;
     }
 
-    /** @return the objective terms by tier (empty when the problem has no objective term) */
+    /**
+     * @return the objective terms by tier (empty when the problem has no objective term)
+     */
     public TierObjectiveBuilder tiers() {
         return tiers;
     }
 
-    /** @return the optimisation plan, or {@code null} when there is no objective term (and in EXPLAIN builds) */
+    /**
+     * @return the optimisation plan, or {@code null} when there is no objective term (and in EXPLAIN builds)
+     */
     public TierObjectiveBuilder.Plan plan() {
         return plan;
     }
 
-    /** @return true when {@code minimize} was set on the model (WEIGHTED or single tier) */
+    /**
+     * @return true when {@code minimize} was set on the model (WEIGHTED or single tier)
+     */
     public boolean hasObjective() {
         return hasObjective;
     }
 
-    /** @return true when the model carries hints (so {@code repair_hint} is worth enabling) */
+    /**
+     * @return true when the model carries hints (so {@code repair_hint} is worth enabling)
+     */
     public boolean hasHints() {
         return hasHints;
     }
 
-    /** @return the SOFT instances (unit literals and measure penalties) in creation order */
+    /**
+     * @return the SOFT instances (unit literals and measure penalties) in creation order
+     */
     public List<CpSatEnforcerFactory.SoftInstance> softInstances() {
         return softInstances;
     }
 
-    /** @return the relaxation literals {@code active_k} in creation order */
+    /**
+     * @return the relaxation literals {@code active_k} in creation order
+     */
     public List<CpSatEnforcerFactory.RelaxLiteral> relaxLiterals() {
         return relaxLiterals;
     }
 
-    /** @return ids of the constraints skipped in an EXPLAIN build because of a size guard */
+    /**
+     * @return ids of the constraints skipped in an EXPLAIN build because of a size guard
+     */
     public List<String> explainSkipped() {
         return Collections.unmodifiableList(explainSkipped);
     }
 
-    /** @return the model construction time in nanoseconds (excluding the index build) */
+    /**
+     * @return the model construction time in nanoseconds (excluding the index build)
+     */
     public long buildNanos() {
         return buildNanos;
     }
 
-    /** @return the model statistics (O(model size)) */
+    /**
+     * @return the model statistics (O(model size))
+     */
     public ModelStats stats() {
         return context.stats();
     }

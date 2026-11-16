@@ -5,17 +5,11 @@ import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.params.LoadMetric;
 import eu.isygoit.dto.request.params.LoadObjectiveParams;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeIndex;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeSolution;
+import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.ctx;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.objective;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.problem;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.resource;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.task;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -23,10 +17,12 @@ class MinimizeMaxLoadObjectiveTest {
 
     private final MinimizeMaxLoadObjective family = new MinimizeMaxLoadObjective();
 
-    /** G9 shape: five 8-tick shifts over three nurses. */
+    /**
+     * G9 shape: five 8-tick shifts over three nurses.
+     */
     private PlanningProblem scenario() {
         return problem(List.of(task("d0").duration(8).build(), task("d1").duration(8).build(),
-                task("d2").duration(8).build(), task("d3").duration(8).build(), task("d4").duration(8).build()),
+                        task("d2").duration(8).build(), task("d3").duration(8).build(), task("d4").duration(8).build()),
                 List.of(resource("ana"), resource("ben"), resource("cleo")));
     }
 

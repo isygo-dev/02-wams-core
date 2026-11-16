@@ -32,7 +32,9 @@ class MaxConsecutiveContributorTest {
                 map("period", map("unit", "DAY"), "max", max));
     }
 
-    /** Four days (96 hourly ticks), one 8-tick task per day (free start inside its day), the given resources. */
+    /**
+     * Four days (96 hourly ticks), one 8-tick task per day (free start inside its day), the given resources.
+     */
     private ContribFixture fixture(Constraint c, String... resources) {
         List<eu.isygoit.dto.request.Resource> rs = new java.util.ArrayList<>();
         for (String r : resources) {

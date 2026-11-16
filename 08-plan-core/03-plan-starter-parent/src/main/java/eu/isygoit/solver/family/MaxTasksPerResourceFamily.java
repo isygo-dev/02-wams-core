@@ -4,15 +4,7 @@ import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.params.LoadMetric;
 import eu.isygoit.dto.request.params.MaxTasksPerResourceParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PeriodBuckets;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,11 +22,17 @@ import java.util.Set;
 @Component
 public class MaxTasksPerResourceFamily implements ConstraintFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "max_tasks_per_resource";
-    /** Violation code for an excess. */
+    /**
+     * Violation code for an excess.
+     */
     public static final String CODE_MAX = "MAX_TASKS_EXCEEDED";
-    /** Violation code for a deficit. */
+    /**
+     * Violation code for a deficit.
+     */
     public static final String CODE_MIN = "MIN_TASKS_NOT_REACHED";
 
     @Override

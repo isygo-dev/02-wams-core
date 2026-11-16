@@ -35,11 +35,12 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
     protected final UI ui;
     protected final ProgressBar loadingBar = new ProgressBar();
     private final List<Runnable> extraRefreshActions = new ArrayList<>();
+
     public AbstractStatisticsPanel(UI ui) {
         this.ui = ui;
         buildUI();
         buildSections();
-    }    protected final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
+    }
 
     private void buildUI() {
         // Lumo theme flags — structural, no measurements. All sizing is in SCSS.
@@ -76,7 +77,7 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
         }
 
         add(headerLayout, refreshFab);
-    }
+    }    protected final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
 
     /**
      * Registers another reload to run when the page's single floating refresh button is clicked
@@ -133,6 +134,8 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
         Notification.show(I18n.t("common.stats.load.error"), 3000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_ERROR);
     }
+
+
 
 
 }

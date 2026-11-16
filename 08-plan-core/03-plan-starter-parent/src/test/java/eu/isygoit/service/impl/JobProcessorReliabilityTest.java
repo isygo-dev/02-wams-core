@@ -31,12 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class JobProcessorReliabilityTest {
     private static final Long JOB_ID = 42L;
@@ -49,6 +44,12 @@ class JobProcessorReliabilityTest {
     private final JobProcessor jobProcessor = new JobProcessor(
             planningService, jobRepository, logProducer, objectMapper, cancellationRegistry,
             mock(PlatformTransactionManager.class));
+
+    private static SolveResult stoppedResult() {
+        return new SolveResult(IEnumSolverStatus.Types.STOPPED_FEASIBLE,
+                new PlanningSolution(List.of(), List.of(), List.of(), List.of(), List.of(), 0.5),
+                List.of(), null, null);
+    }
 
     private void jobIsCreated() throws Exception {
         PlanJobStatusView view = mock(PlanJobStatusView.class);
@@ -322,11 +323,5 @@ class JobProcessorReliabilityTest {
         jobIsCreated();
         when(jobRepository.claimForProcessing(eq(JOB_ID), any(Instant.class))).thenReturn(1);
         when(jobRepository.markSolving(eq(JOB_ID), any())).thenReturn(1);
-    }
-
-    private static SolveResult stoppedResult() {
-        return new SolveResult(IEnumSolverStatus.Types.STOPPED_FEASIBLE,
-                new PlanningSolution(List.of(), List.of(), List.of(), List.of(), List.of(), 0.5),
-                List.of(), null, null);
     }
 }

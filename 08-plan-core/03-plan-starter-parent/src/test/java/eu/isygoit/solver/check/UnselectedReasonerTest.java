@@ -11,10 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static eu.isygoit.solver.check.TestProblems.assign;
-import static eu.isygoit.solver.check.TestProblems.requirement;
-import static eu.isygoit.solver.check.TestProblems.resource;
-import static eu.isygoit.solver.check.TestProblems.task;
+import static eu.isygoit.solver.check.TestProblems.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,7 +51,7 @@ class UnselectedReasonerTest {
     @Test
     void selectedAndRequiredTasksAreNeverListed() {
         PlanningProblem p = TestProblems.problem(100, List.of(resource("R", 1)), List.of(
-                task("req", 10).build(), task("picked", 5).optional(2L).build(), task("left", 5).optional(2L).build()),
+                        task("req", 10).build(), task("picked", 5).optional(2L).build(), task("left", 5).optional(2L).build()),
                 List.of(), List.of());
         StubIndexView index = StubIndexView.of(p);
         List<UnassignedTask> out = reasons(p, index, assign("req", 0, 10, "R"),
@@ -66,9 +63,9 @@ class UnselectedReasonerTest {
     @Test
     void impliesPredecessorThatIsSelectedDoesNotExplainTheAbsence() {
         PlanningProblem p = TestProblems.problem(100, List.of(resource("R", 1)), List.of(
-                task("base", 10).build(),
-                task("succ", 5).optional(2L)
-                        .after("base", PrecedenceRef.Type.FINISH_START, 0, null, PrecedenceRef.Presence.IMPLIES).build()),
+                        task("base", 10).build(),
+                        task("succ", 5).optional(2L)
+                                .after("base", PrecedenceRef.Type.FINISH_START, 0, null, PrecedenceRef.Presence.IMPLIES).build()),
                 List.of(), List.of());
         List<UnassignedTask> out = reasons(p, StubIndexView.of(p), assign("base", 0, 10, "R"));
         assertEquals(UnselectedReasoner.NOT_SELECTED, out.get(0).reasonCode());

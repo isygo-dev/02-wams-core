@@ -16,7 +16,9 @@ import eu.isygoit.dto.request.ResourceSelector;
  */
 public final class SelectorMatcher {
 
-    /** Literal accepted inside {@code resourceIds} meaning "every resource". */
+    /**
+     * Literal accepted inside {@code resourceIds} meaning "every resource".
+     */
     public static final String ALL = "ALL";
 
     private SelectorMatcher() {

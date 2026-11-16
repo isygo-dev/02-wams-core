@@ -14,13 +14,19 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.plan.limits")
 public class PlanLimitsProperties {
 
-    /** Maximum number of tasks of one request. */
+    /**
+     * Maximum number of tasks of one request.
+     */
     private int maxTasks = 5000;
 
-    /** Maximum number of resources of one request. */
+    /**
+     * Maximum number of resources of one request.
+     */
     private int maxResources = 1000;
 
-    /** Maximum number of slots of one request. */
+    /**
+     * Maximum number of slots of one request.
+     */
     private int maxSlots = 2000;
 
     /**
@@ -29,46 +35,74 @@ public class PlanLimitsProperties {
      */
     private long maxVariables = 2_000_000L;
 
-    /** Ticks of the horizon (hard cap 2^30 in {@code Horizon}); design 7.3 {@code max-horizon-ticks}. */
+    /**
+     * Ticks of the horizon (hard cap 2^30 in {@code Horizon}); design 7.3 {@code max-horizon-ticks}.
+     */
     private int maxHorizonTicks = 2_000_000;
 
-    /** Surviving (task, requirement, resource) candidates; the main size guard of the v2 model. */
+    /**
+     * Surviving (task, requirement, resource) candidates; the main size guard of the v2 model.
+     */
     private long maxCandidates = 500_000L;
 
-    /** Estimated interval variables (candidate + master + fixed blocks). */
+    /**
+     * Estimated interval variables (candidate + master + fixed blocks).
+     */
     private long maxIntervals = 1_000_000L;
 
-    /** Structural precedence edges plus expanded {@code precedence} pairs. */
+    /**
+     * Structural precedence edges plus expanded {@code precedence} pairs.
+     */
     private long maxPrecedences = 500_000L;
 
-    /** Circuit arcs of the setup model after window pruning. */
+    /**
+     * Circuit arcs of the setup model after window pruning.
+     */
     private long maxSetupArcs = 300_000L;
 
-    /** Pair literals of pairwise fallbacks and soft pairwise families. */
+    /**
+     * Pair literals of pairwise fallbacks and soft pairwise families.
+     */
     private long maxPairwise = 200_000L;
 
-    /** Maximum number of resource requirements of one task. */
+    /**
+     * Maximum number of resource requirements of one task.
+     */
     private int maxRequirementsPerTask = 8;
 
-    /** Maximum number of distinct lexicographic tiers of one request. */
+    /**
+     * Maximum number of distinct lexicographic tiers of one request.
+     */
     private int maxTiers = 8;
 
-    /** Expanded availability runs of all calendars of one request. */
+    /**
+     * Expanded availability runs of all calendars of one request.
+     */
     private int maxCalendarRuns = 100_000;
 
-    /** Estimated number of solver constraints. */
+    /**
+     * Estimated number of solver constraints.
+     */
     private long maxConstraintInstances = 2_000_000L;
 
-    /** Maximum number of constraints of one request. */
+    /**
+     * Maximum number of constraints of one request.
+     */
     private int maxConstraints = 20_000;
 
-    /** Maximum (estimated or actual) size of a serialized request in bytes. */
+    /**
+     * Maximum (estimated or actual) size of a serialized request in bytes.
+     */
     private long maxRequestBytes = 5_000_000L;
 
-    /** Upper bound of {@code solverOptions.maxTimeSeconds}; larger values are rejected. */
+    /**
+     * Upper bound of {@code solverOptions.maxTimeSeconds}; larger values are rejected.
+     */
     private int maxTimeSeconds = 3600;
 
-    /** Upper bound of {@code solverOptions.numWorkers}; larger values are clamped. */
+    /**
+     * Upper bound of {@code solverOptions.numWorkers}; larger values are clamped.
+     */
     private int maxWorkers = 8;
 
     /**
@@ -77,7 +111,9 @@ public class PlanLimitsProperties {
      */
     private Integer maxConcurrentSolves;
 
-    /** How long a solve waits for a free solver slot before failing with SOLVER_BUSY. */
+    /**
+     * How long a solve waits for a free solver slot before failing with SOLVER_BUSY.
+     */
     private long solveQueueTimeoutSeconds = 300;
 
     /**

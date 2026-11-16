@@ -20,19 +20,19 @@ public record PrecedenceRef(
         Integer maxLag,
         Presence presence) {
 
-    /**
-     * Edge types: which time point of the predecessor constrains which time point of the successor.
-     */
-    public enum Type { FINISH_START, START_START, FINISH_FINISH, START_FINISH }
-
-    /**
-     * Presence semantics. {@code IMPLIES}: successor present implies predecessor present.
-     */
-    public enum Presence { WHEN_BOTH, IMPLIES }
-
     public PrecedenceRef {
         type = type == null ? Type.FINISH_START : type;
         minLag = minLag == null ? Integer.valueOf(0) : minLag;
         presence = presence == null ? Presence.WHEN_BOTH : presence;
     }
+
+    /**
+     * Edge types: which time point of the predecessor constrains which time point of the successor.
+     */
+    public enum Type {FINISH_START, START_START, FINISH_FINISH, START_FINISH}
+
+    /**
+     * Presence semantics. {@code IMPLIES}: successor present implies predecessor present.
+     */
+    public enum Presence {WHEN_BOTH, IMPLIES}
 }

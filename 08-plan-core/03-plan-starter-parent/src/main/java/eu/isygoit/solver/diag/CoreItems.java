@@ -1,18 +1,11 @@
 package eu.isygoit.solver.diag;
 
 import eu.isygoit.dto.response.CoreItem;
-import eu.isygoit.dto.response.Diagnostics;
 import eu.isygoit.dto.response.DiagnosticIssue;
+import eu.isygoit.dto.response.Diagnostics;
 import eu.isygoit.dto.response.InfeasibilityCore;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Vocabulary and helpers shared by the infeasibility explanation phases (design 3, 6.10, 8.3): core item kinds, reason
@@ -24,13 +17,21 @@ import java.util.Set;
 public final class CoreItems {
 
     // ---- kinds
-    /** A catalogue constraint is part of the core. */
+    /**
+     * A catalogue constraint is part of the core.
+     */
     public static final String CONSTRAINT = "CONSTRAINT";
-    /** A task (its window / pin / lock / candidates) is part of the core. */
+    /**
+     * A task (its window / pin / lock / candidates) is part of the core.
+     */
     public static final String TASK = "TASK";
-    /** A resource (calendar / load cap) is part of the core. */
+    /**
+     * A resource (calendar / load cap) is part of the core.
+     */
     public static final String RESOURCE = "RESOURCE";
-    /** A precedence edge, id {@code predecessor->successor}. */
+    /**
+     * A precedence edge, id {@code predecessor->successor}.
+     */
     public static final String EDGE = "EDGE";
 
     // ---- reason codes
@@ -55,12 +56,16 @@ public final class CoreItems {
     private CoreItems() {
     }
 
-    /** @return a new item */
+    /**
+     * @return a new item
+     */
     public static CoreItem item(String kind, String id, String reasonCode, String message) {
         return new CoreItem(kind, id, reasonCode, message);
     }
 
-    /** @return an EDGE item with id {@code predecessor->successor} */
+    /**
+     * @return an EDGE item with id {@code predecessor->successor}
+     */
     public static CoreItem edge(String predecessorId, String successorId, String message) {
         return new CoreItem(EDGE, predecessorId + "->" + successorId, PRECEDENCE, message);
     }

@@ -21,7 +21,9 @@ import java.util.List;
 @Component
 public class MinimizeMaxLoadObjective extends AbstractObjectiveFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "minimize_max_load";
 
     public MinimizeMaxLoadObjective() {

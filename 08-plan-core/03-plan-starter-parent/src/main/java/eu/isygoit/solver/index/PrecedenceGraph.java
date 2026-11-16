@@ -3,11 +3,7 @@ package eu.isygoit.solver.index;
 import eu.isygoit.dto.request.PrecedenceRef;
 import eu.isygoit.dto.request.Task;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Graph algorithms over the hard precedence edges ({@code Task.predecessors}): deterministic topological order, cycle
@@ -18,13 +14,21 @@ import java.util.Map;
  */
 public final class PrecedenceGraph {
 
-    /** Edge type code of {@link PrecedenceRef.Type#FINISH_START}. */
+    /**
+     * Edge type code of {@link PrecedenceRef.Type#FINISH_START}.
+     */
     public static final int FINISH_START = PrecedenceRef.Type.FINISH_START.ordinal();
-    /** Edge type code of {@link PrecedenceRef.Type#START_START}. */
+    /**
+     * Edge type code of {@link PrecedenceRef.Type#START_START}.
+     */
     public static final int START_START = PrecedenceRef.Type.START_START.ordinal();
-    /** Edge type code of {@link PrecedenceRef.Type#FINISH_FINISH}. */
+    /**
+     * Edge type code of {@link PrecedenceRef.Type#FINISH_FINISH}.
+     */
     public static final int FINISH_FINISH = PrecedenceRef.Type.FINISH_FINISH.ordinal();
-    /** Edge type code of {@link PrecedenceRef.Type#START_FINISH}. */
+    /**
+     * Edge type code of {@link PrecedenceRef.Type#START_FINISH}.
+     */
     public static final int START_FINISH = PrecedenceRef.Type.START_FINISH.ordinal();
 
     private static final long BOUND = Integer.MAX_VALUE / 2;

@@ -1,10 +1,6 @@
 package eu.isygoit.solver.registry;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -20,7 +16,9 @@ final class TypeIndex {
     private TypeIndex() {
     }
 
-    /** @return the canonical form of a type id, or {@code null} for {@code null} */
+    /**
+     * @return the canonical form of a type id, or {@code null} for {@code null}
+     */
     static String canonical(String type) {
         return type == null ? null : type.trim().toLowerCase(Locale.ROOT);
     }

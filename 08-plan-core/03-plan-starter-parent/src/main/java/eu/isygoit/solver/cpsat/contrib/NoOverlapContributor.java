@@ -1,11 +1,6 @@
 package eu.isygoit.solver.cpsat.contrib;
 
-import com.google.ortools.sat.BoolVar;
-import com.google.ortools.sat.CpModel;
-import com.google.ortools.sat.IntervalVar;
-import com.google.ortools.sat.LinearArgument;
-import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.Literal;
+import com.google.ortools.sat.*;
 import eu.isygoit.dto.request.params.NoOverlapParams;
 import eu.isygoit.exception.InvalidRequestException;
 import eu.isygoit.solver.CompiledConstraint;
@@ -36,29 +31,6 @@ import java.util.List;
  */
 @Component
 public class NoOverlapContributor implements CpSatConstraintContributor {
-
-    @Override
-    public String type() {
-        return NoOverlapFamily.TYPE;
-    }
-
-    @Override
-    public EnforcementSupport support() {
-        return EnforcementSupport.ALL;
-    }
-
-    @Override
-    public void apply(CpModelContext ctx, CompiledConstraint constraint, Enforcer enforcer) {
-        NoOverlapParams p = (NoOverlapParams) constraint.params();
-        CandidateIndexView idx = ctx.index();
-        int[][] groups = NoOverlapFamily.groups(idx, constraint.constraint(), p);
-        boolean unconditional = enforcer.mode() == Enforcer.Mode.HARD && !ctx.explainMode();
-        if (unconditional) {
-            applyGlobal(ctx, groups, p.minGapTicks());
-        } else {
-            applyPairwise(ctx, constraint, enforcer, groups, p.minGapTicks());
-        }
-    }
 
     private static void applyGlobal(CpModelContext ctx, int[][] groups, int gap) {
         CpModel model = ctx.model();
@@ -154,8 +126,33 @@ public class NoOverlapContributor implements CpSatConstraintContributor {
         }
     }
 
-    /** @return {@code expr + constant} as a new expression. OR-TOOLS-VERIFY: LinearExprBuilder.add(LinearArgument) / add(long) */
+    /**
+     * @return {@code expr + constant} as a new expression. OR-TOOLS-VERIFY: LinearExprBuilder.add(LinearArgument) / add(long)
+     */
     private static LinearExpr plus(LinearArgument expr, long constant) {
         return LinearExpr.newBuilder().add(expr).add(constant).build();
+    }
+
+    @Override
+    public String type() {
+        return NoOverlapFamily.TYPE;
+    }
+
+    @Override
+    public EnforcementSupport support() {
+        return EnforcementSupport.ALL;
+    }
+
+    @Override
+    public void apply(CpModelContext ctx, CompiledConstraint constraint, Enforcer enforcer) {
+        NoOverlapParams p = (NoOverlapParams) constraint.params();
+        CandidateIndexView idx = ctx.index();
+        int[][] groups = NoOverlapFamily.groups(idx, constraint.constraint(), p);
+        boolean unconditional = enforcer.mode() == Enforcer.Mode.HARD && !ctx.explainMode();
+        if (unconditional) {
+            applyGlobal(ctx, groups, p.minGapTicks());
+        } else {
+            applyPairwise(ctx, constraint, enforcer, groups, p.minGapTicks());
+        }
     }
 }

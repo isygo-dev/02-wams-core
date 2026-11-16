@@ -1,13 +1,6 @@
 package eu.isygoit.solver.cpsat;
 
-import com.google.ortools.sat.BoolVar;
-import com.google.ortools.sat.CpModel;
-import com.google.ortools.sat.CpModelProto;
-import com.google.ortools.sat.IntVar;
-import com.google.ortools.sat.IntervalVar;
-import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.LinearExprBuilder;
-import com.google.ortools.sat.Literal;
+import com.google.ortools.sat.*;
 import eu.isygoit.config.PlanLimitsProperties;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.SolverOptions;
@@ -15,17 +8,13 @@ import eu.isygoit.dto.request.params.LoadMetric;
 import eu.isygoit.dto.request.params.PeriodSpec;
 import eu.isygoit.dto.response.ModelStats;
 import eu.isygoit.exception.LimitExceededException;
+import eu.isygoit.solver.CompiledProblem;
 import eu.isygoit.solver.SolveCancelledException;
 import eu.isygoit.solver.SolveContext;
 import eu.isygoit.solver.SolverCancellationToken;
-import eu.isygoit.solver.CompiledProblem;
 import eu.isygoit.solver.index.CandidateIndex;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Everything a contributor may touch while one CP-SAT model is built (design 5.5 / 6.2): the model, the int-indexed
@@ -66,7 +55,11 @@ public final class CpModelContext {
     final boolean named;
     final SolverCancellationToken token;
     final int maxSeconds;
-
+    private final Map<String, BucketGrid> grids = new HashMap<>();
+    private final Map<String, Literal[][]> startBuckets = new HashMap<>();
+    private final Map<Long, Literal> products = new HashMap<>();
+    private final Map<Integer, List<Block>> blocks = new HashMap<>();
+    private final Map<Integer, List<SetupArc>> setupArcs = new HashMap<>();
     BoolVar trueLit;
     IntVar[] start;
     Literal[] presence;
@@ -81,26 +74,15 @@ public final class CpModelContext {
     Literal[][] startChoices;
     int softLiterals;
     int relaxLiterals;
-
     private int boolVars;
     private int intVars;
     private int constraints;
     private int intervals;
     private int circuitArcs;
-
     private IntervalVar[] masterIntervals;
     private IntervalVar[] candIntervals;
-    private final Map<String, BucketGrid> grids = new HashMap<>();
-    private final Map<String, Literal[][]> startBuckets = new HashMap<>();
     private LinearExpr[][] loads;
     private Literal[][] used;
-    private final Map<Long, Literal> products = new HashMap<>();
-    private final Map<Integer, List<Block>> blocks = new HashMap<>();
-    private final Map<Integer, List<SetupArc>> setupArcs = new HashMap<>();
-
-    /** A fixed interval of {@code demand} capacity that families add to a resource ({@link #blockResource}). */
-    record Block(int lo, int hi, int demand, Literal presence) {
-    }
 
     CpModelContext(CompiledProblem compiled, SolveContext solveContext, BuildMode mode, CpSatProperties properties) {
         this.compiled = compiled;
@@ -117,50 +99,93 @@ public final class CpModelContext {
         this.maxSeconds = options.maxTimeSeconds();
     }
 
+    /**
+     * Applies an optional enforcement to a constraint: no-op when the array is null or empty.
+     *
+     * @param constraint the constraint returned by a {@code CpModel.addXxx} call
+     * @param literals   the enforcement literals (nulls are not allowed here; use {@link Enforcer#conditions})
+     */
+    public static void enforce(com.google.ortools.sat.Constraint constraint, Literal... literals) {
+        if (literals != null && literals.length > 0) {
+            constraint.onlyEnforceIf(literals);
+        }
+    }
+
     // ------------------------------------------------------------------------------------------ model + data
 
-    /** @return the model under construction */
+    /**
+     * @return true when the flat inclusive runs contain a value of {@code [lo, hi]}
+     */
+    static boolean intersects(long[] runs, long lo, long hi) {
+        for (int i = 0; i + 1 < runs.length; i += 2) {
+            if (runs[i + 1] >= lo && runs[i] <= hi) {
+                return true;
+            }
+            if (runs[i] > hi) {
+                break;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return the model under construction
+     */
     public CpModel model() {
         return model;
     }
 
-    /** @return the candidate index of the compiled problem */
+    /**
+     * @return the candidate index of the compiled problem
+     */
     public CandidateIndex index() {
         return index;
     }
 
-    /** @return the normalised problem */
+    /**
+     * @return the normalised problem
+     */
     public PlanningProblem problem() {
         return compiled.problem();
     }
 
-    /** @return the effective solver options (from the solve context, falling back to the problem's options) */
+    /**
+     * @return the effective solver options (from the solve context, falling back to the problem's options)
+     */
     public SolverOptions options() {
         SolverOptions options = solveContext.options();
         return options != null ? options : compiled.problem().options();
     }
 
-    /** @return true when the model is built for the infeasibility explanation pass (design 6.10) */
+    /**
+     * @return true when the model is built for the infeasibility explanation pass (design 6.10)
+     */
     public boolean explainMode() {
         return mode == BuildMode.EXPLAIN;
     }
 
-    /** @return the build mode */
+    /**
+     * @return the build mode
+     */
     public BuildMode buildMode() {
         return mode;
     }
 
-    /** @return the solve context of the request (cancellation token, listener, start time) */
+    /**
+     * @return the solve context of the request (cancellation token, listener, start time)
+     */
     public SolveContext solveContext() {
         return solveContext;
     }
 
-    /** @return the assumption registry in EXPLAIN mode, {@code null} otherwise */
+    // -------------------------------------------------------------------------------------- time variables
+
+    /**
+     * @return the assumption registry in EXPLAIN mode, {@code null} otherwise
+     */
     public AssumptionRegistry assumptions() {
         return assumptions;
     }
-
-    // -------------------------------------------------------------------------------------- time variables
 
     /**
      * @param t task index
@@ -289,12 +314,14 @@ public final class CpModelContext {
         return interval;
     }
 
-    /** @return the single shared literal fixed to 1 (never rely on {@code CpModel.trueLiteral()}) */
+    // ------------------------------------------------------------------------------------- shared helpers
+
+    /**
+     * @return the single shared literal fixed to 1 (never rely on {@code CpModel.trueLiteral()})
+     */
     public Literal trueLit() {
         return trueLit;
     }
-
-    // ------------------------------------------------------------------------------------- shared helpers
 
     /**
      * Slot-mode start choices: one literal per allowed start value, exactly one true when the task is present
@@ -499,6 +526,8 @@ public final class CpModelContext {
         return variable;
     }
 
+    // ------------------------------------------------------------------------- resource blocks and setups
+
     /**
      * Cached product literal {@code w = a AND b}: {@code w => a}, {@code w => b}, {@code (a AND b) => w}. These are
      * definitional constraints and must never be enforced by an {@link Enforcer} literal.
@@ -529,8 +558,6 @@ public final class CpModelContext {
         products.put(key, product);
         return product;
     }
-
-    // ------------------------------------------------------------------------- resource blocks and setups
 
     /**
      * Adds a fixed interval of {@code demand} capacity units on a resource inside {@code [lo, hi)}; materialised in the
@@ -564,6 +591,8 @@ public final class CpModelContext {
         setupArcs.computeIfAbsent(r, key -> new ArrayList<>()).addAll(arcs);
     }
 
+    // ------------------------------------------------------------------------------ guards and bookkeeping
+
     /**
      * @param r resource index
      * @return the setup arcs registered for the resource (empty when none); read by {@code minimize_setup}
@@ -572,8 +601,6 @@ public final class CpModelContext {
         List<SetupArc> arcs = setupArcs.get(r);
         return arcs == null ? List.of() : Collections.unmodifiableList(arcs);
     }
-
-    // ------------------------------------------------------------------------------ guards and bookkeeping
 
     /**
      * Cancellation / time check: throws {@link SolveCancelledException} when a stop was requested or the time budget
@@ -628,6 +655,8 @@ public final class CpModelContext {
         }
     }
 
+    // --------------------------------------------------------------------------------- package internals
+
     /**
      * Model statistics computed from the model proto (O(model size): call once, not in loops).
      *
@@ -663,15 +692,17 @@ public final class CpModelContext {
                 intervalCount, optional, circuitArcs, softLiterals, relaxLiterals);
     }
 
-    // --------------------------------------------------------------------------------- package internals
-
-    /** @return the blocks of a resource (never null) */
+    /**
+     * @return the blocks of a resource (never null)
+     */
     List<Block> blocksOf(int r) {
         List<Block> list = blocks.get(r);
         return list == null ? List.of() : list;
     }
 
-    /** @return the candidate ids of a resource in ascending order (a fresh array) */
+    /**
+     * @return the candidate ids of a resource in ascending order (a fresh array)
+     */
     int[] candidatesOfResource(int r) {
         int from = index.resCandStart[r];
         int to = index.resCandStart[r + 1];
@@ -681,27 +712,8 @@ public final class CpModelContext {
     }
 
     /**
-     * Applies an optional enforcement to a constraint: no-op when the array is null or empty.
-     *
-     * @param constraint the constraint returned by a {@code CpModel.addXxx} call
-     * @param literals   the enforcement literals (nulls are not allowed here; use {@link Enforcer#conditions})
+     * A fixed interval of {@code demand} capacity that families add to a resource ({@link #blockResource}).
      */
-    public static void enforce(com.google.ortools.sat.Constraint constraint, Literal... literals) {
-        if (literals != null && literals.length > 0) {
-            constraint.onlyEnforceIf(literals);
-        }
-    }
-
-    /** @return true when the flat inclusive runs contain a value of {@code [lo, hi]} */
-    static boolean intersects(long[] runs, long lo, long hi) {
-        for (int i = 0; i + 1 < runs.length; i += 2) {
-            if (runs[i + 1] >= lo && runs[i] <= hi) {
-                return true;
-            }
-            if (runs[i] > hi) {
-                break;
-            }
-        }
-        return false;
+    record Block(int lo, int hi, int demand, Literal presence) {
     }
 }

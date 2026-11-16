@@ -18,7 +18,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MaximizeSelectedValueTimefoldContributor implements TimefoldObjectiveContributor {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "maximize_selected_value";
 
     @Override

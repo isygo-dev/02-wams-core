@@ -27,25 +27,15 @@ public final class CpSatParameters {
     }
 
     /**
-     * What {@link #apply} configured, for reporting.
-     *
-     * @param workers          the effective number of workers
-     * @param deterministic    true when the reproducible parameters were applied
-     * @param wallLimitSeconds the wall-clock limit that was set
-     */
-    public record Applied(int workers, boolean deterministic, double wallLimitSeconds) {
-    }
-
-    /**
      * Applies the parameters to a fresh solver.
      *
-     * @param solver         the solver (parameters are set on {@code solver.getParameters()})
-     * @param options        the request options
-     * @param properties     the CP-SAT properties (deterministic time factor)
-     * @param limits         the service limits (worker clamp), may be null
-     * @param budgetMillis   wall-clock budget of THIS solve in milliseconds (>= 1)
-     * @param hasHints       true when the model carries hints
-     * @param gapTolerance   relative gap at which the search stops, {@code 0} to prove optimality
+     * @param solver       the solver (parameters are set on {@code solver.getParameters()})
+     * @param options      the request options
+     * @param properties   the CP-SAT properties (deterministic time factor)
+     * @param limits       the service limits (worker clamp), may be null
+     * @param budgetMillis wall-clock budget of THIS solve in milliseconds (>= 1)
+     * @param hasHints     true when the model carries hints
+     * @param gapTolerance relative gap at which the search stops, {@code 0} to prove optimality
      * @return what was applied
      */
     public static Applied apply(CpSolver solver, SolverOptions options, CpSatProperties properties,
@@ -76,5 +66,15 @@ public final class CpSatParameters {
             parameters.setMaxDeterministicTime(Math.max(0.001d, wallSeconds * perSecond));
         }
         return new Applied(workers, deterministic, wallSeconds);
+    }
+
+    /**
+     * What {@link #apply} configured, for reporting.
+     *
+     * @param workers          the effective number of workers
+     * @param deterministic    true when the reproducible parameters were applied
+     * @param wallLimitSeconds the wall-clock limit that was set
+     */
+    public record Applied(int workers, boolean deterministic, double wallLimitSeconds) {
     }
 }

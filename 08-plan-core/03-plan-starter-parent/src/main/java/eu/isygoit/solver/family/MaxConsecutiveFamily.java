@@ -4,16 +4,7 @@ import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.params.MaxConsecutiveParams;
 import eu.isygoit.dto.request.params.PeriodSpec;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PeriodBuckets;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.util.BitSet;
@@ -32,9 +23,13 @@ import java.util.Set;
 @Component
 public class MaxConsecutiveFamily implements ConstraintFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "max_consecutive";
-    /** Violation code reported by the checker. */
+    /**
+     * Violation code reported by the checker.
+     */
     public static final String CODE = "MAX_CONSECUTIVE_EXCEEDED";
 
     @Override
@@ -102,7 +97,9 @@ public class MaxConsecutiveFamily implements ConstraintFamily {
         return new Checker();
     }
 
-    /** Independent checker: counts every window of {@code max + 1} consecutive worked periods. */
+    /**
+     * Independent checker: counts every window of {@code max + 1} consecutive worked periods.
+     */
     static final class Checker implements ConstraintChecker {
         @Override
         public void check(CheckContext ctx, Constraint constraint, Object params, ViolationSink sink) {

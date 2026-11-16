@@ -1,20 +1,10 @@
 package eu.isygoit.solver.family;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.Slot;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.request.params.TaskEligibilityParams;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.index.CandidateIndexBuilder;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PreprocessContext;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -23,17 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class TaskEligibilityFamilyTest {
 
@@ -69,6 +51,20 @@ class TaskEligibilityFamilyTest {
     private static TaskEligibilityParams params(List<String> ids, List<String> exclude, List<String> types, List<String> skills,
                                                 List<String> slots) {
         return new TaskEligibilityParams(ids, exclude, types, skills, slots);
+    }
+
+    private static SolutionView solution(int[] start, int[][] resources) {
+        SolutionView sol = mock(SolutionView.class);
+        when(sol.taskCount()).thenReturn(start.length);
+        when(sol.selected(anyInt())).thenAnswer(i -> start[i.getArgument(0, Integer.class)] >= 0);
+        when(sol.start(anyInt())).thenAnswer(i -> start[i.getArgument(0, Integer.class)]);
+        when(sol.resourceCount(anyInt())).thenAnswer(i -> resources[i.getArgument(0, Integer.class)].length);
+        when(sol.resourceAt(anyInt(), anyInt())).thenAnswer(i -> resources[i.getArgument(0, Integer.class)][i.getArgument(1, Integer.class)]);
+        return sol;
+    }
+
+    private static <T> T any() {
+        return org.mockito.ArgumentMatchers.any();
     }
 
     private ValidationContext validationContext(Constraint c, PlanningProblem problem) {
@@ -135,6 +131,8 @@ class TaskEligibilityFamilyTest {
         assertNull(TaskEligibilityFamily.allowedSlotStarts(problem, params(null, null, null, null, null)));
     }
 
+    // ------------------------------------------------------------------ checker
+
     @Test
     void estimateIsZeroForHardAndCountsCandidatesOtherwise() {
         TaskEligibilityParams p = params(List.of("alice"), null, null, null, null);
@@ -176,18 +174,6 @@ class TaskEligibilityFamilyTest {
         verify(ctx).restrictStartDomain(eq(0), eq(new int[]{20, 20}));
     }
 
-    // ------------------------------------------------------------------ checker
-
-    private static SolutionView solution(int[] start, int[][] resources) {
-        SolutionView sol = mock(SolutionView.class);
-        when(sol.taskCount()).thenReturn(start.length);
-        when(sol.selected(anyInt())).thenAnswer(i -> start[i.getArgument(0, Integer.class)] >= 0);
-        when(sol.start(anyInt())).thenAnswer(i -> start[i.getArgument(0, Integer.class)]);
-        when(sol.resourceCount(anyInt())).thenAnswer(i -> resources[i.getArgument(0, Integer.class)].length);
-        when(sol.resourceAt(anyInt(), anyInt())).thenAnswer(i -> resources[i.getArgument(0, Integer.class)][i.getArgument(1, Integer.class)]);
-        return sol;
-    }
-
     private CheckContext checkContext(PlanningProblem problem, SolutionView sol) {
         CandidateIndexView idx = mock(CandidateIndexView.class);
         when(idx.resolveTasks(any())).thenReturn(new int[]{0, 1, 2});
@@ -220,9 +206,5 @@ class TaskEligibilityFamilyTest {
         List<String> out = new ArrayList<>();
         family.checker().check(checkContext(problem(List.of(c)), sol), c, p, (t, r, code, msg, m) -> out.add(code));
         assertTrue(out.isEmpty());
-    }
-
-    private static <T> T any() {
-        return org.mockito.ArgumentMatchers.any();
     }
 }

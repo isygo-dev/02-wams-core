@@ -78,16 +78,22 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     // ─── Data (current page only) ──────────────────────────────────
     protected List<T> currentItems = new ArrayList<>();
     private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
+    /**
+     * True while an extra view mode added in {@link #configureViewModes} (e.g. a Kanban board) replaces the cards,
+     * the table and the pagination: the base class then leaves those three hidden. The view that set it shows its
+     * own component.
+     */
+    protected boolean customModeActive;
     private boolean gridSupported;
     private boolean gridMode;
     private int renderedCount;
     private boolean imageColumnChecked;
-    // ─── Criteria state ────────────────────────────────────────────
-    private ManagementViewModeSwitch viewModeSwitch;
 
     // ══════════════════════════════════════════════════════════════
     //  Abstract contract — subclasses must implement
     // ══════════════════════════════════════════════════════════════
+    // ─── Criteria state ────────────────────────────────────────────
+    private ManagementViewModeSwitch viewModeSwitch;
 
     private static String imagePathOf(Object item) {
         if (item instanceof IImageEntity entity) {
@@ -130,11 +136,11 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
 
     protected abstract String getCreateButtonKey();
 
-    protected abstract String getSearchPlaceholderKey();
-
     // ══════════════════════════════════════════════════════════════
     //  Optional hooks — subclasses may override
     // ══════════════════════════════════════════════════════════════
+
+    protected abstract String getSearchPlaceholderKey();
 
     protected abstract String getEmptyTitleKey();
 
@@ -185,6 +191,11 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         };
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  Criteria hooks — subclasses override when their backend
+    //  supports /filter and /filter/criteria
+    // ══════════════════════════════════════════════════════════════
+
     /**
      * Optional table mode: declare the columns of {@link #grid} and return {@code true} to offer a Cards / Table
      * switch. The table shows the same page, search and filters as the cards, so pagination and criteria are unchanged.
@@ -193,11 +204,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     protected boolean configureGrid(Grid<T> grid) {
         return false;
     }
-
-    // ══════════════════════════════════════════════════════════════
-    //  Criteria hooks — subclasses override when their backend
-    //  supports /filter and /filter/criteria
-    // ══════════════════════════════════════════════════════════════
 
     /**
      * Adds the actions column of a table by reusing the buttons of the item's card (same icons, tooltips, visibility
@@ -230,6 +236,10 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         return fetchPage(page, size);
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  Template method — call from the subclass constructor
+    // ══════════════════════════════════════════════════════════════
+
     /**
      * Backend‑provided criteria metadata: {@code fieldName -> typeSimpleName}.
      * Return an empty map if the backend does not expose this.
@@ -237,10 +247,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
     protected Map<String, String> fetchCriteriaMetadata() {
         return Map.of();
     }
-
-    // ══════════════════════════════════════════════════════════════
-    //  Template method — call from the subclass constructor
-    // ══════════════════════════════════════════════════════════════
 
     /**
      * Apply a criteria string and reload from page 0.
@@ -257,6 +263,10 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         this.currentCriteria = "";
         loadPage(0);
     }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Data loading
+    // ══════════════════════════════════════════════════════════════
 
     /**
      * Builds the entire view shell and triggers the initial page load.
@@ -340,10 +350,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         loadPage(0);
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  Data loading
-    // ══════════════════════════════════════════════════════════════
-
     /**
      * Called when the user clicks the floating refresh button. Default: reload the current page with the
      * current criteria and page size. Override when the view caches data that must be re-queried first,
@@ -408,6 +414,10 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         return toolbar;
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  Filtering & rendering
+    // ══════════════════════════════════════════════════════════════
+
     /**
      * Loads the given 0‑based page from the backend, refreshes the cards
      * and updates the pagination bar. Honours {@link #currentCriteria}.
@@ -445,10 +455,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         }
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  Filtering & rendering
-    // ══════════════════════════════════════════════════════════════
-
     /**
      * Reload the current page — call this after a create / update / delete.
      */
@@ -464,13 +470,6 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
         refreshFab.setLoading(show);
         paginationBar.setVisible(!show && totalElements > 0 && !customModeActive);
     }
-
-    /**
-     * True while an extra view mode added in {@link #configureViewModes} (e.g. a Kanban board) replaces the cards,
-     * the table and the pagination: the base class then leaves those three hidden. The view that set it shows its
-     * own component.
-     */
-    protected boolean customModeActive;
 
     /**
      * Hook to add modes after Cards and Table ({@link ManagementViewModeSwitch#addMode}); only called when the view
@@ -646,7 +645,9 @@ public abstract class AbstractPaginatedView<T> extends ManagementVerticalView im
             addClassName("pagination-bar");
         }
 
-        /** Kept for subclasses: page buttons only, no record count. */
+        /**
+         * Kept for subclasses: page buttons only, no record count.
+         */
         public void update(int current, int total) {
             update(current, total, 0, 0);
         }

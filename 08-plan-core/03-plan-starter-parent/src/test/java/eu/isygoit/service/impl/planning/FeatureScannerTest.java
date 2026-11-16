@@ -1,41 +1,17 @@
 package eu.isygoit.service.impl.planning;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.RelaxationPolicy;
-import eu.isygoit.dto.request.SolverOptions;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.EngineCapabilities.Feature;
-import eu.isygoit.solver.index.IndexFixtures.ProblemB;
+import eu.isygoit.solver.index.IndexFixtures.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 
-import static eu.isygoit.solver.EngineCapabilities.Feature.CALENDARS;
-import static eu.isygoit.solver.EngineCapabilities.Feature.COST_PER_USE;
-import static eu.isygoit.solver.EngineCapabilities.Feature.CUMULATIVE_DEMAND;
-import static eu.isygoit.solver.EngineCapabilities.Feature.DETERMINISTIC;
-import static eu.isygoit.solver.EngineCapabilities.Feature.FREE_START;
-import static eu.isygoit.solver.EngineCapabilities.Feature.INITIAL_SOLUTION;
-import static eu.isygoit.solver.EngineCapabilities.Feature.LEXICOGRAPHIC;
-import static eu.isygoit.solver.EngineCapabilities.Feature.LOCKED;
-import static eu.isygoit.solver.EngineCapabilities.Feature.MAX_LOAD_TICKS;
-import static eu.isygoit.solver.EngineCapabilities.Feature.MULTI_RESOURCE;
-import static eu.isygoit.solver.EngineCapabilities.Feature.OPTIONAL_TASKS;
-import static eu.isygoit.solver.EngineCapabilities.Feature.PINS;
-import static eu.isygoit.solver.EngineCapabilities.Feature.PRECEDENCES;
-import static eu.isygoit.solver.EngineCapabilities.Feature.RELAXATION;
-import static eu.isygoit.solver.EngineCapabilities.Feature.RESOURCE_DURATIONS;
-import static eu.isygoit.solver.EngineCapabilities.Feature.SETUPS;
-import static eu.isygoit.solver.EngineCapabilities.Feature.SLOT_MODE;
-import static eu.isygoit.solver.EngineCapabilities.Feature.TIME_WINDOWS;
-import static eu.isygoit.solver.index.IndexFixtures.hard;
+import static eu.isygoit.solver.EngineCapabilities.Feature.*;
 import static eu.isygoit.solver.index.IndexFixtures.problem;
 import static eu.isygoit.solver.index.IndexFixtures.resource;
-import static eu.isygoit.solver.index.IndexFixtures.skills;
-import static eu.isygoit.solver.index.IndexFixtures.task;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class FeatureScannerTest {

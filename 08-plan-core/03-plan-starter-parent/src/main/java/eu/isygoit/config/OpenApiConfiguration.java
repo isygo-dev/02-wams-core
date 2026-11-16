@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
                 version = "1.0.0",
                 description = """
                         Generic planning and scheduling API.
-
+                        
                         ## Features
                         - **Asynchronous planning jobs:** submit a planning problem, poll status, fetch the solution
                         - **Pluggable solvers:** CP-SAT and Timefold engines

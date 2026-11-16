@@ -2,23 +2,7 @@ package eu.isygoit.testsupport;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.Pin;
-import eu.isygoit.dto.request.PlanningMeta;
-import eu.isygoit.dto.request.PlanningRequest;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.RelaxationPolicy;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.ResourceSelector;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.SolverCancellationToken;
 
@@ -28,14 +12,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Programmatic builders for the golden scenarios G1-G14 of design 9.5 (IR 2.0) and the G7 cancellation model, plus loaders for
@@ -56,21 +33,28 @@ import java.util.Set;
  */
 public final class ScenarioFixtures {
 
-    /** Monday 2026-09-07 08:00Z, the common start of the workshop scenarios. */
+    /**
+     * Monday 2026-09-07 08:00Z, the common start of the workshop scenarios.
+     */
     public static final Instant WORKSHOP_START = Instant.parse("2026-09-07T08:00:00Z");
+    private static final Instant LAB_START = Instant.parse("2026-09-07T06:00:00Z");
+
+    // ================================================================== loaders
 
     private ScenarioFixtures() {
     }
 
-    // ================================================================== loaders
-
-    /** Strict mapper (unknown properties fail), as used by the validation endpoint. */
+    /**
+     * Strict mapper (unknown properties fail), as used by the validation endpoint.
+     */
     public static ObjectMapper strictMapper() {
         return new ObjectMapper().findAndRegisterModules()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     }
 
-    /** Loads {@code /requests/<name>} from the test classpath (G12: {@code school-timetable.json}). */
+    /**
+     * Loads {@code /requests/<name>} from the test classpath (G12: {@code school-timetable.json}).
+     */
     public static PlanningRequest loadResource(String name) {
         String path = "/requests/" + name;
         try (InputStream in = ScenarioFixtures.class.getResourceAsStream(path)) {
@@ -97,6 +81,8 @@ public final class ScenarioFixtures {
         }
     }
 
+    // ================================================================== request copy helpers
+
     private static Path examplesDir() {
         String configured = System.getProperty("plan.examples.dir");
         List<Path> candidates = new ArrayList<>();
@@ -116,9 +102,9 @@ public final class ScenarioFixtures {
         throw new IllegalStateException("examples/ directory not found (set -Dplan.examples.dir): tried " + candidates);
     }
 
-    // ================================================================== request copy helpers
-
-    /** Same request with another engine ({@code cp_sat} or {@code timefold}). */
+    /**
+     * Same request with another engine ({@code cp_sat} or {@code timefold}).
+     */
     public static PlanningRequest withEngine(PlanningRequest r, String engine) {
         SolverOptions o = r.solverOptions();
         return withOptions(r, new SolverOptions(engine, o.maxTimeSeconds(), o.numWorkers(), o.seed(), o.logSearch(),
@@ -126,7 +112,9 @@ public final class ScenarioFixtures {
                 o.explainInfeasibility(), o.explainTimeSeconds(), o.keepIncumbentOnStop()));
     }
 
-    /** Same request with {@code deterministic} and {@code numWorkers} replaced (G13). */
+    /**
+     * Same request with {@code deterministic} and {@code numWorkers} replaced (G13).
+     */
     public static PlanningRequest withDeterminism(PlanningRequest r, boolean deterministic, int numWorkers) {
         SolverOptions o = r.solverOptions();
         return withOptions(r, new SolverOptions(o.engine(), o.maxTimeSeconds(), numWorkers, o.seed(), o.logSearch(),
@@ -134,7 +122,9 @@ public final class ScenarioFixtures {
                 o.explainInfeasibility(), o.explainTimeSeconds(), o.keepIncumbentOnStop()));
     }
 
-    /** Same request with {@code objectiveScale} replaced (G6 with 1000). */
+    /**
+     * Same request with {@code objectiveScale} replaced (G6 with 1000).
+     */
     public static PlanningRequest withObjectiveScale(PlanningRequest r, int objectiveScale) {
         SolverOptions o = r.solverOptions();
         return withOptions(r, new SolverOptions(o.engine(), o.maxTimeSeconds(), o.numWorkers(), o.seed(), o.logSearch(),
@@ -142,7 +132,9 @@ public final class ScenarioFixtures {
                 o.explainInfeasibility(), o.explainTimeSeconds(), o.keepIncumbentOnStop()));
     }
 
-    /** Same request with {@code maxTimeSeconds} replaced. */
+    /**
+     * Same request with {@code maxTimeSeconds} replaced.
+     */
     public static PlanningRequest withMaxTime(PlanningRequest r, int maxTimeSeconds) {
         SolverOptions o = r.solverOptions();
         return withOptions(r, new SolverOptions(o.engine(), maxTimeSeconds, o.numWorkers(), o.seed(), o.logSearch(),
@@ -156,21 +148,29 @@ public final class ScenarioFixtures {
                 r.initialSolution());
     }
 
-    /** Same request with the constraints replaced. */
+    /**
+     * Same request with the constraints replaced.
+     */
     public static PlanningRequest withConstraints(PlanningRequest r, List<Constraint> constraints) {
         return new PlanningRequest(r.meta(), r.domain(), r.horizon(), r.slots(), r.calendars(),
                 r.setupMatrices(), r.resources(), r.tasks(), constraints, r.objectives(), r.solverOptions(),
                 r.initialSolution());
     }
 
-    /** Same request with the objectives replaced. */
+    /**
+     * Same request with the objectives replaced.
+     */
     public static PlanningRequest withObjectives(PlanningRequest r, List<Objective> objectives) {
         return new PlanningRequest(r.meta(), r.domain(), r.horizon(), r.slots(), r.calendars(),
                 r.setupMatrices(), r.resources(), r.tasks(), r.constraints(), objectives, r.solverOptions(),
                 r.initialSolution());
     }
 
-    /** Same request with a different {@code meta.clientRef} (idempotency key at job level). */
+    // ================================================================== small builders
+
+    /**
+     * Same request with a different {@code meta.clientRef} (idempotency key at job level).
+     */
     public static PlanningRequest withClientRef(PlanningRequest r, String clientRef) {
         PlanningMeta m = r.meta();
         return new PlanningRequest(new PlanningMeta(clientRef, m.version(), m.domainName(), m.locale(),
@@ -178,101 +178,42 @@ public final class ScenarioFixtures {
                 r.tasks(), r.constraints(), r.objectives(), r.solverOptions(), r.initialSolution());
     }
 
-    // ================================================================== small builders
-
-    /** Fluent builder for {@link Task} (the record has 20 components). */
-    public static final class TaskBuilder {
-        private final String id;
-        private Integer duration;
-        private Integer demand;
-        private Integer priority;
-        private Boolean required;
-        private Long prize;
-        private final List<ResourceRequirement> requirements = new ArrayList<>();
-        private Instant release;
-        private Instant deadline;
-        private Instant dueDate;
-        private List<String> startSlots;
-        private Pin pin;
-        private final List<PrecedenceRef> predecessors = new ArrayList<>();
-        private String setupClass;
-        private final Set<String> tags = new LinkedHashSet<>();
-
-        private TaskBuilder(String id) {
-            this.id = id;
-        }
-
-        public TaskBuilder duration(Integer ticks) { this.duration = ticks; return this; }
-        public TaskBuilder demand(int demand) { this.demand = demand; return this; }
-        public TaskBuilder priority(int priority) { this.priority = priority; return this; }
-        public TaskBuilder optional() { this.required = Boolean.FALSE; return this; }
-        public TaskBuilder prize(long prize) { this.prize = prize; return this; }
-        public TaskBuilder release(Instant release) { this.release = release; return this; }
-        public TaskBuilder deadline(Instant deadline) { this.deadline = deadline; return this; }
-        public TaskBuilder dueDate(Instant dueDate) { this.dueDate = dueDate; return this; }
-        public TaskBuilder startSlots(String... slotIds) { this.startSlots = List.of(slotIds); return this; }
-        public TaskBuilder setupClass(String setupClass) { this.setupClass = setupClass; return this; }
-        public TaskBuilder tags(String... tags) { Collections.addAll(this.tags, tags); return this; }
-
-        public TaskBuilder requires(String role, ResourceSelector selector) {
-            requirements.add(new ResourceRequirement(role, selector, null, null));
-            return this;
-        }
-
-        public TaskBuilder requires(String role, ResourceSelector selector, int count, Integer amount) {
-            requirements.add(new ResourceRequirement(role, selector, count, amount));
-            return this;
-        }
-
-        public TaskBuilder pin(Instant start, String... resourceIds) {
-            this.pin = new Pin(start, resourceIds.length == 0 ? null : List.of(resourceIds));
-            return this;
-        }
-
-        /** FINISH_START predecessor with lag 0. */
-        public TaskBuilder after(String taskId) {
-            predecessors.add(new PrecedenceRef(taskId, null, null, null, null));
-            return this;
-        }
-
-        public TaskBuilder after(String taskId, PrecedenceRef.Type type, int minLag) {
-            predecessors.add(new PrecedenceRef(taskId, type, minLag, null, null));
-            return this;
-        }
-
-        public Task build() {
-            return new Task(id, null, null, duration, null, demand, priority, required, prize,
-                    requirements, release, deadline, dueDate, startSlots, pin, predecessors, setupClass,
-                    tags, null, null);
-        }
-    }
-
     public static TaskBuilder task(String id) {
         return new TaskBuilder(id);
     }
 
-    /** Selector restricted to the given resource ids. */
+    /**
+     * Selector restricted to the given resource ids.
+     */
     public static ResourceSelector onResources(String... resourceIds) {
         return new ResourceSelector(List.of(resourceIds), null, null, null, null, null);
     }
 
-    /** Selector requiring ALL the given skills. */
+    /**
+     * Selector requiring ALL the given skills.
+     */
     public static ResourceSelector withSkills(String... skills) {
         return new ResourceSelector(null, null, List.of(skills), null, null, null);
     }
 
-    /** Unary resource (capacity 1) of the given type. */
+    /**
+     * Unary resource (capacity 1) of the given type.
+     */
     public static Resource resource(String id, String typeId) {
         return new Resource(id, typeId, null, null, null, null, null, null, null, null, null, null, null);
     }
 
-    /** Resource with explicit capacity and skills. */
+    /**
+     * Resource with explicit capacity and skills.
+     */
     public static Resource resource(String id, String typeId, int capacity, String... skills) {
         return new Resource(id, typeId, null, capacity, skills.length == 0 ? null : Set.of(skills), null, null,
                 null, null, null, null, null, null);
     }
 
-    /** Resource with a per-tick cost and optional unavailable windows. */
+    /**
+     * Resource with a per-tick cost and optional unavailable windows.
+     */
     public static Resource costedResource(String id, String typeId, double costPerTick, TimeWindow... unavailable) {
         return new Resource(id, typeId, null, 1, null, null, null,
                 unavailable.length == 0 ? null : List.of(unavailable), costPerTick, null, null, null, null);
@@ -312,8 +253,6 @@ public final class ScenarioFixtures {
     }
 
     // ================================================================== G1, G2, G2b, G3 (slot mode and infeasibility)
-
-    private static final Instant LAB_START = Instant.parse("2026-09-07T06:00:00Z");
 
     private static Horizon labHorizon() {
         return new Horizon(LAB_START, LAB_START.plusSeconds(2 * 3600L), 3600);
@@ -388,8 +327,6 @@ public final class ScenarioFixtures {
                 List.of(new Objective("prefer-high-priority", "maximize_task_priority", 1)), options(10, 2, false));
     }
 
-    // ================================================================== G4, G5, G6 (free start)
-
     /**
      * G4: t1(3) -> t2(4) -> t3(5) on one machine, FS with lag 0 then minLag 2, {@code minimize_makespan}.
      * Expected (cp_sat): OPTIMAL, starts 0, 3, 9, ends 3, 7, 14, makespan 14. Timefold must reject PRECEDENCES + FREE_START.
@@ -405,6 +342,8 @@ public final class ScenarioFixtures {
                 List.of(resource("M1", "machine")), tasks, List.of(),
                 List.of(new Objective("makespan", "minimize_makespan", 1)), options(10, 2, true));
     }
+
+    // ================================================================== G4, G5, G6 (free start)
 
     /**
      * G5: A, B (4 ticks) on one machine, {@code time_window} latestEnd tick 6 for both as RELAXABLE ({@code deadline-A}
@@ -444,8 +383,6 @@ public final class ScenarioFixtures {
                 List.of(), List.of(new Objective("cost", "minimize_resource_cost", 1)), options(10, 2, false));
     }
 
-    // ================================================================== G7 (cancellation model)
-
     /**
      * G7 default instance: seeded 30 jobs x 15 machines job-shop, {@code maxTimeSeconds=60}, {@code minimize_makespan}, 4
      * workers. Expected when the token is cancelled after 2 s: STOPPED_FEASIBLE (UNKNOWN only without incumbent), returned
@@ -454,6 +391,8 @@ public final class ScenarioFixtures {
     public static PlanningRequest g7BigJobShop() {
         return bigJobShop(30, 15, 7L, 60, 4);
     }
+
+    // ================================================================== G7 (cancellation model)
 
     /**
      * Seeded job-shop generator: {@code jobs} jobs, each visiting every one of the {@code machines} machines once in a
@@ -515,8 +454,6 @@ public final class ScenarioFixtures {
         return thread;
     }
 
-    // ================================================================== G8, G9, G10, G11, G13, G14
-
     /**
      * G8 (design 2.6 b): 3 jobs x 2 operations on 2 machines. Expected: OPTIMAL, makespan 75, precedence respected,
      * machines never overlap. G13 = this request with {@code deterministic=true} (already set) run twice, also with
@@ -534,6 +471,8 @@ public final class ScenarioFixtures {
                 List.of(resource("M1", "machine"), resource("M2", "machine")), tasks, List.of(),
                 List.of(new Objective("makespan", "minimize_makespan", 1)), options(10, 4, true));
     }
+
+    // ================================================================== G8, G9, G10, G11, G13, G14
 
     /**
      * G9 (design 2.6 c): 5 pinned shifts, 3 nurses, min rest 11, max 8 ticks per day, skills, fairness. Expected: OPTIMAL,
@@ -622,8 +561,6 @@ public final class ScenarioFixtures {
                 options(10, 2, true));
     }
 
-    // ================================================================== G12 (school timetable)
-
     /**
      * G12 (design 2.6 a): the school timetable as stored in {@code src/test/resources/requests/school-timetable.json}
      * (loaded, so the file is the single source). Expected: OPTIMAL (timefold FEASIBLE only without the class constraint,
@@ -633,6 +570,8 @@ public final class ScenarioFixtures {
         return loadResource("school-timetable.json");
     }
 
+    // ================================================================== G12 (school timetable)
+
     /**
      * G12 for Timefold: the same request without the {@code class-no-overlap} constraint (design 4.3 gives {@code no_overlap}
      * no Timefold contributor; the lessons of one class never share a slot pair, so the optimum is unchanged).
@@ -641,9 +580,9 @@ public final class ScenarioFixtures {
         return withConstraints(schoolTimetable(), List.of());
     }
 
-    // ================================================================== catalogue of the file-backed scenarios
-
-    /** Scenario id -> JSON file in {@code examples/} (G12 lives in the test resources, G7/G13 are generated). */
+    /**
+     * Scenario id -> JSON file in {@code examples/} (G12 lives in the test resources, G7/G13 are generated).
+     */
     public static Map<String, String> exampleFiles() {
         Map<String, String> files = new LinkedHashMap<>();
         files.put("G1", "g1-capacity-feasible.json");
@@ -661,7 +600,11 @@ public final class ScenarioFixtures {
         return Collections.unmodifiableMap(files);
     }
 
-    /** Scenario id -> programmatic builder result, same keys as {@link #exampleFiles()} (programmatic twin of the files). */
+    // ================================================================== catalogue of the file-backed scenarios
+
+    /**
+     * Scenario id -> programmatic builder result, same keys as {@link #exampleFiles()} (programmatic twin of the files).
+     */
     public static Map<String, PlanningRequest> programmaticScenarios() {
         Map<String, PlanningRequest> scenarios = new LinkedHashMap<>();
         scenarios.put("G1", g1CapacityFeasible());
@@ -677,5 +620,119 @@ public final class ScenarioFixtures {
         scenarios.put("G11", g11PrizeCollecting());
         scenarios.put("G14", g14SetupTimes());
         return Collections.unmodifiableMap(scenarios);
+    }
+
+    /**
+     * Fluent builder for {@link Task} (the record has 20 components).
+     */
+    public static final class TaskBuilder {
+        private final String id;
+        private final List<ResourceRequirement> requirements = new ArrayList<>();
+        private final List<PrecedenceRef> predecessors = new ArrayList<>();
+        private final Set<String> tags = new LinkedHashSet<>();
+        private Integer duration;
+        private Integer demand;
+        private Integer priority;
+        private Boolean required;
+        private Long prize;
+        private Instant release;
+        private Instant deadline;
+        private Instant dueDate;
+        private List<String> startSlots;
+        private Pin pin;
+        private String setupClass;
+
+        private TaskBuilder(String id) {
+            this.id = id;
+        }
+
+        public TaskBuilder duration(Integer ticks) {
+            this.duration = ticks;
+            return this;
+        }
+
+        public TaskBuilder demand(int demand) {
+            this.demand = demand;
+            return this;
+        }
+
+        public TaskBuilder priority(int priority) {
+            this.priority = priority;
+            return this;
+        }
+
+        public TaskBuilder optional() {
+            this.required = Boolean.FALSE;
+            return this;
+        }
+
+        public TaskBuilder prize(long prize) {
+            this.prize = prize;
+            return this;
+        }
+
+        public TaskBuilder release(Instant release) {
+            this.release = release;
+            return this;
+        }
+
+        public TaskBuilder deadline(Instant deadline) {
+            this.deadline = deadline;
+            return this;
+        }
+
+        public TaskBuilder dueDate(Instant dueDate) {
+            this.dueDate = dueDate;
+            return this;
+        }
+
+        public TaskBuilder startSlots(String... slotIds) {
+            this.startSlots = List.of(slotIds);
+            return this;
+        }
+
+        public TaskBuilder setupClass(String setupClass) {
+            this.setupClass = setupClass;
+            return this;
+        }
+
+        public TaskBuilder tags(String... tags) {
+            Collections.addAll(this.tags, tags);
+            return this;
+        }
+
+        public TaskBuilder requires(String role, ResourceSelector selector) {
+            requirements.add(new ResourceRequirement(role, selector, null, null));
+            return this;
+        }
+
+        public TaskBuilder requires(String role, ResourceSelector selector, int count, Integer amount) {
+            requirements.add(new ResourceRequirement(role, selector, count, amount));
+            return this;
+        }
+
+        public TaskBuilder pin(Instant start, String... resourceIds) {
+            this.pin = new Pin(start, resourceIds.length == 0 ? null : List.of(resourceIds));
+            return this;
+        }
+
+        /**
+         * FINISH_START predecessor with lag 0.
+         */
+        public TaskBuilder after(String taskId) {
+            predecessors.add(new PrecedenceRef(taskId, null, null, null, null));
+            return this;
+        }
+
+        public TaskBuilder after(String taskId, PrecedenceRef.Type type, int minLag) {
+            predecessors.add(new PrecedenceRef(taskId, type, minLag, null, null));
+            return this;
+        }
+
+        public Task build() {
+            return new Task(id, null, null, duration, null, demand, priority, required, prize,
+                    requirements, release, deadline, dueDate, startSlots, pin, predecessors, setupClass,
+                    tags, null, null);
+        }
     }
 }

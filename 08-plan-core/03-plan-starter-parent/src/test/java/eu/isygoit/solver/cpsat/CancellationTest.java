@@ -6,12 +6,7 @@ import eu.isygoit.dto.request.Resource;
 import eu.isygoit.dto.request.Task;
 import eu.isygoit.dto.response.SolveResult;
 import eu.isygoit.enums.IEnumSolverStatus;
-import eu.isygoit.solver.CompiledObjective;
-import eu.isygoit.solver.CompiledProblem;
-import eu.isygoit.solver.SolveCancelledException;
-import eu.isygoit.solver.SolveContext;
-import eu.isygoit.solver.SolveListener;
-import eu.isygoit.solver.SolverCancellationToken;
+import eu.isygoit.solver.*;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,14 +20,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static eu.isygoit.solver.cpsat.CpSatTestKit.on;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.options;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.resource;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.task;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static eu.isygoit.solver.cpsat.CpSatTestKit.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Cancellation and time limit (design 6.11, golden scenario G7): a seeded 30 jobs x 15 machines job shop is generated in
@@ -52,7 +41,9 @@ class CancellationTest {
         Assumptions.assumeTrue(CpSatTestKit.nativesAvailable(), "OR-Tools natives not available");
     }
 
-    /** The G7 generator: {@code jobs} jobs, each visiting every machine once in a seeded random order. */
+    /**
+     * The G7 generator: {@code jobs} jobs, each visiting every machine once in a seeded random order.
+     */
     static PlanningProblem bigJobShop(int jobs, int machines, long seed, int maxSeconds) {
         Random random = new Random(seed);
         List<Resource> resources = new ArrayList<>();

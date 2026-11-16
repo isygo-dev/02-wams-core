@@ -72,6 +72,10 @@ public final class SetupTable {
         return new SetupTable(index.resSetupMatrix, def, same, sparse, max);
     }
 
+    private static long key(int from, int to) {
+        return (((long) from) << 32) | (to & 0xFFFFFFFFL);
+    }
+
     /**
      * Setup time between two consecutive classes on a resource.
      *
@@ -92,17 +96,17 @@ public final class SetupTable {
         return classFrom == classTo ? sameClassTicks[m] : defaultTicks[m];
     }
 
-    /** @return {@code true} when the resource has a setup matrix */
+    /**
+     * @return {@code true} when the resource has a setup matrix
+     */
     public boolean hasSetup(int resource) {
         return resourceMatrix[resource] >= 0;
     }
 
-    /** @return the largest setup time of any matrix (upper bound of {@link #ticks}) */
+    /**
+     * @return the largest setup time of any matrix (upper bound of {@link #ticks})
+     */
     public int maxTicks() {
         return maxTicks;
-    }
-
-    private static long key(int from, int to) {
-        return (((long) from) << 32) | (to & 0xFFFFFFFFL);
     }
 }

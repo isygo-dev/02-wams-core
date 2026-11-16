@@ -4,11 +4,7 @@ import eu.isygoit.dto.request.Horizon;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.SolverOptions;
 import eu.isygoit.exception.SolverUnavailableException;
-import eu.isygoit.solver.CompiledProblem;
-import eu.isygoit.solver.EngineCapabilities;
-import eu.isygoit.solver.SolveContext;
-import eu.isygoit.solver.SolveListener;
-import eu.isygoit.solver.SolverCancellationToken;
+import eu.isygoit.solver.*;
 import eu.isygoit.solver.cpsat.explain.CpSatExplainer;
 import eu.isygoit.solver.registry.CpSatContributorRegistry;
 import org.junit.jupiter.api.Test;
@@ -17,12 +13,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-/** Native loading stays lazy and cached behind the {@code NativeLoader} seam (no OR-Tools library needed here). */
+/**
+ * Native loading stays lazy and cached behind the {@code NativeLoader} seam (no OR-Tools library needed here).
+ */
 class CpSatLazyLoadingTest {
 
     @Test

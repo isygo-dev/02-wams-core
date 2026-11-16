@@ -11,11 +11,7 @@ import eu.isygoit.solver.SolveProgress;
 import eu.isygoit.solver.SolverCancellationToken;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +31,9 @@ class TimefoldSubsetTest {
                 new SolverCancellationToken(), SolveListener.NOOP));
     }
 
-    /** G1: 2 sessions in the early slot (capacity 2), 1 in the late one; tier-0 value 100; FEASIBLE, never OPTIMAL. */
+    /**
+     * G1: 2 sessions in the early slot (capacity 2), 1 in the late one; tier-0 value 100; FEASIBLE, never OPTIMAL.
+     */
     @Test
     void g1CapacityFeasible() {
         SolveResult result = solve(TimefoldTestProblems.g1(true));
@@ -61,7 +59,9 @@ class TimefoldSubsetTest {
         assertThat(result.metrics().workersUsed()).isEqualTo(1);
     }
 
-    /** G3: mandatory + optional-high assigned, medium and low NOT_SELECTED; tier-0 value -9 (reward 9, minimised form). */
+    /**
+     * G3: mandatory + optional-high assigned, medium and low NOT_SELECTED; tier-0 value -9 (reward 9, minimised form).
+     */
     @Test
     void g3OptionalPriorities() {
         SolveResult result = solve(TimefoldTestProblems.g3(true));
@@ -84,7 +84,9 @@ class TimefoldSubsetTest {
         assertThat(result.metrics().tiers().get(0).value()).isEqualTo(-9L);
     }
 
-    /** G12: the school timetable: 2 lessons on Monday, 2 on Tuesday; tier-0 value 200 (score 2.0). */
+    /**
+     * G12: the school timetable: 2 lessons on Monday, 2 on Tuesday; tier-0 value 200 (score 2.0).
+     */
     @Test
     void g12SchoolTimetable() {
         SolveResult result = solve(TimefoldTestProblems.g12(true));

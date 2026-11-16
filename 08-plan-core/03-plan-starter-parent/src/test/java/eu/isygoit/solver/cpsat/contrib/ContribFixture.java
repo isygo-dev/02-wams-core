@@ -1,25 +1,14 @@
 package eu.isygoit.solver.cpsat.contrib;
 
 import com.google.ortools.Loader;
-import com.google.ortools.sat.BoolVar;
-import com.google.ortools.sat.CpModel;
-import com.google.ortools.sat.CpSolver;
-import com.google.ortools.sat.CpSolverStatus;
-import com.google.ortools.sat.IntVar;
-import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.LinearExprBuilder;
-import com.google.ortools.sat.Literal;
+import com.google.ortools.sat.*;
 import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.SolverOptions;
 import eu.isygoit.dto.request.params.LoadMetric;
 import eu.isygoit.dto.request.params.PeriodSpec;
 import eu.isygoit.solver.CompiledConstraint;
-import eu.isygoit.solver.cpsat.BucketGrid;
-import eu.isygoit.solver.cpsat.BucketGrids;
-import eu.isygoit.solver.cpsat.CpModelContext;
-import eu.isygoit.solver.cpsat.Enforcer;
-import eu.isygoit.solver.cpsat.SetupArc;
+import eu.isygoit.solver.cpsat.*;
 import eu.isygoit.solver.family.FamilyKit;
 import eu.isygoit.solver.index.CandidateIndex;
 import eu.isygoit.solver.spi.ConstraintFamily;
@@ -27,12 +16,7 @@ import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Test harness of the CP-SAT contributor tests: a real OR-Tools {@link CpModel} with the variables the model builder (WP3)
@@ -57,28 +41,11 @@ public final class ContribFixture {
     public final Literal[] cand;
     public final CandidateIndex index;
     public final CpModelContext ctx;
-    public boolean explain;
-
     private final Map<String, Literal[]> bucketCache = new HashMap<>();
     private final Map<String, Literal> andCache = new HashMap<>();
     private final Map<Integer, Literal> usedCache = new HashMap<>();
     private final Map<Integer, List<SetupArc>> setupArcs = new HashMap<>();
-
-    public static synchronized boolean nativeAvailable() {
-        if (available == null) {
-            try {
-                Loader.loadNativeLibraries();
-                available = true;
-            } catch (Throwable t) {
-                available = false;
-            }
-        }
-        return available;
-    }
-
-    public static ContribFixture of(FamilyKit.View view, String... optionalTasks) {
-        return new ContribFixture(view, Set.of(optionalTasks));
-    }
+    public boolean explain;
 
     private ContribFixture(FamilyKit.View view, Set<String> optional) {
         this.view = view;
@@ -133,6 +100,22 @@ public final class ContribFixture {
         setField(index, "candReq", view.candReq());
         ctx = Mockito.mock(CpModelContext.class, invocation -> answer(invocation.getMethod().getName(),
                 invocation.getArguments()));
+    }
+
+    public static synchronized boolean nativeAvailable() {
+        if (available == null) {
+            try {
+                Loader.loadNativeLibraries();
+                available = true;
+            } catch (Throwable t) {
+                available = false;
+            }
+        }
+        return available;
+    }
+
+    public static ContribFixture of(FamilyKit.View view, String... optionalTasks) {
+        return new ContribFixture(view, Set.of(optionalTasks));
     }
 
     private static void setField(Object target, String name, Object value) {
@@ -281,7 +264,9 @@ public final class ContribFixture {
         return new CompiledConstraint(0, constraint, family, FamilyKit.bind(family, constraint), true);
     }
 
-    /** Adds {@code NoOverlap} over the candidate intervals of every unary resource (the structural model of WP3). */
+    /**
+     * Adds {@code NoOverlap} over the candidate intervals of every unary resource (the structural model of WP3).
+     */
     public void addStructuralNoOverlap() {
         for (int r = 0; r < view.resourceCount(); r++) {
             List<com.google.ortools.sat.IntervalVar> intervals = new ArrayList<>();
@@ -295,7 +280,100 @@ public final class ContribFixture {
         }
     }
 
-    /** Result of a solve with accessors on the solved model. */
+    public Solved solve(LinearExpr objective) {
+        return new Solved(objective);
+    }
+
+    /**
+     * Fake {@link Enforcer} of the four modes with the accounting of the real one (weight 1).
+     */
+    public static final class FakeEnforcer implements Enforcer {
+        public final List<BoolVar> satisfied = new ArrayList<>();
+        public final List<LinearExpr> measures = new ArrayList<>();
+        private final Mode mode;
+        private final CpModel model;
+        private final boolean explain;
+        private BoolVar shared;
+
+        public FakeEnforcer(Mode mode, ContribFixture fixture) {
+            this.mode = mode;
+            this.model = fixture.model;
+            this.explain = fixture.explain;
+        }
+
+        @Override
+        public Mode mode() {
+            return mode;
+        }
+
+        @Override
+        public Literal instance(int taskIdx, int resourceIdx) {
+            switch (mode) {
+                case HARD:
+                    return explain ? shared() : null;
+                case RELAXABLE:
+                    return shared();
+                default:
+                    BoolVar sat = model.newBoolVar("sat");
+                    satisfied.add(sat);
+                    return sat;
+            }
+        }
+
+        /**
+         * The assumption / activation literal shared by all instances.
+         */
+        public BoolVar shared() {
+            if (shared == null) {
+                shared = model.newBoolVar("shared");
+            }
+            return shared;
+        }
+
+        @Override
+        public boolean penalizeMeasure(LinearExpr measure, long maxMeasure, int taskIdx) {
+            if (mode != Mode.SOFT) {
+                return false;
+            }
+            measures.add(measure);
+            return true;
+        }
+
+        @Override
+        public Literal[] conditions(Literal instance, Literal... extra) {
+            List<Literal> out = new ArrayList<>();
+            if (instance != null) {
+                out.add(instance);
+            }
+            for (Literal l : extra) {
+                if (l != null) {
+                    out.add(l);
+                }
+            }
+            return out.toArray(new Literal[0]);
+        }
+
+        /**
+         * Soft penalty: one per unsatisfied instance plus every measure.
+         */
+        public LinearExpr penalty() {
+            LinearExprBuilder b = LinearExpr.newBuilder();
+            for (BoolVar sat : satisfied) {
+                b.add(1);
+                b.addTerm(sat, -1);
+            }
+            for (LinearExpr m : measures) {
+                b.add(m);
+            }
+            return b.build();
+        }
+    }
+
+    // ------------------------------------------------------------------ enforcer
+
+    /**
+     * Result of a solve with accessors on the solved model.
+     */
     public final class Solved {
         public final CpSolver solver = new CpSolver();
         public final CpSolverStatus status;
@@ -334,7 +412,9 @@ public final class ContribFixture {
             return solver.booleanValue(presence[view.taskIdx(task)]);
         }
 
-        /** Rebuilds the solution as the independent checkers see it. */
+        /**
+         * Rebuilds the solution as the independent checkers see it.
+         */
         public FamilyKit.Solution toSolution() {
             FamilyKit.Solution s = new FamilyKit.Solution(view);
             for (int t = 0; t < view.taskCount(); t++) {
@@ -354,91 +434,6 @@ public final class ContribFixture {
 
         public double objective() {
             return solver.objectiveValue();
-        }
-    }
-
-    public Solved solve(LinearExpr objective) {
-        return new Solved(objective);
-    }
-
-    // ------------------------------------------------------------------ enforcer
-
-    /** Fake {@link Enforcer} of the four modes with the accounting of the real one (weight 1). */
-    public static final class FakeEnforcer implements Enforcer {
-        private final Mode mode;
-        private final CpModel model;
-        private final boolean explain;
-        private BoolVar shared;
-        public final List<BoolVar> satisfied = new ArrayList<>();
-        public final List<LinearExpr> measures = new ArrayList<>();
-
-        public FakeEnforcer(Mode mode, ContribFixture fixture) {
-            this.mode = mode;
-            this.model = fixture.model;
-            this.explain = fixture.explain;
-        }
-
-        @Override
-        public Mode mode() {
-            return mode;
-        }
-
-        @Override
-        public Literal instance(int taskIdx, int resourceIdx) {
-            switch (mode) {
-                case HARD:
-                    return explain ? shared() : null;
-                case RELAXABLE:
-                    return shared();
-                default:
-                    BoolVar sat = model.newBoolVar("sat");
-                    satisfied.add(sat);
-                    return sat;
-            }
-        }
-
-        /** The assumption / activation literal shared by all instances. */
-        public BoolVar shared() {
-            if (shared == null) {
-                shared = model.newBoolVar("shared");
-            }
-            return shared;
-        }
-
-        @Override
-        public boolean penalizeMeasure(LinearExpr measure, long maxMeasure, int taskIdx) {
-            if (mode != Mode.SOFT) {
-                return false;
-            }
-            measures.add(measure);
-            return true;
-        }
-
-        @Override
-        public Literal[] conditions(Literal instance, Literal... extra) {
-            List<Literal> out = new ArrayList<>();
-            if (instance != null) {
-                out.add(instance);
-            }
-            for (Literal l : extra) {
-                if (l != null) {
-                    out.add(l);
-                }
-            }
-            return out.toArray(new Literal[0]);
-        }
-
-        /** Soft penalty: one per unsatisfied instance plus every measure. */
-        public LinearExpr penalty() {
-            LinearExprBuilder b = LinearExpr.newBuilder();
-            for (BoolVar sat : satisfied) {
-                b.add(1);
-                b.addTerm(sat, -1);
-            }
-            for (LinearExpr m : measures) {
-                b.add(m);
-            }
-            return b.build();
         }
     }
 }

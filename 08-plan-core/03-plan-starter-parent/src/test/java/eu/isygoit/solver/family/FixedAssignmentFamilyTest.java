@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FixedAssignmentFamilyTest {
 
-    private final FixedAssignmentFamily family = new FixedAssignmentFamily();
     private static final String START_5H = FamilyKit.START.plusSeconds(5 * 3600L).toString();
+    private final FixedAssignmentFamily family = new FixedAssignmentFamily();
 
     private Constraint constraint(IEnumEnforcement.Types enforcement, java.util.Map<String, Object> params) {
         return FamilyKit.constraint("fix", "fixed_assignment", enforcement, new ConstraintScope("task", "t1"), 2, params);

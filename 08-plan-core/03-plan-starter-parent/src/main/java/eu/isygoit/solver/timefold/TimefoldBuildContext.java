@@ -61,42 +61,70 @@ public final class TimefoldBuildContext {
         this.forbidden = new boolean[options];
     }
 
-    /** @return the candidate index */
+    /**
+     * @param scope an objective scope
+     * @return {@code true} when the scope kind selects RESOURCES ({@code resource}, {@code resourceId}, {@code resourceType})
+     */
+    public static boolean isResourceScope(ConstraintScope scope) {
+        if (scope == null || scope.kind() == null) {
+            return false;
+        }
+        String kind = scope.kind().toLowerCase(Locale.ROOT);
+        return kind.equals("resource") || kind.equals("resourceid") || kind.equals("resourcetype");
+    }
+
+    /**
+     * @return the candidate index
+     */
     public CandidateIndex index() {
         return index;
     }
 
-    /** @return the normalized problem (resources/tasks in index order: {@code problem().resources().get(r)}) */
+    /**
+     * @return the normalized problem (resources/tasks in index order: {@code problem().resources().get(r)})
+     */
     public PlanningProblem problem() {
         return compiled.problem();
     }
 
-    /** @return the BASE option table (neutral pruning applied); option ids used by every method of this context */
+    /**
+     * @return the BASE option table (neutral pruning applied); option ids used by every method of this context
+     */
     public SlotOptions options() {
         return base;
     }
 
-    /** @return the resource record of resource index {@code r} */
+    /**
+     * @return the resource record of resource index {@code r}
+     */
     public Resource resource(int r) {
         return compiled.problem().resources().get(r);
     }
 
-    /** @return the task record of task index {@code t} */
+    /**
+     * @return the task record of task index {@code t}
+     */
     public Task task(int t) {
         return compiled.problem().tasks().get(t);
     }
 
-    /** @return the live soft penalty array {@code [option]} (prefer {@link #addPenalty}); scaled */
+    /**
+     * @return the live soft penalty array {@code [option]} (prefer {@link #addPenalty}); scaled
+     */
     public long[] optionPenalty() {
         return penalty;
     }
 
-    /** @return the live selection reward array {@code [task]} (prefer {@link #addSelectionReward}); scaled */
+    /**
+     * @return the live selection reward array {@code [task]} (prefer {@link #addSelectionReward}); scaled
+     */
     public long[] selectionReward() {
         return reward;
     }
 
-    /** @return the live effective capacity array {@code [option]} of the option's (resource, slot) (prefer {@link #lowerCapacity}) */
+    /**
+     * @return the live effective capacity array {@code [option]} of the option's (resource, slot) (prefer {@link #lowerCapacity})
+     */
     public int[] optionCapacity() {
         return capacity;
     }
@@ -118,7 +146,9 @@ public final class TimefoldBuildContext {
         }
     }
 
-    /** @return {@code true} when the BASE option was forbidden */
+    /**
+     * @return {@code true} when the BASE option was forbidden
+     */
     public boolean isForbidden(int option) {
         return forbidden[option];
     }
@@ -188,18 +218,6 @@ public final class TimefoldBuildContext {
     }
 
     /**
-     * @param scope an objective scope
-     * @return {@code true} when the scope kind selects RESOURCES ({@code resource}, {@code resourceId}, {@code resourceType})
-     */
-    public static boolean isResourceScope(ConstraintScope scope) {
-        if (scope == null || scope.kind() == null) {
-            return false;
-        }
-        String kind = scope.kind().toLowerCase(Locale.ROOT);
-        return kind.equals("resource") || kind.equals("resourceid") || kind.equals("resourcetype");
-    }
-
-    /**
      * @param task a task index
      * @return the ids of the constraints that forbade at least one option of the task (diagnostics, may be empty)
      */
@@ -215,7 +233,9 @@ public final class TimefoldBuildContext {
         return ids;
     }
 
-    /** @return number of options forbidden so far */
+    /**
+     * @return number of options forbidden so far
+     */
     public int forbiddenCount() {
         return forbiddenCount;
     }

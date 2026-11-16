@@ -3,12 +3,7 @@ package eu.isygoit.solver.objective;
 import eu.isygoit.dto.request.InitialAssignment;
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.params.PlanChangeParams;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import eu.isygoit.util.ScaledMath;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +21,9 @@ import java.util.List;
 @Component
 public class MinimizePlanChangesObjective extends AbstractObjectiveFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "minimize_plan_changes";
 
     public MinimizePlanChangesObjective() {
@@ -34,12 +31,16 @@ public class MinimizePlanChangesObjective extends AbstractObjectiveFamily {
                 ScopeKind.TASKS);
     }
 
-    /** @return the start deviation weight of the (possibly {@code null}) params, default 1 */
+    /**
+     * @return the start deviation weight of the (possibly {@code null}) params, default 1
+     */
     public static int startWeight(Object params) {
         return params instanceof PlanChangeParams p && p.startDeviationWeight() != null ? p.startDeviationWeight() : 1;
     }
 
-    /** @return the resource change weight of the (possibly {@code null}) params, default 1 */
+    /**
+     * @return the resource change weight of the (possibly {@code null}) params, default 1
+     */
     public static int resourceWeight(Object params) {
         return params instanceof PlanChangeParams p && p.resourceChangeWeight() != null ? p.resourceChangeWeight() : 1;
     }

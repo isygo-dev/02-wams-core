@@ -1,13 +1,6 @@
 package eu.isygoit.solver.diag;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.InitialSolution;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.CoreItem;
 import eu.isygoit.dto.response.Diagnostics;
 import eu.isygoit.enums.IEnumEnforcement;
@@ -20,26 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static eu.isygoit.solver.check.TestProblems.at;
-import static eu.isygoit.solver.check.TestProblems.requirement;
-import static eu.isygoit.solver.check.TestProblems.requirementOn;
-import static eu.isygoit.solver.check.TestProblems.resource;
-import static eu.isygoit.solver.check.TestProblems.task;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static eu.isygoit.solver.check.TestProblems.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PreSolveAnalyzerTest {
 
     private final PreSolveAnalyzer analyzer = new PreSolveAnalyzer();
-
-    private Optional<Diagnostics> analyze(PlanningProblem problem) {
-        return analyze(problem, StubIndexView.of(problem));
-    }
-
-    private Optional<Diagnostics> analyze(PlanningProblem problem, StubIndexView index) {
-        return analyzer.analyze(problem, index, index);
-    }
 
     private static List<CoreItem> items(Diagnostics d, String reason) {
         return d.core().items().stream().filter(i -> reason.equals(i.reasonCode())).toList();
@@ -47,6 +26,14 @@ class PreSolveAnalyzerTest {
 
     private static PlanningProblem problem(int horizon, List<Resource> resources, List<Task> tasks) {
         return TestProblems.problem(horizon, resources, tasks, List.of(), List.of());
+    }
+
+    private Optional<Diagnostics> analyze(PlanningProblem problem) {
+        return analyze(problem, StubIndexView.of(problem));
+    }
+
+    private Optional<Diagnostics> analyze(PlanningProblem problem, StubIndexView index) {
+        return analyzer.analyze(problem, index, index);
     }
 
     @Test

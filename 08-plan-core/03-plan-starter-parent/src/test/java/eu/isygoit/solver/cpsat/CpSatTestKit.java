@@ -5,31 +5,12 @@ import com.google.ortools.sat.LinearExpr;
 import com.google.ortools.sat.LinearExprBuilder;
 import com.google.ortools.sat.Literal;
 import eu.isygoit.config.PlanLimitsProperties;
-import eu.isygoit.dto.request.Calendar;
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.InitialSolution;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.RelaxationPolicy;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.ResourceSelector;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.dto.request.Task;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.Assignment;
 import eu.isygoit.dto.response.SolveResult;
 import eu.isygoit.dto.response.TierValue;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.CompiledConstraint;
-import eu.isygoit.solver.CompiledObjective;
-import eu.isygoit.solver.CompiledProblem;
-import eu.isygoit.solver.SolveContext;
-import eu.isygoit.solver.SolveListener;
-import eu.isygoit.solver.SolverCancellationToken;
+import eu.isygoit.solver.*;
 import eu.isygoit.solver.cpsat.explain.CpSatExplainer;
 import eu.isygoit.solver.index.CandidateIndex;
 import eu.isygoit.solver.index.CandidateIndexBuilder;
@@ -199,7 +180,9 @@ final class CpSatTestKit {
 
     // ------------------------------------------------------------------------------------- test contributors
 
-    /** {@code test_makespan}: minimises the maximum end (weight x makespan) in the objective's tier. */
+    /**
+     * {@code test_makespan}: minimises the maximum end (weight x makespan) in the objective's tier.
+     */
     static final class MakespanContributor implements CpSatObjectiveContributor {
         static final String TYPE = "test_makespan";
 
@@ -221,7 +204,9 @@ final class CpSatTestKit {
         }
     }
 
-    /** {@code test_value}: maximises the prize of the selected optional tasks (negated term). */
+    /**
+     * {@code test_value}: maximises the prize of the selected optional tasks (negated term).
+     */
     static final class ValueContributor implements CpSatObjectiveContributor {
         static final String TYPE = "test_value";
 

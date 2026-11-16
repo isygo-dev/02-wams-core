@@ -1,26 +1,12 @@
 package eu.isygoit.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.isygoit.config.PlanLimitsProperties;
 import eu.isygoit.dto.data.LogEntry;
 import eu.isygoit.dto.request.PlanningMeta;
 import eu.isygoit.dto.request.PlanningRequest;
 import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.config.PlanLimitsProperties;
-import eu.isygoit.dto.response.Assignment;
-import eu.isygoit.dto.response.CapabilitiesDto;
-import eu.isygoit.dto.response.ConstraintViolation;
-import eu.isygoit.dto.response.CoreItem;
-import eu.isygoit.dto.response.Diagnostics;
-import eu.isygoit.dto.response.InfeasibilityCore;
-import eu.isygoit.dto.response.JobDashboardSummary;
-import eu.isygoit.dto.response.Metrics;
-import eu.isygoit.dto.response.PlanningSolution;
-import eu.isygoit.dto.response.Relaxation;
-import eu.isygoit.dto.response.ResourceAssignment;
-import eu.isygoit.dto.response.SolveResult;
-import eu.isygoit.dto.response.TierValue;
-import eu.isygoit.dto.response.UnassignedTask;
-import eu.isygoit.dto.response.ValidationReportDto;
+import eu.isygoit.dto.response.*;
 import eu.isygoit.enums.IEnumJobStatusCode;
 import eu.isygoit.enums.IEnumLogLevel;
 import eu.isygoit.enums.IEnumSolverStatus;
@@ -56,32 +42,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class PlanJobServiceTest {
     private static final String TENANT = "t1";
-
+    private static final Instant T8 = Instant.parse("2026-01-01T08:00:00Z");
+    private static final Instant T9 = Instant.parse("2026-01-01T09:00:00Z");
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
     private final PlanningService planningService = mock(PlanningService.class);
     private final PlanningRequestValidator requestValidator = mock(PlanningRequestValidator.class);
@@ -91,8 +61,25 @@ class PlanJobServiceTest {
     private final IRemoteNextCodeService remoteNextCode = mock(IRemoteNextCodeService.class);
     private final SolverEngine timefold = mock(SolverEngine.class);
     private final CpSatSolverEngine cpSat = mock(CpSatSolverEngine.class);
-
     private PlanJobService service;
+
+    private static ConstraintFamily family(String type, ScopeKind scope, String... hints) {
+        ConstraintFamily family = mock(ConstraintFamily.class);
+        when(family.type()).thenReturn(type);
+        when(family.descriptionKey()).thenReturn("plan.constraint." + type + ".description");
+        when(family.paramsHint()).thenReturn(List.of(hints));
+        when(family.scopeKind()).thenReturn(scope);
+        return family;
+    }
+
+    private static ObjectiveFamily objective(String type, boolean reward) {
+        ObjectiveFamily family = mock(ObjectiveFamily.class);
+        when(family.type()).thenReturn(type);
+        when(family.descriptionKey()).thenReturn("plan.objective." + type + ".description");
+        when(family.paramsHint()).thenReturn(List.of());
+        when(family.reward()).thenReturn(reward);
+        return family;
+    }
 
     @BeforeEach
     void setUp() {
@@ -118,24 +105,6 @@ class PlanJobServiceTest {
         return created;
     }
 
-    private static ConstraintFamily family(String type, ScopeKind scope, String... hints) {
-        ConstraintFamily family = mock(ConstraintFamily.class);
-        when(family.type()).thenReturn(type);
-        when(family.descriptionKey()).thenReturn("plan.constraint." + type + ".description");
-        when(family.paramsHint()).thenReturn(List.of(hints));
-        when(family.scopeKind()).thenReturn(scope);
-        return family;
-    }
-
-    private static ObjectiveFamily objective(String type, boolean reward) {
-        ObjectiveFamily family = mock(ObjectiveFamily.class);
-        when(family.type()).thenReturn(type);
-        when(family.descriptionKey()).thenReturn("plan.objective." + type + ".description");
-        when(family.paramsHint()).thenReturn(List.of());
-        when(family.reward()).thenReturn(reward);
-        return family;
-    }
-
     private PlanningRequest request(String clientRef) {
         return request(clientRef, null);
     }
@@ -147,6 +116,8 @@ class PlanJobServiceTest {
                 null, null, null, null, null, null, null, null, null, options, null);
     }
 
+    // ------------------------------------------------------------------ submit
+
     private PlanJob job(long id, String tenant, IEnumJobStatusCode.Types status) {
         return PlanJob.builder().id(id).tenant(tenant).code("PLN-" + id).status(status).build();
     }
@@ -154,8 +125,6 @@ class PlanJobServiceTest {
     private void owns(PlanJob job) {
         when(repository.findById(job.getId())).thenReturn(Optional.of(job));
     }
-
-    // ------------------------------------------------------------------ submit
 
     @Test
     void submitGeneratesTheCodeStoresTheJobAndDispatchesIt() {
@@ -242,6 +211,8 @@ class PlanJobServiceTest {
         verify(dispatchService, never()).dispatch(any(PlanJob.class));
     }
 
+    // ------------------------------------------------------------------ tenant isolation / reads
+
     @Test
     void submitRequiresTheCallerTenant() {
         InvalidRequestException error = assertThrows(InvalidRequestException.class,
@@ -263,8 +234,6 @@ class PlanJobServiceTest {
 
         verify(repository).releaseDispatchClaim(5L, false);
     }
-
-    // ------------------------------------------------------------------ tenant isolation / reads
 
     @Test
     void aJobOfAnotherTenantBehavesLikeAMissingJob() {
@@ -333,6 +302,8 @@ class PlanJobServiceTest {
         assertThrows(JobNotFoundException.class, () -> service.getResult(TENANT, 5L));
     }
 
+    // ------------------------------------------------------------------ export
+
     @Test
     void getLogsReadsWithTheTenantOfTheJob() {
         owns(job(5L, TENANT, IEnumJobStatusCode.Types.SUCCEEDED));
@@ -353,11 +324,6 @@ class PlanJobServiceTest {
         assertThrows(InvalidRequestException.class,
                 () -> service.getLogs(TENANT, 5L, now, now.minusSeconds(1), null, 10));
     }
-
-    // ------------------------------------------------------------------ export
-
-    private static final Instant T8 = Instant.parse("2026-01-01T08:00:00Z");
-    private static final Instant T9 = Instant.parse("2026-01-01T09:00:00Z");
 
     private PlanJob jobWithResult() throws Exception {
         Assignment assignment = new Assignment("task-1", false, 4, 8, T8, T9, "slot-1",

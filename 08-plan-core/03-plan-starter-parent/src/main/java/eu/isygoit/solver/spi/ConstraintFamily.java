@@ -18,22 +18,34 @@ import java.util.Set;
  */
 public interface ConstraintFamily {
 
-    /** @return the family id, lower-case snake_case, for example {@code "min_rest"} */
+    /**
+     * @return the family id, lower-case snake_case, for example {@code "min_rest"}
+     */
     String type();
 
-    /** @return the typed params record bound with strict Jackson, for example {@code MinRestParams.class} */
+    /**
+     * @return the typed params record bound with strict Jackson, for example {@code MinRestParams.class}
+     */
     Class<?> paramsType();
 
-    /** @return the enforcement modes this family supports semantically (engine independent) */
+    /**
+     * @return the enforcement modes this family supports semantically (engine independent)
+     */
     Set<IEnumEnforcement.Types> supportedEnforcements();
 
-    /** @return the i18n key, for example {@code "plan.constraint.min_rest.description"} */
+    /**
+     * @return the i18n key, for example {@code "plan.constraint.min_rest.description"}
+     */
     String descriptionKey();
 
-    /** @return the params property names, for the UI, for example {@code ["minRestTicks","afterTasks"]} */
+    /**
+     * @return the params property names, for the UI, for example {@code ["minRestTicks","afterTasks"]}
+     */
     List<String> paramsHint();
 
-    /** @return what {@code Constraint.scope.kind} is validated against */
+    /**
+     * @return what {@code Constraint.scope.kind} is validated against
+     */
     ScopeKind scopeKind();
 
     /**
@@ -52,7 +64,9 @@ public interface ConstraintFamily {
      */
     ModelCost estimate(CandidateIndexView index, Constraint constraint, Object params);
 
-    /** Neutral compile-time step; called only when the constraint is HARD. Default: nothing. */
+    /**
+     * Neutral compile-time step; called only when the constraint is HARD. Default: nothing.
+     */
     default void preprocess(PreprocessContext ctx, Constraint constraint, Object params) {
     }
 

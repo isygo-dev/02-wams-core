@@ -29,8 +29,51 @@ import java.util.List;
 @Component
 public class ResourceAvailabilityTimefoldContributor implements TimefoldConstraintContributor {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "resource_availability";
+
+    private static boolean overlapsAny(List<long[]> blocked, long start, long end) {
+        for (long[] b : blocked) {
+            if (start < b[1] && b[0] < end) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean insideOne(long[][] windows, long start, long end) {
+        for (long[] w : windows) {
+            if (start >= w[0] && end <= w[1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sorts by start and merges overlapping or touching windows; empty windows are dropped.
+     */
+    private static long[][] merge(List<long[]> windows) {
+        List<long[]> sorted = new ArrayList<>();
+        for (long[] w : windows) {
+            if (w[0] < w[1]) {
+                sorted.add(w);
+            }
+        }
+        sorted.sort((a, b) -> Long.compare(a[0], b[0]));
+        List<long[]> result = new ArrayList<>();
+        for (long[] w : sorted) {
+            if (!result.isEmpty() && w[0] <= result.get(result.size() - 1)[1]) {
+                long[] last = result.get(result.size() - 1);
+                last[1] = Math.max(last[1], w[1]);
+            } else {
+                result.add(new long[]{w[0], w[1]});
+            }
+        }
+        return result.toArray(new long[0][]);
+    }
 
     @Override
     public String type() {
@@ -75,44 +118,5 @@ public class ResourceAvailabilityTimefoldContributor implements TimefoldConstrai
                 ctx.forbid(o, constraint.id());
             }
         }
-    }
-
-    private static boolean overlapsAny(List<long[]> blocked, long start, long end) {
-        for (long[] b : blocked) {
-            if (start < b[1] && b[0] < end) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean insideOne(long[][] windows, long start, long end) {
-        for (long[] w : windows) {
-            if (start >= w[0] && end <= w[1]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /** Sorts by start and merges overlapping or touching windows; empty windows are dropped. */
-    private static long[][] merge(List<long[]> windows) {
-        List<long[]> sorted = new ArrayList<>();
-        for (long[] w : windows) {
-            if (w[0] < w[1]) {
-                sorted.add(w);
-            }
-        }
-        sorted.sort((a, b) -> Long.compare(a[0], b[0]));
-        List<long[]> result = new ArrayList<>();
-        for (long[] w : sorted) {
-            if (!result.isEmpty() && w[0] <= result.get(result.size() - 1)[1]) {
-                long[] last = result.get(result.size() - 1);
-                last[1] = Math.max(last[1], w[1]);
-            } else {
-                result.add(new long[]{w[0], w[1]});
-            }
-        }
-        return result.toArray(new long[0][]);
     }
 }

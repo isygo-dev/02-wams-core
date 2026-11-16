@@ -1,27 +1,8 @@
 package eu.isygoit.service.impl.planning;
 
 import eu.isygoit.config.PlanLimitsProperties;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.request.Calendar;
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.DomainDefinition;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.PlanningMeta;
-import eu.isygoit.dto.request.PlanningRequest;
-import eu.isygoit.dto.request.Preference;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.RecurringWindow;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.ResourceSelector;
-import eu.isygoit.dto.request.SetupEntry;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
-import eu.isygoit.dto.request.TypeDefinition;
 import eu.isygoit.dto.response.DiagnosticIssue;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.exception.LimitExceededException;
@@ -34,13 +15,7 @@ import org.springframework.stereotype.Component;
 import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Stage 1 of the validation pipeline (design 7.1): structural, reference and unit checks that need the request only.
@@ -62,7 +37,9 @@ import java.util.Set;
 @Component
 public class PlanningRequestValidator {
 
-    /** Rough serialized size of one entity (JSON punctuation, field names) used by the request size estimate. */
+    /**
+     * Rough serialized size of one entity (JSON punctuation, field names) used by the request size estimate.
+     */
     private static final int ENTITY_OVERHEAD_BYTES = 96;
     private static final int ATTRIBUTE_BYTES = 32;
     private static final String CODE_LIMIT = LimitExceededException.CODE;
@@ -83,9 +60,48 @@ public class PlanningRequestValidator {
         this.limits = limits;
     }
 
-    /** Validator with the default {@link PlanLimitsProperties} (tests, programmatic use). */
+    /**
+     * Validator with the default {@link PlanLimitsProperties} (tests, programmatic use).
+     */
     public PlanningRequestValidator() {
         this(new PlanLimitsProperties());
+    }
+
+    private static void limit(ValidationResult result, String name, long actual, long max) {
+        if (actual > max) {
+            Map<String, Object> args = new LinkedHashMap<>();
+            args.put("limit", name);
+            args.put("actual", actual);
+            args.put("max", max);
+            result.error(CODE_LIMIT, "", "Limit '" + name + "' exceeded: " + actual + " > " + max, args);
+        }
+    }
+
+    private static long length(String value) {
+        return value == null ? 0 : value.length();
+    }
+
+    private static long textBytes(List<String> values) {
+        long bytes = 0;
+        for (String value : values) {
+            bytes += length(value) + 3;
+        }
+        return bytes;
+    }
+
+    // ==================================================================================================
+    // Size limits (cheap, first)
+    // ==================================================================================================
+
+    private static Map<String, Object> argMap(Object... kv) {
+        if (kv == null || kv.length == 0) {
+            return Map.of();
+        }
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (int i = 0; i + 1 < kv.length; i += 2) {
+            map.put(String.valueOf(kv[i]), kv[i + 1]);
+        }
+        return map;
     }
 
     /**
@@ -104,8 +120,8 @@ public class PlanningRequestValidator {
      * Validates a request (submit path).
      *
      * @param request the request
-     * @throws LimitExceededException      when a size limit is crossed
-     * @throws RequestValidationException  when any other error was found
+     * @throws LimitExceededException     when a size limit is crossed
+     * @throws RequestValidationException when any other error was found
      */
     public void validate(PlanningRequest request) {
         ValidationResult result = collect(request);
@@ -138,10 +154,6 @@ public class PlanningRequestValidator {
         new Run(request, result).run();
         return result;
     }
-
-    // ==================================================================================================
-    // Size limits (cheap, first)
-    // ==================================================================================================
 
     private boolean checkSizeLimits(PlanningRequest request, ValidationResult result) {
         limit(result, "max-tasks", request.tasks().size(), limits.getMaxTasks());
@@ -176,15 +188,9 @@ public class PlanningRequestValidator {
         return !result.hasErrors();
     }
 
-    private static void limit(ValidationResult result, String name, long actual, long max) {
-        if (actual > max) {
-            Map<String, Object> args = new LinkedHashMap<>();
-            args.put("limit", name);
-            args.put("actual", actual);
-            args.put("max", max);
-            result.error(CODE_LIMIT, "", "Limit '" + name + "' exceeded: " + actual + " > " + max, args);
-        }
-    }
+    // ==================================================================================================
+    // Structural run
+    // ==================================================================================================
 
     /**
      * Approximation of the serialized request size used when the raw body is not available here (ids, type ids and a
@@ -235,29 +241,10 @@ public class PlanningRequestValidator {
         return bytes;
     }
 
-    private static long length(String value) {
-        return value == null ? 0 : value.length();
-    }
-
-    private static long textBytes(List<String> values) {
-        long bytes = 0;
-        for (String value : values) {
-            bytes += length(value) + 3;
-        }
-        return bytes;
-    }
-
-    // ==================================================================================================
-    // Structural run
-    // ==================================================================================================
-
     private final class Run {
 
         private final PlanningRequest request;
         private final ValidationResult out;
-        private Horizon horizon;
-        private long h;
-        private ZoneId zone = ZoneId.of("UTC");
         private final Set<String> taskIds = new HashSet<>();
         private final Set<String> resourceIds = new HashSet<>();
         private final Map<String, Slot> slotsById = new HashMap<>();
@@ -266,6 +253,9 @@ public class PlanningRequestValidator {
         private final Set<String> resourceTypes = new HashSet<>();
         private final Set<String> taskTypes = new HashSet<>();
         private final Set<String> slotTypes = new HashSet<>();
+        private Horizon horizon;
+        private long h;
+        private ZoneId zone = ZoneId.of("UTC");
         private boolean anyResourceHasSetup;
 
         Run(PlanningRequest request, ValidationResult out) {
@@ -339,7 +329,7 @@ public class PlanningRequestValidator {
             h = horizon.horizonTicks();
             if (h > limits.getMaxHorizonTicks()) {
                 error("HORIZON_TOO_LARGE", "horizon", "horizon has " + h + " ticks, more than the limit "
-                        + limits.getMaxHorizonTicks() + "; use a coarser tickSeconds",
+                                + limits.getMaxHorizonTicks() + "; use a coarser tickSeconds",
                         "ticks", h, "max", limits.getMaxHorizonTicks());
                 horizon = null;
             }
@@ -629,7 +619,9 @@ public class PlanningRequestValidator {
             preferences(at, task);
         }
 
-        /** Default duration in slot mode: the common slot length in ticks, or {@code null} after reporting. */
+        /**
+         * Default duration in slot mode: the common slot length in ticks, or {@code null} after reporting.
+         */
         private Integer slotDefaultDuration(String at, Task task) {
             if (task.startSlots().isEmpty()) {
                 error("DURATION_REQUIRED", at + ".duration", "duration is required unless startSlots are given");
@@ -711,7 +703,9 @@ public class PlanningRequestValidator {
             }
         }
 
-        /** Validates resourceDurations and returns the smallest duration the task can have (for the window check). */
+        /**
+         * Validates resourceDurations and returns the smallest duration the task can have (for the window check).
+         */
         private Integer resourceDurations(String at, Task task, Integer base) {
             if (task.resourceDurations().isEmpty()) {
                 return base;
@@ -944,16 +938,5 @@ public class PlanningRequestValidator {
             out.error(CODE_LIMIT, "", "Limit '" + name + "' exceeded: " + actual + " > " + max,
                     argMap("limit", name, "actual", actual, "max", max));
         }
-    }
-
-    private static Map<String, Object> argMap(Object... kv) {
-        if (kv == null || kv.length == 0) {
-            return Map.of();
-        }
-        Map<String, Object> map = new LinkedHashMap<>();
-        for (int i = 0; i + 1 < kv.length; i += 2) {
-            map.put(String.valueOf(kv[i]), kv[i + 1]);
-        }
-        return map;
     }
 }

@@ -6,24 +6,10 @@ import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.TimeWindow;
 import eu.isygoit.dto.request.params.ResourceCapacityParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PreprocessContext;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Family {@code resource_capacity} (design 4.3 / 6.5.2): lowers the capacity of the scoped resources to
@@ -39,13 +25,43 @@ import java.util.Set;
 @Component
 public class ResourceCapacityFamily implements ConstraintFamily {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "resource_capacity";
 
     private static final Set<IEnumEnforcement.Types> SUPPORTED = Collections.unmodifiableSet(EnumSet.of(
             IEnumEnforcement.Types.STRICTLY_REQUIRED, IEnumEnforcement.Types.CONFIGURABLE_HARD,
             IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION));
     private static final ConstraintChecker CHECKER = new Checker();
+
+    /**
+     * @param resourceCapacity the structural capacity of the resource
+     * @param p                the params ({@code capacity} must be non-null)
+     * @return {@code min(resourceCapacity, p.capacity)}
+     */
+    public static int newCapacity(int resourceCapacity, ResourceCapacityParams p) {
+        return Math.min(resourceCapacity, p.capacity());
+    }
+
+    /**
+     * @return {@code {lo, hi}} half-open tick window clipped to the horizon (whole horizon when the window is null);
+     * {@code lo >= hi} means the window is empty
+     */
+    public static int[] windowTicks(Horizon h, ResourceCapacityParams p) {
+        int horizonTicks = (int) h.horizonTicks();
+        if (p.window() == null) {
+            return new int[]{0, horizonTicks};
+        }
+        int lo = Math.max(0, Math.min(horizonTicks, h.floorTick(p.window().start())));
+        int hi = Math.max(0, Math.min(horizonTicks, h.ceilTick(p.window().end())));
+        return new int[]{lo, hi};
+    }
+
+    private static String path(ValidationContext ctx, Constraint constraint, String field) {
+        int i = ctx.problem().constraints().indexOf(constraint);
+        return "constraints[" + (i < 0 ? "?" : String.valueOf(i)) + "].params." + field;
+    }
 
     @Override
     public String type() {
@@ -108,6 +124,8 @@ public class ResourceCapacityFamily implements ConstraintFamily {
         }
     }
 
+    // ------------------------------------------------------------------ shared semantics
+
     @Override
     public ModelCost estimate(CandidateIndexView index, Constraint constraint, Object params) {
         if (!(params instanceof ResourceCapacityParams p) || p.capacity() == null) {
@@ -152,42 +170,21 @@ public class ResourceCapacityFamily implements ConstraintFamily {
         return CHECKER;
     }
 
-    // ------------------------------------------------------------------ shared semantics
-
-    /**
-     * @param resourceCapacity the structural capacity of the resource
-     * @param p                the params ({@code capacity} must be non-null)
-     * @return {@code min(resourceCapacity, p.capacity)}
-     */
-    public static int newCapacity(int resourceCapacity, ResourceCapacityParams p) {
-        return Math.min(resourceCapacity, p.capacity());
-    }
-
-    /**
-     * @return {@code {lo, hi}} half-open tick window clipped to the horizon (whole horizon when the window is null);
-     * {@code lo >= hi} means the window is empty
-     */
-    public static int[] windowTicks(Horizon h, ResourceCapacityParams p) {
-        int horizonTicks = (int) h.horizonTicks();
-        if (p.window() == null) {
-            return new int[]{0, horizonTicks};
-        }
-        int lo = Math.max(0, Math.min(horizonTicks, h.floorTick(p.window().start())));
-        int hi = Math.max(0, Math.min(horizonTicks, h.ceilTick(p.window().end())));
-        return new int[]{lo, hi};
-    }
-
-    private static String path(ValidationContext ctx, Constraint constraint, String field) {
-        int i = ctx.problem().constraints().indexOf(constraint);
-        return "constraints[" + (i < 0 ? "?" : String.valueOf(i)) + "].params." + field;
-    }
-
     // ------------------------------------------------------------------ checker
 
     private record Event(int time, int delta) {
     }
 
     private static final class Checker implements ConstraintChecker {
+        private static int amountOn(SolutionView sol, int task, int resource) {
+            for (int k = 0; k < sol.resourceCount(task); k++) {
+                if (sol.resourceAt(task, k) == resource) {
+                    return sol.amountAt(task, k);
+                }
+            }
+            return 0;
+        }
+
         @Override
         public void check(CheckContext ctx, Constraint constraint, Object params, ViolationSink sink) {
             if (!(params instanceof ResourceCapacityParams p) || p.capacity() == null) {
@@ -232,15 +229,6 @@ public class ResourceCapacityFamily implements ConstraintFamily {
                             over);
                 }
             }
-        }
-
-        private static int amountOn(SolutionView sol, int task, int resource) {
-            for (int k = 0; k < sol.resourceCount(task); k++) {
-                if (sol.resourceAt(task, k) == resource) {
-                    return sol.amountAt(task, k);
-                }
-            }
-            return 0;
         }
     }
 }

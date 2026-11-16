@@ -9,11 +9,7 @@ import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.spi.CandidateIndexView;
 import eu.isygoit.solver.spi.SolutionView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Explains why each OPTIONAL task is not part of the plan (design 8.4), in O(T + E).
@@ -29,16 +25,26 @@ import java.util.Set;
  */
 public final class UnselectedReasoner {
 
-    /** Reason: the task has no candidate resource. */
+    /**
+     * Reason: the task has no candidate resource.
+     */
     public static final String NO_ELIGIBLE_RESOURCE = "NO_ELIGIBLE_RESOURCE";
-    /** Reason: the start domain is empty. */
+    /**
+     * Reason: the start domain is empty.
+     */
     public static final String OUTSIDE_WINDOW = "OUTSIDE_WINDOW";
-    /** Reason: an IMPLIES predecessor is not selected. */
+    /**
+     * Reason: an IMPLIES predecessor is not selected.
+     */
     public static final String PREDECESSOR_NOT_SELECTED = "PREDECESSOR_NOT_SELECTED";
-    /** Reason: the optimiser preferred other work. */
+    /**
+     * Reason: the optimiser preferred other work.
+     */
     public static final String NOT_SELECTED = "NOT_SELECTED";
 
-    /** Hard constraint families that prune candidates/starts in the neutral compile step (design 6.10 A). */
+    /**
+     * Hard constraint families that prune candidates/starts in the neutral compile step (design 6.10 A).
+     */
     private static final Set<String> PRUNING_TYPES =
             Set.of("task_eligibility", "fixed_assignment", "time_window", "resource_availability");
 
@@ -120,7 +126,9 @@ public final class UnselectedReasoner {
                 "Increase its prize/priority or add capacity", prize);
     }
 
-    /** @return " (possibly pruned by: id1, id2)" for the hard pruning constraints scoping the task, else "" */
+    /**
+     * @return " (possibly pruned by: id1, id2)" for the hard pruning constraints scoping the task, else ""
+     */
     private String pruners(int t) {
         List<String> ids = new ArrayList<>();
         for (Constraint constraint : problem.constraints()) {

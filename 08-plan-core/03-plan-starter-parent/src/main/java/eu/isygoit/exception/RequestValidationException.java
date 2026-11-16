@@ -28,15 +28,17 @@ public class RequestValidationException extends InvalidRequestException {
         this.issues = List.copyOf(result.issues());
     }
 
-    /** @return all collected issues, errors first as reported (never {@code null}) */
-    public List<ValidationResult.Issue> issues() {
-        return issues;
-    }
-
     private static String describe(ValidationResult result) {
         ValidationResult.Issue first = result.firstError();
         int errors = result.errors().size();
         String path = first.path() == null || first.path().isEmpty() ? "" : first.path() + ": ";
         return errors <= 1 ? path + first.message() : path + first.message() + " (and " + (errors - 1) + " more error(s))";
+    }
+
+    /**
+     * @return all collected issues, errors first as reported (never {@code null})
+     */
+    public List<ValidationResult.Issue> issues() {
+        return issues;
     }
 }

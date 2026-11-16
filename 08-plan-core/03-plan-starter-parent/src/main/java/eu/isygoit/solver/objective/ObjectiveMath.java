@@ -23,7 +23,9 @@ import java.util.Map;
  */
 public final class ObjectiveMath {
 
-    /** Marker of "no due date" in {@link CandidateIndexView#due(int)}. */
+    /**
+     * Marker of "no due date" in {@link CandidateIndexView#due(int)}.
+     */
     public static final int NO_DUE = Integer.MIN_VALUE;
 
     private ObjectiveMath() {
@@ -40,7 +42,9 @@ public final class ObjectiveMath {
         return problem.options().objectiveScale();
     }
 
-    /** @return the load metric of the (possibly {@code null}) bound params, default TICKS */
+    /**
+     * @return the load metric of the (possibly {@code null}) bound params, default TICKS
+     */
     public static LoadMetric metricOf(Object params) {
         if (params instanceof LoadObjectiveParams p && p.metric() != null) {
             return p.metric();
@@ -48,7 +52,9 @@ public final class ObjectiveMath {
         return LoadMetric.TICKS;
     }
 
-    /** @return {@code max(0, end - due)} */
+    /**
+     * @return {@code max(0, end - due)}
+     */
     public static long tardiness(int end, int due) {
         return Math.max(0L, (long) end - (long) due);
     }
@@ -69,7 +75,9 @@ public final class ObjectiveMath {
         return min;
     }
 
-    /** @return a mask of length {@code resourceCount} with {@code true} at the given resource indices */
+    /**
+     * @return a mask of length {@code resourceCount} with {@code true} at the given resource indices
+     */
     public static boolean[] mask(int resourceCount, int[] resources) {
         boolean[] mask = new boolean[resourceCount];
         for (int r : resources) {
@@ -78,7 +86,9 @@ public final class ObjectiveMath {
         return mask;
     }
 
-    /** @return {@code mask[r] == true} iff at least one surviving candidate uses resource {@code r} (O(C)) */
+    /**
+     * @return {@code mask[r] == true} iff at least one surviving candidate uses resource {@code r} (O(C))
+     */
     public static boolean[] resourcesWithCandidates(CandidateIndexView index) {
         boolean[] has = new boolean[index.resourceCount()];
         for (int t = 0; t < index.taskCount(); t++) {
@@ -89,7 +99,9 @@ public final class ObjectiveMath {
         return has;
     }
 
-    /** @return the candidate ids of every resource, ascending (two passes, O(C)) */
+    /**
+     * @return the candidate ids of every resource, ascending (two passes, O(C))
+     */
     public static int[][] candidatesByResource(CandidateIndexView index) {
         int resources = index.resourceCount();
         int[] counts = new int[resources];
@@ -135,7 +147,9 @@ public final class ObjectiveMath {
         return bound;
     }
 
-    /** @return the load of a resource in a finished solution: summed (end - start) of its tasks, or their number */
+    /**
+     * @return the load of a resource in a finished solution: summed (end - start) of its tasks, or their number
+     */
     public static long load(SolutionView solution, int resource, LoadMetric metric) {
         long load = 0;
         for (int t : solution.tasksOfResource(resource)) {
@@ -176,12 +190,16 @@ public final class ObjectiveMath {
             }
         }
 
-        /** @return the lookup of a problem */
+        /**
+         * @return the lookup of a problem
+         */
         public static SetupLookup of(PlanningProblem problem) {
             return new SetupLookup(problem);
         }
 
-        /** @return {@code true} when the resource has a setup matrix */
+        /**
+         * @return {@code true} when the resource has a setup matrix
+         */
         public boolean hasMatrix(int resource) {
             String id = problem.resources().get(resource).setupMatrixId();
             return id != null && matrices.containsKey(id);

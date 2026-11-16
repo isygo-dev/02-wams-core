@@ -4,11 +4,7 @@ import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.response.ConstraintViolation;
 import eu.isygoit.dto.response.Relaxation;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Turns the violations a checker found on a DROPPED relaxable constraint into the real {@link Relaxation} impact
@@ -24,9 +20,13 @@ import java.util.TreeSet;
  */
 public final class RelaxationReporter {
 
-    /** Maximum number of task ids listed in a {@link Relaxation}. */
+    /**
+     * Maximum number of task ids listed in a {@link Relaxation}.
+     */
     public static final int MAX_TASK_IDS = 50;
-    /** {@code relaxedValue} of every reported relaxation (kept from v1). */
+    /**
+     * {@code relaxedValue} of every reported relaxation (kept from v1).
+     */
     public static final String RELAXED = "RELAXED";
 
     /**

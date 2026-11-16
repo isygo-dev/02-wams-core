@@ -1,19 +1,10 @@
 package eu.isygoit.service.impl.planning;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.Task;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.EngineCapabilities.Feature;
 
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Computes the engine features a normalized problem REQUIRES (design 7.2 / 4.5).

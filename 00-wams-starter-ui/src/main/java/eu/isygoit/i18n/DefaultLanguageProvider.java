@@ -11,7 +11,9 @@ import java.util.Optional;
 @FunctionalInterface
 public interface DefaultLanguageProvider {
 
-    /** The default language, or empty when none is set or it cannot be read (not signed in, service down...). */
+    /**
+     * The default language, or empty when none is set or it cannot be read (not signed in, service down...).
+     */
     Optional<Locale> defaultLanguage();
 
     /**

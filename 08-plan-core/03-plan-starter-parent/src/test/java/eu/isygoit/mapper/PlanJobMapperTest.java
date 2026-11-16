@@ -16,9 +16,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * {@link PlanJobMapper} / {@link PlanJobMinMapper} / {@link PlanJobJsonConverter}: json <-> typed payload conversion,
@@ -30,14 +28,6 @@ class PlanJobMapperTest {
     private PlanJobJsonConverter converter;
     private PlanJobMapper mapper;
     private PlanJobMinMapper minMapper;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        converter = new PlanJobJsonConverter(new ObjectMapper().findAndRegisterModules());
-        mapper = new PlanJobMapperImpl();
-        inject(mapper, converter);
-        minMapper = new PlanJobMinMapperImpl();
-    }
 
     private static void inject(Object target, Object dependency) throws Exception {
         for (Field field : target.getClass().getDeclaredFields()) {
@@ -53,6 +43,14 @@ class PlanJobMapperTest {
     private static PlanningRequest request() {
         return new PlanningRequest(new PlanningMeta("ref-1", "1", "school", "en", "UTC"),
                 null, null, null, null, null, null, null, null, null, null, null);
+    }
+
+    @BeforeEach
+    void setUp() throws Exception {
+        converter = new PlanJobJsonConverter(new ObjectMapper().findAndRegisterModules());
+        mapper = new PlanJobMapperImpl();
+        inject(mapper, converter);
+        minMapper = new PlanJobMinMapperImpl();
     }
 
     private PlanJob job() throws Exception {

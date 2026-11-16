@@ -8,12 +8,7 @@ import eu.isygoit.solver.CompiledObjective;
 import eu.isygoit.solver.spi.CheckContext;
 import eu.isygoit.util.ScaledMath;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Re-evaluates every objective of a finished solution INDEPENDENTLY of the engine and aggregates the per-tier values
@@ -37,14 +32,46 @@ public final class ObjectiveAggregator {
      */
     public static final Set<String> DECIMAL_TYPES = Set.of("minimize_resource_cost", "minimize_slot_cost");
 
-    /** Lowest tier compared with the engine (tier -2 is the relaxation cost). */
+    /**
+     * Lowest tier compared with the engine (tier -2 is the relaxation cost).
+     */
     public static final int FIRST_COMPARABLE_TIER = -1;
 
-    /** One tier whose recomputed value differs from the value reported by the engine. */
+    /**
+     * Evaluates all objectives.
+     *
+     * @param ctx        check context (problem, index, solution)
+     * @param objectives the compiled objectives (request order)
+     * @return the aggregate (scores + tier totals, soft penalties still to be added)
+     */
+    public Aggregate aggregate(CheckContext ctx, List<CompiledObjective> objectives) {
+        List<ObjectiveScore> scores = new ArrayList<>(objectives.size());
+        Aggregate aggregate = new Aggregate(scores);
+        for (CompiledObjective compiled : objectives) {
+            Objective objective = compiled.objective();
+            long raw = compiled.family().evaluator().evaluate(ctx, objective, compiled.params());
+            boolean reward = compiled.family().reward();
+            boolean decimal = DECIMAL_TYPES.contains(
+                    String.valueOf(objective.type()).trim().toLowerCase(java.util.Locale.ROOT));
+            double score = decimal ? ScaledMath.unscale(raw, compiled.scale()) : (double) raw;
+            double contribution = objective.weight() * score;
+            scores.add(new ObjectiveScore(objective.id(), objective.type(), compiled.tier(), objective.weight(),
+                    raw, score, contribution));
+            long internal = ScaledMath.mulExact(objective.weight(), raw);
+            aggregate.add(compiled.tier(), reward ? -internal : internal);
+        }
+        return aggregate;
+    }
+
+    /**
+     * One tier whose recomputed value differs from the value reported by the engine.
+     */
     public record Mismatch(int tier, long computed, long reported) {
     }
 
-    /** Result of one aggregation: per-objective scores and the internal tier totals. */
+    /**
+     * Result of one aggregation: per-objective scores and the internal tier totals.
+     */
     public static final class Aggregate {
         private final List<ObjectiveScore> scores;
         private final SortedMap<Integer, Long> tiers = new TreeMap<>();
@@ -53,12 +80,16 @@ public final class ObjectiveAggregator {
             this.scores = scores;
         }
 
-        /** @return one score per objective, in objective (request) order */
+        /**
+         * @return one score per objective, in objective (request) order
+         */
         public List<ObjectiveScore> scores() {
             return Collections.unmodifiableList(scores);
         }
 
-        /** @return internal tier values (minimised sense), ascending by tier; unmodifiable view */
+        /**
+         * @return internal tier values (minimised sense), ascending by tier; unmodifiable view
+         */
         public SortedMap<Integer, Long> tierTotals() {
             return Collections.unmodifiableSortedMap(tiers);
         }
@@ -103,31 +134,5 @@ public final class ObjectiveAggregator {
             }
             return out;
         }
-    }
-
-    /**
-     * Evaluates all objectives.
-     *
-     * @param ctx        check context (problem, index, solution)
-     * @param objectives the compiled objectives (request order)
-     * @return the aggregate (scores + tier totals, soft penalties still to be added)
-     */
-    public Aggregate aggregate(CheckContext ctx, List<CompiledObjective> objectives) {
-        List<ObjectiveScore> scores = new ArrayList<>(objectives.size());
-        Aggregate aggregate = new Aggregate(scores);
-        for (CompiledObjective compiled : objectives) {
-            Objective objective = compiled.objective();
-            long raw = compiled.family().evaluator().evaluate(ctx, objective, compiled.params());
-            boolean reward = compiled.family().reward();
-            boolean decimal = DECIMAL_TYPES.contains(
-                    String.valueOf(objective.type()).trim().toLowerCase(java.util.Locale.ROOT));
-            double score = decimal ? ScaledMath.unscale(raw, compiled.scale()) : (double) raw;
-            double contribution = objective.weight() * score;
-            scores.add(new ObjectiveScore(objective.id(), objective.type(), compiled.tier(), objective.weight(),
-                    raw, score, contribution));
-            long internal = ScaledMath.mulExact(objective.weight(), raw);
-            aggregate.add(compiled.tier(), reward ? -internal : internal);
-        }
-        return aggregate;
     }
 }

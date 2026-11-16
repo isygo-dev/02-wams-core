@@ -1,8 +1,8 @@
 package eu.isygoit.service.impl.planning;
 
 import eu.isygoit.config.PlanLimitsProperties;
-import eu.isygoit.dto.request.ResourceRequirement;
 import eu.isygoit.dto.request.Resource;
+import eu.isygoit.dto.request.ResourceRequirement;
 import eu.isygoit.dto.request.Task;
 import eu.isygoit.dto.response.ModelEstimateDto;
 import eu.isygoit.enums.IEnumEnforcement;
@@ -45,7 +45,9 @@ public class ModelCostEstimator {
         this.limits = limits;
     }
 
-    /** Estimator with the default limits (tests, programmatic use). */
+    /**
+     * Estimator with the default limits (tests, programmatic use).
+     */
     public ModelCostEstimator() {
         this(new PlanLimitsProperties());
     }
@@ -67,6 +69,47 @@ public class ModelCostEstimator {
             }
         }
         return total;
+    }
+
+    /**
+     * Distinct lexicographic tiers in use: objectives with weight above zero, SOFT constraints, and the reserved
+     * relaxation tier -2 when a relaxable constraint is authorized.
+     *
+     * @param constraints compiled constraints
+     * @param objectives  compiled objectives
+     * @return the distinct tiers
+     */
+    public static Set<Integer> distinctTiers(List<CompiledConstraint> constraints, List<CompiledObjective> objectives) {
+        Set<Integer> tiers = new HashSet<>();
+        for (CompiledObjective o : objectives) {
+            if (o.objective().weight() > 0) {
+                tiers.add(o.tier());
+            }
+        }
+        for (CompiledConstraint c : constraints) {
+            if (!c.active()) {
+                continue;
+            }
+            IEnumEnforcement.Types e = c.constraint().enforcement();
+            if (e == IEnumEnforcement.Types.SOFT) {
+                tiers.add(c.constraint().tier() == null ? 0 : c.constraint().tier());
+            } else if (e == IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION
+                    && c.constraint().relaxation() != null && c.constraint().relaxation().authorized()) {
+                tiers.add(-2);
+            }
+        }
+        return tiers;
+    }
+
+    private static void check(String name, long actual, long max) {
+        if (actual > max) {
+            throw new LimitExceededException(name, actual, max);
+        }
+    }
+
+    private static long saturatingAdd(long a, long b) {
+        long sum = a + b;
+        return ((a ^ sum) & (b ^ sum)) < 0 ? Long.MAX_VALUE : sum;
     }
 
     /**
@@ -161,46 +204,5 @@ public class ModelCostEstimator {
                 .tiers(distinctTiers(constraints, objectives).size())
                 .horizonTicks(index.horizonTicks)
                 .build();
-    }
-
-    /**
-     * Distinct lexicographic tiers in use: objectives with weight above zero, SOFT constraints, and the reserved
-     * relaxation tier -2 when a relaxable constraint is authorized.
-     *
-     * @param constraints compiled constraints
-     * @param objectives  compiled objectives
-     * @return the distinct tiers
-     */
-    public static Set<Integer> distinctTiers(List<CompiledConstraint> constraints, List<CompiledObjective> objectives) {
-        Set<Integer> tiers = new HashSet<>();
-        for (CompiledObjective o : objectives) {
-            if (o.objective().weight() > 0) {
-                tiers.add(o.tier());
-            }
-        }
-        for (CompiledConstraint c : constraints) {
-            if (!c.active()) {
-                continue;
-            }
-            IEnumEnforcement.Types e = c.constraint().enforcement();
-            if (e == IEnumEnforcement.Types.SOFT) {
-                tiers.add(c.constraint().tier() == null ? 0 : c.constraint().tier());
-            } else if (e == IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION
-                    && c.constraint().relaxation() != null && c.constraint().relaxation().authorized()) {
-                tiers.add(-2);
-            }
-        }
-        return tiers;
-    }
-
-    private static void check(String name, long actual, long max) {
-        if (actual > max) {
-            throw new LimitExceededException(name, actual, max);
-        }
-    }
-
-    private static long saturatingAdd(long a, long b) {
-        long sum = a + b;
-        return ((a ^ sum) & (b ^ sum)) < 0 ? Long.MAX_VALUE : sum;
     }
 }

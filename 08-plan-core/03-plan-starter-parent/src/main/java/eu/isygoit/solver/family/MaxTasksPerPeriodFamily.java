@@ -3,15 +3,7 @@ package eu.isygoit.solver.family;
 import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.params.MaxTasksPerPeriodParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PeriodBuckets;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;

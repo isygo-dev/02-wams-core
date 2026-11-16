@@ -14,20 +14,20 @@ import java.util.Locale;
  * normalised here) and {@code timefold}. Any other value is kept as given (trimmed) and rejected later by the
  * solver registry (UNKNOWN_SOLVER).
  *
- * @param engine              default "cp_sat"; aliases "cp-sat", "cpsat" become "cp_sat"; "timefold"
- * @param maxTimeSeconds      default 30, {@code >= 1} (upper bound: limits.max-time-seconds, checked by the service)
- * @param numWorkers          default 8, 1..32 (clamped to limits.max-workers by the service)
- * @param seed                default 0, must fit an int
- * @param logSearch           default false
- * @param relaxationLevels    allow-list of relaxable constraint ids, empty = all authorized ones
- * @param deterministic       default false; true makes the run reproducible
- * @param objectiveScale      decimal to long multiplier, default 100, 1..1_000_000
- * @param gapTolerance        relative gap at which the search stops, default 0.0 (prove optimality), 0..1
- * @param lexicographicMode   default AUTO
+ * @param engine               default "cp_sat"; aliases "cp-sat", "cpsat" become "cp_sat"; "timefold"
+ * @param maxTimeSeconds       default 30, {@code >= 1} (upper bound: limits.max-time-seconds, checked by the service)
+ * @param numWorkers           default 8, 1..32 (clamped to limits.max-workers by the service)
+ * @param seed                 default 0, must fit an int
+ * @param logSearch            default false
+ * @param relaxationLevels     allow-list of relaxable constraint ids, empty = all authorized ones
+ * @param deterministic        default false; true makes the run reproducible
+ * @param objectiveScale       decimal to long multiplier, default 100, 1..1_000_000
+ * @param gapTolerance         relative gap at which the search stops, default 0.0 (prove optimality), 0..1
+ * @param lexicographicMode    default AUTO
  * @param explainInfeasibility default true: run the explanation pass when INFEASIBLE
- * @param explainTimeSeconds  default {@code min(10, 20% of maxTimeSeconds)}, {@code >= 1}
- * @param keepIncumbentOnStop default true: a stop request with an incumbent yields STOPPED_FEASIBLE
- * @param fallbackToTimefold default false; when true, retry with Timefold after CP-SAT returns UNKNOWN without a solution
+ * @param explainTimeSeconds   default {@code min(10, 20% of maxTimeSeconds)}, {@code >= 1}
+ * @param keepIncumbentOnStop  default true: a stop request with an incumbent yields STOPPED_FEASIBLE
+ * @param fallbackToTimefold   default false; when true, retry with Timefold after CP-SAT returns UNKNOWN without a solution
  */
 public record SolverOptions(
         String engine,
@@ -44,11 +44,6 @@ public record SolverOptions(
         Integer explainTimeSeconds,
         Boolean keepIncumbentOnStop,
         Boolean fallbackToTimefold) {
-
-    /**
-     * How the lexicographic tiers are solved.
-     */
-    public enum LexicographicMode { AUTO, WEIGHTED, SEQUENTIAL }
 
     public static final String ENGINE_CP_SAT = "cp_sat";
     public static final String ENGINE_TIMEFOLD = "timefold";
@@ -67,7 +62,6 @@ public record SolverOptions(
      * Upper bound of the default explain time.
      */
     public static final int DEFAULT_EXPLAIN_TIME_CAP_SECONDS = 10;
-
     public SolverOptions {
         engine = normalizeEngine(engine);
         maxTimeSeconds = maxTimeSeconds == null ? Integer.valueOf(DEFAULT_MAX_TIME_SECONDS) : maxTimeSeconds;
@@ -122,15 +116,6 @@ public record SolverOptions(
     }
 
     /**
-     * Returns a copy with the requested primary engine and fallback strategy.
-     */
-    public SolverOptions withEngineAndFallback(String selectedEngine, boolean retryWithTimefold) {
-        return new SolverOptions(selectedEngine, maxTimeSeconds, numWorkers, seed, logSearch, relaxationLevels,
-                deterministic, objectiveScale, gapTolerance, lexicographicMode, explainInfeasibility,
-                explainTimeSeconds, keepIncumbentOnStop, Boolean.valueOf(retryWithTimefold));
-    }
-
-    /**
      * @return options with every default applied
      */
     public static SolverOptions defaults() {
@@ -162,4 +147,18 @@ public record SolverOptions(
                 return trimmed;
         }
     }
+
+    /**
+     * Returns a copy with the requested primary engine and fallback strategy.
+     */
+    public SolverOptions withEngineAndFallback(String selectedEngine, boolean retryWithTimefold) {
+        return new SolverOptions(selectedEngine, maxTimeSeconds, numWorkers, seed, logSearch, relaxationLevels,
+                deterministic, objectiveScale, gapTolerance, lexicographicMode, explainInfeasibility,
+                explainTimeSeconds, keepIncumbentOnStop, Boolean.valueOf(retryWithTimefold));
+    }
+
+    /**
+     * How the lexicographic tiers are solved.
+     */
+    public enum LexicographicMode {AUTO, WEIGHTED, SEQUENTIAL}
 }

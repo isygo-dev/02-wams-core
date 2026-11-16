@@ -1,13 +1,7 @@
 package eu.isygoit.service.impl.planning;
 
 import eu.isygoit.config.PlanLimitsProperties;
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.SolverOptions;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.exception.ParamsInvalidException;
 import eu.isygoit.solver.CompiledConstraint;
@@ -19,24 +13,13 @@ import eu.isygoit.solver.index.LightIndexView;
 import eu.isygoit.solver.objective.AutoObjectives;
 import eu.isygoit.solver.registry.ConstraintFamilyRegistry;
 import eu.isygoit.solver.registry.ObjectiveFamilyRegistry;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ObjectiveFamily;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.TaskRewriter;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import eu.isygoit.util.ParamsBinder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Stage 3 of the validation pipeline (design 7.2): semantic validation by the constraint and objective families and the
@@ -56,9 +39,13 @@ import java.util.Set;
 @Component
 public class ProblemVerifier {
 
-    /** Highest user tier (design 4.4: tiers 0..7, -1 and -2 are reserved). */
+    /**
+     * Highest user tier (design 4.4: tiers 0..7, -1 and -2 are reserved).
+     */
     public static final int MAX_TIER = 7;
-    /** Highest relaxation priority accepted. */
+    /**
+     * Highest relaxation priority accepted.
+     */
     public static final int MAX_RELAXATION_PRIORITY = 1000;
     private static final int MAX_OBJECTIVE_SCALE = SolverOptions.MAX_OBJECTIVE_SCALE;
 
@@ -68,20 +55,9 @@ public class ProblemVerifier {
     private static final Set<String> GROUP_KINDS = Set.of(ConstraintScope.ALL, "tag");
     private static final Set<String> OBJECTIVE_KINDS =
             Set.of(ConstraintScope.ALL, "task", "taskType", "resource", "resourceId", "resourceType", "tag");
-
-    /**
-     * Result of {@link #verifySemantics}.
-     *
-     * @param constraints compiled constraints in request order (unknown or unbindable ones are absent)
-     * @param objectives  compiled objectives in request order
-     */
-    public record Verified(List<CompiledConstraint> constraints, List<CompiledObjective> objectives) {
-    }
-
     private final ConstraintFamilyRegistry constraintRegistry;
     private final ObjectiveFamilyRegistry objectiveRegistry;
     private final PlanLimitsProperties limits;
-
     /**
      * Creates the verifier.
      *
@@ -97,9 +73,74 @@ public class ProblemVerifier {
         this.limits = limits;
     }
 
+    private static Set<String> kindsOf(ScopeKind kind) {
+        switch (kind) {
+            case TASKS:
+                return TASK_KINDS;
+            case RESOURCES:
+                return RESOURCE_KINDS;
+            case GROUPS:
+                return GROUP_KINDS;
+            default:
+                return null; // NONE: the scope is ignored
+        }
+    }
+
     // ==================================================================================================
     // Semantic validation
     // ==================================================================================================
+
+    private static void checkScope(ValidationResult out, String path, ConstraintScope scope, Set<String> allowed,
+                                   String type) {
+        if (allowed == null || scope == null || allowed.contains(scope.kind())) {
+            return;
+        }
+        out.error("INVALID_SCOPE", path + ".kind", "scope kind '" + scope.kind() + "' is not valid for '" + type
+                + "' (allowed: " + allowed + ")", args("kind", scope.kind(), "type", type));
+    }
+
+    private static boolean supports(EnforcementSupport support, Constraint c) {
+        switch (c.enforcement()) {
+            case SOFT:
+                return support.soft();
+            case RELAXABLE_WITH_AUTHORIZATION:
+                return c.relaxation() != null && c.relaxation().authorized() ? support.relaxable() : support.hard();
+            default:
+                return support.hard();
+        }
+    }
+
+    private static void checkDisjointSlots(PlanningProblem problem, ValidationResult out) {
+        List<Integer> order = new ArrayList<>();
+        List<Slot> slots = problem.slots();
+        for (int s = 0; s < slots.size(); s++) {
+            order.add(s);
+        }
+        order.sort(Comparator.<Integer, Instant>comparing(s -> slots.get(s).start()).thenComparing(s -> s));
+        Instant maxEnd = null;
+        int maxEndSlot = -1;
+        for (int s : order) {
+            Slot slot = slots.get(s);
+            if (maxEnd != null && slot.start().isBefore(maxEnd)) {
+                out.error("OVERLAPPING_SLOTS", "slots[" + s + "]", "Slot '" + slot.id() + "' overlaps slot '"
+                                + slots.get(maxEndSlot).id() + "': this engine needs pairwise disjoint slots",
+                        args("slot", slot.id(), "other", slots.get(maxEndSlot).id()));
+                return;
+            }
+            if (maxEnd == null || slot.end().isAfter(maxEnd)) {
+                maxEnd = slot.end();
+                maxEndSlot = s;
+            }
+        }
+    }
+
+    private static Map<String, Object> args(Object... kv) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (int i = 0; i + 1 < kv.length; i += 2) {
+            map.put(String.valueOf(kv[i]), kv[i + 1]);
+        }
+        return map;
+    }
 
     /**
      * Verifies constraints and objectives of a normalized problem.
@@ -128,12 +169,16 @@ public class ProblemVerifier {
         return new Verified(compiledConstraints, compiledObjectives);
     }
 
+    // ==================================================================================================
+    // Capability check
+    // ==================================================================================================
+
     private CompiledConstraint verifyConstraint(Context ctx, int i, Constraint c, ValidationResult out) {
         String at = "constraints[" + i + "]";
         ConstraintFamily family = constraintRegistry.find(c.type()).orElse(null);
         if (family == null) {
             out.error("UNKNOWN_CONSTRAINT", at + ".type", "Unknown constraint type '" + c.type()
-                    + "'. Supported types: " + constraintRegistry.supportedTypes(),
+                            + "'. Supported types: " + constraintRegistry.supportedTypes(),
                     args("type", c.type(), "supported", String.valueOf(constraintRegistry.supportedTypes())));
             return null;
         }
@@ -186,7 +231,7 @@ public class ProblemVerifier {
         ObjectiveFamily family = objectiveRegistry.find(o.type()).orElse(null);
         if (family == null) {
             out.error("UNKNOWN_OBJECTIVE", at + ".type", "Unknown objective type '" + o.type()
-                    + "'. Supported types: " + objectiveRegistry.supportedTypes(),
+                            + "'. Supported types: " + objectiveRegistry.supportedTypes(),
                     args("type", o.type(), "supported", String.valueOf(objectiveRegistry.supportedTypes())));
             return null;
         }
@@ -221,32 +266,6 @@ public class ProblemVerifier {
         return new CompiledObjective(i, o, family, params, tier, scale);
     }
 
-    private static Set<String> kindsOf(ScopeKind kind) {
-        switch (kind) {
-            case TASKS:
-                return TASK_KINDS;
-            case RESOURCES:
-                return RESOURCE_KINDS;
-            case GROUPS:
-                return GROUP_KINDS;
-            default:
-                return null; // NONE: the scope is ignored
-        }
-    }
-
-    private static void checkScope(ValidationResult out, String path, ConstraintScope scope, Set<String> allowed,
-                                   String type) {
-        if (allowed == null || scope == null || allowed.contains(scope.kind())) {
-            return;
-        }
-        out.error("INVALID_SCOPE", path + ".kind", "scope kind '" + scope.kind() + "' is not valid for '" + type
-                + "' (allowed: " + allowed + ")", args("kind", scope.kind(), "type", type));
-    }
-
-    // ==================================================================================================
-    // Capability check
-    // ==================================================================================================
-
     /**
      * Checks the problem against one engine.
      *
@@ -259,7 +278,7 @@ public class ProblemVerifier {
         for (Map.Entry<Feature, String> need : FeatureScanner.scan(problem).entrySet()) {
             if (!engine.supports(need.getKey())) {
                 out.error("ENGINE_UNSUPPORTED_FEATURE", need.getValue(), "Engine '" + engineId
-                        + "' does not support the feature " + need.getKey() + " (first used here)",
+                                + "' does not support the feature " + need.getKey() + " (first used here)",
                         args("feature", need.getKey().name(), "engine", engineId));
             }
         }
@@ -280,7 +299,7 @@ public class ProblemVerifier {
             EnforcementSupport support = engine.constraints().get(type);
             if (support == null) {
                 out.error("ENGINE_UNSUPPORTED_CONSTRAINT", at, "Engine '" + engineId
-                        + "' does not support the constraint type '" + c.type() + "'",
+                                + "' does not support the constraint type '" + c.type() + "'",
                         args("type", c.type(), "engine", engineId));
             } else if (!supports(support, c)) {
                 out.error("ENGINE_UNSUPPORTED_ENFORCEMENT", at + ".enforcement", "Engine '" + engineId
@@ -294,7 +313,7 @@ public class ProblemVerifier {
             String type = o.type() == null ? "" : o.type().trim().toLowerCase(Locale.ROOT);
             if (!engine.objectives().contains(type)) {
                 out.error("ENGINE_UNSUPPORTED_OBJECTIVE", "objectives[" + i + "]", "Engine '" + engineId
-                        + "' does not support the objective type '" + o.type() + "'",
+                                + "' does not support the objective type '" + o.type() + "'",
                         args("type", o.type(), "engine", engineId));
             }
         }
@@ -310,54 +329,22 @@ public class ProblemVerifier {
         return constraintRegistry.find(c.type()).map(f -> f instanceof TaskRewriter).orElse(false);
     }
 
-    private static boolean supports(EnforcementSupport support, Constraint c) {
-        switch (c.enforcement()) {
-            case SOFT:
-                return support.soft();
-            case RELAXABLE_WITH_AUTHORIZATION:
-                return c.relaxation() != null && c.relaxation().authorized() ? support.relaxable() : support.hard();
-            default:
-                return support.hard();
-        }
-    }
-
-    private static void checkDisjointSlots(PlanningProblem problem, ValidationResult out) {
-        List<Integer> order = new ArrayList<>();
-        List<Slot> slots = problem.slots();
-        for (int s = 0; s < slots.size(); s++) {
-            order.add(s);
-        }
-        order.sort(Comparator.<Integer, Instant>comparing(s -> slots.get(s).start()).thenComparing(s -> s));
-        Instant maxEnd = null;
-        int maxEndSlot = -1;
-        for (int s : order) {
-            Slot slot = slots.get(s);
-            if (maxEnd != null && slot.start().isBefore(maxEnd)) {
-                out.error("OVERLAPPING_SLOTS", "slots[" + s + "]", "Slot '" + slot.id() + "' overlaps slot '"
-                        + slots.get(maxEndSlot).id() + "': this engine needs pairwise disjoint slots",
-                        args("slot", slot.id(), "other", slots.get(maxEndSlot).id()));
-                return;
-            }
-            if (maxEnd == null || slot.end().isAfter(maxEnd)) {
-                maxEnd = slot.end();
-                maxEndSlot = s;
-            }
-        }
-    }
-
-    private static Map<String, Object> args(Object... kv) {
-        Map<String, Object> map = new LinkedHashMap<>();
-        for (int i = 0; i + 1 < kv.length; i += 2) {
-            map.put(String.valueOf(kv[i]), kv[i + 1]);
-        }
-        return map;
+    /**
+     * Result of {@link #verifySemantics}.
+     *
+     * @param constraints compiled constraints in request order (unknown or unbindable ones are absent)
+     * @param objectives  compiled objectives in request order
+     */
+    public record Verified(List<CompiledConstraint> constraints, List<CompiledObjective> objectives) {
     }
 
     // ==================================================================================================
     // ValidationContext
     // ==================================================================================================
 
-    /** Context handed to the families: light index view, strict params binding, issue sink. */
+    /**
+     * Context handed to the families: light index view, strict params binding, issue sink.
+     */
     private static final class Context implements ValidationContext {
 
         private final PlanningProblem problem;

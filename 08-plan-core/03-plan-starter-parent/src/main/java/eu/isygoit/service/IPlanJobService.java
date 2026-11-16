@@ -1,12 +1,12 @@
 package eu.isygoit.service;
 
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
+import eu.isygoit.dto.data.LogEntry;
 import eu.isygoit.dto.request.PlanningRequest;
 import eu.isygoit.dto.response.CapabilitiesDto;
 import eu.isygoit.dto.response.JobDashboardSummary;
 import eu.isygoit.dto.response.SolveResult;
 import eu.isygoit.dto.response.ValidationReportDto;
-import eu.isygoit.dto.data.LogEntry;
 import eu.isygoit.enums.IEnumLogLevel;
 import eu.isygoit.model.PlanJob;
 

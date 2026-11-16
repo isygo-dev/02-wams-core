@@ -1,10 +1,6 @@
 package eu.isygoit.solver.cpsat.contrib;
 
-import com.google.ortools.sat.CpModel;
-import com.google.ortools.sat.IntVar;
-import com.google.ortools.sat.LinearArgument;
-import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.Literal;
+import com.google.ortools.sat.*;
 import eu.isygoit.dto.request.params.TimeWindowParams;
 import eu.isygoit.solver.CompiledConstraint;
 import eu.isygoit.solver.cpsat.CpModelContext;
@@ -31,6 +27,67 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TimeWindowContributor implements CpSatConstraintContributor {
+
+    private static void addHard(CpModelContext ctx, Enforcer enforcer, int t, int which, int bound) {
+        CpModel model = ctx.model();
+        Literal[] conditions = enforcer.conditions(enforcer.instance(t, -1), optionalPresence(ctx, t));
+        com.google.ortools.sat.Constraint rule = switch (which) {
+            case TimeWindowFamily.EARLIEST_START -> model.addGreaterOrEqual(ctx.start(t), bound);
+            case TimeWindowFamily.LATEST_START -> model.addLessOrEqual(ctx.start(t), bound);
+            case TimeWindowFamily.EARLIEST_END -> model.addGreaterOrEqual(ctx.end(t), bound);
+            default -> model.addLessOrEqual(ctx.end(t), bound);
+        };
+        if (conditions.length > 0) {
+            rule.onlyEnforceIf(conditions);
+        }
+    }
+
+    private static void addSoft(CpModelContext ctx, Enforcer enforcer, int t, int which, int bound, long maxMeasure) {
+        CpModel model = ctx.model();
+        IntVar slack = model.newIntVar(0, maxMeasure, "");
+        com.google.ortools.sat.Constraint channel = switch (which) {
+            case TimeWindowFamily.EARLIEST_START -> model.addGreaterOrEqual(sum(slack, ctx.start(t)), bound);
+            case TimeWindowFamily.LATEST_START -> model.addGreaterOrEqual(slack, plus(ctx.start(t), -(long) bound));
+            case TimeWindowFamily.EARLIEST_END -> model.addGreaterOrEqual(sum(slack, ctx.end(t)), bound);
+            default -> model.addGreaterOrEqual(slack, plus(ctx.end(t), -(long) bound));
+        };
+        // definitional channel of the measure (never enforced by the instance); an absent optional task owes nothing
+        Literal presence = optionalPresence(ctx, t);
+        if (presence != null) {
+            channel.onlyEnforceIf(presence);
+        }
+        // OR-TOOLS-VERIFY: wrapping the IntVar in a LinearExpr (the Enforcer signature takes a LinearExpr)
+        enforcer.penalizeMeasure(LinearExpr.newBuilder().add(slack).build(), maxMeasure, t);
+    }
+
+    private static boolean variableDuration(CandidateIndexView idx, int t) {
+        long min = Long.MAX_VALUE;
+        long max = Long.MIN_VALUE;
+        for (int c = idx.candidateBegin(t); c < idx.candidateEnd(t); c++) {
+            min = Math.min(min, idx.candidateDuration(c));
+            max = Math.max(max, idx.candidateDuration(c));
+        }
+        return max != Long.MIN_VALUE && min != max;
+    }
+
+    private static Literal optionalPresence(CpModelContext ctx, int t) {
+        Literal presence = ctx.presence(t);
+        return presence == ctx.trueLit() ? null : presence;
+    }
+
+    /**
+     * @return {@code a + b}. OR-TOOLS-VERIFY: LinearExprBuilder.add(LinearArgument)
+     */
+    private static LinearExpr sum(LinearArgument a, LinearArgument b) {
+        return LinearExpr.newBuilder().add(a).add(b).build();
+    }
+
+    /**
+     * @return {@code expr + constant}. OR-TOOLS-VERIFY: LinearExprBuilder.add(long)
+     */
+    private static LinearExpr plus(LinearArgument expr, long constant) {
+        return LinearExpr.newBuilder().add(expr).add(constant).build();
+    }
 
     @Override
     public String type() {
@@ -80,62 +137,5 @@ public class TimeWindowContributor implements CpSatConstraintContributor {
             }
         }
         ctx.count(0, intVars, constraints, 0);
-    }
-
-    private static void addHard(CpModelContext ctx, Enforcer enforcer, int t, int which, int bound) {
-        CpModel model = ctx.model();
-        Literal[] conditions = enforcer.conditions(enforcer.instance(t, -1), optionalPresence(ctx, t));
-        com.google.ortools.sat.Constraint rule = switch (which) {
-            case TimeWindowFamily.EARLIEST_START -> model.addGreaterOrEqual(ctx.start(t), bound);
-            case TimeWindowFamily.LATEST_START -> model.addLessOrEqual(ctx.start(t), bound);
-            case TimeWindowFamily.EARLIEST_END -> model.addGreaterOrEqual(ctx.end(t), bound);
-            default -> model.addLessOrEqual(ctx.end(t), bound);
-        };
-        if (conditions.length > 0) {
-            rule.onlyEnforceIf(conditions);
-        }
-    }
-
-    private static void addSoft(CpModelContext ctx, Enforcer enforcer, int t, int which, int bound, long maxMeasure) {
-        CpModel model = ctx.model();
-        IntVar slack = model.newIntVar(0, maxMeasure, "");
-        com.google.ortools.sat.Constraint channel = switch (which) {
-            case TimeWindowFamily.EARLIEST_START -> model.addGreaterOrEqual(sum(slack, ctx.start(t)), bound);
-            case TimeWindowFamily.LATEST_START -> model.addGreaterOrEqual(slack, plus(ctx.start(t), -(long) bound));
-            case TimeWindowFamily.EARLIEST_END -> model.addGreaterOrEqual(sum(slack, ctx.end(t)), bound);
-            default -> model.addGreaterOrEqual(slack, plus(ctx.end(t), -(long) bound));
-        };
-        // definitional channel of the measure (never enforced by the instance); an absent optional task owes nothing
-        Literal presence = optionalPresence(ctx, t);
-        if (presence != null) {
-            channel.onlyEnforceIf(presence);
-        }
-        // OR-TOOLS-VERIFY: wrapping the IntVar in a LinearExpr (the Enforcer signature takes a LinearExpr)
-        enforcer.penalizeMeasure(LinearExpr.newBuilder().add(slack).build(), maxMeasure, t);
-    }
-
-    private static boolean variableDuration(CandidateIndexView idx, int t) {
-        long min = Long.MAX_VALUE;
-        long max = Long.MIN_VALUE;
-        for (int c = idx.candidateBegin(t); c < idx.candidateEnd(t); c++) {
-            min = Math.min(min, idx.candidateDuration(c));
-            max = Math.max(max, idx.candidateDuration(c));
-        }
-        return max != Long.MIN_VALUE && min != max;
-    }
-
-    private static Literal optionalPresence(CpModelContext ctx, int t) {
-        Literal presence = ctx.presence(t);
-        return presence == ctx.trueLit() ? null : presence;
-    }
-
-    /** @return {@code a + b}. OR-TOOLS-VERIFY: LinearExprBuilder.add(LinearArgument) */
-    private static LinearExpr sum(LinearArgument a, LinearArgument b) {
-        return LinearExpr.newBuilder().add(a).add(b).build();
-    }
-
-    /** @return {@code expr + constant}. OR-TOOLS-VERIFY: LinearExprBuilder.add(long) */
-    private static LinearExpr plus(LinearArgument expr, long constant) {
-        return LinearExpr.newBuilder().add(expr).add(constant).build();
     }
 }

@@ -15,22 +15,27 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-/** One instance literal per (from, to) pair shared by the min-lag and max-lag constraints. */
+/**
+ * One instance literal per (from, to) pair shared by the min-lag and max-lag constraints.
+ */
 class PrecedenceContributorTest {
-
-    private final PrecedenceContributor contributor = new PrecedenceContributor();
-    private final PrecedenceFamily family = new PrecedenceFamily();
 
     private static final ConstraintScope FROM = new ConstraintScope("tag", "from");
     private static final ConstraintScope TO = new ConstraintScope("tag", "to");
+    private final PrecedenceContributor contributor = new PrecedenceContributor();
+    private final PrecedenceFamily family = new PrecedenceFamily();
 
-    /** tasks 0,1 = "from" side, tasks 2,3 = "to" side; task 3 optional when requested. */
+    private static PrecedenceParams params(Integer minLag, Integer maxLag, PrecedenceParams.PairingMode pairing) {
+        return new PrecedenceParams(FROM, TO, PrecedenceRef.Type.FINISH_START, minLag, maxLag, pairing);
+    }
+
+    /**
+     * tasks 0,1 = "from" side, tasks 2,3 = "to" side; task 3 optional when requested.
+     */
     private ContribTestSupport fixture(boolean optionalLast) {
         ContribTestSupport s = new ContribTestSupport(1);
         s.task(0, 50, false, 0, 5);
@@ -47,10 +52,6 @@ class PrecedenceContributorTest {
     private CompiledConstraint compiled(IEnumEnforcement.Types e, PrecedenceParams p) {
         Constraint c = ContribTestSupport.constraint("precedence", e, ConstraintScope.all());
         return ContribTestSupport.compiled(c, family, p);
-    }
-
-    private static PrecedenceParams params(Integer minLag, Integer maxLag, PrecedenceParams.PairingMode pairing) {
-        return new PrecedenceParams(FROM, TO, PrecedenceRef.Type.FINISH_START, minLag, maxLag, pairing);
     }
 
     @Test

@@ -26,7 +26,9 @@ public class CpSatProperties {
      */
     private int maxStartChoices = 256;
 
-    /** Kill switch of the symmetry breaking module (design 6.7 / R-11). */
+    /**
+     * Kill switch of the symmetry breaking module (design 6.7 / R-11).
+     */
     private boolean symmetryBreaking = true;
 
     /**
@@ -35,9 +37,13 @@ public class CpSatProperties {
      */
     private double dtimePerSecond = 1.0;
 
-    /** Minimum interval between two {@code SolveListener.onProgress} events of the solution callback. */
+    /**
+     * Minimum interval between two {@code SolveListener.onProgress} events of the solution callback.
+     */
     private long progressIntervalMillis = 1000L;
 
-    /** Minimum interval between two {@code SolveListener.onIncumbent} snapshots of the solution callback. */
+    /**
+     * Minimum interval between two {@code SolveListener.onIncumbent} snapshots of the solution callback.
+     */
     private long incumbentIntervalMillis = 2000L;
 }

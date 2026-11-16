@@ -60,7 +60,9 @@ public final class ManagementViewModeSwitch extends Div {
         return TABLE.equals(mode);
     }
 
-    /** True when the extra mode {@code id} is the active one. */
+    /**
+     * True when the extra mode {@code id} is the active one.
+     */
     public boolean isMode(String id) {
         return id.equals(mode);
     }

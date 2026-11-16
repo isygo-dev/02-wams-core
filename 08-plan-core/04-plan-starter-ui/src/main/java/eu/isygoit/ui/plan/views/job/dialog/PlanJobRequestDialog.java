@@ -128,15 +128,6 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
         addContent(stack);
     }
 
-    private String engineLabel(String engine) {
-        return switch (engine) {
-            case SolverOptions.ENGINE_CP_SAT -> I18n.t("plan.ui.job.engine.cp_sat");
-            case SolverOptions.ENGINE_TIMEFOLD -> I18n.t("plan.ui.job.engine.timefold");
-            case ENGINE_TRY_BOTH -> I18n.t("plan.ui.job.engine.try_both");
-            default -> engine;
-        };
-    }
-
     /**
      * Empty form: submits a new job.
      */
@@ -159,7 +150,7 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
      * (the old one would make the service return the existing job instead of creating a new one).
      */
     public static PlanJobRequestDialog cloneOf(PlanFeignService service, ObjectMapper objectMapper,
-                                             PlanningRequest source, Runnable onSuccess) {
+                                               PlanningRequest source, Runnable onSuccess) {
         return new PlanJobRequestDialog(I18n.t("plan.ui.job.clone.title"), service, objectMapper, null, source,
                 cloneRef(clientRefOf(source)), onSuccess);
     }
@@ -212,6 +203,15 @@ public class PlanJobRequestDialog extends AbstractEditionDialog {
         return new PlanningRequest(request.meta(), request.domain(), request.horizon(), request.slots(),
                 request.calendars(), request.setupMatrices(), request.resources(), request.tasks(),
                 request.constraints(), request.objectives(), updated, request.initialSolution());
+    }
+
+    private String engineLabel(String engine) {
+        return switch (engine) {
+            case SolverOptions.ENGINE_CP_SAT -> I18n.t("plan.ui.job.engine.cp_sat");
+            case SolverOptions.ENGINE_TIMEFOLD -> I18n.t("plan.ui.job.engine.timefold");
+            case ENGINE_TRY_BOTH -> I18n.t("plan.ui.job.engine.try_both");
+            default -> engine;
+        };
     }
 
     private String format(PlanningRequest request) {

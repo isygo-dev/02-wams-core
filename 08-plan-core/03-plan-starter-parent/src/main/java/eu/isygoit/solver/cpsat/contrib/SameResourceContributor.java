@@ -27,6 +27,17 @@ import java.util.TreeSet;
 @Component
 public class SameResourceContributor implements CpSatConstraintContributor {
 
+    private static Literal[] clause(Literal notA, Literal notB, Literal self, List<Literal> others) {
+        Literal[] out = new Literal[3 + others.size()];
+        out[0] = notA;
+        out[1] = notB;
+        out[2] = self;
+        for (int i = 0; i < others.size(); i++) {
+            out[3 + i] = others.get(i);
+        }
+        return out;
+    }
+
     @Override
     public String type() {
         return SameResourceFamily.TYPE;
@@ -74,16 +85,5 @@ public class SameResourceContributor implements CpSatConstraintContributor {
                 ContribSupport.count(ctx, 0, 0, clauses.size(), 0);
             }
         }
-    }
-
-    private static Literal[] clause(Literal notA, Literal notB, Literal self, List<Literal> others) {
-        Literal[] out = new Literal[3 + others.size()];
-        out[0] = notA;
-        out[1] = notB;
-        out[2] = self;
-        for (int i = 0; i < others.size(); i++) {
-            out[3 + i] = others.get(i);
-        }
-        return out;
     }
 }

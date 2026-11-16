@@ -1,15 +1,11 @@
 package eu.isygoit.solver.cpsat.contrib;
 
 import com.google.ortools.sat.BoolVar;
-import com.google.ortools.sat.Literal;
 import com.google.ortools.sat.LinearExpr;
+import com.google.ortools.sat.Literal;
 import eu.isygoit.dto.request.params.MaxTasksPerPeriodParams;
 import eu.isygoit.solver.CompiledConstraint;
-import eu.isygoit.solver.cpsat.BucketGrid;
-import eu.isygoit.solver.cpsat.CpModelContext;
-import eu.isygoit.solver.cpsat.CpSatConstraintContributor;
-import eu.isygoit.solver.cpsat.EnforcementSupport;
-import eu.isygoit.solver.cpsat.Enforcer;
+import eu.isygoit.solver.cpsat.*;
 import eu.isygoit.solver.family.MaxTasksPerPeriodFamily;
 import org.springframework.stereotype.Component;
 

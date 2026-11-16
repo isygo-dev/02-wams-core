@@ -36,7 +36,9 @@ public final class CandidateIndex implements CandidateIndexView {
     public final PlanLimitsProperties limits;
     // ---- ids
     public final String[] taskIds, resourceIds, slotIds, roles;
-    /** Setup class names (global dictionary): {@link #setupClass} indexes it. */
+    /**
+     * Setup class names (global dictionary): {@link #setupClass} indexes it.
+     */
     public final String[] setupClassNames;
     // ---- tasks
     public final int[] duration, demand, priority;
@@ -54,14 +56,20 @@ public final class CandidateIndex implements CandidateIndexView {
     // ---- requirements (CSR by task)
     public final int[] taskReqStart;
     public final int[] reqCount, reqAmount, reqRole;
-    /** Owning task of each requirement. */
+    /**
+     * Owning task of each requirement.
+     */
     public final int[] reqTask;
-    /** CSR by requirement into the candidates ({@code [reqCandStart[q], reqCandStart[q+1])}, {@code Q + 1} entries). */
+    /**
+     * CSR by requirement into the candidates ({@code [reqCandStart[q], reqCandStart[q+1])}, {@code Q + 1} entries).
+     */
     public final int[] reqCandStart;
     // ---- candidates (CSR by task)
     public final int[] taskCandStart;
     public final int[] candTask, candReq, candResource, candDuration, candAmount;
-    /** {@code true} when the candidate resource was named by a PARTIAL {@code Task.pin.resourceIds}: it must be used. */
+    /**
+     * {@code true} when the candidate resource was named by a PARTIAL {@code Task.pin.resourceIds}: it must be used.
+     */
     public final boolean[] candForced;
     public final int[] candStartRunStart, candStartRuns;
     // ---- candidates (CSR by resource)
@@ -71,7 +79,9 @@ public final class CandidateIndex implements CandidateIndexView {
     public final int[] capacity;
     public final int[] resCalendar;
     public final int[] resRunStart, resRuns;
-    /** {@code true} when the resource has no availability at all inside the horizon (all its candidates are pruned). */
+    /**
+     * {@code true} when the resource has no availability at all inside the horizon (all its candidates are pruned).
+     */
     public final boolean[] resNeverAvailable;
     public final int[] resSetupMatrix;
     public final int[] maxLoadTicks;
@@ -85,11 +95,17 @@ public final class CandidateIndex implements CandidateIndexView {
     // ---- symmetry
     public final int[] taskSymmetryClass, resourceSymmetryClass;
     // ---- diagnostics
-    /** Candidates removed during the build (bounded to 10 000 records) with the reason, for the infeasibility core. */
+    /**
+     * Candidates removed during the build (bounded to 10 000 records) with the reason, for the infeasibility core.
+     */
     public final List<CandidateIndexBuilder.PrunedCandidate> prunedCandidates;
-    /** Total number of removed candidates (can exceed the size of {@link #prunedCandidates}). */
+    /**
+     * Total number of removed candidates (can exceed the size of {@link #prunedCandidates}).
+     */
     public final long prunedTotal;
-    /** Calendar warnings produced while expanding availability. */
+    /**
+     * Calendar warnings produced while expanding availability.
+     */
     public final List<DiagnosticIssue> warnings;
 
     private final ScopeResolver scopes;
@@ -348,7 +364,9 @@ public final class CandidateIndex implements CandidateIndexView {
         return candAmount[candidate];
     }
 
-    /** Linear lookup helper (slot ids are only resolved at build/validation time). */
+    /**
+     * Linear lookup helper (slot ids are only resolved at build/validation time).
+     */
     private static final class SlotLookup {
         static int indexOf(String[] ids, String id) {
             if (id == null) {

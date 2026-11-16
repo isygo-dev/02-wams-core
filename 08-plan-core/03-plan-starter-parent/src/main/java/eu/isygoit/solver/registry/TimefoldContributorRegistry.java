@@ -31,22 +31,30 @@ public final class TimefoldContributorRegistry {
         this.objectives = TypeIndex.index(objectives, TimefoldObjectiveContributor::type, "Timefold objective contributor");
     }
 
-    /** @return the contributor of the constraint type, or empty when none (or the type is {@code null}) */
+    /**
+     * @return the contributor of the constraint type, or empty when none (or the type is {@code null})
+     */
     public Optional<TimefoldConstraintContributor> constraint(String type) {
         return Optional.ofNullable(constraints.get(TypeIndex.canonical(type)));
     }
 
-    /** @return the contributor of the objective type, or empty when none (or the type is {@code null}) */
+    /**
+     * @return the contributor of the objective type, or empty when none (or the type is {@code null})
+     */
     public Optional<TimefoldObjectiveContributor> objective(String type) {
         return Optional.ofNullable(objectives.get(TypeIndex.canonical(type)));
     }
 
-    /** @return the constraint types that have a contributor, ascending, unmodifiable */
+    /**
+     * @return the constraint types that have a contributor, ascending, unmodifiable
+     */
     public Collection<String> constraintTypes() {
         return constraints.keySet();
     }
 
-    /** @return the objective types that have a contributor, ascending, unmodifiable */
+    /**
+     * @return the objective types that have a contributor, ascending, unmodifiable
+     */
     public Collection<String> objectiveTypes() {
         return objectives.keySet();
     }

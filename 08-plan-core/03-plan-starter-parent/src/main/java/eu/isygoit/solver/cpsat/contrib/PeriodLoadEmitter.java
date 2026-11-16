@@ -14,11 +14,7 @@ import eu.isygoit.solver.family.FamilySupport;
 import eu.isygoit.solver.index.CandidateIndex;
 import eu.isygoit.solver.spi.PeriodBuckets;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Shared CP-SAT formulation of {@code max_load_per_period} and {@code max_tasks_per_resource} (design 6.5.9, 6.5.15): for
@@ -31,9 +27,6 @@ import java.util.TreeMap;
  * (TICKS) or 1 (COUNT).
  */
 final class PeriodLoadEmitter {
-
-    private record Term(Literal literal, long value) {
-    }
 
     private PeriodLoadEmitter() {
     }
@@ -141,5 +134,8 @@ final class PeriodLoadEmitter {
             b.addTerm(term.literal(), term.value());
         }
         return b.build();
+    }
+
+    private record Term(Literal literal, long value) {
     }
 }

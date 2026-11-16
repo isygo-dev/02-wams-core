@@ -24,7 +24,9 @@ public record BucketGrid(int[] lo, int[] hi, String id) {
         hi = hi.clone();
     }
 
-    /** @return the number of buckets */
+    /**
+     * @return the number of buckets
+     */
     public int size() {
         return lo.length;
     }

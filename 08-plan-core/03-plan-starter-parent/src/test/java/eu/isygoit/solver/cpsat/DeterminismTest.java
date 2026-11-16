@@ -12,11 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static eu.isygoit.solver.cpsat.CpSatTestKit.on;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.options;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.resource;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.task;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.tier;
+import static eu.isygoit.solver.cpsat.CpSatTestKit.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**

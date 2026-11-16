@@ -63,6 +63,15 @@ public final class ProgressCallback extends CpSolverSolutionCallback {
         this.hasObjective = hasObjective;
     }
 
+    /**
+     * @param objective the objective value
+     * @param bound     the best bound
+     * @return the relative gap {@code |objective - bound| / max(1, |objective|)}
+     */
+    public static double gap(double objective, double bound) {
+        return Math.abs(objective - bound) / Math.max(1.0d, Math.abs(objective));
+    }
+
     @Override
     public void onSolutionCallback() {
         try {
@@ -95,30 +104,29 @@ public final class ProgressCallback extends CpSolverSolutionCallback {
     }
 
     /**
-     * @param objective the objective value
-     * @param bound     the best bound
-     * @return the relative gap {@code |objective - bound| / max(1, |objective|)}
+     * @return the number of solutions found by this solve
      */
-    public static double gap(double objective, double bound) {
-        return Math.abs(objective - bound) / Math.max(1.0d, Math.abs(objective));
-    }
-
-    /** @return the number of solutions found by this solve */
     public int solutionCount() {
         return solutions;
     }
 
-    /** @return the time of the first solution in milliseconds since the request start, or null when none was found */
+    /**
+     * @return the time of the first solution in milliseconds since the request start, or null when none was found
+     */
     public Long firstSolutionMillis() {
         return firstSolutionMillis;
     }
 
-    /** @return the objective of the last solution (0 without objective) */
+    /**
+     * @return the objective of the last solution (0 without objective)
+     */
     public double lastObjective() {
         return lastObjective;
     }
 
-    /** @return the best bound seen at the last solution (0 without objective) */
+    /**
+     * @return the best bound seen at the last solution (0 without objective)
+     */
     public double lastBound() {
         return lastBound;
     }

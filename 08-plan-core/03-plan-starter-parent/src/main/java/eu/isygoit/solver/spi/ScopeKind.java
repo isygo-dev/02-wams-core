@@ -7,12 +7,20 @@ package eu.isygoit.solver.spi;
  * Pure enum: immutable, thread-safe.
  */
 public enum ScopeKind {
-    /** Scope selects tasks (kind = all | task | taskType | tag). */
+    /**
+     * Scope selects tasks (kind = all | task | taskType | tag).
+     */
     TASKS,
-    /** Scope selects resources (kind = all | resource | resourceId | resourceType | tag of a resource). */
+    /**
+     * Scope selects resources (kind = all | resource | resourceId | resourceType | tag of a resource).
+     */
     RESOURCES,
-    /** Scope is a task-tag group: kind = tag (one group) or kind = all together with a groupByTagPrefix param. */
+    /**
+     * Scope is a task-tag group: kind = tag (one group) or kind = all together with a groupByTagPrefix param.
+     */
     GROUPS,
-    /** The family ignores the scope entirely (for example forbidden_pair). */
+    /**
+     * The family ignores the scope entirely (for example forbidden_pair).
+     */
     NONE
 }

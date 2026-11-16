@@ -17,7 +17,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MaximizeTaskPriorityTimefoldContributor implements TimefoldObjectiveContributor {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "maximize_task_priority";
 
     @Override

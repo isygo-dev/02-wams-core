@@ -29,11 +29,7 @@ import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.common.dialog.NoActionDialog;
 import eu.isygoit.ui.common.notification.AppNotifications;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
-import eu.isygoit.ui.plan.common.PlanEnumTag;
-import eu.isygoit.ui.plan.common.PlanErrors;
-import eu.isygoit.ui.plan.common.PlanFormats;
-import eu.isygoit.ui.plan.common.PlanJsonEditor;
-import eu.isygoit.ui.plan.common.PlanPush;
+import eu.isygoit.ui.plan.common.*;
 import eu.isygoit.ui.plan.layout.PlanMainLayout;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
@@ -61,8 +57,6 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
     private final Grid<LogEntry> logsGrid = new Grid<>(LogEntry.class, false);
     private final eu.isygoit.ui.common.component.GridPager<LogEntry> logsPager =
             new eu.isygoit.ui.common.component.GridPager<>(logsGrid);
-    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::loadLogs);
-
     public PlanLogsView(PlanFeignService planFeignService, ObjectMapper objectMapper) {
         this.planFeignService = planFeignService;
         this.objectMapper = objectMapper;
@@ -75,7 +69,7 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
         add(buildToolbar());
         configureGrid();
         add(logsGrid, refreshButton);
-    }
+    }    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::loadLogs);
 
     @Override
     public String getPageTitle() {
@@ -200,4 +194,6 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
         dialog.add(details);
         dialog.open();
     }
+
+
 }

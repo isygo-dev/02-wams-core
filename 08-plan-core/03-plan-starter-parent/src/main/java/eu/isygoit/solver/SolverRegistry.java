@@ -2,12 +2,7 @@ package eu.isygoit.solver;
 
 import eu.isygoit.exception.UnknownSolverException;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Registry engine id to engine (design 5.7 / D-10). Canonical ids are lower-case ({@code cp_sat}, {@code timefold});
@@ -73,12 +68,16 @@ public final class SolverRegistry {
         return engine;
     }
 
-    /** @return the engine, or empty when the name is {@code null} or unknown */
+    /**
+     * @return the engine, or empty when the name is {@code null} or unknown
+     */
     public Optional<SolverEngine> find(String name) {
         return Optional.ofNullable(engines.get(canonicalId(name)));
     }
 
-    /** @return the canonical ids of the registered engines, ascending, unmodifiable */
+    /**
+     * @return the canonical ids of the registered engines, ascending, unmodifiable
+     */
     public Collection<String> supportedEngines() {
         return engines.keySet();
     }

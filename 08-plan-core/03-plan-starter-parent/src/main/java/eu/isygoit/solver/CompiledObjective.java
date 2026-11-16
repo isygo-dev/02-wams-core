@@ -14,5 +14,6 @@ import eu.isygoit.solver.spi.ObjectiveFamily;
  * @param tier      the effective lexicographic tier (-2 relaxation, -1 auto selection, 0..7 user tiers)
  * @param scale     the effective decimal-to-long multiplier for this objective
  */
-public record CompiledObjective(int index, Objective objective, ObjectiveFamily family, Object params, int tier, int scale) {
+public record CompiledObjective(int index, Objective objective, ObjectiveFamily family, Object params, int tier,
+                                int scale) {
 }

@@ -13,5 +13,6 @@ import eu.isygoit.solver.spi.ConstraintFamily;
  * @param params     the bound typed params record (type = {@code family.paramsType()})
  * @param active     {@code false} when fully handled by preprocess / task rewrite (engines must skip it)
  */
-public record CompiledConstraint(int index, Constraint constraint, ConstraintFamily family, Object params, boolean active) {
+public record CompiledConstraint(int index, Constraint constraint, ConstraintFamily family, Object params,
+                                 boolean active) {
 }

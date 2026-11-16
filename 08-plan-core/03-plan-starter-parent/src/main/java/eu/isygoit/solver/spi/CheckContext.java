@@ -9,13 +9,19 @@ import eu.isygoit.dto.request.PlanningProblem;
  */
 public interface CheckContext {
 
-    /** @return the normalized problem */
+    /**
+     * @return the normalized problem
+     */
     PlanningProblem problem();
 
-    /** @return the read-only index of the problem (id/idx lookups, scope resolution, per-task data) */
+    /**
+     * @return the read-only index of the problem (id/idx lookups, scope resolution, per-task data)
+     */
     CandidateIndexView index();
 
-    /** @return the solution under validation */
+    /**
+     * @return the solution under validation
+     */
     SolutionView solution();
 
     /**

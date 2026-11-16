@@ -25,6 +25,8 @@ public interface ObjectiveSink {
      */
     void add(int tier, LinearExpr expr, long minValue, long maxValue, String label);
 
-    /** Adds a constant offset to a tier (for example the sum of all prizes of a reward term). */
+    /**
+     * Adds a constant offset to a tier (for example the sum of all prizes of a reward term).
+     */
     void addConstantOffset(int tier, long value);
 }

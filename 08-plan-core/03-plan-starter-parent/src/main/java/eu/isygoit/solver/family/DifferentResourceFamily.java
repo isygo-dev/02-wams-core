@@ -3,15 +3,7 @@ package eu.isygoit.solver.family;
 import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.params.GroupingParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -29,9 +21,13 @@ import java.util.TreeMap;
 @Component
 public class DifferentResourceFamily implements ConstraintFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "different_resource";
-    /** Violation code reported by the checker. */
+    /**
+     * Violation code reported by the checker.
+     */
     public static final String CODE = "DIFFERENT_RESOURCE_VIOLATED";
 
     @Override
@@ -86,7 +82,9 @@ public class DifferentResourceFamily implements ConstraintFamily {
         return new Checker();
     }
 
-    /** Independent checker: counts, per group and resource, the tasks beyond the first. */
+    /**
+     * Independent checker: counts, per group and resource, the tasks beyond the first.
+     */
     static final class Checker implements ConstraintChecker {
         @Override
         public void check(CheckContext ctx, Constraint constraint, Object params, ViolationSink sink) {

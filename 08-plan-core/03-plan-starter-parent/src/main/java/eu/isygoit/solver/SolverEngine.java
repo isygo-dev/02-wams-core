@@ -12,10 +12,14 @@ import eu.isygoit.dto.response.SolveResult;
  */
 public interface SolverEngine {
 
-    /** @return the canonical engine id: {@code "cp_sat"} or {@code "timefold"} (lower-case) */
+    /**
+     * @return the canonical engine id: {@code "cp_sat"} or {@code "timefold"} (lower-case)
+     */
     String name();
 
-    /** @return what this engine supports: static features plus the registry-derived constraint/objective support (5.6) */
+    /**
+     * @return what this engine supports: static features plus the registry-derived constraint/objective support (5.6)
+     */
     EngineCapabilities capabilities();
 
     /**

@@ -31,7 +31,9 @@ class SameResourceContributorTest {
         return FamilyKit.constraint("same", "same_resource", enforcement, null, 0, map("groupByTagPrefix", "case-"));
     }
 
-    /** Tasks a and b in case-1 (windows disjoint), r1 and r2; {@code aOn} / {@code bOn} list the candidate resources. */
+    /**
+     * Tasks a and b in case-1 (windows disjoint), r1 and r2; {@code aOn} / {@code bOn} list the candidate resources.
+     */
     private ContribFixture fixture(Constraint c, String[] aOn, String[] bOn, String... optional) {
         PlanningProblem p = FamilyKit.problem(FamilyKit.horizon(40, 3600), "UTC",
                 List.of(FamilyKit.resource("r1", 1), FamilyKit.resource("r2", 1)),

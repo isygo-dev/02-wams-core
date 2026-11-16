@@ -166,7 +166,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
 
         listCard.add(listTitle, sessionsBody, sessionsPager, viewAll);
         return listCard;
-    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
+    }
 
     private void loadSessions(int page) {
         ConnectionPageDto result = fetchSessions(page);
@@ -188,7 +188,7 @@ class ProfileConnectionsPanel extends VerticalLayout {
         } else {
             result.getContent().forEach(c -> sessionsBody.add(new ConnectionCard(c)));
         }
-    }
+    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
 
     private ConnectionPageDto fetchSessions(int page) {
         try {

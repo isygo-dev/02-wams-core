@@ -20,13 +20,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-/** Builds the model with a stub {@code CpModelContext} (no native library) and inspects the generated proto. */
+/**
+ * Builds the model with a stub {@code CpModelContext} (no native library) and inspects the generated proto.
+ */
 class TaskEligibilityContributorTest {
 
     private final TaskEligibilityContributor contributor = new TaskEligibilityContributor();
     private final TaskEligibilityFamily family = new TaskEligibilityFamily();
 
-    /** One task with three candidates on r0 (allowed), r1 and r2 (forbidden by resourceIds=[r0]). */
+    /**
+     * One task with three candidates on r0 (allowed), r1 and r2 (forbidden by resourceIds=[r0]).
+     */
     private ContribTestSupport fixture() {
         ContribTestSupport s = new ContribTestSupport(3);
         s.task(0, 50, false, 0, 5, 1, 5, 2, 5);

@@ -4,12 +4,7 @@ import eu.isygoit.dto.request.ConstraintScope;
 import eu.isygoit.dto.request.Resource;
 import eu.isygoit.dto.request.Task;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -99,36 +94,73 @@ public final class ScopeResolver {
         return a;
     }
 
-    /** @return the task index of an id, or {@code -1} */
+    private static Map<String, int[]> prefixView(TreeMap<String, int[]> tags, String prefix) {
+        if (prefix == null || prefix.isEmpty()) {
+            return tags;
+        }
+        return tags.subMap(prefix, true, prefix + Character.MAX_VALUE, true);
+    }
+
+    private static int[] union(Map<String, int[]> groups) {
+        if (groups.isEmpty()) {
+            return EMPTY;
+        }
+        BitSet bits = new BitSet();
+        for (int[] group : groups.values()) {
+            for (int i : group) {
+                bits.set(i);
+            }
+        }
+        int[] out = new int[bits.cardinality()];
+        int n = 0;
+        for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i + 1)) {
+            out[n++] = i;
+        }
+        return out;
+    }
+
+    /**
+     * @return the task index of an id, or {@code -1}
+     */
     public int taskIdx(String id) {
         Integer i = id == null ? null : taskIndex.get(id);
         return i == null ? -1 : i;
     }
 
-    /** @return the resource index of an id, or {@code -1} */
+    /**
+     * @return the resource index of an id, or {@code -1}
+     */
     public int resourceIdx(String id) {
         Integer i = id == null ? null : resourceIndex.get(id);
         return i == null ? -1 : i;
     }
 
-    /** @return number of tasks */
+    /**
+     * @return number of tasks
+     */
     public int taskCount() {
         return taskCount;
     }
 
-    /** @return number of resources */
+    /**
+     * @return number of resources
+     */
     public int resourceCount() {
         return resourceCount;
     }
 
-    /** @return task indices selected by the scope, ascending (cached, shared) */
+    /**
+     * @return task indices selected by the scope, ascending (cached, shared)
+     */
     public int[] resolveTasks(ConstraintScope scope) {
         ConstraintScope s = scope == null ? ConstraintScope.all() : scope;
         String key = s.kind() + KEY_SEPARATOR + s.value();
         return taskCache.computeIfAbsent(key, k -> computeTasks(s));
     }
 
-    /** @return resource indices selected by the scope, ascending (cached, shared) */
+    /**
+     * @return resource indices selected by the scope, ascending (cached, shared)
+     */
     public int[] resolveResources(ConstraintScope scope) {
         ConstraintScope s = scope == null ? ConstraintScope.all() : scope;
         String key = s.kind() + KEY_SEPARATOR + s.value();
@@ -184,48 +216,31 @@ public final class ScopeResolver {
         });
     }
 
-    /** @return ascending distinct task indices that carry a tag starting with {@code prefix} */
+    /**
+     * @return ascending distinct task indices that carry a tag starting with {@code prefix}
+     */
     public int[] tasksWithTagPrefix(String prefix) {
         return union(prefixView(taskTags, prefix));
     }
 
-    /** @return ascending distinct resource indices that carry a tag starting with {@code prefix} */
+    /**
+     * @return ascending distinct resource indices that carry a tag starting with {@code prefix}
+     */
     public int[] resourcesWithTagPrefix(String prefix) {
         return union(prefixView(resourceTags, prefix));
     }
 
-    /** @return task indices of a task type (shared array) */
+    /**
+     * @return task indices of a task type (shared array)
+     */
     public int[] tasksOfType(String typeId) {
         return taskTypes.getOrDefault(typeId, EMPTY);
     }
 
-    /** @return resource indices of a resource type (shared array) */
+    /**
+     * @return resource indices of a resource type (shared array)
+     */
     public int[] resourcesOfType(String typeId) {
         return resourceTypes.getOrDefault(typeId, EMPTY);
-    }
-
-    private static Map<String, int[]> prefixView(TreeMap<String, int[]> tags, String prefix) {
-        if (prefix == null || prefix.isEmpty()) {
-            return tags;
-        }
-        return tags.subMap(prefix, true, prefix + Character.MAX_VALUE, true);
-    }
-
-    private static int[] union(Map<String, int[]> groups) {
-        if (groups.isEmpty()) {
-            return EMPTY;
-        }
-        BitSet bits = new BitSet();
-        for (int[] group : groups.values()) {
-            for (int i : group) {
-                bits.set(i);
-            }
-        }
-        int[] out = new int[bits.cardinality()];
-        int n = 0;
-        for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i + 1)) {
-            out[n++] = i;
-        }
-        return out;
     }
 }

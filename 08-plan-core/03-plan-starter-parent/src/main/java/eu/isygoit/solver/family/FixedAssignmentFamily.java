@@ -3,16 +3,7 @@ package eu.isygoit.solver.family;
 import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.params.FixedAssignmentParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PreprocessContext;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -32,9 +23,13 @@ import java.util.Set;
 @Component
 public class FixedAssignmentFamily implements ConstraintFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "fixed_assignment";
-    /** Violation code reported by the checker. */
+    /**
+     * Violation code reported by the checker.
+     */
     public static final String CODE = "FIXED_ASSIGNMENT_VIOLATED";
 
     @Override
@@ -139,7 +134,9 @@ public class FixedAssignmentFamily implements ConstraintFamily {
         return new Checker();
     }
 
-    /** Independent checker: one violation per deviating selected task. */
+    /**
+     * Independent checker: one violation per deviating selected task.
+     */
     static final class Checker implements ConstraintChecker {
         @Override
         public void check(CheckContext ctx, Constraint constraint, Object params, ViolationSink sink) {

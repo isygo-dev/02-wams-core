@@ -1,22 +1,14 @@
 package eu.isygoit.solver.index;
 
 import eu.isygoit.config.PlanLimitsProperties;
-import eu.isygoit.dto.request.Calendar;
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.SetupEntry;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.TimeWindow;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.exception.InvalidRequestException;
 import eu.isygoit.exception.LimitExceededException;
 import eu.isygoit.solver.CompiledConstraint;
 import eu.isygoit.solver.SolveCancelledException;
 import eu.isygoit.solver.SolverCancellationToken;
-import eu.isygoit.solver.index.IndexFixtures.ProblemB;
-import eu.isygoit.solver.index.IndexFixtures.StubFamily;
+import eu.isygoit.solver.index.IndexFixtures.*;
 import eu.isygoit.solver.spi.ModelCost;
 import org.junit.jupiter.api.Test;
 
@@ -24,13 +16,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-import static eu.isygoit.solver.index.IndexFixtures.compiled;
-import static eu.isygoit.solver.index.IndexFixtures.hard;
-import static eu.isygoit.solver.index.IndexFixtures.ids;
-import static eu.isygoit.solver.index.IndexFixtures.problem;
-import static eu.isygoit.solver.index.IndexFixtures.resource;
-import static eu.isygoit.solver.index.IndexFixtures.skills;
-import static eu.isygoit.solver.index.IndexFixtures.task;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;

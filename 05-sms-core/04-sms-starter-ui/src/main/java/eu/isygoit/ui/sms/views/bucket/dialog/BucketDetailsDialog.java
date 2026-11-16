@@ -8,7 +8,6 @@ import eu.isygoit.remote.sms.ObjectStorageService;
 import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.sms.views.bucket.BucketManagementView;
 import eu.isygoit.ui.sms.views.common.SmsDetailsDialog;
-import eu.isygoit.ui.sms.views.common.SmsDialogSupport;
 
 /**
  * Read-only view of a {@link BucketDto}: name, creation date, region and ARN

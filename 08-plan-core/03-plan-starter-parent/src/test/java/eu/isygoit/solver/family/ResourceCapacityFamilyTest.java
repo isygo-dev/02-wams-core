@@ -1,21 +1,10 @@
 package eu.isygoit.solver.family;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.request.params.ResourceCapacityParams;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.index.CandidateIndexBuilder;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PreprocessContext;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -23,17 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class ResourceCapacityFamilyTest {
 
@@ -61,6 +42,35 @@ class ResourceCapacityFamilyTest {
 
     private static Constraint constraint(IEnumEnforcement.Types e) {
         return new Constraint("cap", "resource_capacity", e, ConstraintScope.all(), Map.of(), null, 1, 0);
+    }
+
+    /**
+     * tasks[k] = {start, end, resource, amount}.
+     */
+    private static SolutionView solution(int[][] tasks) {
+        SolutionView sol = mock(SolutionView.class);
+        when(sol.taskCount()).thenReturn(tasks.length);
+        when(sol.start(anyInt())).thenAnswer(i -> tasks[i.getArgument(0, Integer.class)][0]);
+        when(sol.end(anyInt())).thenAnswer(i -> tasks[i.getArgument(0, Integer.class)][1]);
+        when(sol.resourceCount(anyInt())).thenReturn(1);
+        when(sol.resourceAt(anyInt(), anyInt())).thenAnswer(i -> tasks[i.getArgument(0, Integer.class)][2]);
+        when(sol.amountAt(anyInt(), anyInt())).thenAnswer(i -> tasks[i.getArgument(0, Integer.class)][3]);
+        when(sol.tasksOfResource(anyInt())).thenAnswer(i -> {
+            int r = i.getArgument(0, Integer.class);
+            List<Integer> list = new ArrayList<>();
+            for (int t = 0; t < tasks.length; t++) {
+                if (tasks[t][2] == r) {
+                    list.add(t);
+                }
+            }
+            list.sort((a, b) -> Integer.compare(tasks[a][0], tasks[b][0]));
+            return list.stream().mapToInt(Integer::intValue).toArray();
+        });
+        return sol;
+    }
+
+    private static <T> T any() {
+        return org.mockito.ArgumentMatchers.any();
     }
 
     private ValidationContext validation(Constraint c) {
@@ -121,6 +131,8 @@ class ResourceCapacityFamilyTest {
         assertEquals(1, cost.constraints());
     }
 
+    // ------------------------------------------------------------------ checker
+
     @Test
     void preprocessPrunesCandidatesThatNeverFitTheLoweredCapacityOnTheWholeHorizon() {
         ResourceCapacityParams p = new ResourceCapacityParams(1, null);
@@ -155,31 +167,6 @@ class ResourceCapacityFamilyTest {
         PreprocessContext ctx = mock(PreprocessContext.class);
         family.preprocess(ctx, constraint(IEnumEnforcement.Types.STRICTLY_REQUIRED), new ResourceCapacityParams(1, new TimeWindow(at(0), at(10))));
         verify(ctx, never()).pruneCandidate(anyInt(), anyString(), anyString());
-    }
-
-    // ------------------------------------------------------------------ checker
-
-    /** tasks[k] = {start, end, resource, amount}. */
-    private static SolutionView solution(int[][] tasks) {
-        SolutionView sol = mock(SolutionView.class);
-        when(sol.taskCount()).thenReturn(tasks.length);
-        when(sol.start(anyInt())).thenAnswer(i -> tasks[i.getArgument(0, Integer.class)][0]);
-        when(sol.end(anyInt())).thenAnswer(i -> tasks[i.getArgument(0, Integer.class)][1]);
-        when(sol.resourceCount(anyInt())).thenReturn(1);
-        when(sol.resourceAt(anyInt(), anyInt())).thenAnswer(i -> tasks[i.getArgument(0, Integer.class)][2]);
-        when(sol.amountAt(anyInt(), anyInt())).thenAnswer(i -> tasks[i.getArgument(0, Integer.class)][3]);
-        when(sol.tasksOfResource(anyInt())).thenAnswer(i -> {
-            int r = i.getArgument(0, Integer.class);
-            List<Integer> list = new ArrayList<>();
-            for (int t = 0; t < tasks.length; t++) {
-                if (tasks[t][2] == r) {
-                    list.add(t);
-                }
-            }
-            list.sort((a, b) -> Integer.compare(tasks[a][0], tasks[b][0]));
-            return list.stream().mapToInt(Integer::intValue).toArray();
-        });
-        return sol;
     }
 
     private CheckContext checkContext(SolutionView sol) {
@@ -225,9 +212,5 @@ class ResourceCapacityFamilyTest {
         family.checker().check(checkContext(sol), constraint(IEnumEnforcement.Types.STRICTLY_REQUIRED), p,
                 (t, r, code, msg, m) -> out.add(code + ":" + r + ":" + m));
         assertEquals(List.of("CAPACITY_REDUCTION_EXCEEDED:unary:4"), out);
-    }
-
-    private static <T> T any() {
-        return org.mockito.ArgumentMatchers.any();
     }
 }

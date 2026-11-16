@@ -1,11 +1,6 @@
 package eu.isygoit.solver.timefold;
 
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.exception.InvalidRequestException;
 import eu.isygoit.exception.ObjectiveRangeException;
 import eu.isygoit.solver.CompiledProblem;

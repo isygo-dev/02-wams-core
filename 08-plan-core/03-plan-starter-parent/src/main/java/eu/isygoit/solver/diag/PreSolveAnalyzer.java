@@ -1,12 +1,6 @@
 package eu.isygoit.solver.diag;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.Task;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.CoreItem;
 import eu.isygoit.dto.response.Diagnostics;
 import eu.isygoit.enums.IEnumEnforcement;
@@ -16,15 +10,7 @@ import eu.isygoit.solver.index.CandidateIndex;
 import eu.isygoit.solver.index.CandidateIndexBuilder;
 import eu.isygoit.solver.spi.CandidateIndexView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Phase A of the infeasibility explanation (design 6.10): exact, engine-neutral structural infeasibility proofs on the
@@ -53,38 +39,13 @@ import java.util.Set;
  */
 public final class PreSolveAnalyzer {
 
-    /** Maximum number of findings reported. */
+    /**
+     * Maximum number of findings reported.
+     */
     public static final int MAX_FINDINGS = 50;
 
     private static final Set<String> PRUNING_TYPES =
             Set.of("task_eligibility", "fixed_assignment", "time_window", "resource_availability");
-
-    /** Requirement-level data of the compiled index that {@link CandidateIndexView} does not expose. */
-    public interface Structure {
-        /** @return per requirement of the task: the number of distinct resources it needs ({@code count}) */
-        int[] requirementNeeded(int task);
-
-        /** @return per requirement of the task: the number of surviving candidate resources */
-        int[] requirementCandidates(int task);
-
-        /** @return global candidate ids that EVERY solution must use (requirements with exactly {@code count} candidates) */
-        int[] forcedCandidates(int task);
-
-        /** @return working ticks of the resource inside {@code [lo, hi)} (calendar and unavailable windows applied) */
-        long availableTicks(int resource, int lo, int hi);
-
-        /**
-         * Why candidates of the requirement were pruned at compile time (design 6.10 A item 1).
-         *
-         * @param task        task index
-         * @param requirement requirement position inside the task (0-based)
-         * @return distinct pairs {@code {reasonCode, constraintId}} ({@code constraintId} empty for structural reasons);
-         * empty when unknown
-         */
-        default List<String[]> pruneReasons(int task, int requirement) {
-            return List.of();
-        }
-    }
 
     /**
      * Analyses a compiled problem.
@@ -123,6 +84,43 @@ public final class PreSolveAnalyzer {
         return Optional.of(CoreItems.diagnostics(message, core, List.of(), details));
     }
 
+    /**
+     * Requirement-level data of the compiled index that {@link CandidateIndexView} does not expose.
+     */
+    public interface Structure {
+        /**
+         * @return per requirement of the task: the number of distinct resources it needs ({@code count})
+         */
+        int[] requirementNeeded(int task);
+
+        /**
+         * @return per requirement of the task: the number of surviving candidate resources
+         */
+        int[] requirementCandidates(int task);
+
+        /**
+         * @return global candidate ids that EVERY solution must use (requirements with exactly {@code count} candidates)
+         */
+        int[] forcedCandidates(int task);
+
+        /**
+         * @return working ticks of the resource inside {@code [lo, hi)} (calendar and unavailable windows applied)
+         */
+        long availableTicks(int resource, int lo, int hi);
+
+        /**
+         * Why candidates of the requirement were pruned at compile time (design 6.10 A item 1).
+         *
+         * @param task        task index
+         * @param requirement requirement position inside the task (0-based)
+         * @return distinct pairs {@code {reasonCode, constraintId}} ({@code constraintId} empty for structural reasons);
+         * empty when unknown
+         */
+        default List<String[]> pruneReasons(int task, int requirement) {
+            return List.of();
+        }
+    }
+
     // ------------------------------------------------------------------------------------------------ one run
 
     private static final class Run {
@@ -134,6 +132,7 @@ public final class PreSolveAnalyzer {
         final List<CoreItem> items = new ArrayList<>();
         final Set<Integer> flagged = new HashSet<>();
         boolean truncated;
+        boolean[] rootWindow;
 
         Run(PlanningProblem problem, CandidateIndexView index, Structure structure) {
             this.problem = problem;
@@ -157,6 +156,8 @@ public final class PreSolveAnalyzer {
             pinAndLockFindings();
         }
 
+        // ---- (1) (2)
+
         boolean add(CoreItem item) {
             if (items.size() >= MAX_FINDINGS) {
                 truncated = true;
@@ -165,8 +166,6 @@ public final class PreSolveAnalyzer {
             items.add(item);
             return true;
         }
-
-        // ---- (1) (2)
 
         void requirementFindings() {
             for (int t = 0; t < taskCount; t++) {
@@ -196,6 +195,8 @@ public final class PreSolveAnalyzer {
                 }
             }
         }
+
+        // ---- (4) critical path, returns per task "covered by a path finding"
 
         String diagnose(int t, Task task, ResourceRequirement req, int q, List<CoreItem> extra) {
             List<String[]> recorded = structure.pruneReasons(t, q);
@@ -256,8 +257,6 @@ public final class PreSolveAnalyzer {
             }
             return String.join(", ", reasons) + ": " + matched + " matching resource(s) were pruned";
         }
-
-        // ---- (4) critical path, returns per task "covered by a path finding"
 
         boolean[] criticalPath() {
             boolean[] coveredByPath = new boolean[taskCount];
@@ -382,8 +381,6 @@ public final class PreSolveAnalyzer {
             this.rootWindow = rootWindow;
             return coveredByPath;
         }
-
-        boolean[] rootWindow;
 
         long minDuration(int t) {
             int begin = index.candidateBegin(t);

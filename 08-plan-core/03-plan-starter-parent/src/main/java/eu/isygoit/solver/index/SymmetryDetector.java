@@ -1,23 +1,9 @@
 package eu.isygoit.solver.index;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.Preference;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.Task;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.solver.CompiledConstraint;
 
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Detects interchangeable tasks and resources for symmetry breaking (design 5.4 step 7, 6.7).
@@ -37,10 +23,6 @@ import java.util.Objects;
  */
 final class SymmetryDetector {
 
-    /** Task and resource classes. */
-    record Result(int[] taskClass, int[] resourceClass) {
-    }
-
     private static final int MAX_SCAN_DEPTH = 8;
 
     private SymmetryDetector() {
@@ -52,8 +34,6 @@ final class SymmetryDetector {
         collectReferences(problem, d, constraints, refTasks, refResources);
         return new Result(taskClasses(problem, d, refTasks), resourceClasses(problem, d, refResources));
     }
-
-    // ------------------------------------------------------------------------------------------ references
 
     private static void collectReferences(PlanningProblem problem, CandidateIndexData d,
                                           List<CompiledConstraint> constraints, BitSet refTasks, BitSet refResources) {
@@ -107,6 +87,8 @@ final class SymmetryDetector {
             scan(scopes, o.params(), refTasks, refResources, 0);
         }
     }
+
+    // ------------------------------------------------------------------------------------------ references
 
     private static void markResources(ScopeResolver scopes, List<String> ids, BitSet refResources) {
         for (String id : ids) {
@@ -172,8 +154,6 @@ final class SymmetryDetector {
         }
     }
 
-    // ------------------------------------------------------------------------------------------ classes
-
     private static int[] taskClasses(PlanningProblem problem, CandidateIndexData d, BitSet referenced) {
         int n = d.taskCount;
         Map<Signature, IntList> groups = new HashMap<>();
@@ -186,6 +166,8 @@ final class SymmetryDetector {
         }
         return assign(n, groups);
     }
+
+    // ------------------------------------------------------------------------------------------ classes
 
     private static Signature taskSignature(CandidateIndexData d, int t, Task task) {
         IntList data = new IntList(32);
@@ -272,7 +254,15 @@ final class SymmetryDetector {
         return classes;
     }
 
-    /** Canonical signature with value equality (arrays compared element-wise). */
+    /**
+     * Task and resource classes.
+     */
+    record Result(int[] taskClass, int[] resourceClass) {
+    }
+
+    /**
+     * Canonical signature with value equality (arrays compared element-wise).
+     */
     private static final class Signature {
         private final int[] data;
         private final Object[] extras;

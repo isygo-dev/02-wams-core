@@ -10,10 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Pure arithmetic of the tier machinery (design 6.8): mode decision, 2^53 guards, multipliers, products. The static helpers
@@ -25,6 +22,15 @@ class TierObjectiveBuilderTest {
     private static final long TWO_53 = ScaledMath.MAX_EXACT;
 
     // ------------------------------------------------------------------------------------------- arithmetic
+
+    private static boolean expressionsUsable() {
+        try {
+            LinearExpr.newBuilder().add(1L).build();
+            return true;
+        } catch (Throwable unusable) {
+            return false;
+        }
+    }
 
     @Test
     void productAndMultipliersFollowTheRanges() {
@@ -90,6 +96,8 @@ class TierObjectiveBuilderTest {
         assertEquals(BigInteger.valueOf(43), TierObjectiveBuilder.weightedBound(lows, highs, multipliers));
     }
 
+    // ------------------------------------------------------------------------------------------- the builder
+
     @Test
     void autoFallsBackWhenTheWeightedObjectiveCouldExceedInt64() {
         // ranges are tiny (product 11 * 601 fits) but the offsets are huge: M_0 = 601 > 512 = 2^62 / 2^53, so the weighted
@@ -99,8 +107,6 @@ class TierObjectiveBuilderTest {
         assertTrue(TierObjectiveBuilder.product(new long[]{10, 600}).compareTo(BigInteger.valueOf(TWO_53)) < 0);
         assertEquals(LexicographicMode.SEQUENTIAL, TierObjectiveBuilder.decideMode(null, lows, highs));
     }
-
-    // ------------------------------------------------------------------------------------------- the builder
 
     @Test
     void plansTheTiersOfOffsetTermsInAscendingOrder() {
@@ -140,14 +146,5 @@ class TierObjectiveBuilderTest {
         TierObjectiveBuilder builder = new TierObjectiveBuilder(8);
         builder.add(0, LinearExpr.constant(0), 0, TWO_53, "wide");
         assertThrows(ObjectiveRangeException.class, () -> builder.add(0, LinearExpr.constant(0), 0, 1, "wider"));
-    }
-
-    private static boolean expressionsUsable() {
-        try {
-            LinearExpr.newBuilder().add(1L).build();
-            return true;
-        } catch (Throwable unusable) {
-            return false;
-        }
     }
 }

@@ -13,10 +13,22 @@ package eu.isygoit.solver.spi;
  * @param circuitArcs circuit arc literals (setup times)
  * @param pairwise    pairwise terms (task x task) that would be enumerated, guarded by maxPairwise
  */
-public record ModelCost(long boolVars, long intVars, long constraints, long intervals, long circuitArcs, long pairwise) {
+public record ModelCost(long boolVars, long intVars, long constraints, long intervals, long circuitArcs,
+                        long pairwise) {
 
-    /** The neutral element of {@link #plus(ModelCost)}. */
+    /**
+     * The neutral element of {@link #plus(ModelCost)}.
+     */
     public static final ModelCost ZERO = new ModelCost(0, 0, 0, 0, 0, 0);
+
+    private static long add(long a, long b) {
+        long sum = a + b;
+        // overflow iff both operands have the same sign and the sum has a different sign
+        if (((a ^ sum) & (b ^ sum)) < 0) {
+            return a < 0 ? Long.MIN_VALUE : Long.MAX_VALUE;
+        }
+        return sum;
+    }
 
     /**
      * Component-wise saturating addition.
@@ -35,14 +47,5 @@ public record ModelCost(long boolVars, long intVars, long constraints, long inte
                 add(intervals, o.intervals),
                 add(circuitArcs, o.circuitArcs),
                 add(pairwise, o.pairwise));
-    }
-
-    private static long add(long a, long b) {
-        long sum = a + b;
-        // overflow iff both operands have the same sign and the sum has a different sign
-        if (((a ^ sum) & (b ^ sum)) < 0) {
-            return a < 0 ? Long.MIN_VALUE : Long.MAX_VALUE;
-        }
-        return sum;
     }
 }

@@ -57,7 +57,9 @@ public class FilterBar extends Div {
 
     private final Map<String, Class<? extends Enum<?>>> enumRegistry = new LinkedHashMap<>();
     private final Map<String, Class<? extends Enum<?>>> fieldEnumHints = new LinkedHashMap<>();
-    /** Per field: bundle prefix of its enum labels, e.g. {@code status -> enrollment.status}. */
+    /**
+     * Per field: bundle prefix of its enum labels, e.g. {@code status -> enrollment.status}.
+     */
     private final Map<String, String> enumLabelPrefixes = new LinkedHashMap<>();
 
     // ─── Manual-mode state ─────────────────────────────────────────

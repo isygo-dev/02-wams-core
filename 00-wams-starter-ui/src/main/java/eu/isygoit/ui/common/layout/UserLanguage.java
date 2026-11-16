@@ -5,8 +5,8 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinSession;
 import eu.isygoit.i18n.DefaultLanguageProvider;
 import eu.isygoit.i18n.I18n;
-
 import jakarta.servlet.http.Cookie;
+
 import java.util.Locale;
 import java.util.Optional;
 
@@ -18,7 +18,9 @@ import java.util.Optional;
  */
 public final class UserLanguage {
 
-    /** Name of the cookie holding the language the user picked. */
+    /**
+     * Name of the cookie holding the language the user picked.
+     */
     public static final String COOKIE = "wams-language";
 
     private static final String SESSION_LOCALE = "locale";
@@ -26,7 +28,9 @@ public final class UserLanguage {
     private UserLanguage() {
     }
 
-    /** Remembers the language picked by the user, for this session and for the next visits. */
+    /**
+     * Remembers the language picked by the user, for this session and for the next visits.
+     */
     public static void remember(UI ui, Locale locale) {
         VaadinSession session = VaadinSession.getCurrent();
         if (session != null) {
@@ -38,7 +42,9 @@ public final class UserLanguage {
         }
     }
 
-    /** The language the user picked, if any: this session's choice, else the remembered one. */
+    /**
+     * The language the user picked, if any: this session's choice, else the remembered one.
+     */
     public static Optional<Locale> chosen() {
         VaadinSession session = VaadinSession.getCurrent();
         if (session != null && session.getAttribute(SESSION_LOCALE) instanceof Locale locale) {
@@ -74,7 +80,9 @@ public final class UserLanguage {
         }
     }
 
-    /** The supported locale of the same language (a bare {@code fr} gives {@code fr_FR}), if any. */
+    /**
+     * The supported locale of the same language (a bare {@code fr} gives {@code fr_FR}), if any.
+     */
     public static Optional<Locale> supported(Locale wanted) {
         if (wanted == null || wanted.getLanguage().isBlank()) {
             return Optional.empty();

@@ -22,24 +22,7 @@ import java.util.List;
  */
 public final class SolutionViewImpl implements SolutionView {
 
-    /** Raised when the assignments cannot be mapped onto the index. */
-    public static final class MalformedSolutionException extends RuntimeException {
-        private static final long serialVersionUID = 1L;
-        private final String code;
-
-        MalformedSolutionException(String code, String message) {
-            super(message);
-            this.code = code;
-        }
-
-        /** @return a {@code SOLUTION_INVALID_*} code */
-        public String code() {
-            return code;
-        }
-    }
-
     private static final int[] EMPTY = new int[0];
-
     private final int taskCount;
     private final boolean[] selected;
     private final int[] start;
@@ -49,7 +32,6 @@ public final class SolutionViewImpl implements SolutionView {
     private final int[][] amounts;
     private final int[] slot;
     private final int[][] byResource;
-
     private SolutionViewImpl(int taskCount, boolean[] selected, int[] start, int[] end, int[][] resources,
                              String[][] roles, int[][] amounts, int[] slot, int[][] byResource) {
         this.taskCount = taskCount;
@@ -157,7 +139,9 @@ public final class SolutionViewImpl implements SolutionView {
         return new SolutionViewImpl(taskCount, selected, start, end, res, roles, amounts, slot, byResource);
     }
 
-    /** Sorts task indices by (start, index): encode as long, sort primitives. */
+    /**
+     * Sorts task indices by (start, index): encode as long, sort primitives.
+     */
     private static void sortByStart(int[] tasks, int[] start) {
         if (tasks.length < 2) {
             return;
@@ -220,5 +204,25 @@ public final class SolutionViewImpl implements SolutionView {
     @Override
     public int slotOf(int task) {
         return slot[task];
+    }
+
+    /**
+     * Raised when the assignments cannot be mapped onto the index.
+     */
+    public static final class MalformedSolutionException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        private final String code;
+
+        MalformedSolutionException(String code, String message) {
+            super(message);
+            this.code = code;
+        }
+
+        /**
+         * @return a {@code SOLUTION_INVALID_*} code
+         */
+        public String code() {
+            return code;
+        }
     }
 }

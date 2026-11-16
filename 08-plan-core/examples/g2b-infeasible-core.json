@@ -6,25 +6,96 @@
     "locale": "en-US",
     "timezone": "UTC"
   },
-  "horizon": { "start": "2026-09-07T08:00:00Z", "end": "2026-09-07T09:00:00Z", "tickSeconds": 60 },
+  "horizon": {
+    "start": "2026-09-07T08:00:00Z",
+    "end": "2026-09-07T09:00:00Z",
+    "tickSeconds": 60
+  },
   "resources": [
-    { "id": "M1", "typeId": "machine", "name": "Machine 1" },
-    { "id": "M2", "typeId": "machine", "name": "Machine 2" }
+    {
+      "id": "M1",
+      "typeId": "machine",
+      "name": "Machine 1"
+    },
+    {
+      "id": "M2",
+      "typeId": "machine",
+      "name": "Machine 2"
+    }
   ],
   "tasks": [
-    { "id": "A", "duration": 10, "tags": ["ab"],
-      "pin": { "start": "2026-09-07T08:00:00Z", "resourceIds": ["M1"] },
-      "requirements": [{ "role": "machine", "selector": { "resourceIds": ["M1", "M2"] } }] },
-    { "id": "B", "duration": 10, "tags": ["ab"],
-      "pin": { "start": "2026-09-07T08:00:00Z", "resourceIds": ["M2"] },
-      "requirements": [{ "role": "machine", "selector": { "resourceIds": ["M1", "M2"] } }] }
+    {
+      "id": "A",
+      "duration": 10,
+      "tags": [
+        "ab"
+      ],
+      "pin": {
+        "start": "2026-09-07T08:00:00Z",
+        "resourceIds": [
+          "M1"
+        ]
+      },
+      "requirements": [
+        {
+          "role": "machine",
+          "selector": {
+            "resourceIds": [
+              "M1",
+              "M2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "B",
+      "duration": 10,
+      "tags": [
+        "ab"
+      ],
+      "pin": {
+        "start": "2026-09-07T08:00:00Z",
+        "resourceIds": [
+          "M2"
+        ]
+      },
+      "requirements": [
+        {
+          "role": "machine",
+          "selector": {
+            "resourceIds": [
+              "M1",
+              "M2"
+            ]
+          }
+        }
+      ]
+    }
   ],
   "constraints": [
-    { "id": "no-overlap-ab", "type": "no_overlap", "enforcement": "STRICTLY_REQUIRED",
-      "scope": { "kind": "tag", "value": "ab" }, "params": {} }
+    {
+      "id": "no-overlap-ab",
+      "type": "no_overlap",
+      "enforcement": "STRICTLY_REQUIRED",
+      "scope": {
+        "kind": "tag",
+        "value": "ab"
+      },
+      "params": {}
+    }
   ],
   "objectives": [
-    { "id": "makespan", "type": "minimize_makespan", "weight": 1 }
+    {
+      "id": "makespan",
+      "type": "minimize_makespan",
+      "weight": 1
+    }
   ],
-  "solverOptions": { "engine": "cp_sat", "maxTimeSeconds": 10, "numWorkers": 1, "seed": 0 }
+  "solverOptions": {
+    "engine": "cp_sat",
+    "maxTimeSeconds": 10,
+    "numWorkers": 1,
+    "seed": 0
+  }
 }

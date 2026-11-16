@@ -1,17 +1,15 @@
 package eu.isygoit.service.impl.planning;
 
+import eu.isygoit.exception.SolverBusyException;
 import eu.isygoit.solver.SolveCancelledException;
 import eu.isygoit.solver.SolverCancellationToken;
-import eu.isygoit.exception.SolverBusyException;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SolveConcurrencyGuardTest {
 

@@ -44,7 +44,7 @@ public class PlanDeadLetterProducer {
         }
         try {
             sender.send(dlqTopic, key, payload == null ? new byte[0] : payload,
-                    headers == null ? new LinkedHashMap<>() : headers)
+                            headers == null ? new LinkedHashMap<>() : headers)
                     .get(sendTimeoutMs, TimeUnit.MILLISECONDS);
             metrics.deadLettered(dlqTopic);
         } catch (InterruptedException exception) {

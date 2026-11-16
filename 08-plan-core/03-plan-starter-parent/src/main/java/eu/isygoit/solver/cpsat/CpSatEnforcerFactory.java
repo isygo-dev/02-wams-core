@@ -10,11 +10,7 @@ import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.exception.ObjectiveRangeException;
 import eu.isygoit.solver.CompiledConstraint;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.IntConsumer;
 
 /**
@@ -39,7 +35,9 @@ import java.util.function.IntConsumer;
  */
 public final class CpSatEnforcerFactory {
 
-    /** Base cost of dropping a relaxable constraint; the cost is {@code BASE * (1 + priority)} (design 6.9). */
+    /**
+     * Base cost of dropping a relaxable constraint; the cost is {@code BASE * (1 + priority)} (design 6.9).
+     */
     public static final long RELAXATION_BASE_COST = 1000L;
 
     private final CpModel model;
@@ -50,33 +48,6 @@ public final class CpSatEnforcerFactory {
     private final List<SoftInstance> softInstances = new ArrayList<>();
     private final List<RelaxLiteral> relaxLiterals = new ArrayList<>();
     private int softMeasures;
-
-    /**
-     * One SOFT unit instance: {@code satisfied} is false exactly when the instance is violated (and then {@code weight} is
-     * paid in {@code tier}); for measure penalties ({@link Enforcer#penalizeMeasure}) {@code satisfied} is {@code null}.
-     *
-     * @param constraintIndex index of the compiled constraint
-     * @param constraintId    constraint id
-     * @param taskIdx         task index or -1
-     * @param resourceIdx     resource index or -1
-     * @param satisfied       the literal (null for measure penalties)
-     * @param weight          penalty weight
-     * @param tier            lexicographic tier
-     */
-    public record SoftInstance(int constraintIndex, String constraintId, int taskIdx, int resourceIdx,
-                               Literal satisfied, int weight, int tier) {
-    }
-
-    /**
-     * The shared {@code active_k} literal of a relaxable constraint.
-     *
-     * @param constraintIndex index of the compiled constraint
-     * @param constraintId    constraint id
-     * @param active          true when the constraint is kept, false when it is dropped
-     * @param cost            the tier -2 cost paid when dropped (0 in the explain pass)
-     */
-    public record RelaxLiteral(int constraintIndex, String constraintId, Literal active, long cost) {
-    }
 
     /**
      * @param model          the model that owns the created literals
@@ -123,6 +94,25 @@ public final class CpSatEnforcerFactory {
     }
 
     /**
+     * Combines the instance literal with the extra conditions, skipping nulls (shared implementation of
+     * {@link Enforcer#conditions}).
+     */
+    static Literal[] combine(Literal instance, Literal... extra) {
+        List<Literal> result = new ArrayList<>();
+        if (instance != null) {
+            result.add(instance);
+        }
+        if (extra != null) {
+            for (Literal literal : extra) {
+                if (literal != null) {
+                    result.add(literal);
+                }
+            }
+        }
+        return result.toArray(new Literal[0]);
+    }
+
+    /**
      * Creates the enforcer of one constraint.
      *
      * @param compiled the compiled constraint (must not be a SOFT constraint in an EXPLAIN build)
@@ -146,17 +136,23 @@ public final class CpSatEnforcerFactory {
         return new LiteralEnforcer(Enforcer.Mode.HARD, null);
     }
 
-    /** @return the SOFT unit instances created so far (unmodifiable view) */
+    /**
+     * @return the SOFT unit instances created so far (unmodifiable view)
+     */
     public List<SoftInstance> softInstances() {
         return Collections.unmodifiableList(softInstances);
     }
 
-    /** @return the relaxation literals created so far (unmodifiable view) */
+    /**
+     * @return the relaxation literals created so far (unmodifiable view)
+     */
     public List<RelaxLiteral> relaxLiterals() {
         return Collections.unmodifiableList(relaxLiterals);
     }
 
-    /** @return the number of measure penalties registered through {@link Enforcer#penalizeMeasure} */
+    /**
+     * @return the number of measure penalties registered through {@link Enforcer#penalizeMeasure}
+     */
     public int softMeasureCount() {
         return softMeasures;
     }
@@ -176,7 +172,36 @@ public final class CpSatEnforcerFactory {
         return active;
     }
 
-    /** HARD / RELAXABLE enforcer: one shared literal (or none). */
+    /**
+     * One SOFT unit instance: {@code satisfied} is false exactly when the instance is violated (and then {@code weight} is
+     * paid in {@code tier}); for measure penalties ({@link Enforcer#penalizeMeasure}) {@code satisfied} is {@code null}.
+     *
+     * @param constraintIndex index of the compiled constraint
+     * @param constraintId    constraint id
+     * @param taskIdx         task index or -1
+     * @param resourceIdx     resource index or -1
+     * @param satisfied       the literal (null for measure penalties)
+     * @param weight          penalty weight
+     * @param tier            lexicographic tier
+     */
+    public record SoftInstance(int constraintIndex, String constraintId, int taskIdx, int resourceIdx,
+                               Literal satisfied, int weight, int tier) {
+    }
+
+    /**
+     * The shared {@code active_k} literal of a relaxable constraint.
+     *
+     * @param constraintIndex index of the compiled constraint
+     * @param constraintId    constraint id
+     * @param active          true when the constraint is kept, false when it is dropped
+     * @param cost            the tier -2 cost paid when dropped (0 in the explain pass)
+     */
+    public record RelaxLiteral(int constraintIndex, String constraintId, Literal active, long cost) {
+    }
+
+    /**
+     * HARD / RELAXABLE enforcer: one shared literal (or none).
+     */
     private static final class LiteralEnforcer implements Enforcer {
         private final Mode mode;
         private final Literal literal;
@@ -207,7 +232,9 @@ public final class CpSatEnforcerFactory {
         }
     }
 
-    /** SOFT enforcer: one fresh "satisfied" literal per instance, penalised in the constraint tier. */
+    /**
+     * SOFT enforcer: one fresh "satisfied" literal per instance, penalised in the constraint tier.
+     */
     private final class SoftEnforcer implements Enforcer {
         private final CompiledConstraint compiled;
         private final int weight;
@@ -266,24 +293,5 @@ public final class CpSatEnforcerFactory {
         public Literal[] conditions(Literal instance, Literal... extra) {
             return combine(instance, extra);
         }
-    }
-
-    /**
-     * Combines the instance literal with the extra conditions, skipping nulls (shared implementation of
-     * {@link Enforcer#conditions}).
-     */
-    static Literal[] combine(Literal instance, Literal... extra) {
-        List<Literal> result = new ArrayList<>();
-        if (instance != null) {
-            result.add(instance);
-        }
-        if (extra != null) {
-            for (Literal literal : extra) {
-                if (literal != null) {
-                    result.add(literal);
-                }
-            }
-        }
-        return result.toArray(new Literal[0]);
     }
 }

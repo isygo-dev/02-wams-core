@@ -34,8 +34,8 @@ public final class HintApplier {
     /**
      * Applies the initial hints of the problem.
      *
-     * @param ctx    the model context (variables are read from it)
-     * @param relax  the relaxation literals to hint to "kept" (may be empty)
+     * @param ctx   the model context (variables are read from it)
+     * @param relax the relaxation literals to hint to "kept" (may be empty)
      * @return true when at least one hint was added
      */
     public static boolean applyInitial(CpModelContext ctx, List<CpSatEnforcerFactory.RelaxLiteral> relax) {
@@ -122,7 +122,9 @@ public final class HintApplier {
         }
     }
 
-    /** Adds one literal hint unless the literal is the constant true literal or its variable was already hinted. */
+    /**
+     * Adds one literal hint unless the literal is the constant true literal or its variable was already hinted.
+     */
     private static boolean hint(CpModelContext ctx, Set<Integer> hinted, Literal literal, boolean value) {
         if (literal == ctx.trueLit()) {
             return false;

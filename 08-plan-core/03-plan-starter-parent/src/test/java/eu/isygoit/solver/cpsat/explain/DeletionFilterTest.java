@@ -5,14 +5,13 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DeletionFilterTest {
 
-    /** Infeasible iff the subset contains every item of {@code conflict}. */
+    /**
+     * Infeasible iff the subset contains every item of {@code conflict}.
+     */
     private static DeletionFilter.Oracle conflict(int... conflict) {
         return subset -> {
             for (int needed : conflict) {

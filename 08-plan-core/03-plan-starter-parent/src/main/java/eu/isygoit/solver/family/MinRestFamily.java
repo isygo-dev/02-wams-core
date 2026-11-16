@@ -4,15 +4,7 @@ import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.ConstraintScope;
 import eu.isygoit.dto.request.params.MinRestParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,9 +23,13 @@ import java.util.Set;
 @Component
 public class MinRestFamily implements ConstraintFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "min_rest";
-    /** Violation code reported by the checker. */
+    /**
+     * Violation code reported by the checker.
+     */
     public static final String CODE = "MIN_REST_VIOLATED";
 
     @Override
@@ -123,7 +119,9 @@ public class MinRestFamily implements ConstraintFamily {
         return new Checker();
     }
 
-    /** Independent checker: sweeps the tasks of each scoped resource sorted by start. */
+    /**
+     * Independent checker: sweeps the tasks of each scoped resource sorted by start.
+     */
     static final class Checker implements ConstraintChecker {
         @Override
         public void check(CheckContext ctx, Constraint constraint, Object params, ViolationSink sink) {

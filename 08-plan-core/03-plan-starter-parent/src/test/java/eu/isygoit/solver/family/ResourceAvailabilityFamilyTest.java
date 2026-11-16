@@ -1,21 +1,10 @@
 package eu.isygoit.solver.family;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.request.params.ResourceAvailabilityParams;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.index.CandidateIndexBuilder;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PreprocessContext;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -23,16 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class ResourceAvailabilityFamilyTest {
 
@@ -70,6 +52,10 @@ class ResourceAvailabilityFamilyTest {
         ValidationContext ctx = mock(ValidationContext.class);
         when(ctx.problem()).thenReturn(problem(c));
         return ctx;
+    }
+
+    private static <T> T any() {
+        return org.mockito.ArgumentMatchers.any();
     }
 
     @Test
@@ -152,6 +138,8 @@ class ResourceAvailabilityFamilyTest {
         assertEquals(3, soft.constraints());
     }
 
+    // ------------------------------------------------------------------ checker
+
     @Test
     void preprocessRestrictsCandidateStartsAndPrunesCandidatesThatCannotAvoidBlockedTime() {
         ResourceAvailabilityParams p = new ResourceAvailabilityParams(List.of(w(50, 60)), null);
@@ -182,9 +170,9 @@ class ResourceAvailabilityFamilyTest {
         verify(ctx).pruneCandidate(3, "UNAVAILABLE", "av");
     }
 
-    // ------------------------------------------------------------------ checker
-
-    /** tasks[t] = {start, end, resource}; start < 0 = unselected. */
+    /**
+     * tasks[t] = {start, end, resource}; start < 0 = unselected.
+     */
     private List<String> check(ResourceAvailabilityParams p, int[] scopedResources, int[][] tasks) {
         SolutionView sol = mock(SolutionView.class);
         when(sol.taskCount()).thenReturn(tasks.length);
@@ -226,9 +214,5 @@ class ResourceAvailabilityFamilyTest {
         List<String> out = check(p, new int[]{0, 1}, new int[][]{{10, 50, 0}, {5, 12, 1}, {45, 55, 0}});
         assertEquals(List.of("t1:r1:1", "t2:r0:1"), out);
         assertTrue(check(new ResourceAvailabilityParams(List.of(w(0, 0)), null), new int[]{0}, new int[][]{{0, 5, 0}}).isEmpty());
-    }
-
-    private static <T> T any() {
-        return org.mockito.ArgumentMatchers.any();
     }
 }

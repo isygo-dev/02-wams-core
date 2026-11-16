@@ -48,15 +48,16 @@ import java.util.function.IntSupplier;
 @Service
 @Slf4j
 public class JobProcessor {
+    /**
+     * Minimum interval between two PROGRESS log entries of one job (the engines already throttle to about 1 s).
+     */
+    static final long PROGRESS_MIN_INTERVAL_NANOS = 1_000_000_000L;
     private final PlanningService planningService;
     private final PlanJobRepository jobRepository;
     private final PlanLogKafkaProducer logProducer;
     private final ObjectMapper objectMapper;
     private final JobCancellationRegistry cancellationRegistry;
     private final TransactionTemplate transactionTemplate;
-
-    /** Minimum interval between two PROGRESS log entries of one job (the engines already throttle to about 1 s). */
-    static final long PROGRESS_MIN_INTERVAL_NANOS = 1_000_000_000L;
 
     /**
      * Creates the processor.
@@ -74,6 +75,24 @@ public class JobProcessor {
         this.objectMapper = objectMapper;
         this.cancellationRegistry = cancellationRegistry;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
+    }
+
+    /**
+     * Message of a progress entry: {@code phase=SEARCH tier=0 solutions=3 objective=120.0 bound=100.0 gap=16.67%}
+     * ({@code n/a} for unknown values; locale independent).
+     */
+    static String describe(SolveProgress progress) {
+        return String.format(Locale.ROOT, "phase=%s tier=%d solutions=%d objective=%s bound=%s gap=%s",
+                progress.phase() == null ? "n/a" : progress.phase(),
+                progress.tier(),
+                progress.solutionCount(),
+                number(progress.objective()),
+                number(progress.bestBound()),
+                progress.gap() == null ? "n/a" : String.format(Locale.ROOT, "%.2f%%", progress.gap() * 100.0));
+    }
+
+    private static String number(Double value) {
+        return value == null ? "n/a" : String.valueOf(value);
     }
 
     /**
@@ -197,82 +216,6 @@ public class JobProcessor {
         }
     }
 
-    /**
-     * Throttled progress publisher handed to the engine: at most one {@code PROGRESS} INFO entry per
-     * {@link #PROGRESS_MIN_INTERVAL_NANOS}, every event is remembered so the final log line can carry the last
-     * objective / bound / solution count. Never throws and never blocks on the log pipeline (the producer is
-     * fire-and-forget), so a solver callback thread is never delayed or broken by logging.
-     */
-    final class ProgressLogger implements SolveListener {
-        private final Long jobId;
-        private final String tenant;
-        private final String engine;
-        private long lastPublishedNanos;
-        private boolean published;
-        private volatile SolveProgress latest;
-
-        ProgressLogger(Long jobId, String tenant, String engine) {
-            this.jobId = jobId;
-            this.tenant = tenant;
-            this.engine = engine;
-        }
-
-        @Override
-        public void onProgress(SolveProgress progress) {
-            if (progress == null) {
-                return;
-            }
-            latest = progress;
-            try {
-                long now = System.nanoTime();
-                synchronized (this) {
-                    if (published && now - lastPublishedNanos < PROGRESS_MIN_INTERVAL_NANOS) {
-                        return;
-                    }
-                    published = true;
-                    lastPublishedNanos = now;
-                }
-                publishLog(jobId, tenant, engine, IEnumLogLevel.Types.INFO, "PROGRESS",
-                        describe(progress), progress.elapsedMillis());
-            } catch (RuntimeException exception) {
-                log.debug("Progress log of planning job {} dropped", jobId, exception);
-            }
-        }
-
-        /**
-         * @return {@code " (last: ...)"} describing the last progress event, or an empty string when none arrived
-         */
-        String summarySuffix() {
-            SolveProgress last = latest;
-            return last == null ? "" : " (last: " + describe(last) + ")";
-        }
-
-        /**
-         * @return the latest progress event, or {@code null} when the engine reported none
-         */
-        SolveProgress latest() {
-            return latest;
-        }
-    }
-
-    /**
-     * Message of a progress entry: {@code phase=SEARCH tier=0 solutions=3 objective=120.0 bound=100.0 gap=16.67%}
-     * ({@code n/a} for unknown values; locale independent).
-     */
-    static String describe(SolveProgress progress) {
-        return String.format(Locale.ROOT, "phase=%s tier=%d solutions=%d objective=%s bound=%s gap=%s",
-                progress.phase() == null ? "n/a" : progress.phase(),
-                progress.tier(),
-                progress.solutionCount(),
-                number(progress.objective()),
-                number(progress.bestBound()),
-                progress.gap() == null ? "n/a" : String.format(Locale.ROOT, "%.2f%%", progress.gap() * 100.0));
-    }
-
-    private static String number(Double value) {
-        return value == null ? "n/a" : String.valueOf(value);
-    }
-
     private PlanningRequest loadRequest(Long jobId) {
         String json = jobRepository.findRequestJson(jobId);
         if (json == null) {
@@ -348,5 +291,63 @@ public class JobProcessor {
                 || status == IEnumJobStatusCode.Types.INFEASIBLE
                 || status == IEnumJobStatusCode.Types.FAILED
                 || status == IEnumJobStatusCode.Types.CANCELLED;
+    }
+
+    /**
+     * Throttled progress publisher handed to the engine: at most one {@code PROGRESS} INFO entry per
+     * {@link #PROGRESS_MIN_INTERVAL_NANOS}, every event is remembered so the final log line can carry the last
+     * objective / bound / solution count. Never throws and never blocks on the log pipeline (the producer is
+     * fire-and-forget), so a solver callback thread is never delayed or broken by logging.
+     */
+    final class ProgressLogger implements SolveListener {
+        private final Long jobId;
+        private final String tenant;
+        private final String engine;
+        private long lastPublishedNanos;
+        private boolean published;
+        private volatile SolveProgress latest;
+
+        ProgressLogger(Long jobId, String tenant, String engine) {
+            this.jobId = jobId;
+            this.tenant = tenant;
+            this.engine = engine;
+        }
+
+        @Override
+        public void onProgress(SolveProgress progress) {
+            if (progress == null) {
+                return;
+            }
+            latest = progress;
+            try {
+                long now = System.nanoTime();
+                synchronized (this) {
+                    if (published && now - lastPublishedNanos < PROGRESS_MIN_INTERVAL_NANOS) {
+                        return;
+                    }
+                    published = true;
+                    lastPublishedNanos = now;
+                }
+                publishLog(jobId, tenant, engine, IEnumLogLevel.Types.INFO, "PROGRESS",
+                        describe(progress), progress.elapsedMillis());
+            } catch (RuntimeException exception) {
+                log.debug("Progress log of planning job {} dropped", jobId, exception);
+            }
+        }
+
+        /**
+         * @return {@code " (last: ...)"} describing the last progress event, or an empty string when none arrived
+         */
+        String summarySuffix() {
+            SolveProgress last = latest;
+            return last == null ? "" : " (last: " + describe(last) + ")";
+        }
+
+        /**
+         * @return the latest progress event, or {@code null} when the engine reported none
+         */
+        SolveProgress latest() {
+            return latest;
+        }
     }
 }

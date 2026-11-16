@@ -5,11 +5,7 @@ import com.google.ortools.sat.CpModel;
 import com.google.ortools.sat.Literal;
 import eu.isygoit.dto.request.params.MaxConsecutiveParams;
 import eu.isygoit.solver.CompiledConstraint;
-import eu.isygoit.solver.cpsat.BucketGrid;
-import eu.isygoit.solver.cpsat.CpModelContext;
-import eu.isygoit.solver.cpsat.CpSatConstraintContributor;
-import eu.isygoit.solver.cpsat.EnforcementSupport;
-import eu.isygoit.solver.cpsat.Enforcer;
+import eu.isygoit.solver.cpsat.*;
 import eu.isygoit.solver.family.FamilySupport;
 import eu.isygoit.solver.family.MaxConsecutiveFamily;
 import eu.isygoit.solver.index.CandidateIndex;
@@ -18,8 +14,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * CP-SAT formulation of {@code max_consecutive} (design 6.5.7). Per scoped resource a literal {@code worked[k]} is the exact

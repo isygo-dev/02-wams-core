@@ -39,22 +39,30 @@ public final class ObjectiveFamilyRegistry {
         return family;
     }
 
-    /** @return the family, or empty when the type is {@code null} or not registered */
+    /**
+     * @return the family, or empty when the type is {@code null} or not registered
+     */
     public Optional<ObjectiveFamily> find(String type) {
         return Optional.ofNullable(families.get(TypeIndex.canonical(type)));
     }
 
-    /** @return {@code true} when the type is registered */
+    /**
+     * @return {@code true} when the type is registered
+     */
     public boolean contains(String type) {
         return families.containsKey(TypeIndex.canonical(type));
     }
 
-    /** @return the canonical registered types, ascending, unmodifiable */
+    /**
+     * @return the canonical registered types, ascending, unmodifiable
+     */
     public Collection<String> supportedTypes() {
         return families.keySet();
     }
 
-    /** @return every family, ordered by type, unmodifiable */
+    /**
+     * @return every family, ordered by type, unmodifiable
+     */
     public Collection<ObjectiveFamily> families() {
         return families.values();
     }

@@ -15,7 +15,9 @@ import java.time.Instant;
  */
 public interface ValidationContext {
 
-    /** @return the (normalized, or request-derived) problem being validated */
+    /**
+     * @return the (normalized, or request-derived) problem being validated
+     */
     PlanningProblem problem();
 
     /**
@@ -31,19 +33,29 @@ public interface ValidationContext {
      */
     <P> P params(Constraint c, Class<P> type);
 
-    /** Reports an error issue (the request is rejected once validation ends). */
+    /**
+     * Reports an error issue (the request is rejected once validation ends).
+     */
     void error(String code, String path, String message);
 
-    /** Reports a warning issue (the request is accepted). */
+    /**
+     * Reports a warning issue (the request is accepted).
+     */
     void warning(String code, String path, String message);
 
-    /** @return {@code true} when a task with this id exists */
+    /**
+     * @return {@code true} when a task with this id exists
+     */
     boolean hasTask(String id);
 
-    /** @return {@code true} when a resource with this id exists */
+    /**
+     * @return {@code true} when a resource with this id exists
+     */
     boolean hasResource(String id);
 
-    /** @return {@code true} when a slot with this id exists */
+    /**
+     * @return {@code true} when a slot with this id exists
+     */
     boolean hasSlot(String id);
 
     /**

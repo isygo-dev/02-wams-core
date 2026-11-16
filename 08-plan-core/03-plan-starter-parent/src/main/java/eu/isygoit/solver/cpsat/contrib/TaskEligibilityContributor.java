@@ -33,6 +33,54 @@ public class TaskEligibilityContributor implements CpSatConstraintContributor {
 
     private static final int CHECKPOINT_INTERVAL = 1024;
 
+    /**
+     * @return {constraints added, bool vars added}
+     */
+    private static int[] restrictStart(CpModelContext ctx, Enforcer enforcer, int t, int[] starts) {
+        CpModel model = ctx.model();
+        Literal[] choice = ctx.startChoice(t);
+        if (choice != null) {
+            long[] values = ctx.startChoiceValues(t);
+            List<Literal> forbidden = new ArrayList<>();
+            for (int k = 0; k < choice.length; k++) {
+                if (Arrays.binarySearch(starts, (int) values[k]) < 0) {
+                    forbidden.add(choice[k]);
+                }
+            }
+            if (forbidden.isEmpty()) {
+                return new int[]{0, 0};
+            }
+            Literal[] conds = enforcer.conditions(enforcer.instance(t, -1), optionalPresence(ctx, t));
+            for (Literal lit : forbidden) {
+                enforce(model.addBoolOr(new Literal[]{lit.not()}), conds);
+            }
+            return new int[]{forbidden.size(), 0};
+        }
+        Literal[] conds = enforcer.conditions(enforcer.instance(t, -1), optionalPresence(ctx, t));
+        List<Literal> equalities = new ArrayList<>();
+        for (int value : starts) {
+            BoolVar eq = model.newBoolVar("");
+            model.addEquality(ctx.start(t), value).onlyEnforceIf(eq); // definitional: eq => start == value
+            equalities.add(eq);
+        }
+        enforce(model.addBoolOr(equalities.toArray(new Literal[0])), conds);
+        return new int[]{starts.length + 1, starts.length};
+    }
+
+    /**
+     * @return the presence literal of an optional task, {@code null} (no condition) for a required task
+     */
+    private static Literal optionalPresence(CpModelContext ctx, int t) {
+        Literal p = ctx.presence(t);
+        return p == ctx.trueLit() ? null : p;
+    }
+
+    private static void enforce(com.google.ortools.sat.Constraint constraint, Literal[] conditions) {
+        if (conditions != null && conditions.length > 0) {
+            constraint.onlyEnforceIf(conditions);
+        }
+    }
+
     @Override
     public String type() {
         return TaskEligibilityFamily.TYPE;
@@ -76,49 +124,5 @@ public class TaskEligibilityContributor implements CpSatConstraintContributor {
             }
         }
         ctx.count(boolVars, 0, constraints, 0);
-    }
-
-    /** @return {constraints added, bool vars added} */
-    private static int[] restrictStart(CpModelContext ctx, Enforcer enforcer, int t, int[] starts) {
-        CpModel model = ctx.model();
-        Literal[] choice = ctx.startChoice(t);
-        if (choice != null) {
-            long[] values = ctx.startChoiceValues(t);
-            List<Literal> forbidden = new ArrayList<>();
-            for (int k = 0; k < choice.length; k++) {
-                if (Arrays.binarySearch(starts, (int) values[k]) < 0) {
-                    forbidden.add(choice[k]);
-                }
-            }
-            if (forbidden.isEmpty()) {
-                return new int[]{0, 0};
-            }
-            Literal[] conds = enforcer.conditions(enforcer.instance(t, -1), optionalPresence(ctx, t));
-            for (Literal lit : forbidden) {
-                enforce(model.addBoolOr(new Literal[]{lit.not()}), conds);
-            }
-            return new int[]{forbidden.size(), 0};
-        }
-        Literal[] conds = enforcer.conditions(enforcer.instance(t, -1), optionalPresence(ctx, t));
-        List<Literal> equalities = new ArrayList<>();
-        for (int value : starts) {
-            BoolVar eq = model.newBoolVar("");
-            model.addEquality(ctx.start(t), value).onlyEnforceIf(eq); // definitional: eq => start == value
-            equalities.add(eq);
-        }
-        enforce(model.addBoolOr(equalities.toArray(new Literal[0])), conds);
-        return new int[]{starts.length + 1, starts.length};
-    }
-
-    /** @return the presence literal of an optional task, {@code null} (no condition) for a required task */
-    private static Literal optionalPresence(CpModelContext ctx, int t) {
-        Literal p = ctx.presence(t);
-        return p == ctx.trueLit() ? null : p;
-    }
-
-    private static void enforce(com.google.ortools.sat.Constraint constraint, Literal[] conditions) {
-        if (conditions != null && conditions.length > 0) {
-            constraint.onlyEnforceIf(conditions);
-        }
     }
 }

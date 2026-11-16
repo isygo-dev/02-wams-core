@@ -4,13 +4,7 @@ import com.google.ortools.sat.BoolVar;
 import com.google.ortools.sat.CpModel;
 import com.google.ortools.sat.Literal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Registry of the assumption literals of an EXPLAIN-mode model (design 6.10, phase B).
@@ -25,13 +19,21 @@ import java.util.Map;
  */
 public final class AssumptionRegistry {
 
-    /** Assumption kind of a catalogue constraint. */
+    /**
+     * Assumption kind of a catalogue constraint.
+     */
     public static final String KIND_CONSTRAINT = "CONSTRAINT";
-    /** Assumption kind of a task fact (window, pin, lock). */
+    /**
+     * Assumption kind of a task fact (window, pin, lock).
+     */
     public static final String KIND_TASK = "TASK";
-    /** Assumption kind of a resource fact (calendar, max load). */
+    /**
+     * Assumption kind of a resource fact (calendar, max load).
+     */
     public static final String KIND_RESOURCE = "RESOURCE";
-    /** Assumption kind of a precedence edge (or of the edges of one successor). */
+    /**
+     * Assumption kind of a precedence edge (or of the edges of one successor).
+     */
     public static final String KIND_EDGE = "EDGE";
 
     private final CpModel model;
@@ -68,17 +70,23 @@ public final class AssumptionRegistry {
         return literal;
     }
 
-    /** @return the assumption descriptors in creation order (unmodifiable) */
+    /**
+     * @return the assumption descriptors in creation order (unmodifiable)
+     */
     public List<AssumptionRef> refs() {
         return Collections.unmodifiableList(refs);
     }
 
-    /** @return the number of registered assumptions */
+    /**
+     * @return the number of registered assumptions
+     */
     public int size() {
         return refs.size();
     }
 
-    /** @return the literals in creation order (a fresh array) */
+    /**
+     * @return the literals in creation order (a fresh array)
+     */
     public Literal[] literals() {
         Literal[] result = new Literal[refs.size()];
         for (int i = 0; i < result.length; i++) {
@@ -138,7 +146,9 @@ public final class AssumptionRegistry {
         model.addAssumptions(literals);
     }
 
-    /** Installs every registered assumption on the model. */
+    /**
+     * Installs every registered assumption on the model.
+     */
     public void install() {
         install(refs);
     }

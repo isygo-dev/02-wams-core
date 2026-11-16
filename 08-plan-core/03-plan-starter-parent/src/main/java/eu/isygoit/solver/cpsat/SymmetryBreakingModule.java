@@ -31,7 +31,9 @@ import java.util.TreeMap;
 @Order(800)
 public class SymmetryBreakingModule implements CpSatStructuralModule {
 
-    /** Module order (after the setup circuit module of order 700). */
+    /**
+     * Module order (after the setup circuit module of order 700).
+     */
     public static final int ORDER = 800;
 
     private final CpSatProperties properties;
@@ -41,6 +43,35 @@ public class SymmetryBreakingModule implements CpSatStructuralModule {
      */
     public SymmetryBreakingModule(CpSatProperties properties) {
         this.properties = properties == null ? new CpSatProperties() : properties;
+    }
+
+    /**
+     * Groups the indices of each class (value {@code >= 0}) in ascending index order; classes of one member are dropped.
+     */
+    private static Map<Integer, List<Integer>> classes(int[] classOf, int size) {
+        Map<Integer, List<Integer>> result = new TreeMap<>();
+        if (classOf == null) {
+            return result;
+        }
+        for (int i = 0; i < size && i < classOf.length; i++) {
+            if (classOf[i] >= 0) {
+                result.computeIfAbsent(classOf[i], key -> new ArrayList<>()).add(i);
+            }
+        }
+        result.values().removeIf(members -> members.size() < 2);
+        return result;
+    }
+
+    private static boolean hasLockedAssignments(CpModelContext ctx) {
+        if (ctx.problem().initialSolution() == null) {
+            return false;
+        }
+        for (InitialAssignment assignment : ctx.problem().initialSolution().assignments()) {
+            if (assignment.locked()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -90,32 +121,5 @@ public class SymmetryBreakingModule implements CpSatStructuralModule {
             }
         }
         ctx.count(0, 0, constraints, 0);
-    }
-
-    /** Groups the indices of each class (value {@code >= 0}) in ascending index order; classes of one member are dropped. */
-    private static Map<Integer, List<Integer>> classes(int[] classOf, int size) {
-        Map<Integer, List<Integer>> result = new TreeMap<>();
-        if (classOf == null) {
-            return result;
-        }
-        for (int i = 0; i < size && i < classOf.length; i++) {
-            if (classOf[i] >= 0) {
-                result.computeIfAbsent(classOf[i], key -> new ArrayList<>()).add(i);
-            }
-        }
-        result.values().removeIf(members -> members.size() < 2);
-        return result;
-    }
-
-    private static boolean hasLockedAssignments(CpModelContext ctx) {
-        if (ctx.problem().initialSolution() == null) {
-            return false;
-        }
-        for (InitialAssignment assignment : ctx.problem().initialSolution().assignments()) {
-            if (assignment.locked()) {
-                return true;
-            }
-        }
-        return false;
     }
 }

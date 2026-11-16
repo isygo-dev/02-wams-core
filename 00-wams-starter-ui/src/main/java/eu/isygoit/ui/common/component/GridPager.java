@@ -16,10 +16,8 @@ public final class GridPager<T> {
 
     private final Grid<T> grid;
     private final int pageSize;
-    private final PagerBar pager = new PagerBar(this::goToPage);
-    private List<T> items = List.of();
+    private List<T> items = List.of();    private final PagerBar pager = new PagerBar(this::goToPage);
     private int page;
-
     public GridPager(Grid<T> grid) {
         this(grid, DEFAULT_PAGE_SIZE);
     }
@@ -29,7 +27,9 @@ public final class GridPager<T> {
         this.pageSize = Math.max(1, pageSize);
     }
 
-    /** Replaces the items; the current page is kept when it still exists. */
+    /**
+     * Replaces the items; the current page is kept when it still exists.
+     */
     public void setItems(java.util.Collection<? extends T> newItems) {
         items = newItems == null ? List.of() : new java.util.ArrayList<T>(newItems);
         page = Math.min(page, Math.max(0, (items.size() - 1) / pageSize));
@@ -52,4 +52,6 @@ public final class GridPager<T> {
         }
         pager.update(page, pageSize, items.size());
     }
+
+
 }

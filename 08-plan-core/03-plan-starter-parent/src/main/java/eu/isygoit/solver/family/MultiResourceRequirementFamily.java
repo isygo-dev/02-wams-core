@@ -6,13 +6,7 @@ import eu.isygoit.dto.request.ResourceSelector;
 import eu.isygoit.dto.request.Task;
 import eu.isygoit.dto.request.params.MultiResourceRequirementParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.TaskRewriter;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -33,8 +27,16 @@ import java.util.Set;
 @Component
 public class MultiResourceRequirementFamily implements ConstraintFamily, TaskRewriter {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "multi_resource_requirement";
+
+    private static Task withRequirements(Task t, List<ResourceRequirement> requirements) {
+        return new Task(t.id(), t.typeId(), t.name(), t.duration(), t.resourceDurations(), t.demand(), t.priority(),
+                t.required(), t.prize(), requirements, t.release(), t.deadline(), t.dueDate(), t.startSlots(), t.pin(),
+                t.predecessors(), t.setupClass(), t.tags(), t.preferences(), t.attributes());
+    }
 
     @Override
     public String type() {
@@ -137,11 +139,5 @@ public class MultiResourceRequirementFamily implements ConstraintFamily, TaskRew
             }
         }
         return withRequirements(task, result);
-    }
-
-    private static Task withRequirements(Task t, List<ResourceRequirement> requirements) {
-        return new Task(t.id(), t.typeId(), t.name(), t.duration(), t.resourceDurations(), t.demand(), t.priority(),
-                t.required(), t.prize(), requirements, t.release(), t.deadline(), t.dueDate(), t.startSlots(), t.pin(),
-                t.predecessors(), t.setupClass(), t.tags(), t.preferences(), t.attributes());
     }
 }

@@ -16,15 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Enforcer semantics of design 5.5 / 6.9 / 6.10 (HARD, RELAXABLE, SOFT, explain assumption) and the soft literal
@@ -36,6 +28,12 @@ class EnforcerTest {
     private CpModel model;
     private TierObjectiveBuilder tiers;
     private AtomicInteger boolVars;
+
+    private static CompiledConstraint compiled(int index, String id, IEnumEnforcement.Types enforcement, int weight,
+                                               Integer tier, RelaxationPolicy relaxation) {
+        Constraint constraint = new Constraint(id, "min_rest", enforcement, null, Map.of(), relaxation, weight, tier);
+        return new CompiledConstraint(index, constraint, null, null, true);
+    }
 
     @BeforeEach
     void setUp() {
@@ -54,12 +52,6 @@ class EnforcerTest {
 
     private CpSatEnforcerFactory solveFactory(SolverOptions options) {
         return new CpSatEnforcerFactory(model, tiers, null, options, boolVars::addAndGet);
-    }
-
-    private static CompiledConstraint compiled(int index, String id, IEnumEnforcement.Types enforcement, int weight,
-                                               Integer tier, RelaxationPolicy relaxation) {
-        Constraint constraint = new Constraint(id, "min_rest", enforcement, null, Map.of(), relaxation, weight, tier);
-        return new CompiledConstraint(index, constraint, null, null, true);
     }
 
     @Test

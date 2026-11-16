@@ -7,7 +7,6 @@ import eu.isygoit.solver.cpsat.CpSatObjectiveContributor;
 import eu.isygoit.solver.cpsat.ObjectiveSink;
 import eu.isygoit.solver.index.CandidateIndex;
 import eu.isygoit.solver.objective.MinimizePlanChangesObjective;
-import eu.isygoit.solver.objective.ObjectiveMath;
 import org.springframework.stereotype.Component;
 
 /**

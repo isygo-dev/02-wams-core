@@ -9,18 +9,16 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class BucketGridsTest {
+
+    private static final PeriodSpec DAY = new PeriodSpec(PeriodSpec.Unit.DAY, null);
 
     private static Horizon hourly(String start, int ticks) {
         Instant s = Instant.parse(start);
         return new Horizon(s, s.plusSeconds(ticks * 3600L), 3600);
     }
-
-    private static final PeriodSpec DAY = new PeriodSpec(PeriodSpec.Unit.DAY, null);
 
     @Test
     void dayGridInUtc() {

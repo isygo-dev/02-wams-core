@@ -5,13 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.springframework.kafka.KafkaException;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class PlanLogDeadLetterProcessorTest {
     private final PlanDeadLetterProducer deadLetterProducer = mock(PlanDeadLetterProducer.class);

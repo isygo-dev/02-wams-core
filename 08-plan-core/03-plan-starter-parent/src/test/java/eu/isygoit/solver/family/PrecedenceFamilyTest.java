@@ -1,17 +1,9 @@
 package eu.isygoit.solver.family;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PrecedenceRef;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.request.params.PrecedenceParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -19,26 +11,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class PrecedenceFamilyTest {
 
     private static final Instant T0 = Instant.parse("2026-01-05T00:00:00Z");
     private static final Horizon H = new Horizon(T0, T0.plusSeconds(6000), 60); // 100 ticks
-
-    private final PrecedenceFamily family = new PrecedenceFamily();
-
     private static final ConstraintScope A = new ConstraintScope("tag", "a");
     private static final ConstraintScope B = new ConstraintScope("tag", "b");
+    private final PrecedenceFamily family = new PrecedenceFamily();
 
     private static Constraint constraint(IEnumEnforcement.Types e) {
         return new Constraint("prec", "precedence", e, ConstraintScope.all(), Map.of(), null, 4, 0);
@@ -49,7 +32,9 @@ class PrecedenceFamilyTest {
         return new PrecedenceParams(from, to, type, minLag, maxLag, pairing);
     }
 
-    /** tag a -> tasks {0,1}; tag b -> tasks {2,3}; "task" scope -> that single task. */
+    /**
+     * tag a -> tasks {0,1}; tag b -> tasks {2,3}; "task" scope -> that single task.
+     */
     private static CandidateIndexView index() {
         CandidateIndexView idx = mock(CandidateIndexView.class);
         when(idx.resolveTasks(any())).thenAnswer(i -> {
@@ -73,6 +58,10 @@ class PrecedenceFamilyTest {
         when(ctx.index()).thenReturn(idx);
         when(ctx.hasTask(anyString())).thenAnswer(i -> !"ghost".equals(i.getArgument(0)));
         return ctx;
+    }
+
+    private static <T> T any() {
+        return org.mockito.ArgumentMatchers.any();
     }
 
     @Test
@@ -173,6 +162,8 @@ class PrecedenceFamilyTest {
         assertEquals(4, softMax.boolVars());
     }
 
+    // ------------------------------------------------------------------ checker
+
     @Test
     void violatedFollowsTheFourLinkTypesAndTheLags() {
         // i = [10, 20), j = [25, 40)
@@ -189,9 +180,9 @@ class PrecedenceFamilyTest {
         assertTrue(PrecedenceFamily.violated(PrecedenceRef.Type.FINISH_START, 10, 20, 14, 30, -5, null));
     }
 
-    // ------------------------------------------------------------------ checker
-
-    /** times[t] = {start, end}; start < 0 = unselected. */
+    /**
+     * times[t] = {start, end}; start < 0 = unselected.
+     */
     private List<String> check(PrecedenceParams p, int[][] times) {
         SolutionView sol = mock(SolutionView.class);
         when(sol.selected(anyInt())).thenAnswer(i -> times[i.getArgument(0, Integer.class)][0] >= 0);
@@ -225,9 +216,5 @@ class PrecedenceFamilyTest {
     void checkerSkipsPairsWithAnUnselectedEndpoint() {
         List<String> out = check(params(A, B, null, null, null, null), new int[][]{{0, 50}, {-1, -1}, {-1, -1}, {5, 15}});
         assertEquals(List.of("t3:1"), out); // only the pair (0, 3) has both endpoints selected and is violated
-    }
-
-    private static <T> T any() {
-        return org.mockito.ArgumentMatchers.any();
     }
 }

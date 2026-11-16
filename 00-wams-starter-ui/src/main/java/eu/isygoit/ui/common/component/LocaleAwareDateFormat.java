@@ -41,7 +41,9 @@ public final class LocaleAwareDateFormat {
         return withDigits(DateTimeFormatter.ofPattern(dateTimePattern()));
     }
 
-    /** Dates are written with the digits chosen for the session (Latin or Arabic-Indic). */
+    /**
+     * Dates are written with the digits chosen for the session (Latin or Arabic-Indic).
+     */
     private static DateTimeFormatter withDigits(DateTimeFormatter formatter) {
         return formatter.withDecimalStyle(java.time.format.DecimalStyle.of(NumberStyle.localize(I18n.getCurrentLocale())));
     }

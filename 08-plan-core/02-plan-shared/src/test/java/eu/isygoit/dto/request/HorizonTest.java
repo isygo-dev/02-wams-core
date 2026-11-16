@@ -6,15 +6,14 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class HorizonTest {
 
     private static final Instant START = Instant.parse("2026-09-07T06:00:00Z");
-    /** 105 ticks of 900 s (the school timetable horizon of the design). */
+    /**
+     * 105 ticks of 900 s (the school timetable horizon of the design).
+     */
     private static final Horizon H = new Horizon(START, Instant.parse("2026-09-08T08:15:00Z"), 900);
 
     @Test

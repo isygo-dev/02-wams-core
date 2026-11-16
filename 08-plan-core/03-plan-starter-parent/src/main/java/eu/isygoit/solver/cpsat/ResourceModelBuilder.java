@@ -1,10 +1,6 @@
 package eu.isygoit.solver.cpsat;
 
-import com.google.ortools.sat.CpModel;
-import com.google.ortools.sat.CumulativeConstraint;
-import com.google.ortools.sat.IntervalVar;
-import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.Literal;
+import com.google.ortools.sat.*;
 import eu.isygoit.solver.index.CandidateIndex;
 
 import java.util.ArrayList;

@@ -25,7 +25,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ResourceCapacityTimefoldContributor implements TimefoldConstraintContributor {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "resource_capacity";
 
     @Override

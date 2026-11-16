@@ -3,17 +3,18 @@
 isygoPlan accepts a generic planning problem, validates and normalizes it, then creates a tracked solve job. The
 runnable API host is `10-starter-test/80-plan-management/04-plan-service`. The module is split like the Edyra Pilot:
 
-| Module                  | Content                                                                                                   |
-|-------------------------|-----------------------------------------------------------------------------------------------------------|
-| `01-plan-jpa`           | `eu.isygoit.model` (`PlanJob` PostgreSQL entity, `PlanLog` Cassandra row, `AppNextCode`, `ApiPermission`) and `eu.isygoit.repository` |
-| `02-plan-shared`        | `eu.isygoit.api.PlanJobServiceApi`, `eu.isygoit.dto.{request,response,data}`, `eu.isygoit.enums`, `JobNotFoundException`, `ImmutableJsonMap` |
-| `03-plan-starter-parent`| controller, services, mappers, exceptions, solver engines, Kafka producers, Camel processors, configuration |
-| `04-plan-starter-ui`    | Vaadin UI library (views, `PlanFeignService`, i18n bundles); not runnable on its own                       |
+| Module                   | Content                                                                                                                                      |
+|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `01-plan-jpa`            | `eu.isygoit.model` (`PlanJob` PostgreSQL entity, `PlanLog` Cassandra row, `AppNextCode`, `ApiPermission`) and `eu.isygoit.repository`        |
+| `02-plan-shared`         | `eu.isygoit.api.PlanJobServiceApi`, `eu.isygoit.dto.{request,response,data}`, `eu.isygoit.enums`, `JobNotFoundException`, `ImmutableJsonMap` |
+| `03-plan-starter-parent` | controller, services, mappers, exceptions, solver engines, Kafka producers, Camel processors, configuration                                  |
+| `04-plan-starter-ui`     | Vaadin UI library (views, `PlanFeignService`, i18n bundles); not runnable on its own                                                         |
 
 Package map of the starter parent: `eu.isygoit.controller` (`PlanJobController`), `eu.isygoit.service` (interfaces),
 `eu.isygoit.service.impl` (job lifecycle: `PlanJobService`, `PlanLogService`, `JobProcessor`, `JobDispatchService`,
 `JobDispatchRecovery`, `JobStopMonitor`, `JobWorkerShutdown`, `TenantScope`, `NextCodeService`),
-`eu.isygoit.service.impl.planning` (`PlanningService`, request/solution validators, normalizer, solve concurrency guard),
+`eu.isygoit.service.impl.planning` (`PlanningService`, request/solution validators, normalizer, solve concurrency
+guard),
 `eu.isygoit.mapper`, `eu.isygoit.dto.tech` (`PlanJobMessage`, `ApiPermissionDto`), `eu.isygoit.exception` and
 `eu.isygoit.exception.handler` (`PlanExceptionHandler`), `eu.isygoit.config`, `eu.isygoit.solver` (engine contracts and
 registries) with `eu.isygoit.solver.cpsat`, `eu.isygoit.solver.timefold` and `eu.isygoit.solver.handler`,
@@ -23,7 +24,8 @@ Services call the Spring Data repositories directly: there are no ports or adapt
 ## Authority: Edyra Pilot
 
 The reference implementation for this service is the Edyra Pilot (`10-edyra/03-edyra-pilot`, central config
-`10-edyra/09-docker/config-files/edyra-pilot-service.yml`, host `10-edyra/10-starter-test/03-edyra-pilot/01-pilot-service`).
+`10-edyra/09-docker/config-files/edyra-pilot-service.yml`, host
+`10-edyra/10-starter-test/03-edyra-pilot/01-pilot-service`).
 Where this document differs from the Edyra Pilot implementation (package layout, base classes, DTO/mapper/service/
 controller patterns, ApiPermission registration, Kafka mail/chat senders, cache configuration, next-code generation,
 security configuration, host starter), **the Edyra Pilot wins** and the plan code is refactored to it. This document
@@ -37,14 +39,14 @@ Ports: plan-service `40417` (not `40414`, which is `scui.server.port` in the clo
 
 ### Roadmap
 
-| Phase | Content | Status |
-|-------|---------|--------|
-| 0 | Make it run (host jar, Docker/Compose, central config aligned to the pilot, ports) | Done (written, unverified) |
-| 1 | Safety / reliability (limits, solve guard, retry/DLQ, dispatch claims, graceful shutdown, tenant scoping) | Done (written, unverified) |
-| 2 | Architecture refactor to the pilot (packages, base classes, DTO/mapper/service/controller, job identity, REST API, messaging, UI, docs; waves 1-4) | Done (written, unverified) |
-| 3 | Engine v2 (solver improvements, new constraints/objectives) | Todo |
-| 4 | UI (host the starter UI, plan-ui on 60607) | Todo |
-| 5 | Tests / operations (unit and integration tests, CI, observability) | Todo |
+| Phase | Content                                                                                                                                            | Status                     |
+|-------|----------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|
+| 0     | Make it run (host jar, Docker/Compose, central config aligned to the pilot, ports)                                                                 | Done (written, unverified) |
+| 1     | Safety / reliability (limits, solve guard, retry/DLQ, dispatch claims, graceful shutdown, tenant scoping)                                          | Done (written, unverified) |
+| 2     | Architecture refactor to the pilot (packages, base classes, DTO/mapper/service/controller, job identity, REST API, messaging, UI, docs; waves 1-4) | Done (written, unverified) |
+| 3     | Engine v2 (solver improvements, new constraints/objectives)                                                                                        | Todo                       |
+| 4     | UI (host the starter UI, plan-ui on 60607)                                                                                                         | Todo                       |
+| 5     | Tests / operations (unit and integration tests, CI, observability)                                                                                 | Todo                       |
 
 Nothing has been compiled yet: the first build is pending. Phases 0 to 2 were written by reading only (see
 `IMPLEMENTATION_PLAN.md`).
@@ -82,19 +84,20 @@ Every read and write is scoped to the tenant of the caller; a job of another ten
 
 ### Messaging
 
-| Topic (`spring.kafka.topics.*`)  | Key              | Body                                        | Producer / consumer                                  |
-|----------------------------------|------------------|---------------------------------------------|------------------------------------------------------|
-| `isygo.plan.jobs` (`plan-jobs`)  | job id (UTF-8)   | `{"jobId":123,"tenant":"acme"}`             | `PlanJobKafkaProducer` / `PlanJobKafkaConsumerProcessor` |
-| `isygo.plan.logs` (`plan-logs`)  | job id           | JSON `LogEntry`                             | `PlanLogKafkaProducer` / `PlanLogKafkaConsumerProcessor` |
-| `isygo.plan.jobs.dlq`            | original key     | original payload + failure headers          | `PlanJobDeadLetterProcessor`                         |
-| `isygo.plan.logs.dlq`            | original key     | original payload + failure headers          | `PlanLogDeadLetterProcessor`                         |
+| Topic (`spring.kafka.topics.*`) | Key            | Body                               | Producer / consumer                                      |
+|---------------------------------|----------------|------------------------------------|----------------------------------------------------------|
+| `isygo.plan.jobs` (`plan-jobs`) | job id (UTF-8) | `{"jobId":123,"tenant":"acme"}`    | `PlanJobKafkaProducer` / `PlanJobKafkaConsumerProcessor` |
+| `isygo.plan.logs` (`plan-logs`) | job id         | JSON `LogEntry`                    | `PlanLogKafkaProducer` / `PlanLogKafkaConsumerProcessor` |
+| `isygo.plan.jobs.dlq`           | original key   | original payload + failure headers | `PlanJobDeadLetterProcessor`                             |
+| `isygo.plan.logs.dlq`           | original key   | original payload + failure headers | `PlanLogDeadLetterProcessor`                             |
 
 The job message is only a pointer: the planning request is never put on the wire, the worker loads the persisted
 request by `jobId`. The key is the job id so a job always lands on the same partition and the id can be recovered from
 the key when the body is unreadable. Failures are redelivered with bounded exponential backoff
 (`app.plan.kafka.retry.*`) and then dead-lettered; poison messages go to the DLQ immediately. The Camel routes
 (`camel/plan-job-camel-routes.xml`, `camel/plan-log-camel-routes.xml`, `camel/email-camel-routes.xml` in the host) are
-consumer routes only: producers are plain Spring beans extending the stack producer types, there are no publisher routes.
+consumer routes only: producers are plain Spring beans extending the stack producer types, there are no publisher
+routes.
 The `plan-jobs` topic has one partition: jobs are processed strictly sequentially.
 
 ### Schema
@@ -158,7 +161,8 @@ docker compose up --build
 ```
 
 Compose builds `09-docker/core-plan.Dockerfile` with `02-wams-core` as build context (it copies, like
-`core-mms.Dockerfile`, the host jar `10-starter-test/80-plan-management/04-plan-service/target/plan-management-service-*.jar`
+`core-mms.Dockerfile`, the host jar
+`10-starter-test/80-plan-management/04-plan-service/target/plan-management-service-*.jar`
 plus `target/uploads` and `target/camel` produced by the host POM; glibc `eclipse-temurin:17-jre`
 base because the OR-Tools natives do not run on Alpine). It starts PostgreSQL (empty database `isygo_plan`; the schema
 `plan` and its tables are created by the application), a single-node KRaft Kafka with a one-shot `kafka-init`
@@ -176,7 +180,8 @@ use a running config-service instead, drop the mount/import and point `spring.co
 file: the pilot infrastructure keys (`spring.hazelcast.config`, `spring.cache.jcache.provider`, Kafka topics
 `register-api-permission` / `register-account` / `send-email`, `app.email.*`, `app.upload.directory`, `app.i18n.*`,
 `app.jwt.*`, `app.password.*`, `app.create.ifNotExists.*`, `app.feign.*`, `jasypt.*`; no `spring.mail` block, the pilot
-sends mail through Kafka to MMS), `ddl-auto: update` with `connection-init-sql: CREATE SCHEMA IF NOT EXISTS plan`, Cassandra
+sends mail through Kafka to MMS), `ddl-auto: update` with `connection-init-sql: CREATE SCHEMA IF NOT EXISTS plan`,
+Cassandra
 `schema-action: create-if-not-exists` with `create-keyspace: true`, the plan topics (`spring.kafka.topics.plan-jobs`,
 `plan-logs`, `plan-jobs-dlq`, `plan-logs-dlq`), `app.plan.kafka.*` (poll intervals, send timeout, retry/backoff),
 `app.plan.execution.*` (`kafka-enabled` from `PLAN_KAFKA_ENABLED`, default `true`; `false` dispatches jobs to the
@@ -186,7 +191,8 @@ overrides the actuator exposure; datasource, Kafka and Cassandra settings come f
 environment variables `PLAN_JDBC_URL`, `PLAN_JDBC_USERNAME`, `PLAN_JDBC_PASSWORD`, `KAFKA_BOOTSTRAP_SERVERS`,
 `PLAN_CASSANDRA_CONTACT_POINTS`, `PLAN_CASSANDRA_PORT`, `PLAN_CASSANDRA_LOCAL_DATACENTER` and `PLAN_CASSANDRA_KEYSPACE`.
 
-Set `SPRING_PROFILES_ACTIVE=prod` in production. Do not rely on the compose `SimpleStrategy` keyspace initialization in production.
+Set `SPRING_PROFILES_ACTIVE=prod` in production. Do not rely on the compose `SimpleStrategy` keyspace initialization in
+production.
 
 The API lives under `/api/v1/private` and is protected by the stack JWT filter; the smoke test accepts an optional
 bearer token (`-Token` / `TOKEN`).
@@ -198,22 +204,22 @@ bearer token (`-Token` / `TOKEN`).
 `engine`, `status`, timestamps, `errorCode` and `message`; `PlanJobDto` adds `request`, `result` and `diagnostics`.
 Errors leave the service as the same `ApiError` body, produced by `PlanExceptionHandler`.
 
-| Method and path (under `/api/v1/private/plan/job`) | Purpose |
-|----------------------------------------------------|---------|
+| Method and path (under `/api/v1/private/plan/job`) | Purpose                                                                                                                                 |
+|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
 | `POST /submit`                                     | Submit a `PlanningRequest`; `202 Accepted` with the `PlanJobDto` (status `CREATED`); the same `meta.clientRef` returns the existing job |
-| `GET /{id}`                                        | Inherited: fetch one job (`PlanJobDto`) |
-| `GET` (paged), `GET /list`, `GET /filter`        | Inherited: paged and filtered job lists of the tenant (`PlanJobMinDto`) |
-| `DELETE /{id}`                                     | Inherited: delete a job in a terminal state only (`409` otherwise); its Cassandra logs expire under the 30-day TTL |
-| `GET /{id}/request`                                | The stored planning request |
-| `PUT /{id}/request`                                | Replace the request while the job is `CREATED` (`409` afterwards) |
-| `GET /{id}/result`                                 | The `SolveResult` once the job has completed |
-| `GET /{id}/result/export?format=json\|csv`         | Download the result as JSON or CSV |
-| `GET /{id}/logs?from&to&minLevel&limit`            | Recent logs or an ISO-8601 `from`/`to` range; optional `minLevel` and `limit` (default 100, max 1000) |
-| `POST /{id}/stop`                                  | Request cancellation of a `NORMALIZING` or `SOLVING` job (moves through `STOPPING` to `CANCELLED`) |
-| `POST /{id}/cancel`                                | Cancel a queued (`CREATED`) job before processing starts (`409` if already processing or terminal) |
-| `POST /validate`                                   | Validate and normalize a request without creating a job (`ValidationReportDto`) |
-| `GET /capabilities`                                | Available solvers, constraint types and objective types (`CapabilitiesDto`) |
-| `GET /dashboard?limit=50`                          | Status counts and recent jobs for the management dashboard (`JobDashboardSummary`, limit max 500) |
+| `GET /{id}`                                        | Inherited: fetch one job (`PlanJobDto`)                                                                                                 |
+| `GET` (paged), `GET /list`, `GET /filter`          | Inherited: paged and filtered job lists of the tenant (`PlanJobMinDto`)                                                                 |
+| `DELETE /{id}`                                     | Inherited: delete a job in a terminal state only (`409` otherwise); its Cassandra logs expire under the 30-day TTL                      |
+| `GET /{id}/request`                                | The stored planning request                                                                                                             |
+| `PUT /{id}/request`                                | Replace the request while the job is `CREATED` (`409` afterwards)                                                                       |
+| `GET /{id}/result`                                 | The `SolveResult` once the job has completed                                                                                            |
+| `GET /{id}/result/export?format=json\|csv`         | Download the result as JSON or CSV                                                                                                      |
+| `GET /{id}/logs?from&to&minLevel&limit`            | Recent logs or an ISO-8601 `from`/`to` range; optional `minLevel` and `limit` (default 100, max 1000)                                   |
+| `POST /{id}/stop`                                  | Request cancellation of a `NORMALIZING` or `SOLVING` job (moves through `STOPPING` to `CANCELLED`)                                      |
+| `POST /{id}/cancel`                                | Cancel a queued (`CREATED`) job before processing starts (`409` if already processing or terminal)                                      |
+| `POST /validate`                                   | Validate and normalize a request without creating a job (`ValidationReportDto`)                                                         |
+| `GET /capabilities`                                | Available solvers, constraint types and objective types (`CapabilitiesDto`)                                                             |
+| `GET /dashboard?limit=50`                          | Status counts and recent jobs for the management dashboard (`JobDashboardSummary`, limit max 500)                                       |
 
 Creating or updating a job through the generic CRUD endpoints (`POST`, `PUT /{id}`) is rejected with `405`: jobs are
 created by `/submit` and their request is changed by `PUT /{id}/request`.

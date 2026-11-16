@@ -3,11 +3,7 @@ package eu.isygoit.dto.data;
 import eu.isygoit.dto.request.PlanningRequest;
 import eu.isygoit.dto.response.Diagnostics;
 import eu.isygoit.dto.response.SolveResult;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 /**

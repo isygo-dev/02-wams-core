@@ -4,15 +4,7 @@ import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.ConstraintScope;
 import eu.isygoit.dto.request.params.GroupingParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -31,10 +23,32 @@ import java.util.Set;
 @Component
 public class SameResourceFamily implements ConstraintFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "same_resource";
-    /** Violation code reported by the checker. */
+    /**
+     * Violation code reported by the checker.
+     */
     public static final String CODE = "SAME_RESOURCE_VIOLATED";
+
+    /**
+     * Shared by {@code same_resource} and {@code different_resource}.
+     */
+    static void validateGrouping(ValidationContext ctx, Constraint constraint, GroupingParams p) {
+        if (p == null) {
+            return;
+        }
+        boolean noPrefix = p.groupByTagPrefix() == null || p.groupByTagPrefix().isBlank();
+        if (noPrefix && ConstraintScope.ALL.equals(constraint.scope().kind())) {
+            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params.groupByTagPrefix"),
+                    "params.groupByTagPrefix is required unless the scope selects one group (kind tag)");
+        }
+        if (p.role() != null && p.role().isBlank()) {
+            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params.role"),
+                    "params.role must not be blank");
+        }
+    }
 
     @Override
     public String type() {
@@ -71,22 +85,6 @@ public class SameResourceFamily implements ConstraintFamily {
         validateGrouping(ctx, constraint, (GroupingParams) params);
     }
 
-    /** Shared by {@code same_resource} and {@code different_resource}. */
-    static void validateGrouping(ValidationContext ctx, Constraint constraint, GroupingParams p) {
-        if (p == null) {
-            return;
-        }
-        boolean noPrefix = p.groupByTagPrefix() == null || p.groupByTagPrefix().isBlank();
-        if (noPrefix && ConstraintScope.ALL.equals(constraint.scope().kind())) {
-            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params.groupByTagPrefix"),
-                    "params.groupByTagPrefix is required unless the scope selects one group (kind tag)");
-        }
-        if (p.role() != null && p.role().isBlank()) {
-            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params.role"),
-                    "params.role must not be blank");
-        }
-    }
-
     @Override
     public ModelCost estimate(CandidateIndexView index, Constraint constraint, Object params) {
         GroupingParams p = (GroupingParams) params;
@@ -104,7 +102,9 @@ public class SameResourceFamily implements ConstraintFamily {
         return new Checker();
     }
 
-    /** Independent checker: compares the resource sets of consecutive group members. */
+    /**
+     * Independent checker: compares the resource sets of consecutive group members.
+     */
     static final class Checker implements ConstraintChecker {
         @Override
         public void check(CheckContext ctx, Constraint constraint, Object params, ViolationSink sink) {

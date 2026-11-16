@@ -9,28 +9,44 @@ package eu.isygoit.solver.spi;
  */
 public interface SolutionView {
 
-    /** @return number of tasks (equals {@code CandidateIndex.taskCount}) */
+    /**
+     * @return number of tasks (equals {@code CandidateIndex.taskCount})
+     */
     int taskCount();
 
-    /** @return {@code true} when the task is part of the solution (always true for a required task) */
+    /**
+     * @return {@code true} when the task is part of the solution (always true for a required task)
+     */
     boolean selected(int task);
 
-    /** @return start tick of a selected task */
+    /**
+     * @return start tick of a selected task
+     */
     int start(int task);
 
-    /** @return end tick (start + the duration actually used, resource specific) of a selected task */
+    /**
+     * @return end tick (start + the duration actually used, resource specific) of a selected task
+     */
     int end(int task);
 
-    /** @return number of resources assigned to the task */
+    /**
+     * @return number of resources assigned to the task
+     */
     int resourceCount(int task);
 
-    /** @return resource index of the {@code k}-th assigned resource of the task, {@code 0 <= k < resourceCount(task)} */
+    /**
+     * @return resource index of the {@code k}-th assigned resource of the task, {@code 0 <= k < resourceCount(task)}
+     */
     int resourceAt(int task, int k);
 
-    /** @return role label of the {@code k}-th assigned resource */
+    /**
+     * @return role label of the {@code k}-th assigned resource
+     */
     String roleAt(int task, int k);
 
-    /** @return capacity amount consumed on the {@code k}-th assigned resource */
+    /**
+     * @return capacity amount consumed on the {@code k}-th assigned resource
+     */
     int amountAt(int task, int k);
 
     /**
@@ -39,6 +55,8 @@ public interface SolutionView {
      */
     int[] tasksOfResource(int resource);
 
-    /** @return slot index chosen by the task start (slot mode), or {@code -1} */
+    /**
+     * @return slot index chosen by the task start (slot mode), or {@code -1}
+     */
     int slotOf(int task);
 }

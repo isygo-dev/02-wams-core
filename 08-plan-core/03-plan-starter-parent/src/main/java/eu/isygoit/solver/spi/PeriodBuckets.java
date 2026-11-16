@@ -3,12 +3,7 @@ package eu.isygoit.solver.spi;
 import eu.isygoit.dto.request.Horizon;
 import eu.isygoit.dto.request.params.PeriodSpec;
 
-import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Arrays;
 

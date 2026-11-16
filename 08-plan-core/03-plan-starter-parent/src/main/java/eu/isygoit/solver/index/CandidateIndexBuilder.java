@@ -1,19 +1,8 @@
 package eu.isygoit.solver.index;
 
 import eu.isygoit.config.PlanLimitsProperties;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.request.Calendar;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.ResourceSelector;
-import eu.isygoit.dto.request.SetupEntry;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
 import eu.isygoit.dto.response.DiagnosticIssue;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.exception.InvalidRequestException;
@@ -24,12 +13,7 @@ import eu.isygoit.solver.SolverCancellationToken;
 import eu.isygoit.solver.spi.PreprocessContext;
 
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Builds the immutable {@link CandidateIndex} of a normalized problem ONCE (design 5.4).
@@ -57,29 +41,67 @@ import java.util.Map;
  */
 public final class CandidateIndexBuilder {
 
-    /** Maximum number of recorded pruned candidates. */
+    /**
+     * Maximum number of recorded pruned candidates.
+     */
     public static final int MAX_PRUNED_RECORDS = 10_000;
 
-    /** Candidate removed because the requirement amount exceeds the resource capacity. */
+    /**
+     * Candidate removed because the requirement amount exceeds the resource capacity.
+     */
     public static final String REASON_AMOUNT = "AMOUNT_EXCEEDS_CAPACITY";
-    /** Candidate removed because a (full) pin names other resources. */
+    /**
+     * Candidate removed because a (full) pin names other resources.
+     */
     public static final String REASON_PIN = "PIN";
-    /** Candidate removed because a pinned resource is not selected by the requirement. */
+    /**
+     * Candidate removed because a pinned resource is not selected by the requirement.
+     */
     public static final String REASON_PIN_NOT_ELIGIBLE = "PIN_NOT_ELIGIBLE";
-    /** Candidate removed because no start fits between release, deadline and pin. */
+    /**
+     * Candidate removed because no start fits between release, deadline and pin.
+     */
     public static final String REASON_WINDOW = "WINDOW";
-    /** Candidate removed because no working window of the resource fits the task. */
+    /**
+     * Candidate removed because no working window of the resource fits the task.
+     */
     public static final String REASON_CALENDAR = "CALENDAR";
-    /** Candidate removed because no allowed slot start remains. */
+    /**
+     * Candidate removed because no allowed slot start remains.
+     */
     public static final String REASON_SLOT = "SLOT";
-    /** Candidate removed because a HARD family restricted the start domain to nothing. */
+    /**
+     * Candidate removed because a HARD family restricted the start domain to nothing.
+     */
     public static final String REASON_CONSTRAINT = "CONSTRAINT";
-    /** Candidate removed because the precedence (CPM) window leaves no start. */
+    /**
+     * Candidate removed because the precedence (CPM) window leaves no start.
+     */
     public static final String REASON_PRECEDENCE = "PRECEDENCE_WINDOW";
 
     private static final int[] EMPTY = new int[0];
 
     private CandidateIndexBuilder() {
+    }
+
+    /**
+     * Builds the index.
+     *
+     * @param problem     the normalized problem (defaults materialised; a raw problem works too)
+     * @param constraints the compiled constraints; only active HARD ones run {@code preprocess}
+     * @param limits      configured limits ({@code max-candidates}, {@code max-precedences}, {@code max-calendar-runs}, ...)
+     * @param token       cancellation token ({@code null} = never cancelled)
+     * @return the index
+     * @throws LimitExceededException  when a size limit is crossed while building
+     * @throws InvalidRequestException with code {@code PRECEDENCE_CYCLE} when the edges are cyclic
+     * @throws SolveCancelledException when stop was requested or the time budget is exhausted
+     */
+    public static CandidateIndex build(PlanningProblem problem, List<CompiledConstraint> constraints,
+                                       PlanLimitsProperties limits, SolverCancellationToken token) {
+        return new Build(problem,
+                constraints == null ? List.of() : constraints,
+                limits == null ? new PlanLimitsProperties() : limits,
+                token == null ? new SolverCancellationToken() : token).run();
     }
 
     /**
@@ -90,55 +112,89 @@ public final class CandidateIndexBuilder {
      */
     public interface Mutable {
 
-        /** @return the problem being indexed */
+        /**
+         * @return the problem being indexed
+         */
         PlanningProblem problem();
 
-        /** @return number of tasks */
+        /**
+         * @return number of tasks
+         */
         int taskCount();
 
-        /** @return number of resources */
+        /**
+         * @return number of resources
+         */
         int resourceCount();
 
-        /** @return the resource index of an id, or {@code -1} */
+        /**
+         * @return the resource index of an id, or {@code -1}
+         */
         int resourceIdx(String id);
 
-        /** @return number of enumerated candidates (removed ones included) */
+        /**
+         * @return number of enumerated candidates (removed ones included)
+         */
         int candidateCount();
 
-        /** @return first candidate id of the task (range {@code [candidateBegin, candidateEnd)}) */
+        /**
+         * @return first candidate id of the task (range {@code [candidateBegin, candidateEnd)})
+         */
         int candidateBegin(int task);
 
-        /** @return one past the last candidate id of the task */
+        /**
+         * @return one past the last candidate id of the task
+         */
         int candidateEnd(int task);
 
-        /** @return the task index of a candidate */
+        /**
+         * @return the task index of a candidate
+         */
         int candidateTask(int candidate);
 
-        /** @return the global requirement index of a candidate */
+        /**
+         * @return the global requirement index of a candidate
+         */
         int candidateRequirement(int candidate);
 
-        /** @return the role name of the requirement the candidate belongs to */
+        /**
+         * @return the role name of the requirement the candidate belongs to
+         */
         String candidateRole(int candidate);
 
-        /** @return the resource index of a candidate */
+        /**
+         * @return the resource index of a candidate
+         */
         int candidateResource(int candidate);
 
-        /** @return the duration in ticks of the candidate */
+        /**
+         * @return the duration in ticks of the candidate
+         */
         int candidateDuration(int candidate);
 
-        /** @return the capacity amount consumed by the candidate */
+        /**
+         * @return the capacity amount consumed by the candidate
+         */
         int candidateAmount(int candidate);
 
-        /** @return {@code true} when the candidate has already been removed */
+        /**
+         * @return {@code true} when the candidate has already been removed
+         */
         boolean removed(int candidate);
 
-        /** Removes the candidate (idempotent) and records the reason. */
+        /**
+         * Removes the candidate (idempotent) and records the reason.
+         */
         void remove(int candidate, String reasonCode, String constraintId);
 
-        /** Intersects the START domain of the candidate with the inclusive tick range {@code [lo, hi]}. */
+        /**
+         * Intersects the START domain of the candidate with the inclusive tick range {@code [lo, hi]}.
+         */
         void restrictCandidateStart(int candidate, int lo, int hi);
 
-        /** Intersects the START domain of the candidate with inclusive runs ({@code [lo0,hi0,lo1,hi1,...]}). */
+        /**
+         * Intersects the START domain of the candidate with inclusive runs ({@code [lo0,hi0,lo1,hi1,...]}).
+         */
         void restrictCandidateStart(int candidate, int[] runs);
     }
 
@@ -152,26 +208,6 @@ public final class CandidateIndexBuilder {
      * @param constraintId id of the constraint responsible, empty for structural reasons
      */
     public record PrunedCandidate(int task, int requirement, int resource, String reasonCode, String constraintId) {
-    }
-
-    /**
-     * Builds the index.
-     *
-     * @param problem     the normalized problem (defaults materialised; a raw problem works too)
-     * @param constraints the compiled constraints; only active HARD ones run {@code preprocess}
-     * @param limits      configured limits ({@code max-candidates}, {@code max-precedences}, {@code max-calendar-runs}, ...)
-     * @param token       cancellation token ({@code null} = never cancelled)
-     * @return the index
-     * @throws LimitExceededException   when a size limit is crossed while building
-     * @throws InvalidRequestException  with code {@code PRECEDENCE_CYCLE} when the edges are cyclic
-     * @throws SolveCancelledException  when stop was requested or the time budget is exhausted
-     */
-    public static CandidateIndex build(PlanningProblem problem, List<CompiledConstraint> constraints,
-                                       PlanLimitsProperties limits, SolverCancellationToken token) {
-        return new Build(problem,
-                constraints == null ? List.of() : constraints,
-                limits == null ? new PlanLimitsProperties() : limits,
-                token == null ? new SolverCancellationToken() : token).run();
     }
 
     // ==================================================================================================
@@ -201,9 +237,9 @@ public final class CandidateIndexBuilder {
         private final ScopeResolver scopes;
         private final List<DiagnosticIssue> warnings = new ArrayList<>();
         private final List<PrunedCandidate> pruned = new ArrayList<>();
+        private final Map<String, Integer> slotIndex = new HashMap<>();
         private long prunedTotal;
         private int counter;
-
         // requirements
         private ResourceSelector[] reqSelector;
         private String[] roleNames;
@@ -212,7 +248,6 @@ public final class CandidateIndexBuilder {
         private int[][] classRuns;
         // slots
         private int[] slotsByStart;
-        private final Map<String, Integer> slotIndex = new HashMap<>();
         private int[][] slotLists;
         // raw candidates
         private IntList rawTask;
@@ -246,6 +281,25 @@ public final class CandidateIndexBuilder {
         }
 
         // ------------------------------------------------------------------ main
+
+        private static int classIndex(Map<String, Integer> classes, List<String> names, String name) {
+            Integer idx = classes.get(name);
+            if (idx == null) {
+                idx = names.size();
+                classes.put(name, idx);
+                names.add(name);
+            }
+            return idx;
+        }
+
+        private static boolean contains(int[] values, int v) {
+            for (int x : values) {
+                if (x == v) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
         CandidateIndex run() {
             check();
@@ -283,6 +337,8 @@ public final class CandidateIndexBuilder {
             SolveCancelledException.check(token, startNanos, budgetSeconds);
         }
 
+        // ------------------------------------------------------------------ 1. ids, slots, tasks
+
         private void tick() {
             if ((++counter & 1023) == 0) {
                 check();
@@ -292,8 +348,6 @@ public final class CandidateIndexBuilder {
         private int tickOf(java.time.Instant instant) {
             return Math.max(0, Math.min(h, horizon.floorTick(instant)));
         }
-
-        // ------------------------------------------------------------------ 1. ids, slots, tasks
 
         private void buildSlotsAndIds() {
             d.taskIds = new String[taskCount];
@@ -361,7 +415,9 @@ public final class CandidateIndexBuilder {
             return d.slotEnd[list[0]] - d.slotStart[list[0]];
         }
 
-        /** Slot indices of a slot-mode task sorted by (start, index); empty for a free-start task. */
+        /**
+         * Slot indices of a slot-mode task sorted by (start, index); empty for a free-start task.
+         */
         private int[] slotList(int t) {
             int[] cached = slotLists[t];
             if (cached != null) {
@@ -397,6 +453,8 @@ public final class CandidateIndexBuilder {
             return result;
         }
 
+        // ------------------------------------------------------------------ 2. requirements, resources
+
         private void buildSetupClasses() {
             Map<String, Integer> classes = new HashMap<>();
             List<String> names = new ArrayList<>();
@@ -413,18 +471,6 @@ public final class CandidateIndexBuilder {
             }
             d.setupClassNames = names.toArray(new String[0]);
         }
-
-        private static int classIndex(Map<String, Integer> classes, List<String> names, String name) {
-            Integer idx = classes.get(name);
-            if (idx == null) {
-                idx = names.size();
-                classes.put(name, idx);
-                names.add(name);
-            }
-            return idx;
-        }
-
-        // ------------------------------------------------------------------ 2. requirements, resources
 
         private void buildRequirements() {
             IntList count = new IntList();
@@ -467,6 +513,8 @@ public final class CandidateIndexBuilder {
             reqSelector = selectors.toArray(new ResourceSelector[0]);
             roleNames = d.roles;
         }
+
+        // ------------------------------------------------------------------ 3. precedence edges
 
         private void buildResources() {
             d.capacity = new int[resourceCount];
@@ -542,7 +590,7 @@ public final class CandidateIndexBuilder {
             classRuns = runsOfClass.toArray(new int[0][]);
         }
 
-        // ------------------------------------------------------------------ 3. precedence edges
+        // ------------------------------------------------------------------ 4. candidates
 
         private void buildEdges() {
             IntList pred = new IntList();
@@ -587,8 +635,6 @@ public final class CandidateIndexBuilder {
             }
             d.topoOrder = topo;
         }
-
-        // ------------------------------------------------------------------ 4. candidates
 
         private void enumerateCandidates() {
             SelectorEvaluator selectors = new SelectorEvaluator(resources);
@@ -679,7 +725,9 @@ public final class CandidateIndexBuilder {
             return result;
         }
 
-        /** {@code resourceDurations} apply only to a task with exactly one requirement of count 1. */
+        /**
+         * {@code resourceDurations} apply only to a task with exactly one requirement of count 1.
+         */
         private Map<Integer, Integer> resourceDurations(Task task, int qBegin, int qEnd) {
             if (task.resourceDurations().isEmpty() || qEnd - qBegin != 1 || d.reqCount[qBegin] != 1) {
                 return null;
@@ -692,15 +740,6 @@ public final class CandidateIndexBuilder {
                 }
             }
             return map;
-        }
-
-        private static boolean contains(int[] values, int v) {
-            for (int x : values) {
-                if (x == v) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private void record(int task, int requirement, int resource, String reason, String constraintId) {
@@ -886,7 +925,9 @@ public final class CandidateIndexBuilder {
             compact(allowed, union);
         }
 
-        /** Restricts runs to the starts of the task's slots that are long enough, as merged point runs. */
+        /**
+         * Restricts runs to the starts of the task's slots that are long enough, as merged point runs.
+         */
         private int[] slotStarts(int[] runs, int[] slotList, int dur) {
             IntList out = new IntList();
             int lastEnd = Integer.MIN_VALUE;
@@ -906,7 +947,9 @@ public final class CandidateIndexBuilder {
             return out.toArray();
         }
 
-        /** Drops removed candidates, renumbers, emits per-candidate overrides and the requirement CSR. */
+        /**
+         * Drops removed candidates, renumbers, emits per-candidate overrides and the requirement CSR.
+         */
         private void compact(int[][] allowed, int[][] union) {
             int rawCount = rawTask.size();
             IntList candTask = new IntList(rawCount);

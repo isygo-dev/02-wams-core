@@ -23,9 +23,6 @@ public final class StartDomainCalculator {
     private final Map<Long, int[]> startRunsCache = new HashMap<>();
     private final Map<WindowKey, int[]> windowCache = new HashMap<>();
 
-    private record WindowKey(int cls, int duration, int lo, int hi) {
-    }
-
     /**
      * Creates the calculator.
      *
@@ -33,33 +30,6 @@ public final class StartDomainCalculator {
      */
     public StartDomainCalculator(int[][] classRuns) {
         this.classRuns = classRuns;
-    }
-
-    /**
-     * Allowed start runs of a task of duration {@code d} on a resource of profile {@code cls} within {@code [lo, hi]}.
-     *
-     * @param cls profile class of the resource, or a negative value for "always available"
-     * @param d   duration in ticks on that resource
-     * @param lo  earliest start (inclusive)
-     * @param hi  latest start (inclusive)
-     * @return inclusive runs, shared (do not modify); empty when no start fits
-     */
-    public int[] allowed(int cls, int d, int lo, int hi) {
-        if (hi < lo) {
-            return EMPTY;
-        }
-        if (cls < 0) {
-            return new int[]{lo, hi};
-        }
-        WindowKey key = new WindowKey(cls, d, lo, hi);
-        int[] cached = windowCache.get(key);
-        if (cached == null) {
-            long startKey = (((long) cls) << 32) | (d & 0xFFFFFFFFL);
-            int[] starts = startRunsCache.computeIfAbsent(startKey, k -> startRuns(classRuns[cls], d));
-            cached = clip(starts, lo, hi);
-            windowCache.put(key, cached);
-        }
-        return cached;
     }
 
     /**
@@ -120,7 +90,9 @@ public final class StartDomainCalculator {
         return out;
     }
 
-    /** Intersection of two inclusive run lists. */
+    /**
+     * Intersection of two inclusive run lists.
+     */
     public static int[] intersect(int[] a, int[] b) {
         if (a.length == 0 || b.length == 0) {
             return EMPTY;
@@ -144,7 +116,9 @@ public final class StartDomainCalculator {
         return out.toArray();
     }
 
-    /** Union of two inclusive run lists (adjacent runs are merged). */
+    /**
+     * Union of two inclusive run lists (adjacent runs are merged).
+     */
     public static int[] union(int[] a, int[] b) {
         if (a.length == 0) {
             return b;
@@ -188,7 +162,9 @@ public final class StartDomainCalculator {
         return out.toArray();
     }
 
-    /** @return whether {@code v} lies in one of the inclusive runs (binary search) */
+    /**
+     * @return whether {@code v} lies in one of the inclusive runs (binary search)
+     */
     public static boolean contains(int[] runs, int v) {
         int lo = 0;
         int hi = runs.length / 2 - 1;
@@ -205,18 +181,54 @@ public final class StartDomainCalculator {
         return false;
     }
 
-    /** @return the earliest value of a non-empty run list */
+    /**
+     * @return the earliest value of a non-empty run list
+     */
     public static int min(int[] runs) {
         return runs[0];
     }
 
-    /** @return the latest value of a non-empty run list */
+    /**
+     * @return the latest value of a non-empty run list
+     */
     public static int max(int[] runs) {
         return runs[runs.length - 1];
     }
 
-    /** @return whether the run list describes exactly the plain interval {@code [lo, hi]} */
+    /**
+     * @return whether the run list describes exactly the plain interval {@code [lo, hi]}
+     */
     public static boolean isInterval(int[] runs, int lo, int hi) {
         return runs.length == 2 && runs[0] == lo && runs[1] == hi;
+    }
+
+    /**
+     * Allowed start runs of a task of duration {@code d} on a resource of profile {@code cls} within {@code [lo, hi]}.
+     *
+     * @param cls profile class of the resource, or a negative value for "always available"
+     * @param d   duration in ticks on that resource
+     * @param lo  earliest start (inclusive)
+     * @param hi  latest start (inclusive)
+     * @return inclusive runs, shared (do not modify); empty when no start fits
+     */
+    public int[] allowed(int cls, int d, int lo, int hi) {
+        if (hi < lo) {
+            return EMPTY;
+        }
+        if (cls < 0) {
+            return new int[]{lo, hi};
+        }
+        WindowKey key = new WindowKey(cls, d, lo, hi);
+        int[] cached = windowCache.get(key);
+        if (cached == null) {
+            long startKey = (((long) cls) << 32) | (d & 0xFFFFFFFFL);
+            int[] starts = startRunsCache.computeIfAbsent(startKey, k -> startRuns(classRuns[cls], d));
+            cached = clip(starts, lo, hi);
+            windowCache.put(key, cached);
+        }
+        return cached;
+    }
+
+    private record WindowKey(int cls, int duration, int lo, int hi) {
     }
 }

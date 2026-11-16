@@ -16,5 +16,5 @@ public record PeriodSpec(Unit unit, Integer ticks) {
     /**
      * Period units.
      */
-    public enum Unit { TICKS, DAY, WEEK }
+    public enum Unit {TICKS, DAY, WEEK}
 }

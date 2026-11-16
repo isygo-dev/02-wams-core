@@ -29,10 +29,35 @@ import java.util.Set;
 @Component
 public class TaskEligibilityTimefoldContributor implements TimefoldConstraintContributor {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "task_eligibility";
 
     private static final String ALL = "ALL";
+
+    private static boolean containsAll(List<String> ids) {
+        for (String id : ids) {
+            if (ALL.equalsIgnoreCase(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean resourceAllowed(Resource resource, boolean allResources, Set<String> ids, Set<String> excluded,
+                                           Set<String> types, List<String> skills) {
+        if (!allResources && !ids.contains(resource.id())) {
+            return false;
+        }
+        if (excluded.contains(resource.id())) {
+            return false;
+        }
+        if (!types.isEmpty() && !types.contains(resource.typeId())) {
+            return false;
+        }
+        return skills.isEmpty() || resource.skills().containsAll(skills);
+    }
 
     @Override
     public String type() {
@@ -80,28 +105,5 @@ public class TaskEligibilityTimefoldContributor implements TimefoldConstraintCon
                 }
             }
         }
-    }
-
-    private static boolean containsAll(List<String> ids) {
-        for (String id : ids) {
-            if (ALL.equalsIgnoreCase(id)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean resourceAllowed(Resource resource, boolean allResources, Set<String> ids, Set<String> excluded,
-                                           Set<String> types, List<String> skills) {
-        if (!allResources && !ids.contains(resource.id())) {
-            return false;
-        }
-        if (excluded.contains(resource.id())) {
-            return false;
-        }
-        if (!types.isEmpty() && !types.contains(resource.typeId())) {
-            return false;
-        }
-        return skills.isEmpty() || resource.skills().containsAll(skills);
     }
 }

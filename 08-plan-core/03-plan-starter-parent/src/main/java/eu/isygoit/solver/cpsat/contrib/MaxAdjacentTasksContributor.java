@@ -2,8 +2,8 @@ package eu.isygoit.solver.cpsat.contrib;
 
 import com.google.ortools.sat.BoolVar;
 import com.google.ortools.sat.IntVar;
-import com.google.ortools.sat.Literal;
 import com.google.ortools.sat.LinearExpr;
+import com.google.ortools.sat.Literal;
 import eu.isygoit.dto.request.params.MaxAdjacentTasksParams;
 import eu.isygoit.solver.CompiledConstraint;
 import eu.isygoit.solver.cpsat.CpModelContext;

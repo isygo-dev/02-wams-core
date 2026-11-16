@@ -15,8 +15,8 @@ import eu.isygoit.solver.CompiledProblem;
 import eu.isygoit.solver.SolveContext;
 import eu.isygoit.solver.SolveListener;
 import eu.isygoit.solver.SolverCancellationToken;
-import eu.isygoit.solver.cpsat.AssumptionRef;
 import eu.isygoit.solver.check.TestProblems;
+import eu.isygoit.solver.cpsat.AssumptionRef;
 import eu.isygoit.solver.diag.CoreItems;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
@@ -25,9 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests of {@link CpSatExplainer}. The fallback paths need no native library; the real assumption-core tests (G2b) are
@@ -67,6 +65,28 @@ class CpSatExplainerTest {
     }
 
     // ------------------------------------------------------------------------------------------ fallback (no natives)
+
+    private static void assertSame(Object expected, Object actual) {
+        org.junit.jupiter.api.Assertions.assertSame(expected, actual);
+    }
+
+    /**
+     * x in [0,10]; a => x >= 5; b => x <= 3; c => x >= 0 (irrelevant). The minimal core is {a, b}.
+     */
+    private static CpSatExplainer.ExplainModel conflictingModel(boolean includeConflict) {
+        CpModel model = new CpModel();
+        IntVar x = model.newIntVar(0, 10, "x");
+        BoolVar a = model.newBoolVar("a");
+        BoolVar b = model.newBoolVar("b");
+        BoolVar c = model.newBoolVar("c");
+        model.addGreaterOrEqual(x, 5).onlyEnforceIf(a);
+        model.addLessOrEqual(x, includeConflict ? 3 : 8).onlyEnforceIf(b);
+        model.addGreaterOrEqual(x, 0).onlyEnforceIf(c);
+        return new CpSatExplainer.ExplainModel(model, List.of(
+                new AssumptionRef(a, "CONSTRAINT", "c-a", "CONSTRAINT"),
+                new AssumptionRef(b, "TASK", "t-b", "WINDOW_EMPTY"),
+                new AssumptionRef(c, "CONSTRAINT", "c-c", "CONSTRAINT")));
+    }
 
     @Test
     void builderFailureFallsBackToTheLabelledV1List() {
@@ -108,6 +128,8 @@ class CpSatExplainerTest {
         assertEquals(CoreItems.METHOD_NONE, core.method());
     }
 
+    // ------------------------------------------------------------------------------------------ G2b (natives)
+
     @Test
     void theFactoryReceivesAFreshSingleWorkerContextWithTheExplainBudget() {
         CompiledProblem problem = compiled(constraint("hard-1", IEnumEnforcement.Types.STRICTLY_REQUIRED));
@@ -121,28 +143,6 @@ class CpSatExplainerTest {
         assertEquals(7, seen[0].options().maxTimeSeconds());
         assertTrue(seen[0].startNanos() >= original.startNanos());
         assertSame(original.cancellation(), seen[0].cancellation());
-    }
-
-    private static void assertSame(Object expected, Object actual) {
-        org.junit.jupiter.api.Assertions.assertSame(expected, actual);
-    }
-
-    // ------------------------------------------------------------------------------------------ G2b (natives)
-
-    /** x in [0,10]; a => x >= 5; b => x <= 3; c => x >= 0 (irrelevant). The minimal core is {a, b}. */
-    private static CpSatExplainer.ExplainModel conflictingModel(boolean includeConflict) {
-        CpModel model = new CpModel();
-        IntVar x = model.newIntVar(0, 10, "x");
-        BoolVar a = model.newBoolVar("a");
-        BoolVar b = model.newBoolVar("b");
-        BoolVar c = model.newBoolVar("c");
-        model.addGreaterOrEqual(x, 5).onlyEnforceIf(a);
-        model.addLessOrEqual(x, includeConflict ? 3 : 8).onlyEnforceIf(b);
-        model.addGreaterOrEqual(x, 0).onlyEnforceIf(c);
-        return new CpSatExplainer.ExplainModel(model, List.of(
-                new AssumptionRef(a, "CONSTRAINT", "c-a", "CONSTRAINT"),
-                new AssumptionRef(b, "TASK", "t-b", "WINDOW_EMPTY"),
-                new AssumptionRef(c, "CONSTRAINT", "c-c", "CONSTRAINT")));
     }
 
     @Test

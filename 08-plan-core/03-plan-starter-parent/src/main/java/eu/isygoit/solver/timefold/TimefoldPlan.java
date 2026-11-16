@@ -22,7 +22,9 @@ public class TimefoldPlan {
     private List<TimefoldTask> tasks = List.of();
     private HardSoftLongScore score;
 
-    /** Required by Timefold. */
+    /**
+     * Required by Timefold.
+     */
     public TimefoldPlan() {
     }
 

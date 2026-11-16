@@ -1,20 +1,6 @@
 package eu.isygoit.solver.check;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.InitialSolution;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.Pin;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.ResourceSelector;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.Assignment;
 import eu.isygoit.dto.response.PlanningSolution;
 import eu.isygoit.dto.response.ResourceAssignment;
@@ -67,9 +53,53 @@ public final class TestProblems {
                 1, null);
     }
 
-    /** Fluent task builder. */
+    public static TaskB task(String id, int duration) {
+        return new TaskB(id, duration);
+    }
+
+    public static Slot slot(String id, int startTick, int endTick) {
+        return new Slot(id, null, id, at(startTick), at(endTick), 0.0, Map.of());
+    }
+
+    public static PlanningProblem problem(int horizonTicks, List<Resource> resources, List<Task> tasks,
+                                          List<Constraint> constraints, List<Objective> objectives) {
+        return new PlanningProblem(1L, "test", "UTC", horizon(horizonTicks), List.of(), List.of(), List.of(),
+                resources, tasks, constraints, objectives, SolverOptions.defaults(), new InitialSolution(null));
+    }
+
+    public static PlanningProblem problem(int horizonTicks, List<Slot> slots, List<SetupMatrix> matrices,
+                                          List<Resource> resources, List<Task> tasks, InitialSolution initial) {
+        return new PlanningProblem(1L, "test", "UTC", horizon(horizonTicks), slots, List.of(), matrices,
+                resources, tasks, List.of(), List.of(), SolverOptions.defaults(), initial);
+    }
+
+    public static Assignment assign(String taskId, int start, int end, String... resourceIds) {
+        return assign(taskId, start, end, 1, false, resourceIds);
+    }
+
+    // ------------------------------------------------------------------------------------------ result builders
+
+    public static Assignment assign(String taskId, int start, int end, int amount, boolean optional,
+                                    String... resourceIds) {
+        List<ResourceAssignment> resources = new ArrayList<>();
+        for (String id : resourceIds) {
+            resources.add(new ResourceAssignment(id, "default", amount));
+        }
+        return new Assignment(taskId, optional, start, end, at(start), at(end), null, resources);
+    }
+
+    public static SolveResult result(IEnumSolverStatus.Types status, Assignment... assignments) {
+        PlanningSolution solution = new PlanningSolution(List.of(assignments), List.of(), List.of(), List.of(),
+                List.of(), 1.0);
+        return new SolveResult(status, solution, List.of(), null, null);
+    }
+
+    /**
+     * Fluent task builder.
+     */
     public static final class TaskB {
         private final String id;
+        private final List<PrecedenceRef> predecessors = new ArrayList<>();
         private Integer duration;
         private int demand = 1;
         private boolean required = true;
@@ -79,7 +109,6 @@ public final class TestProblems {
         private Instant deadline;
         private List<String> startSlots = List.of();
         private Pin pin;
-        private final List<PrecedenceRef> predecessors = new ArrayList<>();
         private String setupClass;
         private Map<String, Integer> resourceDurations = Map.of();
 
@@ -148,46 +177,5 @@ public final class TestProblems {
             return new Task(id, null, id, duration, resourceDurations, demand, 0, required, prize, requirements,
                     release, deadline, null, startSlots, pin, predecessors, setupClass, Set.of(), List.of(), Map.of());
         }
-    }
-
-    public static TaskB task(String id, int duration) {
-        return new TaskB(id, duration);
-    }
-
-    public static Slot slot(String id, int startTick, int endTick) {
-        return new Slot(id, null, id, at(startTick), at(endTick), 0.0, Map.of());
-    }
-
-    public static PlanningProblem problem(int horizonTicks, List<Resource> resources, List<Task> tasks,
-                                          List<Constraint> constraints, List<Objective> objectives) {
-        return new PlanningProblem(1L, "test", "UTC", horizon(horizonTicks), List.of(), List.of(), List.of(),
-                resources, tasks, constraints, objectives, SolverOptions.defaults(), new InitialSolution(null));
-    }
-
-    public static PlanningProblem problem(int horizonTicks, List<Slot> slots, List<SetupMatrix> matrices,
-                                          List<Resource> resources, List<Task> tasks, InitialSolution initial) {
-        return new PlanningProblem(1L, "test", "UTC", horizon(horizonTicks), slots, List.of(), matrices,
-                resources, tasks, List.of(), List.of(), SolverOptions.defaults(), initial);
-    }
-
-    // ------------------------------------------------------------------------------------------ result builders
-
-    public static Assignment assign(String taskId, int start, int end, String... resourceIds) {
-        return assign(taskId, start, end, 1, false, resourceIds);
-    }
-
-    public static Assignment assign(String taskId, int start, int end, int amount, boolean optional,
-                                    String... resourceIds) {
-        List<ResourceAssignment> resources = new ArrayList<>();
-        for (String id : resourceIds) {
-            resources.add(new ResourceAssignment(id, "default", amount));
-        }
-        return new Assignment(taskId, optional, start, end, at(start), at(end), null, resources);
-    }
-
-    public static SolveResult result(IEnumSolverStatus.Types status, Assignment... assignments) {
-        PlanningSolution solution = new PlanningSolution(List.of(assignments), List.of(), List.of(), List.of(),
-                List.of(), 1.0);
-        return new SolveResult(status, solution, List.of(), null, null);
     }
 }

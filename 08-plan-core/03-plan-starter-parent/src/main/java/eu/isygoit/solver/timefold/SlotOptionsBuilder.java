@@ -32,7 +32,9 @@ import java.util.Arrays;
  */
 public final class SlotOptionsBuilder {
 
-    /** Cancellation/time checkpoint interval of the build loops. */
+    /**
+     * Cancellation/time checkpoint interval of the build loops.
+     */
     private static final int CHECKPOINT_INTERVAL = 1024;
 
     private SlotOptionsBuilder() {
@@ -130,7 +132,9 @@ public final class SlotOptionsBuilder {
         }
     }
 
-    /** Slots referenced by at least one option must not overlap (half-open intervals; touching is fine). */
+    /**
+     * Slots referenced by at least one option must not overlap (half-open intervals; touching is fine).
+     */
     private static void requireDisjointUsedSlots(CandidateIndex index, boolean[] slotUsed) {
         int used = 0;
         for (boolean b : slotUsed) {
@@ -171,13 +175,17 @@ public final class SlotOptionsBuilder {
         return csr == null || i + 1 >= csr.length ? 0 : csr[i + 1];
     }
 
-    /** Runs are flat pairs {@code [lo0,hi0,lo1,hi1,...)} in {@code runs[from, to)}; half-open {@code [lo,hi)}. */
+    /**
+     * Runs are flat pairs {@code [lo0,hi0,lo1,hi1,...)} in {@code runs[from, to)}; half-open {@code [lo,hi)}.
+     */
     static boolean fitsAvailableRun(int[] runs, int from, int to, int start, int end) {
         int found = lastRunStartingAtOrBefore(runs, from, to, start);
         return found >= 0 && end <= runs[from + 2 * found + 1];
     }
 
-    /** Runs are flat pairs in {@code runs[from, to)}; inclusive {@code [lo,hi]}. */
+    /**
+     * Runs are flat pairs in {@code runs[from, to)}; inclusive {@code [lo,hi]}.
+     */
     static boolean startInInclusiveRuns(int[] runs, int from, int to, int start) {
         int found = lastRunStartingAtOrBefore(runs, from, to, start);
         return found >= 0 && start <= runs[from + 2 * found + 1];
@@ -199,7 +207,9 @@ public final class SlotOptionsBuilder {
         return found;
     }
 
-    /** Minimal growable int array (no boxing). */
+    /**
+     * Minimal growable int array (no boxing).
+     */
     private static final class IntBuffer {
         private int[] data = new int[64];
         private int size;

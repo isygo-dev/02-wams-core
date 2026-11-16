@@ -24,8 +24,21 @@ import java.util.Set;
 @Component
 public class FixedAssignmentTimefoldContributor implements TimefoldConstraintContributor {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "fixed_assignment";
+
+    /**
+     * The Timefold subset has exactly one requirement per task, so the role is that of requirement 0.
+     */
+    private static boolean roleMatches(CandidateIndex index, int task, String role) {
+        if (role == null || role.isBlank()) {
+            return true;
+        }
+        int requirement = index.taskReqStart[task];
+        return role.equals(index.roles[index.reqRole[requirement]]);
+    }
 
     @Override
     public String type() {
@@ -62,14 +75,5 @@ public class FixedAssignmentTimefoldContributor implements TimefoldConstraintCon
                 }
             }
         }
-    }
-
-    /** The Timefold subset has exactly one requirement per task, so the role is that of requirement 0. */
-    private static boolean roleMatches(CandidateIndex index, int task, String role) {
-        if (role == null || role.isBlank()) {
-            return true;
-        }
-        int requirement = index.taskReqStart[task];
-        return role.equals(index.roles[index.reqRole[requirement]]);
     }
 }

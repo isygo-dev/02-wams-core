@@ -93,6 +93,17 @@ public class PlanJobController
 
     // region Lifecycle endpoints
 
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /**
+     * Keeps the job code usable in a file name / header.
+     */
+    private static String sanitize(String code) {
+        return code == null ? "job" : code.replaceAll("[^A-Za-z0-9._-]", "_");
+    }
+
     @Override
     public ResponseEntity<PlanJobDto> submit(PlanningRequest request) {
         try {
@@ -209,6 +220,10 @@ public class PlanJobController
         }
     }
 
+    // endregion
+
+    // region Neutralised inherited creation / update
+
     @Override
     public ResponseEntity<CapabilitiesDto> getCapabilities() {
         try {
@@ -231,8 +246,6 @@ public class PlanJobController
     }
 
     // endregion
-
-    // region Neutralised inherited creation / update
 
     /**
      * Rejects the inherited {@code POST ""} and {@code POST /batch}: jobs are created by {@code POST /submit} only.
@@ -259,8 +272,6 @@ public class PlanJobController
         throw new OperationNotSupportedException(
                 "Planning jobs cannot be updated directly: use PUT " + BASE_PATH + "/{id}/request");
     }
-
-    // endregion
 
     /**
      * Every error of the controller leaves as the plan {@link PlanExceptionHandler.ApiError} body (same shape as the
@@ -291,16 +302,5 @@ public class PlanJobController
             throw new InvalidRequestException("TENANT_REQUIRED", "The caller tenant could not be resolved");
         }
         return tenant;
-    }
-
-    private static int clamp(int value, int min, int max) {
-        return Math.max(min, Math.min(max, value));
-    }
-
-    /**
-     * Keeps the job code usable in a file name / header.
-     */
-    private static String sanitize(String code) {
-        return code == null ? "job" : code.replaceAll("[^A-Za-z0-9._-]", "_");
     }
 }

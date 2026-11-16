@@ -2,26 +2,20 @@ package eu.isygoit.solver.objective;
 
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.exception.ObjectiveRangeException;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeIndex;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeSolution;
+import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.ctx;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.objective;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.problem;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.resource;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.task;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MaximizeSelectedValueObjectiveTest {
 
     private final MaximizeSelectedValueObjective family = new MaximizeSelectedValueObjective();
 
-    /** G11 shape: five optional tasks with prizes 50, 80, 90, 30, 60. */
+    /**
+     * G11 shape: five optional tasks with prizes 50, 80, 90, 30, 60.
+     */
     private PlanningProblem g11() {
         return problem(List.of(task("P1").optional().prize(50).build(), task("P2").optional().prize(80).build(),
                 task("P3").optional().prize(90).build(), task("P4").optional().prize(30).build(),

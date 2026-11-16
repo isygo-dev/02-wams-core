@@ -58,6 +58,16 @@ public record Horizon(Instant start, Instant end, int tickSeconds) {
         }
     }
 
+    private static int saturate(long value) {
+        if (value > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        if (value < Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        return (int) value;
+    }
+
     /**
      * @return number of ticks of the horizon, {@code (end - start) / tickSeconds}
      */
@@ -156,15 +166,5 @@ public record Horizon(Instant start, Instant end, int tickSeconds) {
      */
     public Duration duration(long ticks) {
         return Duration.ofSeconds(Math.multiplyExact(ticks, (long) tickSeconds));
-    }
-
-    private static int saturate(long value) {
-        if (value > Integer.MAX_VALUE) {
-            return Integer.MAX_VALUE;
-        }
-        if (value < Integer.MIN_VALUE) {
-            return Integer.MIN_VALUE;
-        }
-        return (int) value;
     }
 }

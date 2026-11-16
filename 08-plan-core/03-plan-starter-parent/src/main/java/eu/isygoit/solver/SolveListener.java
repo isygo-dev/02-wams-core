@@ -7,20 +7,28 @@ package eu.isygoit.solver;
  */
 public interface SolveListener {
 
-    /** The listener that ignores everything. */
+    /**
+     * The listener that ignores everything.
+     */
     SolveListener NOOP = new SolveListener() {
     };
 
-    /** Progress event; the engine throttles calls to at most about one per second. */
+    /**
+     * Progress event; the engine throttles calls to at most about one per second.
+     */
     default void onProgress(SolveProgress progress) {
     }
 
-    /** @return {@code true} when {@link #onIncumbent} must be called (snapshots are only built then) */
+    /**
+     * @return {@code true} when {@link #onIncumbent} must be called (snapshots are only built then)
+     */
     default boolean wantsIncumbents() {
         return false;
     }
 
-    /** New best solution; only called when {@link #wantsIncumbents()} is {@code true}. */
+    /**
+     * New best solution; only called when {@link #wantsIncumbents()} is {@code true}.
+     */
     default void onIncumbent(IncumbentSnapshot snapshot) {
     }
 }

@@ -1,17 +1,11 @@
 package eu.isygoit.solver.objective;
 
 import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeIndex;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeSolution;
+import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.ctx;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.objective;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.problem;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.resource;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.task;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -19,10 +13,12 @@ class MaximizeTaskPriorityObjectiveTest {
 
     private final MaximizeTaskPriorityObjective family = new MaximizeTaskPriorityObjective();
 
-    /** G3 shape: one required task (priority 100, never counted) and optional tasks with priority 9 / 5 / 1. */
+    /**
+     * G3 shape: one required task (priority 100, never counted) and optional tasks with priority 9 / 5 / 1.
+     */
     private PlanningProblem scenario() {
         return problem(List.of(task("mandatory").priority(100).build(), task("high").priority(9).optional().build(),
-                task("medium").priority(5).optional().build(), task("low").priority(1).optional().build()),
+                        task("medium").priority(5).optional().build(), task("low").priority(1).optional().build()),
                 List.of(resource("lab")));
     }
 

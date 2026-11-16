@@ -2,11 +2,7 @@ package eu.isygoit.solver.family;
 
 import eu.isygoit.dto.request.params.LoadMetric;
 import eu.isygoit.dto.request.params.PeriodSpec;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.PeriodBuckets;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 
 import java.util.BitSet;
 import java.util.Map;

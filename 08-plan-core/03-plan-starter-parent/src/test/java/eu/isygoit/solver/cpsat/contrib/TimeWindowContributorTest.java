@@ -19,7 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-/** HARD is a preprocess prune, SOFT charges the slack in ticks, RELAXABLE / explain use the plain enforced bound. */
+/**
+ * HARD is a preprocess prune, SOFT charges the slack in ticks, RELAXABLE / explain use the plain enforced bound.
+ */
 class TimeWindowContributorTest {
 
     private final TimeWindowContributor contributor = new TimeWindowContributor();

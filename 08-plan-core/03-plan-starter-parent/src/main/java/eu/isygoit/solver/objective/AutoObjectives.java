@@ -3,11 +3,7 @@ package eu.isygoit.solver.objective;
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.Task;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Automatic objective injection (design 6.8, example 2.6e). When a problem has at least one OPTIONAL task and declares
@@ -20,9 +16,13 @@ import java.util.Set;
  */
 public final class AutoObjectives {
 
-    /** Id of the injected objective. */
+    /**
+     * Id of the injected objective.
+     */
     public static final String AUTO_ID = "auto-selected-value";
-    /** Reserved tier of the injected objective. */
+    /**
+     * Reserved tier of the injected objective.
+     */
     public static final int AUTO_TIER = -1;
 
     private AutoObjectives() {

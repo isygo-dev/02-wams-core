@@ -7,14 +7,14 @@ import java.util.List;
 /**
  * Timing and statistics of a solve. The time fields are excluded from determinism comparisons.
  *
- * @param durationMillis             total wall time of the solve call (build + solve + post)
- * @param buildMillis                index and model construction
- * @param solveMillis                inside CpSolver.solve / Timefold solve
- * @param timeToFirstSolutionMillis  from solve start; null if no solution was found
- * @param workersUsed                number of workers used
- * @param model                      model size, may be null
- * @param search                     search statistics, may be null
- * @param tiers                      per-tier values, ascending tier
+ * @param durationMillis            total wall time of the solve call (build + solve + post)
+ * @param buildMillis               index and model construction
+ * @param solveMillis               inside CpSolver.solve / Timefold solve
+ * @param timeToFirstSolutionMillis from solve start; null if no solution was found
+ * @param workersUsed               number of workers used
+ * @param model                     model size, may be null
+ * @param search                    search statistics, may be null
+ * @param tiers                     per-tier values, ascending tier
  */
 public record Metrics(
         long durationMillis,

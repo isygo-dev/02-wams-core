@@ -13,9 +13,13 @@ import java.util.Locale;
  */
 public final class NumberStyle {
 
-    /** Unicode numbering system of Latin digits. */
+    /**
+     * Unicode numbering system of Latin digits.
+     */
     public static final String LATIN = "latn";
-    /** Unicode numbering system of Arabic-Indic digits. */
+    /**
+     * Unicode numbering system of Arabic-Indic digits.
+     */
     public static final String ARABIC_INDIC = "arab";
 
     private static final String SESSION_KEY = "wams-numeral-system";
@@ -23,7 +27,9 @@ public final class NumberStyle {
     private NumberStyle() {
     }
 
-    /** Sets the numbering system of this session; anything other than Arabic-Indic means Latin. */
+    /**
+     * Sets the numbering system of this session; anything other than Arabic-Indic means Latin.
+     */
     public static void use(String system) {
         VaadinSession session = VaadinSession.getCurrent();
         if (session != null) {
@@ -31,25 +37,33 @@ public final class NumberStyle {
         }
     }
 
-    /** The numbering system of this session. */
+    /**
+     * The numbering system of this session.
+     */
     public static String system() {
         VaadinSession session = VaadinSession.getCurrent();
         Object stored = session == null ? null : session.getAttribute(SESSION_KEY);
         return ARABIC_INDIC.equals(stored) ? ARABIC_INDIC : LATIN;
     }
 
-    /** The locale with the numbering system of the session forced (e.g. {@code ar_SA} with Latin digits). */
+    /**
+     * The locale with the numbering system of the session forced (e.g. {@code ar_SA} with Latin digits).
+     */
     public static Locale localize(Locale base) {
         Locale locale = base == null ? I18n.getCurrentLocale() : base;
         return new Locale.Builder().setLocale(locale).setUnicodeLocaleKeyword("nu", system()).build();
     }
 
-    /** Number format of the current language, written with the session's digits. */
+    /**
+     * Number format of the current language, written with the session's digits.
+     */
     public static NumberFormat numberFormat() {
         return NumberFormat.getNumberInstance(localize(I18n.getCurrentLocale()));
     }
 
-    /** Integer format of the current language, written with the session's digits. */
+    /**
+     * Integer format of the current language, written with the session's digits.
+     */
     public static NumberFormat integerFormat() {
         return NumberFormat.getIntegerInstance(localize(I18n.getCurrentLocale()));
     }

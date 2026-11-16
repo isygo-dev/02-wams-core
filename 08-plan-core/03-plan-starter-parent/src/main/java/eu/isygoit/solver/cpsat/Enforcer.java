@@ -13,10 +13,9 @@ import com.google.ortools.sat.Literal;
  */
 public interface Enforcer {
 
-    /** The enforcement mode as seen by the contributor. */
-    enum Mode { HARD, RELAXABLE, SOFT }
-
-    /** @return the effective mode */
+    /**
+     * @return the effective mode
+     */
     Mode mode();
 
     /**
@@ -35,7 +34,9 @@ public interface Enforcer {
      */
     Literal instance(int taskIdx, int resourceIdx);
 
-    /** Shorthand for {@code instance(-1, -1)}. */
+    /**
+     * Shorthand for {@code instance(-1, -1)}.
+     */
     default Literal instance() {
         return instance(-1, -1);
     }
@@ -56,4 +57,9 @@ public interface Enforcer {
      * literals are skipped (so the result may be empty, meaning unconditional).
      */
     Literal[] conditions(Literal instance, Literal... extra);
+
+    /**
+     * The enforcement mode as seen by the contributor.
+     */
+    enum Mode {HARD, RELAXABLE, SOFT}
 }

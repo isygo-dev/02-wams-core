@@ -3,22 +3,12 @@ package eu.isygoit.solver.objective;
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.Preference;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeIndex;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeSolution;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.RecordingValidation;
+import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.at;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.ctx;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.objective;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.problem;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.resource;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.task;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MinimizePreferencePenaltyObjectiveTest {
 
@@ -26,10 +16,10 @@ class MinimizePreferencePenaltyObjectiveTest {
 
     private PlanningProblem scenario() {
         return problem(List.of(
-                task("t1").preference(new Preference(Preference.Kind.RESOURCE, "alice", null, 5))
-                        .preference(new Preference(Preference.Kind.START, null, at(10), 2)).build(),
-                task("t2").optional().preference(new Preference(Preference.Kind.RESOURCE, "alice", null, 7)).build(),
-                task("t3").preference(new Preference(Preference.Kind.RESOURCE, "ghost", null, 3)).build()),
+                        task("t1").preference(new Preference(Preference.Kind.RESOURCE, "alice", null, 5))
+                                .preference(new Preference(Preference.Kind.START, null, at(10), 2)).build(),
+                        task("t2").optional().preference(new Preference(Preference.Kind.RESOURCE, "alice", null, 7)).build(),
+                        task("t3").preference(new Preference(Preference.Kind.RESOURCE, "ghost", null, 3)).build()),
                 List.of(resource("alice"), resource("bob")));
     }
 
@@ -70,7 +60,7 @@ class MinimizePreferencePenaltyObjectiveTest {
     @Test
     void validateReportsUnknownResourceAndNegativePenalty() {
         PlanningProblem p = problem(List.of(
-                task("t").preference(new Preference(Preference.Kind.RESOURCE, "ghost", null, -1)).build()),
+                        task("t").preference(new Preference(Preference.Kind.RESOURCE, "ghost", null, -1)).build()),
                 List.of(resource("alice")));
         RecordingValidation v = new RecordingValidation(p);
         family.validate(v, new Objective("obj", "minimize_preference_penalty", 1), null);

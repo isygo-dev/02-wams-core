@@ -20,7 +20,9 @@ import java.util.List;
 @Component
 public class BalanceLoadObjective extends AbstractObjectiveFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "balance_load";
 
     public BalanceLoadObjective() {

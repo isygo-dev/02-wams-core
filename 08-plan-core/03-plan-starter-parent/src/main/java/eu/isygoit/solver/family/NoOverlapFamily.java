@@ -3,22 +3,10 @@ package eu.isygoit.solver.family;
 import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.params.NoOverlapParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Family {@code no_overlap} (design 4.3 / 6.5.3): the tasks of a group never overlap in time, whatever their
@@ -36,12 +24,99 @@ import java.util.Set;
 @Component
 public class NoOverlapFamily implements ConstraintFamily {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "no_overlap";
 
     private static final Set<IEnumEnforcement.Types> SUPPORTED =
             Collections.unmodifiableSet(EnumSet.allOf(IEnumEnforcement.Types.class));
     private static final ConstraintChecker CHECKER = new Checker();
+
+    /**
+     * Resolves the task groups of the constraint (groups with fewer than two members are dropped).
+     *
+     * @param index      the index view (scope resolution only)
+     * @param constraint the constraint
+     * @param p          its params
+     * @return groups of task indices, ascending inside a group
+     */
+    public static int[][] groups(CandidateIndexView index, Constraint constraint, NoOverlapParams p) {
+        List<int[]> result = new ArrayList<>();
+        if ("tag".equals(constraint.scope().kind())) {
+            int[] g = index.resolveTasks(constraint.scope());
+            if (g.length >= 2) {
+                result.add(g);
+            }
+        } else if (p.groupByTagPrefix() != null && !p.groupByTagPrefix().isBlank()) {
+            for (int[] g : index.groupTasksByTagPrefix(p.groupByTagPrefix())) {
+                if (g.length >= 2) {
+                    result.add(g);
+                }
+            }
+        }
+        return result.toArray(new int[0][]);
+    }
+
+    /**
+     * @return the largest duration the task can have over its candidates (the base duration when it has none)
+     */
+    public static long maxDuration(CandidateIndexView index, int task) {
+        long max = -1;
+        for (int c = index.candidateBegin(task); c < index.candidateEnd(task); c++) {
+            max = Math.max(max, index.candidateDuration(c));
+        }
+        return max < 0 ? index.duration(task) : max;
+    }
+
+    /**
+     * @return {@code true} when the task can never occupy time: gap 0 and every candidate duration 0
+     */
+    public static boolean zeroSize(CandidateIndexView index, int task, int gap) {
+        return gap == 0 && maxDuration(index, task) == 0;
+    }
+
+    /**
+     * Cheap static test: {@code false} when the domains guarantee the two tasks are separated whatever the solver
+     * decides, so that no pair literal is needed (and the checker can never find a violation).
+     */
+    public static boolean mayConflict(CandidateIndexView index, int i, int j, int gap, long maxDurI, long maxDurJ) {
+        return !((long) index.lstStart(i) + maxDurI + gap <= index.estStart(j)
+                || (long) index.lstStart(j) + maxDurJ + gap <= index.estStart(i));
+    }
+
+    /**
+     * @return the number of pairs of the group for which {@link #mayConflict} holds (zero-size tasks excluded)
+     */
+    public static long countConflictPairs(CandidateIndexView index, int[] group, int gap) {
+        long[] maxDur = new long[group.length];
+        boolean[] skip = new boolean[group.length];
+        for (int a = 0; a < group.length; a++) {
+            maxDur[a] = maxDuration(index, group[a]);
+            skip[a] = gap == 0 && maxDur[a] == 0;
+        }
+        long pairs = 0;
+        for (int a = 0; a < group.length; a++) {
+            if (skip[a]) {
+                continue;
+            }
+            for (int b = a + 1; b < group.length; b++) {
+                if (!skip[b] && mayConflict(index, group[a], group[b], gap, maxDur[a], maxDur[b])) {
+                    pairs++;
+                }
+            }
+        }
+        return pairs;
+    }
+
+    private static int indexOf(ValidationContext ctx, Constraint constraint) {
+        return ctx.problem().constraints().indexOf(constraint);
+    }
+
+    private static String path(ValidationContext ctx, Constraint constraint, String field) {
+        int i = indexOf(ctx, constraint);
+        return "constraints[" + (i < 0 ? "?" : String.valueOf(i)) + "].params." + field;
+    }
 
     @Override
     public String type() {
@@ -52,6 +127,8 @@ public class NoOverlapFamily implements ConstraintFamily {
     public Class<?> paramsType() {
         return NoOverlapParams.class;
     }
+
+    // ------------------------------------------------------------------ shared semantics
 
     @Override
     public Set<IEnumEnforcement.Types> supportedEnforcements() {
@@ -132,87 +209,6 @@ public class NoOverlapFamily implements ConstraintFamily {
     @Override
     public ConstraintChecker checker() {
         return CHECKER;
-    }
-
-    // ------------------------------------------------------------------ shared semantics
-
-    /**
-     * Resolves the task groups of the constraint (groups with fewer than two members are dropped).
-     *
-     * @param index      the index view (scope resolution only)
-     * @param constraint the constraint
-     * @param p          its params
-     * @return groups of task indices, ascending inside a group
-     */
-    public static int[][] groups(CandidateIndexView index, Constraint constraint, NoOverlapParams p) {
-        List<int[]> result = new ArrayList<>();
-        if ("tag".equals(constraint.scope().kind())) {
-            int[] g = index.resolveTasks(constraint.scope());
-            if (g.length >= 2) {
-                result.add(g);
-            }
-        } else if (p.groupByTagPrefix() != null && !p.groupByTagPrefix().isBlank()) {
-            for (int[] g : index.groupTasksByTagPrefix(p.groupByTagPrefix())) {
-                if (g.length >= 2) {
-                    result.add(g);
-                }
-            }
-        }
-        return result.toArray(new int[0][]);
-    }
-
-    /** @return the largest duration the task can have over its candidates (the base duration when it has none) */
-    public static long maxDuration(CandidateIndexView index, int task) {
-        long max = -1;
-        for (int c = index.candidateBegin(task); c < index.candidateEnd(task); c++) {
-            max = Math.max(max, index.candidateDuration(c));
-        }
-        return max < 0 ? index.duration(task) : max;
-    }
-
-    /** @return {@code true} when the task can never occupy time: gap 0 and every candidate duration 0 */
-    public static boolean zeroSize(CandidateIndexView index, int task, int gap) {
-        return gap == 0 && maxDuration(index, task) == 0;
-    }
-
-    /**
-     * Cheap static test: {@code false} when the domains guarantee the two tasks are separated whatever the solver
-     * decides, so that no pair literal is needed (and the checker can never find a violation).
-     */
-    public static boolean mayConflict(CandidateIndexView index, int i, int j, int gap, long maxDurI, long maxDurJ) {
-        return !((long) index.lstStart(i) + maxDurI + gap <= index.estStart(j)
-                || (long) index.lstStart(j) + maxDurJ + gap <= index.estStart(i));
-    }
-
-    /** @return the number of pairs of the group for which {@link #mayConflict} holds (zero-size tasks excluded) */
-    public static long countConflictPairs(CandidateIndexView index, int[] group, int gap) {
-        long[] maxDur = new long[group.length];
-        boolean[] skip = new boolean[group.length];
-        for (int a = 0; a < group.length; a++) {
-            maxDur[a] = maxDuration(index, group[a]);
-            skip[a] = gap == 0 && maxDur[a] == 0;
-        }
-        long pairs = 0;
-        for (int a = 0; a < group.length; a++) {
-            if (skip[a]) {
-                continue;
-            }
-            for (int b = a + 1; b < group.length; b++) {
-                if (!skip[b] && mayConflict(index, group[a], group[b], gap, maxDur[a], maxDur[b])) {
-                    pairs++;
-                }
-            }
-        }
-        return pairs;
-    }
-
-    private static int indexOf(ValidationContext ctx, Constraint constraint) {
-        return ctx.problem().constraints().indexOf(constraint);
-    }
-
-    private static String path(ValidationContext ctx, Constraint constraint, String field) {
-        int i = indexOf(ctx, constraint);
-        return "constraints[" + (i < 0 ? "?" : String.valueOf(i)) + "].params." + field;
     }
 
     // ------------------------------------------------------------------ checker

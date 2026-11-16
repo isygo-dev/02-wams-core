@@ -1,11 +1,6 @@
 package eu.isygoit.solver.family;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.ResourceSelector;
-import eu.isygoit.dto.request.Task;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.family.FamilyKit.Validation;
 import eu.isygoit.solver.family.FamilyKit.View;
@@ -18,11 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static eu.isygoit.solver.family.FamilyKit.map;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MultiResourceRequirementFamilyTest {
 

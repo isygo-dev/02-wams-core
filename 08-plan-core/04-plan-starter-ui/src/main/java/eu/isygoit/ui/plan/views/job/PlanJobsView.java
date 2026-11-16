@@ -65,6 +65,10 @@ public class PlanJobsView extends AbstractPaginatedView<PlanJobMinDto> {
     //  Contract: fetch / render / filter / create
     // ══════════════════════════════════════════════════════════════
 
+    private static Comparator<PlanJobMinDto> byInstant(java.util.function.Function<PlanJobMinDto, java.time.Instant> instant) {
+        return Comparator.comparing(instant, Comparator.nullsLast(Comparator.naturalOrder()));
+    }
+
     @Override
     protected PaginatedResponseDto<PlanJobMinDto> fetchPage(int page, int size) {
         var response = service.findAll(page, size);
@@ -131,10 +135,6 @@ public class PlanJobsView extends AbstractPaginatedView<PlanJobMinDto> {
         grid.addColumn(PlanJobMinDto::getMessage).setHeader(I18n.t("plan.ui.jobs.message")).setFlexGrow(2);
         addCardActionsColumn(grid);
         return true;
-    }
-
-    private static Comparator<PlanJobMinDto> byInstant(java.util.function.Function<PlanJobMinDto, java.time.Instant> instant) {
-        return Comparator.comparing(instant, Comparator.nullsLast(Comparator.naturalOrder()));
     }
 
     @Override

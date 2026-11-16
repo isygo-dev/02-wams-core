@@ -1,17 +1,7 @@
 package eu.isygoit.solver.check;
 
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.request.Calendar;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.SetupEntry;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
 import eu.isygoit.dto.response.Assignment;
 import eu.isygoit.dto.response.DiagnosticIssue;
 import eu.isygoit.solver.index.CalendarExpander;
@@ -19,14 +9,7 @@ import eu.isygoit.solver.spi.CandidateIndexView;
 import eu.isygoit.solver.spi.SolutionView;
 
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Independent re-check of the STRUCTURAL semantics of design 4.2 against a finished solution (design 8.2 step 2).
@@ -47,15 +30,11 @@ import java.util.Set;
  */
 public final class StructuralSolutionChecker {
 
-    /** Prefix of every structural violation code (design 8.1). */
+    /**
+     * Prefix of every structural violation code (design 8.1).
+     */
     public static final String PREFIX = "SOLUTION_INVALID_";
-
-    /** One structural violation; {@code taskId}/{@code resourceId} may be {@code null}. */
-    public record Violation(String code, String taskId, String resourceId, String message) {
-    }
-
     private static final int[] ALWAYS = new int[0];
-
     private final PlanningProblem problem;
     private final CandidateIndexView index;
     private final Horizon horizon;
@@ -73,7 +52,6 @@ public final class StructuralSolutionChecker {
     private final Map<String, Map<String, Integer>> matrixEntries = new HashMap<>();
     private final int[][] runsCache;
     private final boolean[] runsComputed;
-
     /**
      * @param problem the normalized problem
      * @param index   read-only index view; only the always-available methods are used (ids, counts, lookups, horizon)
@@ -142,7 +120,84 @@ public final class StructuralSolutionChecker {
         this.runsComputed = new boolean[resources.length];
     }
 
+    private static int setupTicks(SetupMatrix matrix, Map<String, Integer> entries, String from, String to) {
+        if (from == null || to == null) {
+            return 0;
+        }
+        if (from.equals(to)) {
+            return matrix.sameClassTicks();
+        }
+        Integer ticks = entries == null ? null : entries.get(from + '\u0000' + to);
+        return ticks != null ? ticks : matrix.defaultTicks();
+    }
+
     // ------------------------------------------------------------------------------------------------ public API
+
+    /**
+     * Removes the (arbitrary, possibly overlapping) blocks from sorted disjoint runs.
+     */
+    static int[] subtract(int[] runs, List<int[]> blocks) {
+        if (blocks.isEmpty()) {
+            return runs;
+        }
+        List<int[]> sorted = new ArrayList<>(blocks);
+        sorted.sort((a, b) -> Integer.compare(a[0], b[0]));
+        int[] out = new int[runs.length + sorted.size() * 2];
+        int n = 0;
+        for (int i = 0; i + 1 < runs.length; i += 2) {
+            int lo = runs[i];
+            int hi = runs[i + 1];
+            for (int[] block : sorted) {
+                if (block[1] <= lo || block[0] >= hi) {
+                    continue;
+                }
+                if (block[0] > lo) {
+                    out = ensure(out, n + 2);
+                    out[n++] = lo;
+                    out[n++] = block[0];
+                }
+                lo = Math.max(lo, block[1]);
+                if (lo >= hi) {
+                    break;
+                }
+            }
+            if (lo < hi) {
+                out = ensure(out, n + 2);
+                out[n++] = lo;
+                out[n++] = hi;
+            }
+        }
+        return Arrays.copyOf(out, n);
+    }
+
+    private static int[] ensure(int[] array, int size) {
+        return array.length >= size ? array : Arrays.copyOf(array, Math.max(size, array.length * 2));
+    }
+
+    // ------------------------------------------------------------------------------------------------ per task
+
+    /**
+     * @return {@code true} when [start,end] lies inside one half-open run
+     */
+    static boolean insideOneRun(int[] runs, int start, int end) {
+        int lo = 0;
+        int hi = runs.length / 2 - 1;
+        int found = -1;
+        while (lo <= hi) {
+            int mid = (lo + hi) >>> 1;
+            if (runs[2 * mid] <= start) {
+                found = mid;
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        return found >= 0 && end <= runs[2 * found + 1] && (start < runs[2 * found + 1] || end == start);
+    }
+
+    private static Violation violation(String suffix, String taskId, String resourceId, String message) {
+        return new Violation(PREFIX + suffix.toUpperCase(Locale.ROOT), taskId, resourceId, message);
+    }
 
     /**
      * Checks the result-level records: instants consistent with the ticks and the {@code optional} flag.
@@ -243,8 +298,6 @@ public final class StructuralSolutionChecker {
         }
         return out;
     }
-
-    // ------------------------------------------------------------------------------------------------ per task
 
     private void checkTask(SolutionView s, int t, Task task, List<Violation> out) {
         int start = s.start(t);
@@ -353,6 +406,8 @@ public final class StructuralSolutionChecker {
                 + ") does not start at an allowed slot start and end inside that slot"));
     }
 
+    // ------------------------------------------------------------------------------------------------ sweeps
+
     private void checkCalendars(SolutionView s, int t, Task task, List<Violation> out) {
         int start = s.start(t);
         int end = s.end(t);
@@ -433,6 +488,8 @@ public final class StructuralSolutionChecker {
         }
     }
 
+    // ------------------------------------------------------------------------------------------------ helpers
+
     private void checkLocked(SolutionView s, int t, Task task, InitialAssignment lock, List<Violation> out) {
         if (lock.start() != null && horizon.ceilTick(lock.start()) != s.start(t)) {
             out.add(violation("LOCKED", task.id(), null, "locked task '" + task.id() + "' must start at tick "
@@ -450,9 +507,9 @@ public final class StructuralSolutionChecker {
         }
     }
 
-    // ------------------------------------------------------------------------------------------------ sweeps
-
-    /** Unary resource: sorted sweep with setup gaps. {@code list} is sorted by (start, task index). */
+    /**
+     * Unary resource: sorted sweep with setup gaps. {@code list} is sorted by (start, task index).
+     */
     private void sweepUnary(SolutionView s, int r, Resource resource, int[] list, List<Violation> out) {
         SetupMatrix matrix = resource.setupMatrixId() == null ? null : matrices.get(resource.setupMatrixId());
         Map<String, Integer> entries = matrix == null ? null : matrixEntries.get(matrix.id());
@@ -480,18 +537,9 @@ public final class StructuralSolutionChecker {
         }
     }
 
-    private static int setupTicks(SetupMatrix matrix, Map<String, Integer> entries, String from, String to) {
-        if (from == null || to == null) {
-            return 0;
-        }
-        if (from.equals(to)) {
-            return matrix.sameClassTicks();
-        }
-        Integer ticks = entries == null ? null : entries.get(from + '\u0000' + to);
-        return ticks != null ? ticks : matrix.defaultTicks();
-    }
-
-    /** Cumulative resource: event sweep, ends are released before starts at the same tick. */
+    /**
+     * Cumulative resource: event sweep, ends are released before starts at the same tick.
+     */
     private void sweepCumulative(SolutionView s, int r, Resource resource, int[] list, List<Violation> out) {
         int n = 0;
         int[] members = new int[list.length];
@@ -536,8 +584,6 @@ public final class StructuralSolutionChecker {
         }
     }
 
-    // ------------------------------------------------------------------------------------------------ helpers
-
     private int[] resolveSlots(Task task) {
         if (task.startSlots().isEmpty() || index.slotCount() == 0) {
             return null;
@@ -578,7 +624,9 @@ public final class StructuralSolutionChecker {
         return length;
     }
 
-    /** @return availability runs [lo0,hi0,lo1,hi1,...) of a resource, or {@link #ALWAYS} when always available */
+    /**
+     * @return availability runs [lo0,hi0,lo1,hi1,...) of a resource, or {@link #ALWAYS} when always available
+     */
     private int[] runs(int r) {
         if (runsComputed[r]) {
             return runsCache[r];
@@ -613,63 +661,9 @@ public final class StructuralSolutionChecker {
         return result;
     }
 
-    /** Removes the (arbitrary, possibly overlapping) blocks from sorted disjoint runs. */
-    static int[] subtract(int[] runs, List<int[]> blocks) {
-        if (blocks.isEmpty()) {
-            return runs;
-        }
-        List<int[]> sorted = new ArrayList<>(blocks);
-        sorted.sort((a, b) -> Integer.compare(a[0], b[0]));
-        int[] out = new int[runs.length + sorted.size() * 2];
-        int n = 0;
-        for (int i = 0; i + 1 < runs.length; i += 2) {
-            int lo = runs[i];
-            int hi = runs[i + 1];
-            for (int[] block : sorted) {
-                if (block[1] <= lo || block[0] >= hi) {
-                    continue;
-                }
-                if (block[0] > lo) {
-                    out = ensure(out, n + 2);
-                    out[n++] = lo;
-                    out[n++] = block[0];
-                }
-                lo = Math.max(lo, block[1]);
-                if (lo >= hi) {
-                    break;
-                }
-            }
-            if (lo < hi) {
-                out = ensure(out, n + 2);
-                out[n++] = lo;
-                out[n++] = hi;
-            }
-        }
-        return Arrays.copyOf(out, n);
-    }
-
-    private static int[] ensure(int[] array, int size) {
-        return array.length >= size ? array : Arrays.copyOf(array, Math.max(size, array.length * 2));
-    }
-
-    /** @return {@code true} when [start,end] lies inside one half-open run */
-    static boolean insideOneRun(int[] runs, int start, int end) {
-        int lo = 0;
-        int hi = runs.length / 2 - 1;
-        int found = -1;
-        while (lo <= hi) {
-            int mid = (lo + hi) >>> 1;
-            if (runs[2 * mid] <= start) {
-                found = mid;
-                lo = mid + 1;
-            } else {
-                hi = mid - 1;
-            }
-        }
-        return found >= 0 && end <= runs[2 * found + 1] && (start < runs[2 * found + 1] || end == start);
-    }
-
-    private static Violation violation(String suffix, String taskId, String resourceId, String message) {
-        return new Violation(PREFIX + suffix.toUpperCase(Locale.ROOT), taskId, resourceId, message);
+    /**
+     * One structural violation; {@code taskId}/{@code resourceId} may be {@code null}.
+     */
+    public record Violation(String code, String taskId, String resourceId, String message) {
     }
 }

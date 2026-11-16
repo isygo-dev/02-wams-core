@@ -4,22 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import eu.isygoit.dto.response.Assignment;
-import eu.isygoit.dto.response.ObjectiveScore;
-import eu.isygoit.dto.response.ResourceAssignment;
-import eu.isygoit.dto.response.SolveResult;
-import eu.isygoit.dto.response.TierValue;
 import eu.isygoit.dto.request.PlanningRequest;
 import eu.isygoit.dto.request.Task;
+import eu.isygoit.dto.response.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -49,19 +38,25 @@ public final class ResultComparator {
 
     // ================================================================== determinism comparison
 
-    /** JSON tree of the result without the {@code metrics} object. */
+    /**
+     * JSON tree of the result without the {@code metrics} object.
+     */
     public static JsonNode withoutMetrics(SolveResult result) {
         ObjectNode node = MAPPER.valueToTree(result);
         node.remove("metrics");
         return node;
     }
 
-    /** True when both results are JSON-equal ignoring {@code metrics}. */
+    /**
+     * True when both results are JSON-equal ignoring {@code metrics}.
+     */
     public static boolean sameIgnoringMetrics(SolveResult a, SolveResult b) {
         return withoutMetrics(a).equals(withoutMetrics(b));
     }
 
-    /** Fails with the first differing JSON path when the results differ (ignoring {@code metrics}). */
+    /**
+     * Fails with the first differing JSON path when the results differ (ignoring {@code metrics}).
+     */
     public static void assertSameIgnoringMetrics(SolveResult expected, SolveResult actual) {
         String difference = firstDifference("$", withoutMetrics(expected), withoutMetrics(actual));
         if (difference != null) {
@@ -69,7 +64,9 @@ public final class ResultComparator {
         }
     }
 
-    /** Fails when the assignments (task, start, end, slot, resources) differ; ignores everything else. */
+    /**
+     * Fails when the assignments (task, start, end, slot, resources) differ; ignores everything else.
+     */
     public static void assertSameAssignments(SolveResult expected, SolveResult actual) {
         JsonNode a = MAPPER.valueToTree(expected.solution() == null ? List.of() : expected.solution().assignments());
         JsonNode b = MAPPER.valueToTree(actual.solution() == null ? List.of() : actual.solution().assignments());
@@ -121,7 +118,9 @@ public final class ResultComparator {
 
     // ================================================================== inspection helpers
 
-    /** Assignments by task id in result order; empty when there is no solution. */
+    /**
+     * Assignments by task id in result order; empty when there is no solution.
+     */
     public static Map<String, Assignment> assignmentsByTask(SolveResult result) {
         Map<String, Assignment> byTask = new LinkedHashMap<>();
         if (result != null && result.solution() != null) {
@@ -132,12 +131,16 @@ public final class ResultComparator {
         return byTask;
     }
 
-    /** Ids of the tasks that are assigned, as a sorted set. */
+    /**
+     * Ids of the tasks that are assigned, as a sorted set.
+     */
     public static Set<String> assignedTaskIds(SolveResult result) {
         return new TreeSet<>(assignmentsByTask(result).keySet());
     }
 
-    /** Ids of the unassigned (unselected optional) tasks, as a sorted set. */
+    /**
+     * Ids of the unassigned (unselected optional) tasks, as a sorted set.
+     */
     public static Set<String> unassignedTaskIds(SolveResult result) {
         if (result == null || result.solution() == null) {
             return Set.of();
@@ -146,28 +149,38 @@ public final class ResultComparator {
                 .map(u -> u.taskId()).collect(Collectors.toCollection(TreeSet::new));
     }
 
-    /** Resource ids used by an assignment, in assignment order. */
+    /**
+     * Resource ids used by an assignment, in assignment order.
+     */
     public static List<String> resourceIds(Assignment assignment) {
         return assignment.resources().stream().map(ResourceAssignment::resourceId).collect(Collectors.toList());
     }
 
-    /** Resource ids of the task (empty when the task is not assigned). */
+    /**
+     * Resource ids of the task (empty when the task is not assigned).
+     */
     public static List<String> resourceIds(SolveResult result, String taskId) {
         Assignment a = assignmentsByTask(result).get(taskId);
         return a == null ? List.of() : resourceIds(a);
     }
 
-    /** Largest {@code endTick} over all assignments (the makespan), or -1 without assignments. */
+    /**
+     * Largest {@code endTick} over all assignments (the makespan), or -1 without assignments.
+     */
     public static int makespan(SolveResult result) {
         return assignmentsByTask(result).values().stream().mapToInt(Assignment::endTick).max().orElse(-1);
     }
 
-    /** Number of assignments carrying the given slot id. */
+    /**
+     * Number of assignments carrying the given slot id.
+     */
     public static long countInSlot(SolveResult result, String slotId) {
         return assignmentsByTask(result).values().stream().filter(a -> slotId.equals(a.slotId())).count();
     }
 
-    /** Sum of {@link ObjectiveScore#rawValue()} of the objectives of the tier (empty when none is reported). */
+    /**
+     * Sum of {@link ObjectiveScore#rawValue()} of the objectives of the tier (empty when none is reported).
+     */
     public static Optional<Long> tierRawValue(SolveResult result, int tier) {
         List<ObjectiveScore> scores = objectiveScores(result, tier);
         if (scores.isEmpty()) {
@@ -176,7 +189,9 @@ public final class ResultComparator {
         return Optional.of(scores.stream().mapToLong(ObjectiveScore::rawValue).sum());
     }
 
-    /** Sum of {@link ObjectiveScore#score()} of the objectives of the tier (human value), empty when none is reported. */
+    /**
+     * Sum of {@link ObjectiveScore#score()} of the objectives of the tier (human value), empty when none is reported.
+     */
     public static Optional<Double> tierScore(SolveResult result, int tier) {
         List<ObjectiveScore> scores = objectiveScores(result, tier);
         if (scores.isEmpty()) {
@@ -185,7 +200,9 @@ public final class ResultComparator {
         return Optional.of(scores.stream().mapToDouble(ObjectiveScore::score).sum());
     }
 
-    /** The per-objective scores of one tier (design 8.2, evaluated by the independent validator). */
+    /**
+     * The per-objective scores of one tier (design 8.2, evaluated by the independent validator).
+     */
     public static List<ObjectiveScore> objectiveScores(SolveResult result, int tier) {
         if (result == null || result.solution() == null) {
             return List.of();
@@ -193,7 +210,9 @@ public final class ResultComparator {
         return result.solution().qualityDetails().stream().filter(q -> q.tier() == tier).collect(Collectors.toList());
     }
 
-    /** The engine-reported value of a tier ({@code Metrics.tiers}), e.g. tier -2 = relaxation cost (G5: 1000). */
+    /**
+     * The engine-reported value of a tier ({@code Metrics.tiers}), e.g. tier -2 = relaxation cost (G5: 1000).
+     */
     public static Optional<TierValue> metricsTier(SolveResult result, int tier) {
         if (result == null || result.metrics() == null) {
             return Optional.empty();
@@ -235,7 +254,9 @@ public final class ResultComparator {
         }
     }
 
-    /** Peak concurrent consumed amount on a resource (sweep line over start/end events); 0 when it is not used. */
+    /**
+     * Peak concurrent consumed amount on a resource (sweep line over start/end events); 0 when it is not used.
+     */
     public static int peakLoad(SolveResult result, String resourceId) {
         List<int[]> events = new ArrayList<>();   // {tick, delta}; ends sort before starts at the same tick
         for (Assignment a : assignmentsByTask(result).values()) {
@@ -277,7 +298,9 @@ public final class ResultComparator {
         }
     }
 
-    /** Fails when an assigned required task ends after its hard deadline (ticks computed from the request horizon). */
+    /**
+     * Fails when an assigned required task ends after its hard deadline (ticks computed from the request horizon).
+     */
     public static void assertDeadlinesRespected(PlanningRequest request, SolveResult result) {
         Map<String, Assignment> byTask = assignmentsByTask(result);
         for (Task task : request.tasks()) {

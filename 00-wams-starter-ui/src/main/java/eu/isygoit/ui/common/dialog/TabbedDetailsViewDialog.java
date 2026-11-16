@@ -1,8 +1,6 @@
 package eu.isygoit.ui.common.dialog;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -123,6 +121,7 @@ public abstract class TabbedDetailsViewDialog extends DetailsViewDialog {
 
     /**
      * File metadata tab for entities carrying a primary file (FileEntityDto).
+     *
      * @deprecated no longer shown: use {@link #addFilesTab(Component...)}; kept so older callers keep compiling.
      */
     @Deprecated

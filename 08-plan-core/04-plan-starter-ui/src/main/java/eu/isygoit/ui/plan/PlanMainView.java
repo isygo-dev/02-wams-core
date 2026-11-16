@@ -13,14 +13,14 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import eu.isygoit.async.ContextAwareAsync;
-import eu.isygoit.i18n.I18n;
-import eu.isygoit.dto.response.JobDashboardSummary;
 import eu.isygoit.dto.data.PlanJobMinDto;
+import eu.isygoit.dto.response.JobDashboardSummary;
+import eu.isygoit.i18n.I18n;
 import eu.isygoit.remote.plan.PlanFeignService;
-import eu.isygoit.ui.plan.common.PlanEnumTag;
-import eu.isygoit.ui.plan.common.PlanFormats;
 import eu.isygoit.ui.common.component.*;
 import eu.isygoit.ui.common.view.ManagementVerticalView;
+import eu.isygoit.ui.plan.common.PlanEnumTag;
+import eu.isygoit.ui.plan.common.PlanFormats;
 import eu.isygoit.ui.plan.layout.PlanMainLayout;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
@@ -195,6 +195,14 @@ public class PlanMainView extends ManagementVerticalView {
                 summary.recentJobs());
     }
 
+    private void openJobs() {
+        ui.navigate("plan/jobs");
+    }
+
+    private void openLogs() {
+        ui.navigate("plan/logs");
+    }
+
     private record DashboardData(
             long total,
             long active,
@@ -207,13 +215,5 @@ public class PlanMainView extends ManagementVerticalView {
             long failed,
             long cancelled,
             List<PlanJobMinDto> recentJobs) {
-    }
-
-    private void openJobs() {
-        ui.navigate("plan/jobs");
-    }
-
-    private void openLogs() {
-        ui.navigate("plan/logs");
     }
 }

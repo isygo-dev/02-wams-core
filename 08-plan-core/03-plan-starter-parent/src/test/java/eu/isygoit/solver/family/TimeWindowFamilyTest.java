@@ -7,12 +7,7 @@ import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.params.TimeWindowParams;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.index.CandidateIndexBuilder;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PreprocessContext;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -20,16 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class TimeWindowFamilyTest {
 
@@ -55,6 +43,10 @@ class TimeWindowFamilyTest {
         when(ctx.problem()).thenReturn(problem(c));
         when(ctx.tick(any(), anyString())).thenAnswer(i -> H.toTick(i.getArgument(0)));
         return ctx;
+    }
+
+    private static <T> T any() {
+        return org.mockito.ArgumentMatchers.any();
     }
 
     @Test
@@ -142,14 +134,14 @@ class TimeWindowFamilyTest {
         verify(ctx).restrictStart(0, 20, 56);
     }
 
+    // ------------------------------------------------------------------ checker
+
     @Test
     void preprocessDoesNothingWhenNoBoundTightensTheDomain() {
         PreprocessContext ctx = preprocessContext(new int[]{10});
         family.preprocess(ctx, constraint(IEnumEnforcement.Types.STRICTLY_REQUIRED), new TimeWindowParams(at(0), at(100), null, null));
         verify(ctx, never()).restrictStart(anyInt(), anyInt(), anyInt());
     }
-
-    // ------------------------------------------------------------------ checker
 
     private List<String> check(TimeWindowParams p, int[][] times) {
         SolutionView sol = mock(SolutionView.class);
@@ -181,9 +173,5 @@ class TimeWindowFamilyTest {
     void checkerIgnoresUnselectedTasks() {
         List<String> out = check(new TimeWindowParams(at(10), null, null, null), new int[][]{{-1, -1}, {-1, -1}, {-1, -1}});
         assertTrue(out.isEmpty());
-    }
-
-    private static <T> T any() {
-        return org.mockito.ArgumentMatchers.any();
     }
 }

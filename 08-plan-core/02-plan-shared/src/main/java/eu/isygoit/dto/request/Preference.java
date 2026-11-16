@@ -20,5 +20,5 @@ public record Preference(Kind kind, String resourceId, Instant start, int penalt
     /**
      * Preference kinds.
      */
-    public enum Kind { RESOURCE, START }
+    public enum Kind {RESOURCE, START}
 }

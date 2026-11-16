@@ -2,12 +2,7 @@ package eu.isygoit.solver.objective;
 
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.params.LoadMetric;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import eu.isygoit.util.ScaledMath;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +21,13 @@ import java.util.List;
 @Component
 public class MinimizeIdleObjective extends AbstractObjectiveFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "minimize_idle";
-    /** Warning code: cumulative resources are ignored by the idle objective. */
+    /**
+     * Warning code: cumulative resources are ignored by the idle objective.
+     */
     public static final String IDLE_CUMULATIVE_IGNORED = "OBJECTIVE_IDLE_CUMULATIVE_IGNORED";
 
     public MinimizeIdleObjective() {

@@ -13,16 +13,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static eu.isygoit.solver.cpsat.CpSatTestKit.any;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.assignment;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.at;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.options;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.resource;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.task;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.tier;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static eu.isygoit.solver.cpsat.CpSatTestKit.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Hints and locked assignments (design 6.4 step 6, 6.11): locked assignments are frozen (start and resource) and a

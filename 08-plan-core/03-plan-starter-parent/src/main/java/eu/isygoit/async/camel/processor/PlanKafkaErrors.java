@@ -12,7 +12,9 @@ public final class PlanKafkaErrors {
     private PlanKafkaErrors() {
     }
 
-    /** True when retrying the same record can never succeed (parse / deserialization / validation failures). */
+    /**
+     * True when retrying the same record can never succeed (parse / deserialization / validation failures).
+     */
     public static boolean isNonRetryable(Throwable failure) {
         int depth = 0;
         for (Throwable current = failure; current != null && depth < 20; current = current.getCause(), depth++) {

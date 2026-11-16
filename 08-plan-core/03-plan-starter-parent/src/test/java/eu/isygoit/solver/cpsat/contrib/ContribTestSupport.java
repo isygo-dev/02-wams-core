@@ -1,17 +1,9 @@
 package eu.isygoit.solver.cpsat.contrib;
 
-import com.google.ortools.sat.BoolVar;
-import com.google.ortools.sat.ConstraintProto;
-import com.google.ortools.sat.CpModel;
-import com.google.ortools.sat.IntVar;
-import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.Literal;
+import com.google.ortools.sat.*;
 import eu.isygoit.config.PlanLimitsProperties;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.Slot;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.CompiledConstraint;
 import eu.isygoit.solver.cpsat.CpModelContext;
@@ -99,12 +91,20 @@ final class ContribTestSupport {
         });
     }
 
+    static Constraint constraint(String type, IEnumEnforcement.Types enforcement, eu.isygoit.dto.request.ConstraintScope scope) {
+        return new Constraint("c1", type, enforcement, scope, Map.of(), null, 3, 0);
+    }
+
+    static CompiledConstraint compiled(Constraint constraint, ConstraintFamily family, Object params) {
+        return new CompiledConstraint(0, constraint, family, params, true);
+    }
+
     /**
      * Adds a task.
      *
-     * @param est       earliest start after pruning
-     * @param lst       latest start after pruning
-     * @param optional  {@code true} for an optional task (own presence literal)
+     * @param est                 earliest start after pruning
+     * @param lst                 latest start after pruning
+     * @param optional            {@code true} for an optional task (own presence literal)
      * @param resourceAndDuration pairs {@code resource, duration} (one candidate per pair)
      * @return the task index
      */
@@ -137,15 +137,9 @@ final class ContribTestSupport {
         ReflectionTestUtils.setField(limits, "maxPairwise", (long) max);
     }
 
-    static Constraint constraint(String type, IEnumEnforcement.Types enforcement, eu.isygoit.dto.request.ConstraintScope scope) {
-        return new Constraint("c1", type, enforcement, scope, Map.of(), null, 3, 0);
-    }
-
-    static CompiledConstraint compiled(Constraint constraint, ConstraintFamily family, Object params) {
-        return new CompiledConstraint(0, constraint, family, params, true);
-    }
-
-    /** @return the constraints added to the model so far */
+    /**
+     * @return the constraints added to the model so far
+     */
     List<ConstraintProto> constraints() {
         return model.model().getConstraintsList();
     }
@@ -156,14 +150,35 @@ final class ContribTestSupport {
 
     // ------------------------------------------------------------------ enforcer fake
 
-    /** Mirrors the contract of {@code Enforcer}: HARD solve null; SOFT fresh literal per instance; RELAXABLE / explain a shared literal. */
+    FakeEnforcer hard() {
+        return new FakeEnforcer(Enforcer.Mode.HARD, model, null);
+    }
+
+    /**
+     * HARD enforcer of the explain pass: the assumption literal is returned as instance literal.
+     */
+    FakeEnforcer assumption(Literal assumption) {
+        return new FakeEnforcer(Enforcer.Mode.HARD, model, assumption);
+    }
+
+    FakeEnforcer relaxable(Literal active) {
+        return new FakeEnforcer(Enforcer.Mode.RELAXABLE, model, active);
+    }
+
+    FakeEnforcer soft() {
+        return new FakeEnforcer(Enforcer.Mode.SOFT, model, null);
+    }
+
+    /**
+     * Mirrors the contract of {@code Enforcer}: HARD solve null; SOFT fresh literal per instance; RELAXABLE / explain a shared literal.
+     */
     static final class FakeEnforcer implements Enforcer {
+        final List<LinearExpr> penalized = new ArrayList<>();
+        final List<Literal> issued = new ArrayList<>();
         private final Mode mode;
         private final CpModel model;
         private final Literal shared;
         int instanceCalls;
-        final List<LinearExpr> penalized = new ArrayList<>();
-        final List<Literal> issued = new ArrayList<>();
 
         FakeEnforcer(Mode mode, CpModel model, Literal shared) {
             this.mode = mode;
@@ -208,22 +223,5 @@ final class ContribTestSupport {
             }
             return list.toArray(new Literal[0]);
         }
-    }
-
-    FakeEnforcer hard() {
-        return new FakeEnforcer(Enforcer.Mode.HARD, model, null);
-    }
-
-    /** HARD enforcer of the explain pass: the assumption literal is returned as instance literal. */
-    FakeEnforcer assumption(Literal assumption) {
-        return new FakeEnforcer(Enforcer.Mode.HARD, model, assumption);
-    }
-
-    FakeEnforcer relaxable(Literal active) {
-        return new FakeEnforcer(Enforcer.Mode.RELAXABLE, model, active);
-    }
-
-    FakeEnforcer soft() {
-        return new FakeEnforcer(Enforcer.Mode.SOFT, model, null);
     }
 }

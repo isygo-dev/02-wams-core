@@ -1,15 +1,12 @@
 package eu.isygoit.service.impl;
 
 import eu.isygoit.repository.PlanJobRepository;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.junit.jupiter.api.Test;
-
+import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 class JobWorkerShutdownTest {
     private final PlanJobRepository jobRepository = mock(PlanJobRepository.class);

@@ -11,12 +11,12 @@ package eu.isygoit.dto.request.params;
  */
 public record TardinessParams(WeightBy weightBy) {
 
-    /**
-     * Weighting modes.
-     */
-    public enum WeightBy { NONE, PRIORITY }
-
     public TardinessParams {
         weightBy = weightBy == null ? WeightBy.NONE : weightBy;
     }
+
+    /**
+     * Weighting modes.
+     */
+    public enum WeightBy {NONE, PRIORITY}
 }

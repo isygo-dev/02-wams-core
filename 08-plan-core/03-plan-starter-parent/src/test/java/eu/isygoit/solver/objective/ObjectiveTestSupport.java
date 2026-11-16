@@ -1,19 +1,7 @@
 package eu.isygoit.solver.objective;
 
 import eu.isygoit.config.PlanLimitsProperties;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.InitialSolution;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Preference;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.dto.request.Task;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.solver.spi.CandidateIndexView;
 import eu.isygoit.solver.spi.CheckContext;
 import eu.isygoit.solver.spi.SolutionView;
@@ -21,11 +9,7 @@ import eu.isygoit.solver.spi.ValidationContext;
 import eu.isygoit.util.ScaledMath;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Hand-built fakes shared by the objective family tests: problem builders, an in-memory {@link CandidateIndexView}, a
@@ -53,7 +37,70 @@ final class ObjectiveTestSupport {
         return new TaskBuilder(id);
     }
 
-    /** Mutable builder for the 20-component {@link Task} record. */
+    static Resource resource(String id) {
+        return resource(id, 1, 0.0, 0.0, null);
+    }
+
+    static Resource resource(String id, int capacity, double costPerTick, double costPerUse, String setupMatrixId) {
+        return new Resource(id, null, null, capacity, null, null, null, null, costPerTick, costPerUse, null,
+                setupMatrixId, null);
+    }
+
+    static Slot slot(String id, int startTick, int endTick, double cost) {
+        return new Slot(id, null, null, at(startTick), at(endTick), cost, null);
+    }
+
+    static PlanningProblem problem(List<Task> tasks, List<Resource> resources) {
+        return problem(tasks, resources, List.of(), List.of(), new InitialSolution(List.of()), List.of());
+    }
+
+    static PlanningProblem problem(List<Task> tasks, List<Resource> resources, List<Slot> slots,
+                                   List<SetupMatrix> matrices, InitialSolution initial, List<Objective> objectives) {
+        return new PlanningProblem(1L, "test", "UTC", horizon(), slots, List.of(), matrices, resources, tasks,
+                List.<Constraint>of(), objectives, SolverOptions.defaults(), initial);
+    }
+
+    static InitialSolution initial(InitialAssignment... assignments) {
+        return new InitialSolution(Arrays.asList(assignments));
+    }
+
+    static Objective objective(String type, int weight) {
+        return new Objective("obj", type, weight);
+    }
+
+    static Objective objective(String type, ConstraintScope scope, int scale) {
+        return new Objective("obj", type, 1, 0, scale, scope, java.util.Map.of());
+    }
+
+    static CheckContext ctx(PlanningProblem problem, CandidateIndexView index, SolutionView solution) {
+        return new CheckContext() {
+            @Override
+            public PlanningProblem problem() {
+                return problem;
+            }
+
+            @Override
+            public CandidateIndexView index() {
+                return index;
+            }
+
+            @Override
+            public SolutionView solution() {
+                return solution;
+            }
+
+            @Override
+            public long scaled(double value, int scale) {
+                return ScaledMath.scale(value, scale);
+            }
+        };
+    }
+
+    // ------------------------------------------------------------------ fakes
+
+    /**
+     * Mutable builder for the 20-component {@link Task} record.
+     */
     static final class TaskBuilder {
         private final String id;
         private Integer duration = 10;
@@ -115,44 +162,9 @@ final class ObjectiveTestSupport {
         }
     }
 
-    static Resource resource(String id) {
-        return resource(id, 1, 0.0, 0.0, null);
-    }
-
-    static Resource resource(String id, int capacity, double costPerTick, double costPerUse, String setupMatrixId) {
-        return new Resource(id, null, null, capacity, null, null, null, null, costPerTick, costPerUse, null,
-                setupMatrixId, null);
-    }
-
-    static Slot slot(String id, int startTick, int endTick, double cost) {
-        return new Slot(id, null, null, at(startTick), at(endTick), cost, null);
-    }
-
-    static PlanningProblem problem(List<Task> tasks, List<Resource> resources) {
-        return problem(tasks, resources, List.of(), List.of(), new InitialSolution(List.of()), List.of());
-    }
-
-    static PlanningProblem problem(List<Task> tasks, List<Resource> resources, List<Slot> slots,
-                                   List<SetupMatrix> matrices, InitialSolution initial, List<Objective> objectives) {
-        return new PlanningProblem(1L, "test", "UTC", horizon(), slots, List.of(), matrices, resources, tasks,
-                List.<Constraint>of(), objectives, SolverOptions.defaults(), initial);
-    }
-
-    static InitialSolution initial(InitialAssignment... assignments) {
-        return new InitialSolution(Arrays.asList(assignments));
-    }
-
-    static Objective objective(String type, int weight) {
-        return new Objective("obj", type, weight);
-    }
-
-    static Objective objective(String type, ConstraintScope scope, int scale) {
-        return new Objective("obj", type, 1, 0, scale, scope, java.util.Map.of());
-    }
-
-    // ------------------------------------------------------------------ fakes
-
-    /** In-memory index: one candidate per (task, listed resource), duration = task duration. */
+    /**
+     * In-memory index: one candidate per (task, listed resource), duration = task duration.
+     */
     static final class FakeIndex implements CandidateIndexView {
         private final PlanningProblem problem;
         private final int[] candBegin;
@@ -187,15 +199,50 @@ final class ObjectiveTestSupport {
             }
         }
 
-        @Override public int taskCount() { return problem.tasks().size(); }
-        @Override public int resourceCount() { return problem.resources().size(); }
-        @Override public int slotCount() { return problem.slots().size(); }
-        @Override public Horizon horizon() { return problem.horizon(); }
-        @Override public int horizonTicks() { return (int) problem.horizon().horizonTicks(); }
-        @Override public PlanLimitsProperties limits() { return new PlanLimitsProperties(); }
-        @Override public String taskId(int t) { return problem.tasks().get(t).id(); }
-        @Override public String resourceId(int r) { return problem.resources().get(r).id(); }
-        @Override public String slotId(int s) { return problem.slots().get(s).id(); }
+        @Override
+        public int taskCount() {
+            return problem.tasks().size();
+        }
+
+        @Override
+        public int resourceCount() {
+            return problem.resources().size();
+        }
+
+        @Override
+        public int slotCount() {
+            return problem.slots().size();
+        }
+
+        @Override
+        public Horizon horizon() {
+            return problem.horizon();
+        }
+
+        @Override
+        public int horizonTicks() {
+            return (int) problem.horizon().horizonTicks();
+        }
+
+        @Override
+        public PlanLimitsProperties limits() {
+            return new PlanLimitsProperties();
+        }
+
+        @Override
+        public String taskId(int t) {
+            return problem.tasks().get(t).id();
+        }
+
+        @Override
+        public String resourceId(int r) {
+            return problem.resources().get(r).id();
+        }
+
+        @Override
+        public String slotId(int s) {
+            return problem.slots().get(s).id();
+        }
 
         @Override
         public int taskIdx(String id) {
@@ -261,15 +308,51 @@ final class ObjectiveTestSupport {
             return out.stream().mapToInt(Integer::intValue).toArray();
         }
 
-        @Override public int[][] groupTasksByTagPrefix(String prefix) { return new int[0][]; }
-        @Override public int candidateCount() { return candTask.length; }
-        @Override public int duration(int t) { Integer d = problem.tasks().get(t).duration(); return d == null ? 0 : d; }
-        @Override public int demand(int t) { return 1; }
-        @Override public int priority(int t) { return problem.tasks().get(t).priority(); }
-        @Override public boolean required(int t) { return problem.tasks().get(t).requiredTask(); }
-        @Override public long prize(int t) { return required(t) ? 0L : problem.tasks().get(t).effectivePrize(); }
-        @Override public int release(int t) { return 0; }
-        @Override public int latestEnd(int t) { return horizonTicks(); }
+        @Override
+        public int[][] groupTasksByTagPrefix(String prefix) {
+            return new int[0][];
+        }
+
+        @Override
+        public int candidateCount() {
+            return candTask.length;
+        }
+
+        @Override
+        public int duration(int t) {
+            Integer d = problem.tasks().get(t).duration();
+            return d == null ? 0 : d;
+        }
+
+        @Override
+        public int demand(int t) {
+            return 1;
+        }
+
+        @Override
+        public int priority(int t) {
+            return problem.tasks().get(t).priority();
+        }
+
+        @Override
+        public boolean required(int t) {
+            return problem.tasks().get(t).requiredTask();
+        }
+
+        @Override
+        public long prize(int t) {
+            return required(t) ? 0L : problem.tasks().get(t).effectivePrize();
+        }
+
+        @Override
+        public int release(int t) {
+            return 0;
+        }
+
+        @Override
+        public int latestEnd(int t) {
+            return horizonTicks();
+        }
 
         @Override
         public int due(int t) {
@@ -277,20 +360,65 @@ final class ObjectiveTestSupport {
             return due == null ? ObjectiveMath.NO_DUE : problem.horizon().toTick(due);
         }
 
-        @Override public int estStart(int t) { return 0; }
-        @Override public int lstStart(int t) { return horizonTicks() - duration(t); }
-        @Override public int pinStart(int t) { return -1; }
-        @Override public int capacity(int r) { return problem.resources().get(r).capacity(); }
-        @Override public int maxLoadTicks(int r) { return Integer.MAX_VALUE; }
-        @Override public int candidateBegin(int t) { return candBegin[t]; }
-        @Override public int candidateEnd(int t) { return candBegin[t + 1]; }
-        @Override public int candidateTask(int c) { return candTask[c]; }
-        @Override public int candidateResource(int c) { return candResource[c]; }
-        @Override public int candidateDuration(int c) { return candDuration[c]; }
-        @Override public int candidateAmount(int c) { return 1; }
+        @Override
+        public int estStart(int t) {
+            return 0;
+        }
+
+        @Override
+        public int lstStart(int t) {
+            return horizonTicks() - duration(t);
+        }
+
+        @Override
+        public int pinStart(int t) {
+            return -1;
+        }
+
+        @Override
+        public int capacity(int r) {
+            return problem.resources().get(r).capacity();
+        }
+
+        @Override
+        public int maxLoadTicks(int r) {
+            return Integer.MAX_VALUE;
+        }
+
+        @Override
+        public int candidateBegin(int t) {
+            return candBegin[t];
+        }
+
+        @Override
+        public int candidateEnd(int t) {
+            return candBegin[t + 1];
+        }
+
+        @Override
+        public int candidateTask(int c) {
+            return candTask[c];
+        }
+
+        @Override
+        public int candidateResource(int c) {
+            return candResource[c];
+        }
+
+        @Override
+        public int candidateDuration(int c) {
+            return candDuration[c];
+        }
+
+        @Override
+        public int candidateAmount(int c) {
+            return 1;
+        }
     }
 
-    /** In-memory solution; tasks are unselected until {@link #place}d. */
+    /**
+     * In-memory solution; tasks are unselected until {@link #place}d.
+     */
     static final class FakeSolution implements SolutionView {
         private final boolean[] selected;
         private final int[] start;
@@ -322,15 +450,50 @@ final class ObjectiveTestSupport {
             return this;
         }
 
-        @Override public int taskCount() { return selected.length; }
-        @Override public boolean selected(int task) { return selected[task]; }
-        @Override public int start(int task) { return start[task]; }
-        @Override public int end(int task) { return end[task]; }
-        @Override public int resourceCount(int task) { return resources[task].length; }
-        @Override public int resourceAt(int task, int k) { return resources[task][k]; }
-        @Override public String roleAt(int task, int k) { return "default"; }
-        @Override public int amountAt(int task, int k) { return 1; }
-        @Override public int slotOf(int task) { return slot[task]; }
+        @Override
+        public int taskCount() {
+            return selected.length;
+        }
+
+        @Override
+        public boolean selected(int task) {
+            return selected[task];
+        }
+
+        @Override
+        public int start(int task) {
+            return start[task];
+        }
+
+        @Override
+        public int end(int task) {
+            return end[task];
+        }
+
+        @Override
+        public int resourceCount(int task) {
+            return resources[task].length;
+        }
+
+        @Override
+        public int resourceAt(int task, int k) {
+            return resources[task][k];
+        }
+
+        @Override
+        public String roleAt(int task, int k) {
+            return "default";
+        }
+
+        @Override
+        public int amountAt(int task, int k) {
+            return 1;
+        }
+
+        @Override
+        public int slotOf(int task) {
+            return slot[task];
+        }
 
         @Override
         public int[] tasksOfResource(int resource) {
@@ -345,16 +508,9 @@ final class ObjectiveTestSupport {
         }
     }
 
-    static CheckContext ctx(PlanningProblem problem, CandidateIndexView index, SolutionView solution) {
-        return new CheckContext() {
-            @Override public PlanningProblem problem() { return problem; }
-            @Override public CandidateIndexView index() { return index; }
-            @Override public SolutionView solution() { return solution; }
-            @Override public long scaled(double value, int scale) { return ScaledMath.scale(value, scale); }
-        };
-    }
-
-    /** Collects the issues of {@code family.validate}. */
+    /**
+     * Collects the issues of {@code family.validate}.
+     */
     static final class RecordingValidation implements ValidationContext {
         final List<String> errors = new ArrayList<>();
         final List<String> warnings = new ArrayList<>();
@@ -364,14 +520,45 @@ final class ObjectiveTestSupport {
             this.problem = problem;
         }
 
-        @Override public PlanningProblem problem() { return problem; }
-        @Override public CandidateIndexView index() { throw new UnsupportedOperationException(); }
-        @Override public <P> P params(Constraint c, Class<P> type) { return null; }
-        @Override public void error(String code, String path, String message) { errors.add(code + "@" + path); }
-        @Override public void warning(String code, String path, String message) { warnings.add(code + "@" + path); }
-        @Override public boolean hasTask(String id) { return problem.tasks().stream().anyMatch(t -> t.id().equals(id)); }
-        @Override public boolean hasResource(String id) { return problem.resources().stream().anyMatch(r -> r.id().equals(id)); }
-        @Override public boolean hasSlot(String id) { return problem.slots().stream().anyMatch(s -> s.id().equals(id)); }
+        @Override
+        public PlanningProblem problem() {
+            return problem;
+        }
+
+        @Override
+        public CandidateIndexView index() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public <P> P params(Constraint c, Class<P> type) {
+            return null;
+        }
+
+        @Override
+        public void error(String code, String path, String message) {
+            errors.add(code + "@" + path);
+        }
+
+        @Override
+        public void warning(String code, String path, String message) {
+            warnings.add(code + "@" + path);
+        }
+
+        @Override
+        public boolean hasTask(String id) {
+            return problem.tasks().stream().anyMatch(t -> t.id().equals(id));
+        }
+
+        @Override
+        public boolean hasResource(String id) {
+            return problem.resources().stream().anyMatch(r -> r.id().equals(id));
+        }
+
+        @Override
+        public boolean hasSlot(String id) {
+            return problem.slots().stream().anyMatch(s -> s.id().equals(id));
+        }
 
         @Override
         public int tick(Instant t, String path) {

@@ -21,7 +21,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class TimeWindowTimefoldContributor implements TimefoldConstraintContributor {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "time_window";
 
     @Override

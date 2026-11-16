@@ -46,31 +46,94 @@ import java.util.Map;
  */
 public final class CpSatExplainer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CpSatExplainer.class);
-
-    /** Maximum number of core items re-examined by the deletion filter (design: 30). */
+    /**
+     * Maximum number of core items re-examined by the deletion filter (design: 30).
+     */
     public static final int MAX_SHRINK_ITEMS = 30;
-
-    /** Share of the explain budget given to the first (core-producing) solve. */
+    private static final Logger LOG = LoggerFactory.getLogger(CpSatExplainer.class);
+    /**
+     * Share of the explain budget given to the first (core-producing) solve.
+     */
     private static final double FIRST_SOLVE_SHARE = 0.6;
 
-    /** The pieces of a built EXPLAIN model the explainer needs. */
-    public record ExplainModel(CpModel model, List<AssumptionRef> assumptions) {
-        public ExplainModel {
-            assumptions = assumptions == null ? List.of() : List.copyOf(assumptions);
+    /**
+     * Solves the model under the assumptions at the given positions; the core is returned as positions.
+     */
+    private static Outcome solveWith(CpSolver solver, CpModel model, List<AssumptionRef> refs,
+                                     Map<Integer, Integer> positionByLiteral, int[] subset, SolverOptions options,
+                                     double seconds) {
+        model.clearAssumptions(); // OR-TOOLS-VERIFY: CpModel.clearAssumptions() exists in 9.15 Java
+        if (subset.length > 0) {
+            Literal[] literals = new Literal[subset.length];
+            for (int i = 0; i < subset.length; i++) {
+                literals[i] = refs.get(subset[i]).literal();
+            }
+            model.addAssumptions(literals); // OR-TOOLS-VERIFY: CpModel.addAssumptions(Literal[])
         }
+        solver.getParameters().setMaxTimeInSeconds(seconds);
+        solver.getParameters().setNumWorkers(1); // OR-TOOLS-VERIFY: SatParameters.Builder.setNumWorkers (was setNumSearchWorkers)
+        solver.getParameters().setRandomSeed((int) (long) options.seed());
+        solver.getParameters().setLogSearchProgress(false);
+        CpSolverStatus status = solver.solve(model);
+        if (status != CpSolverStatus.INFEASIBLE) {
+            return new Outcome(status, new int[0]);
+        }
+        // OR-TOOLS-VERIFY: CpSolver.sufficientAssumptionsForInfeasibility() returns the literal indices as int[]
+        List<Integer> raw = solver.sufficientAssumptionsForInfeasibility();
+        List<Integer> positions = new ArrayList<>(raw.size());
+        for (int literalIndex : raw) {
+            Integer position = positionByLiteral.get(literalIndex);
+            if (position != null && !positions.contains(position)) {
+                positions.add(position);
+            }
+        }
+        int[] core = new int[positions.size()];
+        for (int i = 0; i < core.length; i++) {
+            core[i] = positions.get(i);
+        }
+        return new Outcome(status, core);
     }
 
-    /** Builds the EXPLAIN model; the production implementation delegates to {@link CpModelBuilder}. */
-    @FunctionalInterface
-    public interface ModelFactory {
-        /**
-         * @param problem the compiled problem
-         * @param context a fresh context whose budget is the explain budget (single worker)
-         * @return the model and its assumption list
-         */
-        ExplainModel build(CompiledProblem problem, SolveContext context);
+    private static List<CoreItem> toItems(List<AssumptionRef> refs, int[] core) {
+        List<CoreItem> items = new ArrayList<>(core.length);
+        for (int position : core) {
+            AssumptionRef ref = refs.get(position);
+            String kind = ref.kind() == null ? CoreItems.CONSTRAINT : ref.kind();
+            String reason = ref.reasonCode() != null ? ref.reasonCode() : defaultReason(kind);
+            items.add(CoreItems.item(kind, ref.id(), reason,
+                    kind + " '" + ref.id() + "' is part of an infeasible set of requirements"));
+        }
+        return items;
     }
+
+    private static String defaultReason(String kind) {
+        return switch (kind) {
+            case CoreItems.TASK -> CoreItems.WINDOW_EMPTY;
+            case CoreItems.RESOURCE -> CoreItems.CALENDAR;
+            case CoreItems.EDGE -> CoreItems.PRECEDENCE;
+            default -> CoreItems.CONSTRAINT_REASON;
+        };
+    }
+
+    /**
+     * The labelled v1 fallback: method {@code NONE}, not minimal, every non-SOFT catalogue constraint listed.
+     *
+     * @param problem the compiled problem
+     * @return the fallback core
+     */
+    static InfeasibilityCore fallback(CompiledProblem problem) {
+        List<CoreItem> items = new ArrayList<>();
+        for (Constraint constraint : problem.problem().constraints()) {
+            if (constraint.enforcement() != IEnumEnforcement.Types.SOFT) {
+                items.add(CoreItems.item(CoreItems.CONSTRAINT, constraint.id(), CoreItems.CONSTRAINT_REASON,
+                        "constraint '" + constraint.id() + "' (" + constraint.type()
+                                + ") may be part of the conflict; the exact core could not be computed"));
+            }
+        }
+        return CoreItems.core(CoreItems.METHOD_NONE, false, items);
+    }
+
+    // ------------------------------------------------------------------------------------------------ solve + shrink
 
     /**
      * Explains an infeasible problem.
@@ -122,8 +185,6 @@ public final class CpSatExplainer {
             return fallback(problem);
         }
     }
-
-    // ------------------------------------------------------------------------------------------------ solve + shrink
 
     private InfeasibilityCore solveAndShrink(CompiledProblem problem, ExplainModel built, SolverOptions options,
                                              SolverCancellationToken token, long startNanos, int budgetSeconds) {
@@ -177,6 +238,30 @@ public final class CpSatExplainer {
         }
     }
 
+    // ------------------------------------------------------------------------------------------------ items
+
+    /**
+     * Builds the EXPLAIN model; the production implementation delegates to {@link CpModelBuilder}.
+     */
+    @FunctionalInterface
+    public interface ModelFactory {
+        /**
+         * @param problem the compiled problem
+         * @param context a fresh context whose budget is the explain budget (single worker)
+         * @return the model and its assumption list
+         */
+        ExplainModel build(CompiledProblem problem, SolveContext context);
+    }
+
+    /**
+     * The pieces of a built EXPLAIN model the explainer needs.
+     */
+    public record ExplainModel(CpModel model, List<AssumptionRef> assumptions) {
+        public ExplainModel {
+            assumptions = assumptions == null ? List.of() : List.copyOf(assumptions);
+        }
+    }
+
     private static final class Outcome {
         final CpSolverStatus status;
         final int[] core;
@@ -185,82 +270,5 @@ public final class CpSatExplainer {
             this.status = status;
             this.core = core;
         }
-    }
-
-    /** Solves the model under the assumptions at the given positions; the core is returned as positions. */
-    private static Outcome solveWith(CpSolver solver, CpModel model, List<AssumptionRef> refs,
-                                     Map<Integer, Integer> positionByLiteral, int[] subset, SolverOptions options,
-                                     double seconds) {
-        model.clearAssumptions(); // OR-TOOLS-VERIFY: CpModel.clearAssumptions() exists in 9.15 Java
-        if (subset.length > 0) {
-            Literal[] literals = new Literal[subset.length];
-            for (int i = 0; i < subset.length; i++) {
-                literals[i] = refs.get(subset[i]).literal();
-            }
-            model.addAssumptions(literals); // OR-TOOLS-VERIFY: CpModel.addAssumptions(Literal[])
-        }
-        solver.getParameters().setMaxTimeInSeconds(seconds);
-        solver.getParameters().setNumWorkers(1); // OR-TOOLS-VERIFY: SatParameters.Builder.setNumWorkers (was setNumSearchWorkers)
-        solver.getParameters().setRandomSeed((int) (long) options.seed());
-        solver.getParameters().setLogSearchProgress(false);
-        CpSolverStatus status = solver.solve(model);
-        if (status != CpSolverStatus.INFEASIBLE) {
-            return new Outcome(status, new int[0]);
-        }
-        // OR-TOOLS-VERIFY: CpSolver.sufficientAssumptionsForInfeasibility() returns the literal indices as int[]
-        List<Integer> raw = solver.sufficientAssumptionsForInfeasibility();
-        List<Integer> positions = new ArrayList<>(raw.size());
-        for (int literalIndex : raw) {
-            Integer position = positionByLiteral.get(literalIndex);
-            if (position != null && !positions.contains(position)) {
-                positions.add(position);
-            }
-        }
-        int[] core = new int[positions.size()];
-        for (int i = 0; i < core.length; i++) {
-            core[i] = positions.get(i);
-        }
-        return new Outcome(status, core);
-    }
-
-    // ------------------------------------------------------------------------------------------------ items
-
-    private static List<CoreItem> toItems(List<AssumptionRef> refs, int[] core) {
-        List<CoreItem> items = new ArrayList<>(core.length);
-        for (int position : core) {
-            AssumptionRef ref = refs.get(position);
-            String kind = ref.kind() == null ? CoreItems.CONSTRAINT : ref.kind();
-            String reason = ref.reasonCode() != null ? ref.reasonCode() : defaultReason(kind);
-            items.add(CoreItems.item(kind, ref.id(), reason,
-                    kind + " '" + ref.id() + "' is part of an infeasible set of requirements"));
-        }
-        return items;
-    }
-
-    private static String defaultReason(String kind) {
-        return switch (kind) {
-            case CoreItems.TASK -> CoreItems.WINDOW_EMPTY;
-            case CoreItems.RESOURCE -> CoreItems.CALENDAR;
-            case CoreItems.EDGE -> CoreItems.PRECEDENCE;
-            default -> CoreItems.CONSTRAINT_REASON;
-        };
-    }
-
-    /**
-     * The labelled v1 fallback: method {@code NONE}, not minimal, every non-SOFT catalogue constraint listed.
-     *
-     * @param problem the compiled problem
-     * @return the fallback core
-     */
-    static InfeasibilityCore fallback(CompiledProblem problem) {
-        List<CoreItem> items = new ArrayList<>();
-        for (Constraint constraint : problem.problem().constraints()) {
-            if (constraint.enforcement() != IEnumEnforcement.Types.SOFT) {
-                items.add(CoreItems.item(CoreItems.CONSTRAINT, constraint.id(), CoreItems.CONSTRAINT_REASON,
-                        "constraint '" + constraint.id() + "' (" + constraint.type()
-                                + ") may be part of the conflict; the exact core could not be computed"));
-            }
-        }
-        return CoreItems.core(CoreItems.METHOD_NONE, false, items);
     }
 }

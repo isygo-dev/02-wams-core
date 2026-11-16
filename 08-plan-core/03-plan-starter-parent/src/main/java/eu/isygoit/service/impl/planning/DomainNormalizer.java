@@ -1,18 +1,7 @@
 package eu.isygoit.service.impl.planning;
 
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.request.Calendar;
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PlanningRequest;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.ResourceSelector;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.dto.request.Task;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.exception.InvalidRequestException;
 import eu.isygoit.exception.ParamsInvalidException;
@@ -26,12 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Stage 2 (design 7 / 2.4): turns a validated {@link PlanningRequest} into the solver-ready {@link PlanningProblem}.
@@ -68,6 +52,75 @@ public class DomainNormalizer {
     @Autowired
     public DomainNormalizer(ConstraintFamilyRegistry constraintRegistry) {
         this.constraintRegistry = constraintRegistry;
+    }
+
+    /**
+     * @param enforcement the constraint enforcement
+     * @return {@code true} for STRICTLY_REQUIRED and CONFIGURABLE_HARD
+     */
+    static boolean isHard(IEnumEnforcement.Types enforcement) {
+        return enforcement == IEnumEnforcement.Types.STRICTLY_REQUIRED
+                || enforcement == IEnumEnforcement.Types.CONFIGURABLE_HARD;
+    }
+
+    private static ResourceRequirement materialiseRequirement(ResourceRequirement requirement, int demand,
+                                                              Set<String> resourceTypeIds) {
+        ResourceSelector selector = requirement.selector();
+        if (selector.resourceTypeIds().isEmpty() && resourceTypeIds.contains(requirement.role())) {
+            selector = new ResourceSelector(selector.resourceIds(), List.of(requirement.role()), selector.skills(),
+                    selector.anySkills(), selector.tags(), selector.excludeResourceIds());
+        }
+        return new ResourceRequirement(requirement.role(), selector, requirement.count(),
+                requirement.amount() == null ? demand : requirement.amount());
+    }
+
+    // ------------------------------------------------------------------------------------------ rewriting
+
+    /**
+     * Common length in ticks of the listed slots, or {@code null} when none or different.
+     */
+    private static Integer slotLength(List<String> startSlots, List<Slot> slots, Horizon horizon) {
+        if (startSlots.isEmpty()) {
+            return null;
+        }
+        Map<String, Slot> byId = new HashMap<>();
+        for (Slot slot : slots) {
+            byId.putIfAbsent(slot.id(), slot);
+        }
+        List<Slot> listed = new ArrayList<>();
+        if (startSlots.stream().anyMatch(ALL::equalsIgnoreCase)) {
+            listed.addAll(slots);
+        } else {
+            for (String id : startSlots) {
+                Slot slot = byId.get(id);
+                if (slot != null) {
+                    listed.add(slot);
+                }
+            }
+        }
+        long length = -1;
+        for (Slot slot : listed) {
+            long ticks = Duration.between(slot.start(), slot.end()).getSeconds() / horizon.tickSeconds();
+            if (length >= 0 && length != ticks) {
+                return null;
+            }
+            length = ticks;
+        }
+        return length < 0 ? null : (int) Math.min(length, Integer.MAX_VALUE);
+    }
+
+    private static boolean allZero(SetupMatrix matrix) {
+        if (matrix.defaultTicks() != 0 || matrix.sameClassTicks() != 0) {
+            return false;
+        }
+        return matrix.entries().stream().allMatch(entry -> entry.ticks() == 0);
+    }
+
+    // ------------------------------------------------------------------------------------------ defaults
+
+    private static Resource withoutMatrix(Resource r) {
+        return new Resource(r.id(), r.typeId(), r.name(), r.capacity(), r.skills(), r.tags(), r.calendarId(),
+                r.unavailable(), r.costPerTick(), r.costPerUse(), r.maxLoadTicks(), null, r.attributes());
     }
 
     /**
@@ -144,8 +197,6 @@ public class DomainNormalizer {
                 matrices, resources, tasks, request.constraints(), objectives, options, request.initialSolution());
     }
 
-    // ------------------------------------------------------------------------------------------ rewriting
-
     private List<Task> applyRewriters(PlanningRequest request) {
         List<Task> tasks = new ArrayList<>(request.tasks());
         List<Constraint> constraints = request.constraints();
@@ -170,17 +221,6 @@ public class DomainNormalizer {
         }
         return tasks;
     }
-
-    /**
-     * @param enforcement the constraint enforcement
-     * @return {@code true} for STRICTLY_REQUIRED and CONFIGURABLE_HARD
-     */
-    static boolean isHard(IEnumEnforcement.Types enforcement) {
-        return enforcement == IEnumEnforcement.Types.STRICTLY_REQUIRED
-                || enforcement == IEnumEnforcement.Types.CONFIGURABLE_HARD;
-    }
-
-    // ------------------------------------------------------------------------------------------ defaults
 
     private Task materialise(Task task, List<Slot> slots, Horizon horizon, Set<String> resourceTypeIds) {
         int demand = task.demand() == null ? 1 : task.demand();
@@ -212,59 +252,5 @@ public class DomainNormalizer {
                 task.priority(), task.required(), task.prize(), requirements, task.release(), task.deadline(), dueDate,
                 startSlots, task.pin(), task.predecessors(), task.setupClass(), task.tags(), task.preferences(),
                 task.attributes());
-    }
-
-    private static ResourceRequirement materialiseRequirement(ResourceRequirement requirement, int demand,
-                                                              Set<String> resourceTypeIds) {
-        ResourceSelector selector = requirement.selector();
-        if (selector.resourceTypeIds().isEmpty() && resourceTypeIds.contains(requirement.role())) {
-            selector = new ResourceSelector(selector.resourceIds(), List.of(requirement.role()), selector.skills(),
-                    selector.anySkills(), selector.tags(), selector.excludeResourceIds());
-        }
-        return new ResourceRequirement(requirement.role(), selector, requirement.count(),
-                requirement.amount() == null ? demand : requirement.amount());
-    }
-
-    /** Common length in ticks of the listed slots, or {@code null} when none or different. */
-    private static Integer slotLength(List<String> startSlots, List<Slot> slots, Horizon horizon) {
-        if (startSlots.isEmpty()) {
-            return null;
-        }
-        Map<String, Slot> byId = new HashMap<>();
-        for (Slot slot : slots) {
-            byId.putIfAbsent(slot.id(), slot);
-        }
-        List<Slot> listed = new ArrayList<>();
-        if (startSlots.stream().anyMatch(ALL::equalsIgnoreCase)) {
-            listed.addAll(slots);
-        } else {
-            for (String id : startSlots) {
-                Slot slot = byId.get(id);
-                if (slot != null) {
-                    listed.add(slot);
-                }
-            }
-        }
-        long length = -1;
-        for (Slot slot : listed) {
-            long ticks = Duration.between(slot.start(), slot.end()).getSeconds() / horizon.tickSeconds();
-            if (length >= 0 && length != ticks) {
-                return null;
-            }
-            length = ticks;
-        }
-        return length < 0 ? null : (int) Math.min(length, Integer.MAX_VALUE);
-    }
-
-    private static boolean allZero(SetupMatrix matrix) {
-        if (matrix.defaultTicks() != 0 || matrix.sameClassTicks() != 0) {
-            return false;
-        }
-        return matrix.entries().stream().allMatch(entry -> entry.ticks() == 0);
-    }
-
-    private static Resource withoutMatrix(Resource r) {
-        return new Resource(r.id(), r.typeId(), r.name(), r.capacity(), r.skills(), r.tags(), r.calendarId(),
-                r.unavailable(), r.costPerTick(), r.costPerUse(), r.maxLoadTicks(), null, r.attributes());
     }
 }

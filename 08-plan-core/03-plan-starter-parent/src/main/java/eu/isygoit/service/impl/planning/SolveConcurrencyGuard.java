@@ -1,9 +1,9 @@
 package eu.isygoit.service.impl.planning;
 
 import eu.isygoit.config.PlanLimitsProperties;
+import eu.isygoit.exception.SolverBusyException;
 import eu.isygoit.solver.SolveCancelledException;
 import eu.isygoit.solver.SolverCancellationToken;
-import eu.isygoit.exception.SolverBusyException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -109,7 +109,9 @@ public class SolveConcurrencyGuard {
         return semaphore.getQueueLength();
     }
 
-    /** A held solver slot; closing it more than once releases it only once. */
+    /**
+     * A held solver slot; closing it more than once releases it only once.
+     */
     public static final class Permit implements AutoCloseable {
         private final Semaphore semaphore;
         private final AtomicBoolean released = new AtomicBoolean();

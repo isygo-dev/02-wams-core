@@ -1,7 +1,7 @@
 package eu.isygoit.i18n;
 
-import org.springframework.stereotype.Component;
 import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 

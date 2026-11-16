@@ -17,9 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static eu.isygoit.solver.family.FamilyKit.map;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MinRestContributorTest {
 
@@ -36,7 +34,9 @@ class MinRestContributorTest {
                 enforcement == IEnumEnforcement.Types.SOFT ? 1 : 0, map("minRestTicks", ticks));
     }
 
-    /** Two tasks A and B of {@code duration} ticks; windows {@code [estA..lstA]} and {@code [estB..lstB]}. */
+    /**
+     * Two tasks A and B of {@code duration} ticks; windows {@code [estA..lstA]} and {@code [estB..lstB]}.
+     */
     private ContribFixture fixture(Constraint c, int horizon, int duration, int[] winA, int[] winB, int capacity,
                                    String... resources) {
         List<Resource> rs = new ArrayList<>();

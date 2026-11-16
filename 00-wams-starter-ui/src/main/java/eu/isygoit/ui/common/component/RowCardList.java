@@ -19,7 +19,9 @@ public class RowCardList<T> extends Div {
     private final List<T> items = new ArrayList<>();
     private Function<T, RowCard> cardFactory;
     private String emptyText = "-";
-    /** Items per page; 0 (the default) shows every item and no pager. */
+    /**
+     * Items per page; 0 (the default) shows every item and no pager.
+     */
     private int pageSize;
     private int page;
     private PagerBar pager;

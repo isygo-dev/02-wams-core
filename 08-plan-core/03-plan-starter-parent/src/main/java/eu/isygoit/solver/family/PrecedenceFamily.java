@@ -5,15 +5,7 @@ import eu.isygoit.dto.request.ConstraintScope;
 import eu.isygoit.dto.request.PrecedenceRef;
 import eu.isygoit.dto.request.params.PrecedenceParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -34,106 +26,14 @@ import java.util.Set;
 @Component
 public class PrecedenceFamily implements ConstraintFamily {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "precedence";
 
     private static final Set<IEnumEnforcement.Types> SUPPORTED =
             Collections.unmodifiableSet(EnumSet.allOf(IEnumEnforcement.Types.class));
     private static final ConstraintChecker CHECKER = new Checker();
-
-    /** Receiver of the (from, to) task index pairs of a precedence constraint. */
-    @FunctionalInterface
-    public interface PairConsumer {
-        /**
-         * @param from index of the predecessor
-         * @param to   index of the successor
-         */
-        void accept(int from, int to);
-    }
-
-    @Override
-    public String type() {
-        return TYPE;
-    }
-
-    @Override
-    public Class<?> paramsType() {
-        return PrecedenceParams.class;
-    }
-
-    @Override
-    public Set<IEnumEnforcement.Types> supportedEnforcements() {
-        return SUPPORTED;
-    }
-
-    @Override
-    public String descriptionKey() {
-        return "plan.constraint.precedence.description";
-    }
-
-    @Override
-    public List<String> paramsHint() {
-        return List.of("from", "to", "type", "minLag", "maxLag", "pairing");
-    }
-
-    @Override
-    public ScopeKind scopeKind() {
-        return ScopeKind.TASKS;
-    }
-
-    @Override
-    public void validate(ValidationContext ctx, Constraint constraint, Object params) {
-        if (!(params instanceof PrecedenceParams p)) {
-            return;
-        }
-        boolean sidesOk = validateSide(ctx, constraint, "from", p.from()) & validateSide(ctx, constraint, "to", p.to());
-        long horizon = ctx.problem().horizon().horizonTicks();
-        if (Math.abs((long) p.minLag()) > horizon) {
-            ctx.error("INVALID_LAG", path(ctx, constraint, "minLag"), "minLag must be within [-horizon, horizon] ticks");
-        }
-        if (p.maxLag() != null) {
-            if (Math.abs((long) p.maxLag()) > horizon) {
-                ctx.error("INVALID_LAG", path(ctx, constraint, "maxLag"), "maxLag must be within [-horizon, horizon] ticks");
-            }
-            if (p.maxLag() < p.minLag()) {
-                ctx.error("INVALID_LAG", path(ctx, constraint, "maxLag"), "maxLag must not be smaller than minLag");
-            }
-        }
-        if (sidesOk && p.pairing() == PrecedenceParams.PairingMode.BY_ORDER) {
-            int[] from = side(ctx.index(), constraint, p.from());
-            int[] to = side(ctx.index(), constraint, p.to());
-            if (from.length != to.length) {
-                ctx.error("PARAMS_INVALID", path(ctx, constraint, "pairing"),
-                        "BY_ORDER needs equally sized sides but from has " + from.length + " and to has " + to.length + " tasks");
-            } else {
-                for (int k = 0; k < from.length; k++) {
-                    if (from[k] == to[k]) {
-                        ctx.error("PARAMS_INVALID", path(ctx, constraint, "pairing"),
-                                "BY_ORDER pairs task '" + ctx.index().taskId(from[k]) + "' with itself");
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public ModelCost estimate(CandidateIndexView index, Constraint constraint, Object params) {
-        if (!(params instanceof PrecedenceParams p) || p.from() == null || p.to() == null) {
-            return ModelCost.ZERO;
-        }
-        long pairs = pairCount(index, constraint, p);
-        long perPair = p.maxLag() == null ? 1 : 2;
-        long soft = constraint.enforcement() == IEnumEnforcement.Types.SOFT ? pairs : 0;
-        return new ModelCost(soft, 0, pairs * perPair, 0, 0, pairs);
-    }
-
-    @Override
-    public ConstraintChecker checker() {
-        return CHECKER;
-    }
-
-    // ------------------------------------------------------------------ shared semantics
 
     /**
      * Effective side of the constraint: the params scope intersected with the constraint scope (unless that is
@@ -166,7 +66,9 @@ public class PrecedenceFamily implements ConstraintFamily {
         return java.util.Arrays.copyOf(out, n);
     }
 
-    /** @return the number of (from, to) pairs {@link #forEachPair} enumerates */
+    /**
+     * @return the number of (from, to) pairs {@link #forEachPair} enumerates
+     */
     public static long pairCount(CandidateIndexView index, Constraint constraint, PrecedenceParams p) {
         int[] from = side(index, constraint, p.from());
         int[] to = side(index, constraint, p.to());
@@ -190,7 +92,9 @@ public class PrecedenceFamily implements ConstraintFamily {
         return (long) from.length * to.length - common;
     }
 
-    /** Enumerates the pairs in a deterministic order (from ascending, then to ascending); self pairs are skipped. */
+    /**
+     * Enumerates the pairs in a deterministic order (from ascending, then to ascending); self pairs are skipped.
+     */
     public static void forEachPair(CandidateIndexView index, Constraint constraint, PrecedenceParams p, PairConsumer consumer) {
         int[] from = side(index, constraint, p.from());
         int[] to = side(index, constraint, p.to());
@@ -267,6 +171,102 @@ public class PrecedenceFamily implements ConstraintFamily {
     private static String path(ValidationContext ctx, Constraint constraint, String field) {
         int i = ctx.problem().constraints().indexOf(constraint);
         return "constraints[" + (i < 0 ? "?" : String.valueOf(i)) + "].params." + field;
+    }
+
+    @Override
+    public String type() {
+        return TYPE;
+    }
+
+    @Override
+    public Class<?> paramsType() {
+        return PrecedenceParams.class;
+    }
+
+    @Override
+    public Set<IEnumEnforcement.Types> supportedEnforcements() {
+        return SUPPORTED;
+    }
+
+    @Override
+    public String descriptionKey() {
+        return "plan.constraint.precedence.description";
+    }
+
+    // ------------------------------------------------------------------ shared semantics
+
+    @Override
+    public List<String> paramsHint() {
+        return List.of("from", "to", "type", "minLag", "maxLag", "pairing");
+    }
+
+    @Override
+    public ScopeKind scopeKind() {
+        return ScopeKind.TASKS;
+    }
+
+    @Override
+    public void validate(ValidationContext ctx, Constraint constraint, Object params) {
+        if (!(params instanceof PrecedenceParams p)) {
+            return;
+        }
+        boolean sidesOk = validateSide(ctx, constraint, "from", p.from()) & validateSide(ctx, constraint, "to", p.to());
+        long horizon = ctx.problem().horizon().horizonTicks();
+        if (Math.abs((long) p.minLag()) > horizon) {
+            ctx.error("INVALID_LAG", path(ctx, constraint, "minLag"), "minLag must be within [-horizon, horizon] ticks");
+        }
+        if (p.maxLag() != null) {
+            if (Math.abs((long) p.maxLag()) > horizon) {
+                ctx.error("INVALID_LAG", path(ctx, constraint, "maxLag"), "maxLag must be within [-horizon, horizon] ticks");
+            }
+            if (p.maxLag() < p.minLag()) {
+                ctx.error("INVALID_LAG", path(ctx, constraint, "maxLag"), "maxLag must not be smaller than minLag");
+            }
+        }
+        if (sidesOk && p.pairing() == PrecedenceParams.PairingMode.BY_ORDER) {
+            int[] from = side(ctx.index(), constraint, p.from());
+            int[] to = side(ctx.index(), constraint, p.to());
+            if (from.length != to.length) {
+                ctx.error("PARAMS_INVALID", path(ctx, constraint, "pairing"),
+                        "BY_ORDER needs equally sized sides but from has " + from.length + " and to has " + to.length + " tasks");
+            } else {
+                for (int k = 0; k < from.length; k++) {
+                    if (from[k] == to[k]) {
+                        ctx.error("PARAMS_INVALID", path(ctx, constraint, "pairing"),
+                                "BY_ORDER pairs task '" + ctx.index().taskId(from[k]) + "' with itself");
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public ModelCost estimate(CandidateIndexView index, Constraint constraint, Object params) {
+        if (!(params instanceof PrecedenceParams p) || p.from() == null || p.to() == null) {
+            return ModelCost.ZERO;
+        }
+        long pairs = pairCount(index, constraint, p);
+        long perPair = p.maxLag() == null ? 1 : 2;
+        long soft = constraint.enforcement() == IEnumEnforcement.Types.SOFT ? pairs : 0;
+        return new ModelCost(soft, 0, pairs * perPair, 0, 0, pairs);
+    }
+
+    @Override
+    public ConstraintChecker checker() {
+        return CHECKER;
+    }
+
+    /**
+     * Receiver of the (from, to) task index pairs of a precedence constraint.
+     */
+    @FunctionalInterface
+    public interface PairConsumer {
+        /**
+         * @param from index of the predecessor
+         * @param to   index of the successor
+         */
+        void accept(int from, int to);
     }
 
     // ------------------------------------------------------------------ checker

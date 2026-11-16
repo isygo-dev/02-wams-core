@@ -1,21 +1,11 @@
 package eu.isygoit.solver.check;
 
 import eu.isygoit.config.PlanLimitsProperties;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.solver.diag.PreSolveAnalyzer;
 import eu.isygoit.solver.spi.CandidateIndexView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Test-only index derived directly from a {@link PlanningProblem}: a miniature, readable stand-in for WP2's
@@ -31,7 +21,9 @@ public final class StubIndexView implements CandidateIndexView, PreSolveAnalyzer
     private final Map<String, Integer> taskIx = new HashMap<>();
     private final Map<String, Integer> resourceIx = new HashMap<>();
     private final Map<String, Integer> slotIx = new HashMap<>();
-    /** per task: candidates as {requirement, resource, duration, amount} */
+    /**
+     * per task: candidates as {requirement, resource, duration, amount}
+     */
     private final List<List<int[]>> cands = new ArrayList<>();
     private final int[] est;
     private final int[] lst;
@@ -78,12 +70,16 @@ public final class StubIndexView implements CandidateIndexView, PreSolveAnalyzer
         reindex();
     }
 
-    /** @return a stub index of the problem */
+    /**
+     * @return a stub index of the problem
+     */
     public static StubIndexView of(PlanningProblem problem) {
         return new StubIndexView(problem);
     }
 
-    /** Removes a candidate, as pruning by an eligibility constraint would. */
+    /**
+     * Removes a candidate, as pruning by an eligibility constraint would.
+     */
     public StubIndexView prune(String taskId, String resourceId) {
         int r = resourceIx.get(resourceId);
         cands.get(taskIx.get(taskId)).removeIf(c -> c[1] == r);
@@ -91,7 +87,9 @@ public final class StubIndexView implements CandidateIndexView, PreSolveAnalyzer
         return this;
     }
 
-    /** Overrides the start domain of a task. */
+    /**
+     * Overrides the start domain of a task.
+     */
     public StubIndexView window(String taskId, int estStart, int lstStart) {
         est[taskIx.get(taskId)] = estStart;
         lst[taskIx.get(taskId)] = lstStart;

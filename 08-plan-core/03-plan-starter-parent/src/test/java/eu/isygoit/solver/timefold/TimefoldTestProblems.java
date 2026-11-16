@@ -1,35 +1,14 @@
 package eu.isygoit.solver.timefold;
 
 import eu.isygoit.config.PlanLimitsProperties;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.ResourceSelector;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
-import eu.isygoit.solver.CompiledObjective;
-import eu.isygoit.solver.CompiledProblem;
-import eu.isygoit.solver.SolveContext;
-import eu.isygoit.solver.SolveListener;
-import eu.isygoit.solver.SolverCancellationToken;
+import eu.isygoit.dto.request.*;
+import eu.isygoit.solver.*;
 import eu.isygoit.solver.index.CandidateIndex;
 import eu.isygoit.solver.index.CandidateIndexBuilder;
 import eu.isygoit.solver.registry.TimefoldContributorRegistry;
 import eu.isygoit.solver.spi.ModelCost;
 import eu.isygoit.solver.spi.ObjectiveFamily;
-import eu.isygoit.solver.timefold.contrib.FixedAssignmentTimefoldContributor;
-import eu.isygoit.solver.timefold.contrib.MaximizeSelectedValueTimefoldContributor;
-import eu.isygoit.solver.timefold.contrib.MaximizeTaskPriorityTimefoldContributor;
-import eu.isygoit.solver.timefold.contrib.MinimizeResourceCostTimefoldContributor;
-import eu.isygoit.solver.timefold.contrib.MinimizeSlotCostTimefoldContributor;
-import eu.isygoit.solver.timefold.contrib.ResourceAvailabilityTimefoldContributor;
-import eu.isygoit.solver.timefold.contrib.ResourceCapacityTimefoldContributor;
-import eu.isygoit.solver.timefold.contrib.TaskEligibilityTimefoldContributor;
-import eu.isygoit.solver.timefold.contrib.TimeWindowTimefoldContributor;
+import eu.isygoit.solver.timefold.contrib.*;
 import org.mockito.Mockito;
 
 import java.time.Instant;
@@ -50,7 +29,9 @@ final class TimefoldTestProblems {
     private TimefoldTestProblems() {
     }
 
-    /** All real Timefold contributors, registered like the Spring wiring does. */
+    /**
+     * All real Timefold contributors, registered like the Spring wiring does.
+     */
     static TimefoldContributorRegistry contributorRegistry() {
         return new TimefoldContributorRegistry(
                 List.of(new TaskEligibilityTimefoldContributor(), new ResourceCapacityTimefoldContributor(),
@@ -60,7 +41,9 @@ final class TimefoldTestProblems {
                         new MaximizeTaskPriorityTimefoldContributor(), new MaximizeSelectedValueTimefoldContributor()));
     }
 
-    /** An engine with the default limits except a short unimproved limit (fast tests). */
+    /**
+     * An engine with the default limits except a short unimproved limit (fast tests).
+     */
     static TimefoldSolverEngine engine() {
         PlanLimitsProperties limits = new PlanLimitsProperties();
         limits.setTimefoldUnimprovedSeconds(1);
@@ -84,7 +67,9 @@ final class TimefoldTestProblems {
         return new Slot(id, "period", id, start, end, cost, null);
     }
 
-    /** A task with one implicit-style requirement selecting resources with ALL the given skills. */
+    /**
+     * A task with one implicit-style requirement selecting resources with ALL the given skills.
+     */
     static Task task(String id, int duration, boolean required, int priority, List<String> skills, List<String> slots) {
         ResourceRequirement requirement = new ResourceRequirement("default",
                 new ResourceSelector(null, null, skills, null, null, null), 1, null);
@@ -98,7 +83,9 @@ final class TimefoldTestProblems {
                 options, null);
     }
 
-    /** Indexes the problem (no constraints) and wraps the objectives with stub families. */
+    /**
+     * Indexes the problem (no constraints) and wraps the objectives with stub families.
+     */
     static CompiledProblem compile(PlanningProblem problem) {
         CandidateIndex index = CandidateIndexBuilder.build(problem, List.of(), new PlanLimitsProperties(),
                 new SolverCancellationToken());
@@ -113,7 +100,9 @@ final class TimefoldTestProblems {
 
     // ------------------------------------------------------------------------------------------------ scenarios
 
-    /** G1: three one-hour sessions, one lab of capacity 2, slots early (cost 0) and late (cost 1.0), minimize_slot_cost. */
+    /**
+     * G1: three one-hour sessions, one lab of capacity 2, slots early (cost 0) and late (cost 1.0), minimize_slot_cost.
+     */
     static CompiledProblem g1(boolean deterministic) {
         Horizon horizon = new Horizon(T0, T0.plusSeconds(4 * 3600), 900);
         List<Slot> slots = List.of(
@@ -129,7 +118,9 @@ final class TimefoldTestProblems {
                 List.of(new Objective("slot-cost", "minimize_slot_cost", 1)), options(deterministic)));
     }
 
-    /** G3: one required + three optional tasks (priority 9/5/1), one lab of capacity 1, two slots, maximize_task_priority. */
+    /**
+     * G3: one required + three optional tasks (priority 9/5/1), one lab of capacity 1, two slots, maximize_task_priority.
+     */
     static CompiledProblem g3(boolean deterministic) {
         Horizon horizon = new Horizon(T0, T0.plusSeconds(4 * 3600), 900);
         List<Slot> slots = List.of(
@@ -146,7 +137,9 @@ final class TimefoldTestProblems {
                 List.of(new Objective("priority", "maximize_task_priority", 1)), options(deterministic)));
     }
 
-    /** G12 (without the redundant class no_overlap, which the Timefold subset rejects): the school timetable of 2.6 (a). */
+    /**
+     * G12 (without the redundant class no_overlap, which the Timefold subset rejects): the school timetable of 2.6 (a).
+     */
     static CompiledProblem g12(boolean deterministic) {
         Instant start = Instant.parse("2026-09-07T06:00:00Z");
         Horizon horizon = new Horizon(start, Instant.parse("2026-09-08T08:15:00Z"), 900);

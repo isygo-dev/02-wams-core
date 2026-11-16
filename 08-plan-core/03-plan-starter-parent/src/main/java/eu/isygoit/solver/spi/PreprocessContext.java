@@ -14,16 +14,24 @@ import eu.isygoit.solver.index.CandidateIndexBuilder;
  */
 public interface PreprocessContext {
 
-    /** @return the mutable build state: prune (task, requirement, resource) / start options, rewrite requirements */
+    /**
+     * @return the mutable build state: prune (task, requirement, resource) / start options, rewrite requirements
+     */
     CandidateIndexBuilder.Mutable candidates();
 
-    /** @return the task indices selected by the scope, ascending (cached) */
+    /**
+     * @return the task indices selected by the scope, ascending (cached)
+     */
     int[] resolveTasks(ConstraintScope scope);
 
-    /** @return the resource indices selected by the scope, ascending (cached) */
+    /**
+     * @return the resource indices selected by the scope, ascending (cached)
+     */
     int[] resolveResources(ConstraintScope scope);
 
-    /** @return the problem horizon */
+    /**
+     * @return the problem horizon
+     */
     Horizon horizon();
 
     /**
@@ -35,7 +43,9 @@ public interface PreprocessContext {
      */
     void pruneCandidate(int candidate, String reasonCode, String constraintId);
 
-    /** Intersects the start domain of {@code task} with the inclusive tick range {@code [lo, hi]}. */
+    /**
+     * Intersects the start domain of {@code task} with the inclusive tick range {@code [lo, hi]}.
+     */
     void restrictStart(int task, int lo, int hi);
 
     /**

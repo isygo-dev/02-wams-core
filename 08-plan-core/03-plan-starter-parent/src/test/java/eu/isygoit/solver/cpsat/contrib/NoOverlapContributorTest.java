@@ -14,21 +14,21 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-/** Universal contributor rule: global NoOverlap when unconditional, pairwise literals otherwise. */
+/**
+ * Universal contributor rule: global NoOverlap when unconditional, pairwise literals otherwise.
+ */
 class NoOverlapContributorTest {
 
     private final NoOverlapContributor contributor = new NoOverlapContributor();
     private final NoOverlapFamily family = new NoOverlapFamily();
 
-    /** Three free tasks of duration 5 in one group. */
+    /**
+     * Three free tasks of duration 5 in one group.
+     */
     private ContribTestSupport fixture() {
         ContribTestSupport s = new ContribTestSupport(1);
         s.task(0, 50, false, 0, 5);

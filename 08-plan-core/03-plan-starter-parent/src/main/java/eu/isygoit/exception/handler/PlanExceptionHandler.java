@@ -9,18 +9,7 @@ import eu.isygoit.dto.data.MailMessageDto;
 import eu.isygoit.dto.response.DiagnosticIssue;
 import eu.isygoit.dto.response.ValidationReportDto;
 import eu.isygoit.enums.IEnumEmailTemplate;
-import eu.isygoit.exception.BadArgumentException;
-import eu.isygoit.exception.BadRequestException;
-import eu.isygoit.exception.ConflictException;
-import eu.isygoit.exception.EmptyListException;
-import eu.isygoit.exception.InvalidRequestException;
-import eu.isygoit.exception.ManagedException;
-import eu.isygoit.exception.NullIdentifierException;
-import eu.isygoit.exception.ObjectAlreadyExistsException;
-import eu.isygoit.exception.ObjectNotFoundException;
-import eu.isygoit.exception.OperationNotAllowedException;
-import eu.isygoit.exception.OperationNotSupportedException;
-import eu.isygoit.exception.RequestValidationException;
+import eu.isygoit.exception.*;
 import eu.isygoit.service.IMsgService;
 import eu.isygoit.types.EmailSubjects;
 import eu.isygoit.types.MsgTemplateVariables;
@@ -83,14 +72,15 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class PlanExceptionHandler extends ControllerExceptionHandler {
 
+    /**
+     * Upper bound of the issues rendered in one error body.
+     */
+    static final int MAX_ISSUES = 100;
     private static final String INVALID_REQUEST_KEY = "plan.error.invalid.request";
     private static final String INVALID_REQUEST_CODE = "INVALID_REQUEST";
     private static final String INTERNAL_ERROR_CODE = "INTERNAL_ERROR";
     private static final String ERROR_KEY_PREFIX = "plan.error.";
     private static final String WARNING_KEY_PREFIX = "plan.warning.";
-    /** Upper bound of the issues rendered in one error body. */
-    static final int MAX_ISSUES = 100;
-
     /**
      * Status of the stack's managed exceptions that carry no explicit HTTP status in their {@code @MsgLocale}
      * (the stack defaults them to 500).
@@ -121,6 +111,29 @@ public class PlanExceptionHandler extends ControllerExceptionHandler {
      */
     public PlanExceptionHandler(AppProperties appProperties) {
         this.appProperties = appProperties;
+    }
+
+    /**
+     * i18n key of a code: prefix + lower-case code with dots, for example {@code PRECEDENCE_CYCLE} to
+     * {@code plan.error.precedence.cycle}.
+     */
+    static String keyOf(String prefix, String code) {
+        return prefix + code.trim().toLowerCase(Locale.ROOT).replace('_', '.');
+    }
+
+    /**
+     * The explicit {@code @MsgLocale} status wins; stack exceptions that kept the 500 default get a meaningful one.
+     */
+    private static HttpStatus resolveStatus(ManagedException exception) {
+        HttpStatus declared = exception.getHttpStatus();
+        if (declared != null && declared != HttpStatus.INTERNAL_SERVER_ERROR) {
+            return declared;
+        }
+        return STACK_STATUS.entrySet().stream()
+                .filter(entry -> entry.getKey().isInstance(exception))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -304,14 +317,6 @@ public class PlanExceptionHandler extends ControllerExceptionHandler {
     }
 
     /**
-     * i18n key of a code: prefix + lower-case code with dots, for example {@code PRECEDENCE_CYCLE} to
-     * {@code plan.error.precedence.cycle}.
-     */
-    static String keyOf(String prefix, String code) {
-        return prefix + code.trim().toLowerCase(Locale.ROOT).replace('_', '.');
-    }
-
-    /**
      * The localized message of an error code, or of the fallback key when the bundle has no text for the code.
      */
     private String messageOfCode(String code, String fallbackKey) {
@@ -333,21 +338,6 @@ public class PlanExceptionHandler extends ControllerExceptionHandler {
         } catch (RuntimeException exception) {
             return null;
         }
-    }
-
-    /**
-     * The explicit {@code @MsgLocale} status wins; stack exceptions that kept the 500 default get a meaningful one.
-     */
-    private static HttpStatus resolveStatus(ManagedException exception) {
-        HttpStatus declared = exception.getHttpStatus();
-        if (declared != null && declared != HttpStatus.INTERNAL_SERVER_ERROR) {
-            return declared;
-        }
-        return STACK_STATUS.entrySet().stream()
-                .filter(entry -> entry.getKey().isInstance(exception))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**

@@ -8,12 +8,7 @@ import eu.isygoit.dto.response.Metrics;
 import eu.isygoit.dto.response.SolveResult;
 import eu.isygoit.enums.IEnumSolverStatus;
 import eu.isygoit.exception.InfeasibleException;
-import eu.isygoit.solver.CompiledProblem;
-import eu.isygoit.solver.SolveContext;
-import eu.isygoit.solver.SolveListener;
-import eu.isygoit.solver.SolverCancellationToken;
-import eu.isygoit.solver.SolverEngine;
-import eu.isygoit.solver.SolverRegistry;
+import eu.isygoit.solver.*;
 import eu.isygoit.solver.diag.PreSolveAnalyzer;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -23,18 +18,45 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class PlanningServiceFallbackTest {
+
+    private static PlanningService service(CompiledProblem compiled, SolverEngine cpSat, SolverEngine timefold) {
+        SolverRegistry registry = new SolverRegistry(List.of(cpSat, timefold));
+        PreSolveAnalyzer preSolveAnalyzer = mock(PreSolveAnalyzer.class);
+        when(preSolveAnalyzer.analyze(compiled)).thenReturn(Optional.empty());
+        return new PlanningService(null, null, null, null, null, null, registry, preSolveAnalyzer, null,
+                new SolveConcurrencyGuard(1, Duration.ofSeconds(1)), null) {
+            @Override
+            public CompiledProblem compile(Long jobId, PlanningRequest request, String engineOverride,
+                                           SolverCancellationToken token) {
+                return compiled;
+            }
+        };
+    }
+
+    private static CompiledProblem compiledProblem() {
+        SolverOptions options = SolverOptions.defaults().withEngineAndFallback(SolverOptions.ENGINE_CP_SAT, true);
+        PlanningProblem problem = new PlanningProblem(1L, null, null, null, null, null, null, null, null,
+                null, null, options, null);
+        return new CompiledProblem(problem, null, null, null, null);
+    }
+
+    private static SolverEngine engine(String name) {
+        SolverEngine engine = mock(SolverEngine.class);
+        when(engine.name()).thenReturn(name);
+        return engine;
+    }
+
+    private static SolveResult result(IEnumSolverStatus.Types status) {
+        return new SolveResult(status, null, List.of(),
+                new Diagnostics(status.name(), List.of(), null, List.of(), Map.of()),
+                new Metrics(0, 0, 0, null, 0, null, null, List.of()));
+    }
 
     @Test
     void retriesWithTimefoldWhenCpSatReturnsUnknownWithoutSolution() {
@@ -78,38 +100,5 @@ class PlanningServiceFallbackTest {
 
         assertEquals(IEnumSolverStatus.Types.UNKNOWN, cancelled.status());
         verify(timefold, never()).solve(any(), any());
-    }
-
-    private static PlanningService service(CompiledProblem compiled, SolverEngine cpSat, SolverEngine timefold) {
-        SolverRegistry registry = new SolverRegistry(List.of(cpSat, timefold));
-        PreSolveAnalyzer preSolveAnalyzer = mock(PreSolveAnalyzer.class);
-        when(preSolveAnalyzer.analyze(compiled)).thenReturn(Optional.empty());
-        return new PlanningService(null, null, null, null, null, null, registry, preSolveAnalyzer, null,
-                new SolveConcurrencyGuard(1, Duration.ofSeconds(1)), null) {
-            @Override
-            public CompiledProblem compile(Long jobId, PlanningRequest request, String engineOverride,
-                                           SolverCancellationToken token) {
-                return compiled;
-            }
-        };
-    }
-
-    private static CompiledProblem compiledProblem() {
-        SolverOptions options = SolverOptions.defaults().withEngineAndFallback(SolverOptions.ENGINE_CP_SAT, true);
-        PlanningProblem problem = new PlanningProblem(1L, null, null, null, null, null, null, null, null,
-                null, null, options, null);
-        return new CompiledProblem(problem, null, null, null, null);
-    }
-
-    private static SolverEngine engine(String name) {
-        SolverEngine engine = mock(SolverEngine.class);
-        when(engine.name()).thenReturn(name);
-        return engine;
-    }
-
-    private static SolveResult result(IEnumSolverStatus.Types status) {
-        return new SolveResult(status, null, List.of(),
-                new Diagnostics(status.name(), List.of(), null, List.of(), Map.of()),
-                new Metrics(0, 0, 0, null, 0, null, null, List.of()));
     }
 }

@@ -59,82 +59,114 @@ public final class SlotOptions {
         this.taskReward = taskReward;
     }
 
-    /** @return number of tasks (entities may exist for fewer: tasks without option have none) */
+    /**
+     * @return number of tasks (entities may exist for fewer: tasks without option have none)
+     */
     public int taskCount() {
         return taskCount;
     }
 
-    /** @return number of slots of the index */
+    /**
+     * @return number of slots of the index
+     */
     public int slotCount() {
         return slotCount;
     }
 
-    /** @return total number of options */
+    /**
+     * @return total number of options
+     */
     public int optionCount() {
         return optCandidate.length;
     }
 
-    /** @return first option id of the task */
+    /**
+     * @return first option id of the task
+     */
     public int taskOptionStart(int task) {
         return taskOptionStart[task];
     }
 
-    /** @return one past the last option id of the task */
+    /**
+     * @return one past the last option id of the task
+     */
     public int taskOptionEnd(int task) {
         return taskOptionStart[task + 1];
     }
 
-    /** @return number of options of the task */
+    /**
+     * @return number of options of the task
+     */
     public int taskOptionCount(int task) {
         return taskOptionStart[task + 1] - taskOptionStart[task];
     }
 
-    /** @return the candidate id (index) of the option */
+    /**
+     * @return the candidate id (index) of the option
+     */
     public int candidate(int option) {
         return optCandidate[option];
     }
 
-    /** @return the resource index of the option */
+    /**
+     * @return the resource index of the option
+     */
     public int resource(int option) {
         return optResource[option];
     }
 
-    /** @return the slot index of the option */
+    /**
+     * @return the slot index of the option
+     */
     public int slot(int option) {
         return optSlot[option];
     }
 
-    /** @return the start tick of the option */
+    /**
+     * @return the start tick of the option
+     */
     public int start(int option) {
         return optStart[option];
     }
 
-    /** @return the end tick of the option */
+    /**
+     * @return the end tick of the option
+     */
     public int end(int option) {
         return optEnd[option];
     }
 
-    /** @return the capacity consumed while the option is chosen (0 for a zero-duration task) */
+    /**
+     * @return the capacity consumed while the option is chosen (0 for a zero-duration task)
+     */
     public int demand(int option) {
         return optDemand[option];
     }
 
-    /** @return the effective capacity of the (resource, slot) of the option */
+    /**
+     * @return the effective capacity of the (resource, slot) of the option
+     */
     public int capacity(int option) {
         return optCapacity[option];
     }
 
-    /** @return the key identifying the (resource, slot) pair of the option: equal keys share one capacity bucket */
+    /**
+     * @return the key identifying the (resource, slot) pair of the option: equal keys share one capacity bucket
+     */
     public long capacityKey(int option) {
         return (long) optResource[option] * slotCount + optSlot[option];
     }
 
-    /** @return the scaled soft penalty of the option */
+    /**
+     * @return the scaled soft penalty of the option
+     */
     public long penalty(int option) {
         return optPenalty[option];
     }
 
-    /** @return the scaled reward when the task is selected */
+    /**
+     * @return the scaled reward when the task is selected
+     */
     public long reward(int task) {
         return taskReward[task];
     }
@@ -157,7 +189,9 @@ public final class SlotOptions {
         return lo;
     }
 
-    /** @return a defensive copy of the soft penalties (tests, diagnostics) */
+    /**
+     * @return a defensive copy of the soft penalties (tests, diagnostics)
+     */
     public long[] penaltiesCopy() {
         return optPenalty.clone();
     }

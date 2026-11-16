@@ -18,7 +18,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class MinimizeSlotCostTimefoldContributor implements TimefoldObjectiveContributor {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "minimize_slot_cost";
 
     @Override

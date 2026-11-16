@@ -10,25 +10,25 @@ import eu.isygoit.solver.CompiledConstraint;
 import eu.isygoit.solver.family.ResourceCapacityFamily;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-/** Verifies the blocks registered with the stub context; the Cumulative / NoOverlap creation itself belongs to WP3. */
+/**
+ * Verifies the blocks registered with the stub context; the Cumulative / NoOverlap creation itself belongs to WP3.
+ */
 class ResourceCapacityContributorTest {
 
     private final ResourceCapacityContributor contributor = new ResourceCapacityContributor();
     private final ResourceCapacityFamily family = new ResourceCapacityFamily();
 
-    /** r0 unary, r1 a pool of capacity 3, both in scope. */
+    private static TimeWindow window(int from, int to) {
+        return new TimeWindow(ContribTestSupport.T0.plusSeconds(from * 60L), ContribTestSupport.T0.plusSeconds(to * 60L));
+    }
+
+    /**
+     * r0 unary, r1 a pool of capacity 3, both in scope.
+     */
     private ContribTestSupport fixture() {
         ContribTestSupport s = new ContribTestSupport(2);
         when(s.index.resolveResources(any())).thenReturn(new int[]{0, 1});
@@ -40,10 +40,6 @@ class ResourceCapacityContributorTest {
     private CompiledConstraint compiled(IEnumEnforcement.Types e, ResourceCapacityParams p) {
         Constraint c = ContribTestSupport.constraint("resource_capacity", e, ConstraintScope.all());
         return ContribTestSupport.compiled(c, family, p);
-    }
-
-    private static TimeWindow window(int from, int to) {
-        return new TimeWindow(ContribTestSupport.T0.plusSeconds(from * 60L), ContribTestSupport.T0.plusSeconds(to * 60L));
     }
 
     @Test

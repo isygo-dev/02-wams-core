@@ -1,20 +1,7 @@
 package eu.isygoit.service.impl.planning;
 
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.response.Assignment;
-import eu.isygoit.dto.response.ConstraintViolation;
-import eu.isygoit.dto.response.Diagnostics;
-import eu.isygoit.dto.response.DiagnosticIssue;
-import eu.isygoit.dto.response.PlanningSolution;
-import eu.isygoit.dto.response.Relaxation;
-import eu.isygoit.dto.response.ResourceAssignment;
-import eu.isygoit.dto.response.SolveResult;
-import eu.isygoit.dto.response.UnassignedTask;
+import eu.isygoit.dto.request.*;
+import eu.isygoit.dto.response.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.enums.IEnumSolverStatus;
 import eu.isygoit.exception.InvalidSolverResultException;
@@ -22,13 +9,7 @@ import eu.isygoit.exception.ObjectiveRangeException;
 import eu.isygoit.solver.CompiledConstraint;
 import eu.isygoit.solver.CompiledObjective;
 import eu.isygoit.solver.CompiledProblem;
-import eu.isygoit.solver.check.CheckContextImpl;
-import eu.isygoit.solver.check.ObjectiveAggregator;
-import eu.isygoit.solver.check.RelaxationReporter;
-import eu.isygoit.solver.check.SolutionViewImpl;
-import eu.isygoit.solver.check.StructuralSolutionChecker;
-import eu.isygoit.solver.check.UnselectedReasoner;
-import eu.isygoit.solver.check.ViolationCollector;
+import eu.isygoit.solver.check.*;
 import eu.isygoit.solver.registry.ConstraintFamilyRegistry;
 import eu.isygoit.solver.registry.ObjectiveFamilyRegistry;
 import eu.isygoit.solver.spi.CandidateIndexView;
@@ -37,14 +18,7 @@ import eu.isygoit.solver.spi.ConstraintFamily;
 import eu.isygoit.solver.spi.ObjectiveFamily;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Independent post-solve validator and enricher (design 8.1-8.4). Replaces the Phase 0-2 slot/capacity re-check.
@@ -72,9 +46,13 @@ import java.util.Set;
 @Component
 public class PlanningSolutionValidator {
 
-    /** Code prefix of structural and family violations. */
+    /**
+     * Code prefix of structural and family violations.
+     */
     public static final String CODE_PREFIX = "SOLUTION_INVALID_";
-    /** Code of a tier whose recomputed value differs from the engine's. */
+    /**
+     * Code of a tier whose recomputed value differs from the engine's.
+     */
     public static final String TIER_VALUE_MISMATCH = "TIER_VALUE_MISMATCH";
 
     private final ConstraintFamilyRegistry constraintFamilies;
@@ -90,6 +68,111 @@ public class PlanningSolutionValidator {
                                      ObjectiveFamilyRegistry objectiveFamilies) {
         this.constraintFamilies = constraintFamilies;
         this.objectiveFamilies = objectiveFamilies;
+    }
+
+    private static InvalidSolverResultException hardViolation(Constraint constraint, ViolationCollector collector) {
+        ViolationCollector.Entry first = collector.entries().get(0);
+        return invalid(CODE_PREFIX + "CONSTRAINT", "constraint '" + constraint.id() + "' (" + constraint.type()
+                + ") is violated"
+                + (first.taskId() == null ? "" : " by task '" + first.taskId() + "'")
+                + (first.resourceId() == null ? "" : " on resource '" + first.resourceId() + "'")
+                + ": " + first.message()
+                + (collector.count() > 1 ? " (+" + (collector.count() - 1) + " more)" : ""));
+    }
+
+    private static List<Assignment> sortedAssignments(PlanningProblem problem, CandidateIndexView index,
+                                                      List<Assignment> assignments) {
+        Map<String, Task> tasks = new HashMap<>();
+        for (Task task : problem.tasks()) {
+            tasks.put(task.id(), task);
+        }
+        List<Assignment> out = new ArrayList<>(assignments.size());
+        for (Assignment assignment : assignments) {
+            Task task = tasks.get(assignment.taskId());
+            Map<String, Integer> roleOrder = new HashMap<>();
+            if (task != null) {
+                int i = 0;
+                for (ResourceRequirement requirement : task.effectiveRequirements()) {
+                    roleOrder.putIfAbsent(requirement.role(), i++);
+                }
+            }
+            List<ResourceAssignment> resources = new ArrayList<>(assignment.resources());
+            resources.sort(Comparator
+                    .comparingInt((ResourceAssignment ra) -> roleOrder.getOrDefault(ra.role(), Integer.MAX_VALUE))
+                    .thenComparing(ResourceAssignment::resourceId));
+            out.add(new Assignment(assignment.taskId(), assignment.optional(), assignment.startTick(),
+                    assignment.endTick(), assignment.start(), assignment.end(), assignment.slotId(), resources));
+        }
+        out.sort(Comparator.comparingInt(Assignment::startTick).thenComparing(Assignment::taskId));
+        return out;
+    }
+
+    // ------------------------------------------------------------------------------------------------ steps
+
+    private static Comparator<ConstraintViolation> violationOrder() {
+        return Comparator.comparing(ConstraintViolation::constraintId)
+                .thenComparing(ConstraintViolation::taskId, Comparator.nullsFirst(Comparator.naturalOrder()))
+                .thenComparing(ConstraintViolation::resourceId, Comparator.nullsFirst(Comparator.naturalOrder()));
+    }
+
+    /**
+     * 1.0 when OPTIMAL, else {@code 1/(1+gap)} clamped to [0.01, 0.99]; 0.5 when the gap is unknown.
+     */
+    static double qualityScore(SolveResult result) {
+        if (result.status() == IEnumSolverStatus.Types.OPTIMAL) {
+            return 1.0;
+        }
+        Double gap = result.metrics() == null || result.metrics().search() == null
+                ? null : result.metrics().search().gap();
+        if (gap == null || !Double.isFinite(gap) || gap < 0.0) {
+            return 0.5;
+        }
+        return Math.max(0.01, Math.min(0.99, 1.0 / (1.0 + gap)));
+    }
+
+    /**
+     * {@code HINT_OUT_OF_DOMAIN} warnings for non-locked hints outside the pruned start domain (design 6.11).
+     */
+    private static List<DiagnosticIssue> hintWarnings(PlanningProblem problem, CandidateIndexView index) {
+        List<DiagnosticIssue> warnings = new ArrayList<>();
+        List<InitialAssignment> hints = problem.initialSolution().assignments();
+        try {
+            for (int i = 0; i < hints.size(); i++) {
+                InitialAssignment hint = hints.get(i);
+                int t = index.taskIdx(hint.taskId());
+                if (hint.locked() || hint.start() == null || t < 0) {
+                    continue;
+                }
+                int tick = problem.horizon().ceilTick(hint.start());
+                if (tick < index.estStart(t) || tick > index.lstStart(t)) {
+                    warnings.add(new DiagnosticIssue("HINT_OUT_OF_DOMAIN", "WARNING",
+                            "initialSolution.assignments[" + i + "]", "the start hint of task '" + hint.taskId()
+                            + "' lies outside the feasible start domain and is ignored by the solver"));
+                }
+            }
+        } catch (UnsupportedOperationException lightView) {
+            // a light view has no domains: nothing to report
+        }
+        return warnings;
+    }
+
+    private static Diagnostics withWarnings(Diagnostics base, List<DiagnosticIssue> extra) {
+        if (extra.isEmpty()) {
+            return base;
+        }
+        if (base == null) {
+            return new Diagnostics(null, null, null, extra, new LinkedHashMap<>());
+        }
+        List<DiagnosticIssue> merged = new ArrayList<>(base.warnings());
+        merged.addAll(extra);
+        return new Diagnostics(base.message(), base.infeasibilityCore(), base.core(), merged, base.details());
+    }
+
+    /**
+     * Builds the exception carrying the stable validator code ({@code SOLUTION_INVALID_*}, {@code TIER_VALUE_MISMATCH}).
+     */
+    private static InvalidSolverResultException invalid(String code, String message) {
+        return new InvalidSolverResultException(code, code + ": " + message);
     }
 
     /**
@@ -217,8 +300,6 @@ public class PlanningSolutionValidator {
         return new SolveResult(result.status(), enriched, relaxations, diagnostics, result.metrics());
     }
 
-    // ------------------------------------------------------------------------------------------------ steps
-
     private Set<String> checkRelaxations(PlanningProblem problem, Map<String, Constraint> byId,
                                          List<Relaxation> relaxations) {
         Set<String> ids = new HashSet<>();
@@ -280,104 +361,5 @@ public class PlanningSolutionValidator {
         } catch (ObjectiveRangeException e) {
             throw invalid(CODE_PREFIX + "OBJECTIVE_RANGE", "objective evaluation overflows: " + e.getMessage());
         }
-    }
-
-    private static InvalidSolverResultException hardViolation(Constraint constraint, ViolationCollector collector) {
-        ViolationCollector.Entry first = collector.entries().get(0);
-        return invalid(CODE_PREFIX + "CONSTRAINT", "constraint '" + constraint.id() + "' (" + constraint.type()
-                + ") is violated"
-                + (first.taskId() == null ? "" : " by task '" + first.taskId() + "'")
-                + (first.resourceId() == null ? "" : " on resource '" + first.resourceId() + "'")
-                + ": " + first.message()
-                + (collector.count() > 1 ? " (+" + (collector.count() - 1) + " more)" : ""));
-    }
-
-    private static List<Assignment> sortedAssignments(PlanningProblem problem, CandidateIndexView index,
-                                                      List<Assignment> assignments) {
-        Map<String, Task> tasks = new HashMap<>();
-        for (Task task : problem.tasks()) {
-            tasks.put(task.id(), task);
-        }
-        List<Assignment> out = new ArrayList<>(assignments.size());
-        for (Assignment assignment : assignments) {
-            Task task = tasks.get(assignment.taskId());
-            Map<String, Integer> roleOrder = new HashMap<>();
-            if (task != null) {
-                int i = 0;
-                for (ResourceRequirement requirement : task.effectiveRequirements()) {
-                    roleOrder.putIfAbsent(requirement.role(), i++);
-                }
-            }
-            List<ResourceAssignment> resources = new ArrayList<>(assignment.resources());
-            resources.sort(Comparator
-                    .comparingInt((ResourceAssignment ra) -> roleOrder.getOrDefault(ra.role(), Integer.MAX_VALUE))
-                    .thenComparing(ResourceAssignment::resourceId));
-            out.add(new Assignment(assignment.taskId(), assignment.optional(), assignment.startTick(),
-                    assignment.endTick(), assignment.start(), assignment.end(), assignment.slotId(), resources));
-        }
-        out.sort(Comparator.comparingInt(Assignment::startTick).thenComparing(Assignment::taskId));
-        return out;
-    }
-
-    private static Comparator<ConstraintViolation> violationOrder() {
-        return Comparator.comparing(ConstraintViolation::constraintId)
-                .thenComparing(ConstraintViolation::taskId, Comparator.nullsFirst(Comparator.naturalOrder()))
-                .thenComparing(ConstraintViolation::resourceId, Comparator.nullsFirst(Comparator.naturalOrder()));
-    }
-
-    /** 1.0 when OPTIMAL, else {@code 1/(1+gap)} clamped to [0.01, 0.99]; 0.5 when the gap is unknown. */
-    static double qualityScore(SolveResult result) {
-        if (result.status() == IEnumSolverStatus.Types.OPTIMAL) {
-            return 1.0;
-        }
-        Double gap = result.metrics() == null || result.metrics().search() == null
-                ? null : result.metrics().search().gap();
-        if (gap == null || !Double.isFinite(gap) || gap < 0.0) {
-            return 0.5;
-        }
-        return Math.max(0.01, Math.min(0.99, 1.0 / (1.0 + gap)));
-    }
-
-    /** {@code HINT_OUT_OF_DOMAIN} warnings for non-locked hints outside the pruned start domain (design 6.11). */
-    private static List<DiagnosticIssue> hintWarnings(PlanningProblem problem, CandidateIndexView index) {
-        List<DiagnosticIssue> warnings = new ArrayList<>();
-        List<InitialAssignment> hints = problem.initialSolution().assignments();
-        try {
-            for (int i = 0; i < hints.size(); i++) {
-                InitialAssignment hint = hints.get(i);
-                int t = index.taskIdx(hint.taskId());
-                if (hint.locked() || hint.start() == null || t < 0) {
-                    continue;
-                }
-                int tick = problem.horizon().ceilTick(hint.start());
-                if (tick < index.estStart(t) || tick > index.lstStart(t)) {
-                    warnings.add(new DiagnosticIssue("HINT_OUT_OF_DOMAIN", "WARNING",
-                            "initialSolution.assignments[" + i + "]", "the start hint of task '" + hint.taskId()
-                            + "' lies outside the feasible start domain and is ignored by the solver"));
-                }
-            }
-        } catch (UnsupportedOperationException lightView) {
-            // a light view has no domains: nothing to report
-        }
-        return warnings;
-    }
-
-    private static Diagnostics withWarnings(Diagnostics base, List<DiagnosticIssue> extra) {
-        if (extra.isEmpty()) {
-            return base;
-        }
-        if (base == null) {
-            return new Diagnostics(null, null, null, extra, new LinkedHashMap<>());
-        }
-        List<DiagnosticIssue> merged = new ArrayList<>(base.warnings());
-        merged.addAll(extra);
-        return new Diagnostics(base.message(), base.infeasibilityCore(), base.core(), merged, base.details());
-    }
-
-    /**
-     * Builds the exception carrying the stable validator code ({@code SOLUTION_INVALID_*}, {@code TIER_VALUE_MISMATCH}).
-     */
-    private static InvalidSolverResultException invalid(String code, String message) {
-        return new InvalidSolverResultException(code, code + ": " + message);
     }
 }

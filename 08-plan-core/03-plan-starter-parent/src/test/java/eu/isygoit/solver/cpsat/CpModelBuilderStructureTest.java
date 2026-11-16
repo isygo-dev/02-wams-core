@@ -20,19 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static eu.isygoit.solver.cpsat.CpSatTestKit.any;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.assignment;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.at;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.on;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.options;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.resource;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.task;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.tier;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static eu.isygoit.solver.cpsat.CpSatTestKit.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Structural model of design 6.4 on the real solver: requirement counts, interval models (NoOverlap / Cumulative),
@@ -53,15 +42,15 @@ class CpModelBuilderStructureTest {
         Assumptions.assumeTrue(CpSatTestKit.nativesAvailable(), "OR-Tools natives not available");
     }
 
+    private static void assertOptimal(SolveResult result) {
+        assertEquals(IEnumSolverStatus.Types.OPTIMAL, result.status(), String.valueOf(result.diagnostics()));
+        assertNotNull(result.solution());
+    }
+
     private SolveResult solve(PlanningProblem problem, List<CompiledConstraint> constraints,
                               CompiledObjective... objectives) {
         CompiledProblem compiled = CpSatTestKit.compile(problem, constraints, List.of(objectives));
         return engine.solve(compiled, CpSatTestKit.context(problem.options(), null));
-    }
-
-    private static void assertOptimal(SolveResult result) {
-        assertEquals(IEnumSolverStatus.Types.OPTIMAL, result.status(), String.valueOf(result.diagnostics()));
-        assertNotNull(result.solution());
     }
 
     // ------------------------------------------------------------------------------------ requirements

@@ -11,7 +11,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-/** Mock-based Camel exchange for the Kafka processor tests (no CamelContext needed). */
+/**
+ * Mock-based Camel exchange for the Kafka processor tests (no CamelContext needed).
+ */
 final class ExchangeFixtures {
     final Exchange exchange = mock(Exchange.class);
     final Message message = mock(Message.class);

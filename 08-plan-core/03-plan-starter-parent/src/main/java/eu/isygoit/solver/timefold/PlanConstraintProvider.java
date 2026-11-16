@@ -20,13 +20,21 @@ import ai.timefold.solver.core.api.score.stream.ConstraintProvider;
  */
 public class PlanConstraintProvider implements ConstraintProvider {
 
-    /** Constraint name: required task not scheduled. */
+    /**
+     * Constraint name: required task not scheduled.
+     */
     public static final String REQUIRED = "Required task scheduled";
-    /** Constraint name: per-slot resource capacity. */
+    /**
+     * Constraint name: per-slot resource capacity.
+     */
     public static final String CAPACITY = "Resource capacity per slot";
-    /** Constraint name: option penalties. */
+    /**
+     * Constraint name: option penalties.
+     */
     public static final String PENALTY = "Option penalty";
-    /** Constraint name: selection rewards. */
+    /**
+     * Constraint name: selection rewards.
+     */
     public static final String REWARD = "Selection reward";
 
     @Override

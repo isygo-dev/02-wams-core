@@ -37,7 +37,9 @@ class MaxLoadPerPeriodContributorTest {
                 enforcement == IEnumEnforcement.Types.SOFT ? 1 : 0, params);
     }
 
-    /** {@code days} days of hourly ticks, tasks of the given durations free to start anywhere, the given resources. */
+    /**
+     * {@code days} days of hourly ticks, tasks of the given durations free to start anywhere, the given resources.
+     */
     private ContribFixture fixture(Constraint c, int days, int[] durations, String... resources) {
         List<Resource> rs = new ArrayList<>();
         for (String r : resources) {

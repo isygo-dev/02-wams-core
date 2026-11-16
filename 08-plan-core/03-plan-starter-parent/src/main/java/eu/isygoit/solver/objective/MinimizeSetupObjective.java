@@ -2,12 +2,7 @@ package eu.isygoit.solver.objective;
 
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.Resource;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import eu.isygoit.util.ScaledMath;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +18,9 @@ import java.util.List;
 @Component
 public class MinimizeSetupObjective extends AbstractObjectiveFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "minimize_setup";
 
     public MinimizeSetupObjective() {

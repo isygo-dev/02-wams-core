@@ -13,25 +13,39 @@ import java.util.List;
  */
 public interface ObjectiveFamily {
 
-    /** @return the family id, lower-case snake_case, for example {@code "minimize_makespan"} */
+    /**
+     * @return the family id, lower-case snake_case, for example {@code "minimize_makespan"}
+     */
     String type();
 
-    /** @return the typed params record, or {@code Void.class} when the family has no params */
+    /**
+     * @return the typed params record, or {@code Void.class} when the family has no params
+     */
     Class<?> paramsType();
 
-    /** @return the i18n key, for example {@code "plan.objective.minimize_makespan.description"} */
+    /**
+     * @return the i18n key, for example {@code "plan.objective.minimize_makespan.description"}
+     */
     String descriptionKey();
 
-    /** @return the params property names for the UI (empty when none) */
+    /**
+     * @return the params property names for the UI (empty when none)
+     */
     List<String> paramsHint();
 
-    /** @return {@code true} for a maximisation term (internally negated, reported sign-normalised) */
+    /**
+     * @return {@code true} for a maximisation term (internally negated, reported sign-normalised)
+     */
     boolean reward();
 
-    /** Structural validation; report through {@code ctx}, never throw for user errors. {@code params} is already bound. */
+    /**
+     * Structural validation; report through {@code ctx}, never throw for user errors. {@code params} is already bound.
+     */
     void validate(ValidationContext ctx, Objective objective, Object params);
 
-    /** Estimates the model cost BEFORE building. @return never {@code null} */
+    /**
+     * Estimates the model cost BEFORE building. @return never {@code null}
+     */
     ModelCost estimate(CandidateIndexView index, Objective objective, Object params);
 
     /**

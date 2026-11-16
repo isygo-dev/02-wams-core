@@ -47,12 +47,16 @@ public final class ContribSupport {
         }
     }
 
-    /** @return the affine expression {@code start(t) + offset} (the end of a candidate with that duration) */
+    /**
+     * @return the affine expression {@code start(t) + offset} (the end of a candidate with that duration)
+     */
     public static LinearExpr endOf(CpModelContext ctx, int task, int offset) {
         return LinearExpr.affine(ctx.start(task), 1, offset);
     }
 
-    /** Clamped {@link CpModelContext#count} (size guard against the configured limits). */
+    /**
+     * Clamped {@link CpModelContext#count} (size guard against the configured limits).
+     */
     public static void count(CpModelContext ctx, long boolVars, long intVars, long constraints, long intervals) {
         ctx.count(clamp(boolVars), clamp(intVars), clamp(constraints), clamp(intervals));
     }

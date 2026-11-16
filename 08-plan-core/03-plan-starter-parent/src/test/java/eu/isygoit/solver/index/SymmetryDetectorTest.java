@@ -6,20 +6,13 @@ import eu.isygoit.dto.request.ConstraintScope;
 import eu.isygoit.dto.request.InitialAssignment;
 import eu.isygoit.dto.request.Preference;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.index.IndexFixtures.ProblemB;
-import eu.isygoit.solver.index.IndexFixtures.StubFamily;
+import eu.isygoit.solver.index.IndexFixtures.*;
 import eu.isygoit.solver.spi.ModelCost;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
 
-import static eu.isygoit.solver.index.IndexFixtures.compiled;
-import static eu.isygoit.solver.index.IndexFixtures.ids;
-import static eu.isygoit.solver.index.IndexFixtures.problem;
-import static eu.isygoit.solver.index.IndexFixtures.resource;
-import static eu.isygoit.solver.index.IndexFixtures.skills;
-import static eu.isygoit.solver.index.IndexFixtures.task;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SymmetryDetectorTest {

@@ -4,7 +4,6 @@ import com.google.ortools.sat.CpModel;
 import com.google.ortools.sat.LinearArgument;
 import com.google.ortools.sat.LinearExpr;
 import com.google.ortools.sat.Literal;
-import eu.isygoit.dto.request.PrecedenceRef;
 import eu.isygoit.dto.request.params.PrecedenceParams;
 import eu.isygoit.exception.InvalidRequestException;
 import eu.isygoit.solver.CompiledConstraint;
@@ -29,38 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Component
 public class PrecedenceContributor implements CpSatConstraintContributor {
-
-    @Override
-    public String type() {
-        return PrecedenceFamily.TYPE;
-    }
-
-    @Override
-    public EnforcementSupport support() {
-        return EnforcementSupport.ALL;
-    }
-
-    @Override
-    public void apply(CpModelContext ctx, CompiledConstraint constraint, Enforcer enforcer) {
-        PrecedenceParams p = (PrecedenceParams) constraint.params();
-        long pairs = PrecedenceFamily.pairCount(ctx.index(), constraint.constraint(), p);
-        long maxPairwise = ctx.index().limits().getMaxPairwise(); // needs from WP2: PlanLimitsProperties.maxPairwise
-        if (pairs > maxPairwise) {
-            if (ctx.explainMode()) {
-                return; // skipped from the explanation (design 6.10)
-            }
-            throw new InvalidRequestException("PAIRWISE_TOO_LARGE", "precedence constraint '" + constraint.constraint().id()
-                    + "' expands to " + pairs + " pairs, limit " + maxPairwise);
-        }
-        AtomicInteger counter = new AtomicInteger();
-        PrecedenceFamily.forEachPair(ctx.index(), constraint.constraint(), p, (from, to) -> {
-            if (counter.incrementAndGet() % 1024 == 0) {
-                ctx.checkpoint();
-            }
-            emit(ctx, enforcer, p, from, to);
-        });
-        ctx.count(0, 0, (int) Math.min(Integer.MAX_VALUE, pairs * (p.maxLag() == null ? 1 : 2)), 0);
-    }
 
     private static void emit(CpModelContext ctx, Enforcer enforcer, PrecedenceParams p, int i, int j) {
         CpModel model = ctx.model();
@@ -102,8 +69,42 @@ public class PrecedenceContributor implements CpSatConstraintContributor {
         }
     }
 
-    /** @return {@code expr + constant}. OR-TOOLS-VERIFY: LinearExprBuilder.add(LinearArgument) / add(long) */
+    /**
+     * @return {@code expr + constant}. OR-TOOLS-VERIFY: LinearExprBuilder.add(LinearArgument) / add(long)
+     */
     private static LinearExpr plus(LinearArgument expr, long constant) {
         return LinearExpr.newBuilder().add(expr).add(constant).build();
+    }
+
+    @Override
+    public String type() {
+        return PrecedenceFamily.TYPE;
+    }
+
+    @Override
+    public EnforcementSupport support() {
+        return EnforcementSupport.ALL;
+    }
+
+    @Override
+    public void apply(CpModelContext ctx, CompiledConstraint constraint, Enforcer enforcer) {
+        PrecedenceParams p = (PrecedenceParams) constraint.params();
+        long pairs = PrecedenceFamily.pairCount(ctx.index(), constraint.constraint(), p);
+        long maxPairwise = ctx.index().limits().getMaxPairwise(); // needs from WP2: PlanLimitsProperties.maxPairwise
+        if (pairs > maxPairwise) {
+            if (ctx.explainMode()) {
+                return; // skipped from the explanation (design 6.10)
+            }
+            throw new InvalidRequestException("PAIRWISE_TOO_LARGE", "precedence constraint '" + constraint.constraint().id()
+                    + "' expands to " + pairs + " pairs, limit " + maxPairwise);
+        }
+        AtomicInteger counter = new AtomicInteger();
+        PrecedenceFamily.forEachPair(ctx.index(), constraint.constraint(), p, (from, to) -> {
+            if (counter.incrementAndGet() % 1024 == 0) {
+                ctx.checkpoint();
+            }
+            emit(ctx, enforcer, p, from, to);
+        });
+        ctx.count(0, 0, (int) Math.min(Integer.MAX_VALUE, pairs * (p.maxLag() == null ? 1 : 2)), 0);
     }
 }

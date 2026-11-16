@@ -6,25 +6,10 @@ import eu.isygoit.dto.request.Resource;
 import eu.isygoit.dto.request.Slot;
 import eu.isygoit.dto.request.params.TaskEligibilityParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PreprocessContext;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Family {@code task_eligibility} (design 4.3 / 6.5.1): scoped tasks may only use resources and start slots that match
@@ -46,14 +31,84 @@ import java.util.TreeSet;
 @Component
 public class TaskEligibilityFamily implements ConstraintFamily {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "task_eligibility";
-    /** Literal accepted in {@code resourceIds} / {@code slotIds} meaning "no restriction". */
+    /**
+     * Literal accepted in {@code resourceIds} / {@code slotIds} meaning "no restriction".
+     */
     public static final String ALL = "ALL";
 
     private static final Set<IEnumEnforcement.Types> SUPPORTED =
             Collections.unmodifiableSet(EnumSet.allOf(IEnumEnforcement.Types.class));
     private static final ConstraintChecker CHECKER = new Checker();
+
+    /**
+     * Evaluates the resource criteria once.
+     *
+     * @param problem the problem (resources in index order)
+     * @param p       the params
+     * @return {@code allowed[r]} for every resource index
+     */
+    public static boolean[] allowedResources(PlanningProblem problem, TaskEligibilityParams p) {
+        List<Resource> resources = problem.resources();
+        boolean[] allowed = new boolean[resources.size()];
+        Set<String> ids = new HashSet<>(p.resourceIds());
+        boolean anyId = ids.isEmpty() || ids.contains(ALL);
+        Set<String> types = new HashSet<>(p.resourceTypeIds());
+        Set<String> excluded = new HashSet<>(p.excludeResourceIds());
+        for (int r = 0; r < allowed.length; r++) {
+            Resource res = resources.get(r);
+            boolean ok = anyId || ids.contains(res.id());
+            if (ok && !types.isEmpty()) {
+                ok = types.contains(res.typeId());
+            }
+            if (ok && !p.skills().isEmpty()) {
+                ok = res.skills().containsAll(p.skills());
+            }
+            if (ok && excluded.contains(res.id())) {
+                ok = false;
+            }
+            allowed[r] = ok;
+        }
+        return allowed;
+    }
+
+    /**
+     * Start ticks of the allowed slots.
+     *
+     * @return ascending distinct start ticks, or {@code null} when {@code slotIds} imposes no restriction
+     */
+    public static int[] allowedSlotStarts(PlanningProblem problem, TaskEligibilityParams p) {
+        if (p.slotIds().isEmpty() || p.slotIds().contains(ALL)) {
+            return null;
+        }
+        Set<String> ids = new HashSet<>(p.slotIds());
+        TreeSet<Integer> starts = new TreeSet<>();
+        for (Slot slot : problem.slots()) {
+            if (ids.contains(slot.id())) {
+                starts.add(problem.horizon().floorTick(slot.start()));
+            }
+        }
+        int[] result = new int[starts.size()];
+        int k = 0;
+        for (int s : starts) {
+            result[k++] = s;
+        }
+        return result;
+    }
+
+    private static boolean isHard(Constraint constraint) {
+        return constraint.enforcement() == IEnumEnforcement.Types.STRICTLY_REQUIRED
+                || constraint.enforcement() == IEnumEnforcement.Types.CONFIGURABLE_HARD;
+    }
+
+    private static String path(ValidationContext ctx, Constraint constraint, String field) {
+        int i = ctx.problem().constraints().indexOf(constraint);
+        String base = "constraints[" + (i < 0 ? "?" : String.valueOf(i)) + "].params";
+        return field == null ? base : base + "." + field;
+    }
 
     @Override
     public String type() {
@@ -84,6 +139,8 @@ public class TaskEligibilityFamily implements ConstraintFamily {
     public ScopeKind scopeKind() {
         return ScopeKind.TASKS;
     }
+
+    // ------------------------------------------------------------------ shared semantics
 
     @Override
     public void validate(ValidationContext ctx, Constraint constraint, Object params) {
@@ -176,74 +233,6 @@ public class TaskEligibilityFamily implements ConstraintFamily {
     @Override
     public ConstraintChecker checker() {
         return CHECKER;
-    }
-
-    // ------------------------------------------------------------------ shared semantics
-
-    /**
-     * Evaluates the resource criteria once.
-     *
-     * @param problem the problem (resources in index order)
-     * @param p       the params
-     * @return {@code allowed[r]} for every resource index
-     */
-    public static boolean[] allowedResources(PlanningProblem problem, TaskEligibilityParams p) {
-        List<Resource> resources = problem.resources();
-        boolean[] allowed = new boolean[resources.size()];
-        Set<String> ids = new HashSet<>(p.resourceIds());
-        boolean anyId = ids.isEmpty() || ids.contains(ALL);
-        Set<String> types = new HashSet<>(p.resourceTypeIds());
-        Set<String> excluded = new HashSet<>(p.excludeResourceIds());
-        for (int r = 0; r < allowed.length; r++) {
-            Resource res = resources.get(r);
-            boolean ok = anyId || ids.contains(res.id());
-            if (ok && !types.isEmpty()) {
-                ok = types.contains(res.typeId());
-            }
-            if (ok && !p.skills().isEmpty()) {
-                ok = res.skills().containsAll(p.skills());
-            }
-            if (ok && excluded.contains(res.id())) {
-                ok = false;
-            }
-            allowed[r] = ok;
-        }
-        return allowed;
-    }
-
-    /**
-     * Start ticks of the allowed slots.
-     *
-     * @return ascending distinct start ticks, or {@code null} when {@code slotIds} imposes no restriction
-     */
-    public static int[] allowedSlotStarts(PlanningProblem problem, TaskEligibilityParams p) {
-        if (p.slotIds().isEmpty() || p.slotIds().contains(ALL)) {
-            return null;
-        }
-        Set<String> ids = new HashSet<>(p.slotIds());
-        TreeSet<Integer> starts = new TreeSet<>();
-        for (Slot slot : problem.slots()) {
-            if (ids.contains(slot.id())) {
-                starts.add(problem.horizon().floorTick(slot.start()));
-            }
-        }
-        int[] result = new int[starts.size()];
-        int k = 0;
-        for (int s : starts) {
-            result[k++] = s;
-        }
-        return result;
-    }
-
-    private static boolean isHard(Constraint constraint) {
-        return constraint.enforcement() == IEnumEnforcement.Types.STRICTLY_REQUIRED
-                || constraint.enforcement() == IEnumEnforcement.Types.CONFIGURABLE_HARD;
-    }
-
-    private static String path(ValidationContext ctx, Constraint constraint, String field) {
-        int i = ctx.problem().constraints().indexOf(constraint);
-        String base = "constraints[" + (i < 0 ? "?" : String.valueOf(i)) + "].params";
-        return field == null ? base : base + "." + field;
     }
 
     // ------------------------------------------------------------------ checker

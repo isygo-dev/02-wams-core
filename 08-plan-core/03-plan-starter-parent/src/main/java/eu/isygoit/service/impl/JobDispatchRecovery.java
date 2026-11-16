@@ -32,14 +32,13 @@ import java.util.function.IntSupplier;
 @Service
 @Slf4j
 public class JobDispatchRecovery {
+    static final String STALE_STOP_MESSAGE =
+            "Stop completed by recovery: the worker did not acknowledge the stop within the grace period";
+    static final String DISPATCH_FAILED_ERROR_CODE = "DISPATCH_FAILED";
     private static final int MAX_BATCH_SIZE = 1000;
     private static final String STALE_JOB_ERROR_CODE = "JOB_PROCESSING_TIMEOUT";
     private static final String STALE_JOB_MESSAGE =
             "Processing exceeded the solver time limit plus the recovery grace period";
-    static final String STALE_STOP_MESSAGE =
-            "Stop completed by recovery: the worker did not acknowledge the stop within the grace period";
-    static final String DISPATCH_FAILED_ERROR_CODE = "DISPATCH_FAILED";
-
     private final PlanJobRepository jobRepository;
     private final JobDispatchService dispatchService;
     private final JobCancellationRegistry cancellationRegistry;

@@ -15,10 +15,6 @@ import java.util.List;
  */
 public final class ViolationCollector implements ViolationSink {
 
-    /** One reported violation instance. {@code taskId}/{@code resourceId} may be {@code null}. */
-    public record Entry(String taskId, String resourceId, String code, String message, long measure) {
-    }
-
     private final List<Entry> entries = new ArrayList<>();
 
     @Override
@@ -26,22 +22,30 @@ public final class ViolationCollector implements ViolationSink {
         entries.add(new Entry(taskId, resourceId, code, message, measure));
     }
 
-    /** @return the recorded entries in report order (unmodifiable) */
+    /**
+     * @return the recorded entries in report order (unmodifiable)
+     */
     public List<Entry> entries() {
         return Collections.unmodifiableList(entries);
     }
 
-    /** @return {@code true} when no violation was reported */
+    /**
+     * @return {@code true} when no violation was reported
+     */
     public boolean isEmpty() {
         return entries.isEmpty();
     }
 
-    /** @return number of recorded instances */
+    /**
+     * @return number of recorded instances
+     */
     public int count() {
         return entries.size();
     }
 
-    /** @return the sum of all measures, saturating at {@link Long#MAX_VALUE} */
+    /**
+     * @return the sum of all measures, saturating at {@link Long#MAX_VALUE}
+     */
     public long totalMeasure() {
         long sum = 0L;
         for (Entry entry : entries) {
@@ -52,5 +56,11 @@ public final class ViolationCollector implements ViolationSink {
             sum = next;
         }
         return sum;
+    }
+
+    /**
+     * One reported violation instance. {@code taskId}/{@code resourceId} may be {@code null}.
+     */
+    public record Entry(String taskId, String resourceId, String code, String message, long measure) {
     }
 }

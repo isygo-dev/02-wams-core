@@ -1,40 +1,13 @@
 package eu.isygoit.solver.index;
 
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.request.Calendar;
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.InitialSolution;
-import eu.isygoit.dto.request.Objective;
-import eu.isygoit.dto.request.Pin;
-import eu.isygoit.dto.request.PlanningMeta;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PlanningRequest;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.ResourceSelector;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Slot;
-import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.solver.CompiledConstraint;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PreprocessContext;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 /**
@@ -43,55 +16,91 @@ import java.util.function.BiConsumer;
  */
 public final class IndexFixtures {
 
-    /** Horizon start of every fixture. */
+    /**
+     * Horizon start of every fixture.
+     */
     public static final Instant START = Instant.parse("2026-09-07T08:00:00Z");
 
     private IndexFixtures() {
     }
 
-    /** @return a horizon of {@code ticks} ticks of {@code tickSeconds} seconds starting at {@link #START} */
+    /**
+     * @return a horizon of {@code ticks} ticks of {@code tickSeconds} seconds starting at {@link #START}
+     */
     public static Horizon horizon(int ticks, int tickSeconds) {
         return new Horizon(START, START.plusSeconds((long) ticks * tickSeconds), tickSeconds);
     }
 
-    /** @return the instant of a tick */
+    /**
+     * @return the instant of a tick
+     */
     public static Instant at(int tick, int tickSeconds) {
         return START.plusSeconds((long) tick * tickSeconds);
     }
 
-    /** @return a task builder */
+    /**
+     * @return a task builder
+     */
     public static TaskB task(String id) {
         return new TaskB(id);
     }
 
-    /** @return a resource builder */
+    /**
+     * @return a resource builder
+     */
     public static ResB resource(String id) {
         return new ResB(id);
     }
 
-    /** @return a selector restricted to skills */
+    /**
+     * @return a selector restricted to skills
+     */
     public static ResourceSelector skills(String... skills) {
         return new ResourceSelector(null, null, Arrays.asList(skills), null, null, null);
     }
 
-    /** @return a selector restricted to ids */
+    /**
+     * @return a selector restricted to ids
+     */
     public static ResourceSelector ids(String... ids) {
         return new ResourceSelector(Arrays.asList(ids), null, null, null, null, null);
     }
 
-    /** @return a problem builder with a 1-minute tick horizon of {@code ticks} ticks */
+    /**
+     * @return a problem builder with a 1-minute tick horizon of {@code ticks} ticks
+     */
     public static ProblemB problem(int ticks) {
         return new ProblemB(horizon(ticks, 60), 60);
     }
 
-    /** @return a problem builder with a custom tick length */
+    /**
+     * @return a problem builder with a custom tick length
+     */
     public static ProblemB problem(int ticks, int tickSeconds) {
         return new ProblemB(horizon(ticks, tickSeconds), tickSeconds);
     }
 
-    /** Mutable task builder (all other fields default). */
+    /**
+     * @return a HARD constraint of the given type with empty params
+     */
+    public static Constraint hard(String id, String type) {
+        return new Constraint(id, type, IEnumEnforcement.Types.STRICTLY_REQUIRED, null, Map.of(), null, 0, null);
+    }
+
+    /**
+     * @return a compiled constraint of the stub family
+     */
+    public static CompiledConstraint compiled(int index, Constraint constraint, ConstraintFamily family) {
+        return new CompiledConstraint(index, constraint, family, null, true);
+    }
+
+    /**
+     * Mutable task builder (all other fields default).
+     */
     public static final class TaskB {
         private final String id;
+        private final List<ResourceRequirement> requirements = new ArrayList<>();
+        private final List<PrecedenceRef> predecessors = new ArrayList<>();
         private String typeId;
         private Integer duration = 10;
         private Map<String, Integer> resourceDurations;
@@ -99,13 +108,11 @@ public final class IndexFixtures {
         private Integer priority;
         private Boolean required;
         private Long prize;
-        private final List<ResourceRequirement> requirements = new ArrayList<>();
         private Instant release;
         private Instant deadline;
         private Instant dueDate;
         private List<String> startSlots;
         private Pin pin;
-        private final List<PrecedenceRef> predecessors = new ArrayList<>();
         private String setupClass;
         private Set<String> tags;
         private List<eu.isygoit.dto.request.Preference> preferences;
@@ -211,7 +218,9 @@ public final class IndexFixtures {
         }
     }
 
-    /** Mutable resource builder. */
+    /**
+     * Mutable resource builder.
+     */
     public static final class ResB {
         private final String id;
         private String typeId;
@@ -285,7 +294,9 @@ public final class IndexFixtures {
         }
     }
 
-    /** Mutable problem / request builder. */
+    /**
+     * Mutable problem / request builder.
+     */
     public static final class ProblemB {
         private final Horizon horizon;
         private final int tickSeconds;
@@ -388,17 +399,9 @@ public final class IndexFixtures {
         }
     }
 
-    /** @return a HARD constraint of the given type with empty params */
-    public static Constraint hard(String id, String type) {
-        return new Constraint(id, type, IEnumEnforcement.Types.STRICTLY_REQUIRED, null, Map.of(), null, 0, null);
-    }
-
-    /** @return a compiled constraint of the stub family */
-    public static CompiledConstraint compiled(int index, Constraint constraint, ConstraintFamily family) {
-        return new CompiledConstraint(index, constraint, family, null, true);
-    }
-
-    /** Minimal {@link ConstraintFamily} whose {@code preprocess} runs a lambda and whose estimate is configurable. */
+    /**
+     * Minimal {@link ConstraintFamily} whose {@code preprocess} runs a lambda and whose estimate is configurable.
+     */
     public static final class StubFamily implements ConstraintFamily {
         private final String type;
         private final BiConsumer<PreprocessContext, Constraint> preprocess;

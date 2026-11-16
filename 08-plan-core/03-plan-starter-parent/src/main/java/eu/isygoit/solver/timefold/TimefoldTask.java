@@ -26,7 +26,9 @@ public class TimefoldTask {
     private SlotOptions options;
     private Integer option;
 
-    /** Required by Timefold. */
+    /**
+     * Required by Timefold.
+     */
     public TimefoldTask() {
     }
 
@@ -41,7 +43,9 @@ public class TimefoldTask {
         this.options = options;
     }
 
-    /** @return the task index in the candidate index */
+    /**
+     * @return the task index in the candidate index
+     */
     public int getTaskIdx() {
         return taskIdx;
     }
@@ -50,7 +54,9 @@ public class TimefoldTask {
         this.taskIdx = taskIdx;
     }
 
-    /** @return whether the task is required */
+    /**
+     * @return whether the task is required
+     */
     public boolean isRequired() {
         return required;
     }
@@ -59,7 +65,9 @@ public class TimefoldTask {
         this.required = required;
     }
 
-    /** @return the shared immutable option table */
+    /**
+     * @return the shared immutable option table
+     */
     public SlotOptions getOptions() {
         return options;
     }
@@ -68,14 +76,18 @@ public class TimefoldTask {
         this.options = options;
     }
 
-    /** @return the int range of this task's option ids (a view, no allocation of values) */
+    /**
+     * @return the int range of this task's option ids (a view, no allocation of values)
+     */
     // TIMEFOLD-VERIFY: entity-level @ValueRangeProvider on a getter returning CountableValueRange<Integer>, referenced by id.
     @ValueRangeProvider(id = "optionRange")
     public CountableValueRange<Integer> getOptionRange() {
         return ValueRangeFactory.createIntValueRange(options.taskOptionStart(taskIdx), options.taskOptionEnd(taskIdx));
     }
 
-    /** @return the chosen option id, or {@code null} when the task is not selected */
+    /**
+     * @return the chosen option id, or {@code null} when the task is not selected
+     */
     // TIMEFOLD-VERIFY: allowsUnassigned (1.x name; replaces the deprecated nullable) on a boxed Integer variable.
     @PlanningVariable(valueRangeProviderRefs = "optionRange", allowsUnassigned = true)
     public Integer getOption() {
@@ -86,27 +98,37 @@ public class TimefoldTask {
         this.option = option;
     }
 
-    /** @return capacity consumed by the chosen option, 0 when unassigned */
+    /**
+     * @return capacity consumed by the chosen option, 0 when unassigned
+     */
     public int getDemand() {
         return option == null ? 0 : options.demand(option);
     }
 
-    /** @return the (resource, slot) bucket key of the chosen option; only call when assigned */
+    /**
+     * @return the (resource, slot) bucket key of the chosen option; only call when assigned
+     */
     public long getCapacityKey() {
         return options.capacityKey(option);
     }
 
-    /** @return the capacity of the chosen option's bucket; only call when assigned */
+    /**
+     * @return the capacity of the chosen option's bucket; only call when assigned
+     */
     public int getSlotCapacity() {
         return options.capacity(option);
     }
 
-    /** @return the scaled soft penalty of the chosen option, 0 when unassigned */
+    /**
+     * @return the scaled soft penalty of the chosen option, 0 when unassigned
+     */
     public long getPenalty() {
         return option == null ? 0L : options.penalty(option);
     }
 
-    /** @return the scaled reward of the selected task, 0 when unassigned */
+    /**
+     * @return the scaled reward of the selected task, 0 when unassigned
+     */
     public long getReward() {
         return option == null ? 0L : options.reward(taskIdx);
     }

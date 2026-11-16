@@ -1,11 +1,6 @@
 package eu.isygoit.solver.cpsat.objective;
 
-import com.google.ortools.sat.Constraint;
-import com.google.ortools.sat.IntVar;
-import com.google.ortools.sat.LinearArgument;
-import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.LinearExprBuilder;
-import com.google.ortools.sat.Literal;
+import com.google.ortools.sat.*;
 import eu.isygoit.exception.ObjectiveRangeException;
 import eu.isygoit.solver.cpsat.CpModelContext;
 import eu.isygoit.solver.cpsat.ObjectiveSink;
@@ -42,12 +37,16 @@ final class ObjectiveTerms {
         return c;
     }
 
-    /** @return {@code true} every 1024th iteration, the cancellation checkpoint cadence */
+    /**
+     * @return {@code true} every 1024th iteration, the cancellation checkpoint cadence
+     */
     static boolean checkpointDue(int iteration) {
         return (iteration & 1023) == 1023;
     }
 
-    /** Sum of the {@code k} largest of {@code values[0..n)} (sorts the prefix of the array). */
+    /**
+     * Sum of the {@code k} largest of {@code values[0..n)} (sorts the prefix of the array).
+     */
     static long topSum(long[] values, int n, int k) {
         if (n == 0 || k <= 0) {
             return 0;
@@ -60,7 +59,9 @@ final class ObjectiveTerms {
         return sum;
     }
 
-    /** @return the literals {@code cand(c)} of the candidates of {@code task} on {@code resource} (empty when none or {@code resource < 0}) */
+    /**
+     * @return the literals {@code cand(c)} of the candidates of {@code task} on {@code resource} (empty when none or {@code resource < 0})
+     */
     static List<Literal> candidateLiterals(CpModelContext ctx, CandidateIndex index, int task, int resource) {
         List<Literal> lits = new ArrayList<>(2);
         if (resource < 0) {
@@ -145,35 +146,47 @@ final class ObjectiveTerms {
         private long offset;
         private int terms;
 
-        /** Adds {@code coef * arg} to the expression only (the caller declares the bounds with {@link #bounds}). */
+        /**
+         * Adds {@code coef * arg} to the expression only (the caller declares the bounds with {@link #bounds}).
+         */
         void term(LinearArgument arg, long coef) {
             builder.addTerm(arg, coef);
             terms++;
         }
 
-        /** Adds the exact bounds of a group of terms added with {@link #term}. */
+        /**
+         * Adds the exact bounds of a group of terms added with {@link #term}.
+         */
         void bounds(long termLo, long termHi) {
             lo = ScaledMath.addExact(lo, termLo);
             hi = ScaledMath.addExact(hi, termHi);
         }
 
-        /** Adds one term with its own bounds. */
+        /**
+         * Adds one term with its own bounds.
+         */
         void add(LinearArgument arg, long coef, long termLo, long termHi) {
             term(arg, coef);
             bounds(termLo, termHi);
         }
 
-        /** Adds a constant to the tier value (sent through {@code ObjectiveSink.addConstantOffset}). */
+        /**
+         * Adds a constant to the tier value (sent through {@code ObjectiveSink.addConstantOffset}).
+         */
         void offset(long value) {
             offset = ScaledMath.addExact(offset, value);
         }
 
-        /** @return {@code true} when no term and no offset was added */
+        /**
+         * @return {@code true} when no term and no offset was added
+         */
         boolean isEmpty() {
             return terms == 0 && offset == 0;
         }
 
-        /** Sends the collected term (and offset) to the sink; does nothing when empty. */
+        /**
+         * Sends the collected term (and offset) to the sink; does nothing when empty.
+         */
         void flush(ObjectiveSink sink, int tier, String label) {
             if (terms > 0) {
                 sink.add(tier, builder.build(), ScaledMath.guard(lo, label), ScaledMath.guard(hi, label), label);

@@ -3,15 +3,7 @@ package eu.isygoit.solver.family;
 import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.params.MaxLoadPerPeriodParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PeriodBuckets;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,12 +20,46 @@ import java.util.Set;
 @Component
 public class MaxLoadPerPeriodFamily implements ConstraintFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "max_load_per_period";
-    /** Violation code for an excess. */
+    /**
+     * Violation code for an excess.
+     */
     public static final String CODE_MAX = "MAX_LOAD_EXCEEDED";
-    /** Violation code for a deficit. */
+    /**
+     * Violation code for a deficit.
+     */
     public static final String CODE_MIN = "MIN_LOAD_NOT_REACHED";
+
+    /**
+     * Shared bound validation of the period-load families.
+     */
+    static void validateBounds(ValidationContext ctx, Constraint constraint, Integer max, Integer min) {
+        if (max == null && min == null) {
+            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params"),
+                    "at least one of params.max and params.min is required");
+        }
+        if (max != null && max < 0) {
+            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params.max"), "params.max must be >= 0");
+        }
+        if (min != null && min < 0) {
+            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params.min"), "params.min must be >= 0");
+        }
+        if (max != null && min != null && min > max) {
+            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params.min"),
+                    "params.min must not exceed params.max");
+        }
+    }
+
+    /**
+     * Size model shared by the period-load families.
+     */
+    static ModelCost windowedCost(CandidateIndexView index, Constraint constraint, int[][] tiles) {
+        long[] size = FamilySupport.windowedSize(index, index.resolveResources(constraint.scope()), tiles[0], tiles[1]);
+        return new ModelCost(size[0], size[1], 3 * size[0] + 2 * size[1], 0, 0, 0);
+    }
 
     @Override
     public String type() {
@@ -75,24 +101,6 @@ public class MaxLoadPerPeriodFamily implements ConstraintFamily {
         validateBounds(ctx, constraint, p.max(), p.min());
     }
 
-    /** Shared bound validation of the period-load families. */
-    static void validateBounds(ValidationContext ctx, Constraint constraint, Integer max, Integer min) {
-        if (max == null && min == null) {
-            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params"),
-                    "at least one of params.max and params.min is required");
-        }
-        if (max != null && max < 0) {
-            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params.max"), "params.max must be >= 0");
-        }
-        if (min != null && min < 0) {
-            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params.min"), "params.min must be >= 0");
-        }
-        if (max != null && min != null && min > max) {
-            ctx.error("PARAMS_INVALID", FamilySupport.path(ctx, constraint, "params.min"),
-                    "params.min must not exceed params.max");
-        }
-    }
-
     @Override
     public ModelCost estimate(CandidateIndexView index, Constraint constraint, Object params) {
         MaxLoadPerPeriodParams p = (MaxLoadPerPeriodParams) params;
@@ -106,12 +114,6 @@ public class MaxLoadPerPeriodFamily implements ConstraintFamily {
             return ModelCost.ZERO;
         }
         return windowedCost(index, constraint, tiles);
-    }
-
-    /** Size model shared by the period-load families. */
-    static ModelCost windowedCost(CandidateIndexView index, Constraint constraint, int[][] tiles) {
-        long[] size = FamilySupport.windowedSize(index, index.resolveResources(constraint.scope()), tiles[0], tiles[1]);
-        return new ModelCost(size[0], size[1], 3 * size[0] + 2 * size[1], 0, 0, 0);
     }
 
     @Override

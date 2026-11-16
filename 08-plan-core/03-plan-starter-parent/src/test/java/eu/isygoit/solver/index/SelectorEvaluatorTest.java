@@ -14,6 +14,11 @@ class SelectorEvaluatorTest {
 
     private SelectorEvaluator evaluator;
 
+    private static ResourceSelector selector(List<String> ids, List<String> types, List<String> skills,
+                                             List<String> anySkills, List<String> tags, List<String> exclude) {
+        return new ResourceSelector(ids, types, skills, anySkills, tags, exclude);
+    }
+
     @BeforeEach
     void setUp() {
         List<Resource> resources = List.of(
@@ -21,11 +26,6 @@ class SelectorEvaluatorTest {
                 resource("r1").type("t1").skills("a").build(),
                 resource("r2").type("t2").skills("b").tags("x").build());
         evaluator = new SelectorEvaluator(resources);
-    }
-
-    private static ResourceSelector selector(List<String> ids, List<String> types, List<String> skills,
-                                             List<String> anySkills, List<String> tags, List<String> exclude) {
-        return new ResourceSelector(ids, types, skills, anySkills, tags, exclude);
     }
 
     @Test

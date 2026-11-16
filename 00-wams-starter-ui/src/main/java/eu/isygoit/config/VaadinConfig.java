@@ -18,16 +18,18 @@ import org.springframework.context.annotation.Configuration;
 public class VaadinConfig implements VaadinServiceInitListener {
 
     /**
+     * The institution's default language, when the application has one (optional).
+     */
+    @org.springframework.beans.factory.annotation.Autowired(required = false)
+    private eu.isygoit.i18n.DefaultLanguageProvider defaultLanguage;
+
+    /**
      * Enregistre le I18nProvider comme fournisseur de traductions Vaadin
      */
     @Bean
     public I18NProvider i18nProvider(CustomI18nProvider i18nProvider) {
         return i18nProvider;
     }
-
-    /** The institution's default language, when the application has one (optional). */
-    @org.springframework.beans.factory.annotation.Autowired(required = false)
-    private eu.isygoit.i18n.DefaultLanguageProvider defaultLanguage;
 
     @Override
     public void serviceInit(ServiceInitEvent event) {

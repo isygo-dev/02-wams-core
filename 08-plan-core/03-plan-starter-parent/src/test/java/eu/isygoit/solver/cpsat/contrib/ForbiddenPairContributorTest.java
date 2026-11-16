@@ -16,9 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static eu.isygoit.solver.family.FamilyKit.map;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ForbiddenPairContributorTest {
 
@@ -39,7 +37,9 @@ class ForbiddenPairContributorTest {
         return map("kind", "TASK_TASK", "relation", relation, "pairs", List.of(map("a", "a", "b", "b")));
     }
 
-    /** Tasks a and b, resources r1 r2; {@code pinned} fixes both at tick 0 (forced time overlap). */
+    /**
+     * Tasks a and b, resources r1 r2; {@code pinned} fixes both at tick 0 (forced time overlap).
+     */
     private ContribFixture fixture(Constraint c, int resources, boolean pinned) {
         List<eu.isygoit.dto.request.Resource> rs = new java.util.ArrayList<>();
         for (int i = 1; i <= resources; i++) {

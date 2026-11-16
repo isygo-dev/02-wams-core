@@ -2,11 +2,7 @@ package eu.isygoit.solver.objective;
 
 import eu.isygoit.dto.request.ConstraintScope;
 import eu.isygoit.dto.request.Objective;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ObjectiveEvaluator;
-import eu.isygoit.solver.spi.ObjectiveFamily;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 
 import java.util.List;
 import java.util.Set;
@@ -21,15 +17,25 @@ import java.util.Set;
  */
 public abstract class AbstractObjectiveFamily implements ObjectiveFamily {
 
-    /** Error code of a scope kind the family cannot use (existing catalogue code, design 7.4). */
+    /**
+     * Error code of a scope kind the family cannot use (existing catalogue code, design 7.4).
+     */
     public static final String INVALID_SCOPE = "INVALID_SCOPE";
-    /** Error code of a scope or preference referencing an unknown id (existing catalogue code). */
+    /**
+     * Error code of a scope or preference referencing an unknown id (existing catalogue code).
+     */
     public static final String UNKNOWN_REFERENCE = "UNKNOWN_REFERENCE";
-    /** Error code of an invalid family parameter value. */
+    /**
+     * Error code of an invalid family parameter value.
+     */
     public static final String OBJECTIVE_PARAMS_INVALID = "OBJECTIVE_PARAMS_INVALID";
-    /** Warning code: the weight is 0, the objective is disabled. */
+    /**
+     * Warning code: the weight is 0, the objective is disabled.
+     */
     public static final String OBJECTIVE_WEIGHT_ZERO = "OBJECTIVE_WEIGHT_ZERO";
-    /** Warning code: the objective cannot change the result on this problem. */
+    /**
+     * Warning code: the objective cannot change the result on this problem.
+     */
     public static final String OBJECTIVE_NO_EFFECT = "OBJECTIVE_NO_EFFECT";
 
     private static final Set<String> TASK_KINDS = Set.of("all", "task", "taskType", "tag");
@@ -55,6 +61,29 @@ public abstract class AbstractObjectiveFamily implements ObjectiveFamily {
         this.reward = reward;
         this.paramsHint = List.copyOf(paramsHint);
         this.scopeKind = scopeKind;
+    }
+
+    /**
+     * @return the JSON path of a field of the objective, {@code objectives[i].<suffix>} (index found by identity or id)
+     */
+    protected static String path(ValidationContext ctx, Objective objective, String suffix) {
+        List<Objective> all = ctx.problem().objectives();
+        int idx = -1;
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i) == objective || (objective.id() != null && objective.id().equals(all.get(i).id()))) {
+                idx = i;
+                break;
+            }
+        }
+        return "objectives[" + Math.max(idx, 0) + "]." + suffix;
+    }
+
+    /**
+     * Emits the {@code OBJECTIVE_NO_EFFECT} warning.
+     */
+    protected static void noEffect(ValidationContext ctx, Objective objective, String reason) {
+        ctx.warning(OBJECTIVE_NO_EFFECT, path(ctx, objective, "type"),
+                "objective '" + objective.id() + "' has no effect: " + reason);
     }
 
     @Override
@@ -92,7 +121,9 @@ public abstract class AbstractObjectiveFamily implements ObjectiveFamily {
         validateParams(ctx, objective, params);
     }
 
-    /** Family specific checks (params values, data that makes the objective meaningless). Default: none. */
+    /**
+     * Family specific checks (params values, data that makes the objective meaningless). Default: none.
+     */
     protected void validateParams(ValidationContext ctx, Objective objective, Object params) {
     }
 
@@ -106,25 +137,6 @@ public abstract class AbstractObjectiveFamily implements ObjectiveFamily {
     @Override
     public final ObjectiveEvaluator evaluator() {
         return this::evaluate;
-    }
-
-    /** @return the JSON path of a field of the objective, {@code objectives[i].<suffix>} (index found by identity or id) */
-    protected static String path(ValidationContext ctx, Objective objective, String suffix) {
-        List<Objective> all = ctx.problem().objectives();
-        int idx = -1;
-        for (int i = 0; i < all.size(); i++) {
-            if (all.get(i) == objective || (objective.id() != null && objective.id().equals(all.get(i).id()))) {
-                idx = i;
-                break;
-            }
-        }
-        return "objectives[" + Math.max(idx, 0) + "]." + suffix;
-    }
-
-    /** Emits the {@code OBJECTIVE_NO_EFFECT} warning. */
-    protected static void noEffect(ValidationContext ctx, Objective objective, String reason) {
-        ctx.warning(OBJECTIVE_NO_EFFECT, path(ctx, objective, "type"),
-                "objective '" + objective.id() + "' has no effect: " + reason);
     }
 
     private void validateScope(ValidationContext ctx, Objective objective) {

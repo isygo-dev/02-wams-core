@@ -4,31 +4,23 @@ import eu.isygoit.dto.request.ConstraintScope;
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.exception.ObjectiveRangeException;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeIndex;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeSolution;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.RecordingValidation;
+import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.ctx;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.objective;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.problem;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.resource;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.task;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MinimizeResourceCostObjectiveTest {
 
     private final MinimizeResourceCostObjective family = new MinimizeResourceCostObjective();
 
-    /** G6 shape: three 60-tick jobs, cheap (1.0/tick) and expensive (3.0/tick) resources. */
+    /**
+     * G6 shape: three 60-tick jobs, cheap (1.0/tick) and expensive (3.0/tick) resources.
+     */
     private PlanningProblem g6() {
         return problem(List.of(task("j1").duration(60).build(), task("j2").duration(60).build(),
-                task("j3").duration(60).build()),
+                        task("j3").duration(60).build()),
                 List.of(resource("cheap", 1, 1.0, 0.0, null), resource("expensive", 1, 3.0, 0.0, null)));
     }
 

@@ -1,14 +1,6 @@
 package eu.isygoit.solver.check;
 
-import eu.isygoit.dto.request.InitialAssignment;
-import eu.isygoit.dto.request.InitialSolution;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.SetupEntry;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Task;
-import eu.isygoit.dto.request.TimeWindow;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.dto.response.Assignment;
 import org.junit.jupiter.api.Test;
 
@@ -17,11 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static eu.isygoit.solver.check.TestProblems.assign;
-import static eu.isygoit.solver.check.TestProblems.at;
-import static eu.isygoit.solver.check.TestProblems.resource;
-import static eu.isygoit.solver.check.TestProblems.resourceWith;
-import static eu.isygoit.solver.check.TestProblems.task;
+import static eu.isygoit.solver.check.TestProblems.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -39,6 +27,18 @@ class StructuralSolutionCheckerTest {
 
     private static PlanningProblem simple(List<Resource> resources, List<Task> tasks) {
         return TestProblems.problem(100, resources, tasks, List.of(), List.of());
+    }
+
+    private static PlanningProblem setupProblem(String... ids) {
+        SetupMatrix matrix = new SetupMatrix("m", 5, 0, List.of(new SetupEntry("A", "C", 8)));
+        Map<String, Task> all = Map.of(
+                "t1", task("t1", 10).setupClass("A").build(),
+                "t2", task("t2", 10).setupClass("B").build(),
+                "t3", task("t3", 10).setupClass("A").build(),
+                "t4", task("t4", 10).setupClass("C").build());
+        List<Task> tasks = java.util.Arrays.stream(ids).map(all::get).toList();
+        return TestProblems.problem(200, List.of(), List.of(matrix),
+                List.of(resourceWith("R", 1, List.of(), null, "m")), tasks, new InitialSolution(null));
     }
 
     @Test
@@ -92,18 +92,6 @@ class StructuralSolutionCheckerTest {
     void amountAboveCapacityIsRejected() {
         PlanningProblem p = simple(List.of(resource("R", 2)), List.of(task("A", 5).demand(3).build()));
         assertTrue(codes(check(p, assign("A", 0, 5, 3, false, "R"))).contains("SOLUTION_INVALID_AMOUNT"));
-    }
-
-    private static PlanningProblem setupProblem(String... ids) {
-        SetupMatrix matrix = new SetupMatrix("m", 5, 0, List.of(new SetupEntry("A", "C", 8)));
-        Map<String, Task> all = Map.of(
-                "t1", task("t1", 10).setupClass("A").build(),
-                "t2", task("t2", 10).setupClass("B").build(),
-                "t3", task("t3", 10).setupClass("A").build(),
-                "t4", task("t4", 10).setupClass("C").build());
-        List<Task> tasks = java.util.Arrays.stream(ids).map(all::get).toList();
-        return TestProblems.problem(200, List.of(), List.of(matrix),
-                List.of(resourceWith("R", 1, List.of(), null, "m")), tasks, new InitialSolution(null));
     }
 
     @Test

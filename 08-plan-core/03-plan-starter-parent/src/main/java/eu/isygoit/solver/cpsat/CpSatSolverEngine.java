@@ -4,26 +4,12 @@ import com.google.ortools.Loader;
 import com.google.ortools.sat.CpSolverStatus;
 import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.dto.response.CoreItem;
-import eu.isygoit.dto.response.Diagnostics;
-import eu.isygoit.dto.response.InfeasibilityCore;
-import eu.isygoit.dto.response.Metrics;
-import eu.isygoit.dto.response.ModelStats;
-import eu.isygoit.dto.response.PlanningSolution;
-import eu.isygoit.dto.response.Relaxation;
-import eu.isygoit.dto.response.SearchStats;
-import eu.isygoit.dto.response.SolveResult;
+import eu.isygoit.dto.response.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.enums.IEnumSolverStatus;
 import eu.isygoit.exception.InvalidRequestException;
 import eu.isygoit.exception.SolverUnavailableException;
-import eu.isygoit.solver.CompiledConstraint;
-import eu.isygoit.solver.CompiledProblem;
-import eu.isygoit.solver.EngineCapabilities;
-import eu.isygoit.solver.SolveCancelledException;
-import eu.isygoit.solver.SolveContext;
-import eu.isygoit.solver.SolveProgress;
-import eu.isygoit.solver.SolverEngine;
+import eu.isygoit.solver.*;
 import eu.isygoit.solver.cpsat.explain.CpSatExplainer;
 import eu.isygoit.solver.diag.CoreItems;
 import eu.isygoit.solver.registry.CpSatContributorRegistry;
@@ -32,12 +18,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * The reference CP-SAT engine (canonical id {@code cp_sat}), implementing the full v2 model (design 5.3, 6, D-8 to D-12).
@@ -66,7 +47,9 @@ import java.util.TreeSet;
 @Component
 public class CpSatSolverEngine implements SolverEngine {
 
-    /** Canonical engine id. */
+    /**
+     * Canonical engine id.
+     */
     public static final String NAME = "cp_sat";
 
     private final CpModelBuilder builder;
@@ -76,17 +59,6 @@ public class CpSatSolverEngine implements SolverEngine {
     private final Object loadLock = new Object();
     private volatile boolean loaded;
     private volatile Throwable loadFailure;
-
-    /** Seam for loading the OR-Tools native libraries (replaceable in tests). */
-    @FunctionalInterface
-    public interface NativeLoader {
-        /**
-         * Loads the native libraries.
-         *
-         * @throws Exception when they cannot be loaded
-         */
-        void load() throws Exception;
-    }
 
     /**
      * Spring constructor: the explainer is taken from the context when a bean exists, otherwise a default one is created.
@@ -128,10 +100,56 @@ public class CpSatSolverEngine implements SolverEngine {
         this.nativeLoader = nativeLoader;
     }
 
+    private static InfeasibilityCore fallbackCore(CompiledProblem problem) {
+        List<CoreItem> items = new ArrayList<>();
+        for (Constraint constraint : problem.problem().constraints()) {
+            if (constraint.enforcement() != IEnumEnforcement.Types.SOFT) {
+                items.add(CoreItems.item(CoreItems.CONSTRAINT, constraint.id(), CoreItems.CONSTRAINT_REASON,
+                        "constraint '" + constraint.id() + "' (" + constraint.type() + ") may be part of the conflict"));
+            }
+        }
+        return CoreItems.core(CoreItems.METHOD_NONE, false, items);
+    }
+
+    private static ModelStats structureStats(CompiledProblem problem) {
+        int tasks = problem.index() == null ? problem.problem().tasks().size() : problem.index().taskCount();
+        int resources = problem.index() == null ? problem.problem().resources().size() : problem.index().resourceCount();
+        int candidates = problem.index() == null ? 0 : problem.index().candidateCount();
+        return new ModelStats(tasks, resources, candidates, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
+
+    /**
+     * 1.0 when optimal, else {@code 1 / (1 + gap)} clamped to [0.01, 0.99], 0.5 when the gap is unknown.
+     */
+    private static double qualityScore(IEnumSolverStatus.Types status, Double gap) {
+        if (status == IEnumSolverStatus.Types.OPTIMAL) {
+            return 1.0d;
+        }
+        if (gap == null || gap.isNaN() || gap.isInfinite()) {
+            return 0.5d;
+        }
+        return Math.min(0.99d, Math.max(0.01d, 1.0d / (1.0d + Math.max(0.0d, gap))));
+    }
+
+    private static IEnumEnforcement.Types enforcementOf(CompiledProblem problem, int constraintIndex) {
+        for (CompiledConstraint compiled : problem.constraints()) {
+            if (compiled.index() == constraintIndex) {
+                return compiled.constraint().enforcement();
+            }
+        }
+        return null;
+    }
+
+    private static long elapsedMillis(long startNanos) {
+        return Math.max(0L, (System.nanoTime() - startNanos) / 1_000_000L);
+    }
+
     @Override
     public String name() {
         return NAME;
     }
+
+    // -------------------------------------------------------------------------------------------- results
 
     @Override
     public EngineCapabilities capabilities() {
@@ -247,8 +265,6 @@ public class CpSatSolverEngine implements SolverEngine {
                 metrics(problem, built, outcome, startNanos, buildMillis));
     }
 
-    // -------------------------------------------------------------------------------------------- results
-
     private SolveResult infeasible(CompiledProblem problem, SolveContext context, SolverOptions options, BuiltModel built,
                                    SolveRunner.Outcome outcome, long startNanos, long buildMillis) {
         InfeasibilityCore core = null;
@@ -268,17 +284,6 @@ public class CpSatSolverEngine implements SolverEngine {
                 core, List.of(), Map.of());
         return new SolveResult(IEnumSolverStatus.Types.INFEASIBLE, null, List.of(), diagnostics,
                 metrics(problem, built, outcome, startNanos, buildMillis));
-    }
-
-    private static InfeasibilityCore fallbackCore(CompiledProblem problem) {
-        List<CoreItem> items = new ArrayList<>();
-        for (Constraint constraint : problem.problem().constraints()) {
-            if (constraint.enforcement() != IEnumEnforcement.Types.SOFT) {
-                items.add(CoreItems.item(CoreItems.CONSTRAINT, constraint.id(), CoreItems.CONSTRAINT_REASON,
-                        "constraint '" + constraint.id() + "' (" + constraint.type() + ") may be part of the conflict"));
-            }
-        }
-        return CoreItems.core(CoreItems.METHOD_NONE, false, items);
     }
 
     private SolveResult unknown(CompiledProblem problem, long startNanos, String message, BuiltModel built) {
@@ -305,34 +310,16 @@ public class CpSatSolverEngine implements SolverEngine {
                 built.stats(), search, outcome.tiers);
     }
 
-    private static ModelStats structureStats(CompiledProblem problem) {
-        int tasks = problem.index() == null ? problem.problem().tasks().size() : problem.index().taskCount();
-        int resources = problem.index() == null ? problem.problem().resources().size() : problem.index().resourceCount();
-        int candidates = problem.index() == null ? 0 : problem.index().candidateCount();
-        return new ModelStats(tasks, resources, candidates, 0, 0, 0, 0, 0, 0, 0, 0);
-    }
-
-    /** 1.0 when optimal, else {@code 1 / (1 + gap)} clamped to [0.01, 0.99], 0.5 when the gap is unknown. */
-    private static double qualityScore(IEnumSolverStatus.Types status, Double gap) {
-        if (status == IEnumSolverStatus.Types.OPTIMAL) {
-            return 1.0d;
-        }
-        if (gap == null || gap.isNaN() || gap.isInfinite()) {
-            return 0.5d;
-        }
-        return Math.min(0.99d, Math.max(0.01d, 1.0d / (1.0d + Math.max(0.0d, gap))));
-    }
-
-    private static IEnumEnforcement.Types enforcementOf(CompiledProblem problem, int constraintIndex) {
-        for (CompiledConstraint compiled : problem.constraints()) {
-            if (compiled.index() == constraintIndex) {
-                return compiled.constraint().enforcement();
-            }
-        }
-        return null;
-    }
-
-    private static long elapsedMillis(long startNanos) {
-        return Math.max(0L, (System.nanoTime() - startNanos) / 1_000_000L);
+    /**
+     * Seam for loading the OR-Tools native libraries (replaceable in tests).
+     */
+    @FunctionalInterface
+    public interface NativeLoader {
+        /**
+         * Loads the native libraries.
+         *
+         * @throws Exception when they cannot be loaded
+         */
+        void load() throws Exception;
     }
 }

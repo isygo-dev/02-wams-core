@@ -1,20 +1,7 @@
 package eu.isygoit.util;
 
 import eu.isygoit.dto.request.PrecedenceRef;
-import eu.isygoit.dto.request.params.FixedAssignmentParams;
-import eu.isygoit.dto.request.params.ForbiddenPairParams;
-import eu.isygoit.dto.request.params.LoadMetric;
-import eu.isygoit.dto.request.params.LoadObjectiveParams;
-import eu.isygoit.dto.request.params.MaxConsecutiveParams;
-import eu.isygoit.dto.request.params.MaxLoadPerPeriodParams;
-import eu.isygoit.dto.request.params.MinRestParams;
-import eu.isygoit.dto.request.params.PeriodSpec;
-import eu.isygoit.dto.request.params.PlanChangeParams;
-import eu.isygoit.dto.request.params.PrecedenceParams;
-import eu.isygoit.dto.request.params.ResourceCapacityParams;
-import eu.isygoit.dto.request.params.TaskEligibilityParams;
-import eu.isygoit.dto.request.params.TardinessParams;
-import eu.isygoit.dto.request.params.TimeWindowParams;
+import eu.isygoit.dto.request.params.*;
 import eu.isygoit.exception.ParamsInvalidException;
 import org.junit.jupiter.api.Test;
 
@@ -23,10 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ParamsBinderTest {
 

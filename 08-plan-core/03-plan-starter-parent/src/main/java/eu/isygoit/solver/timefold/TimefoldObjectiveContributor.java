@@ -11,9 +11,13 @@ import eu.isygoit.solver.CompiledObjective;
  */
 public interface TimefoldObjectiveContributor {
 
-    /** @return the same id as the {@code ObjectiveFamily} it formulates */
+    /**
+     * @return the same id as the {@code ObjectiveFamily} it formulates
+     */
     String type();
 
-    /** Adds the exact scaled cost of every (task, resource, slot) OPTION and/or the selection reward of a task. */
+    /**
+     * Adds the exact scaled cost of every (task, resource, slot) OPTION and/or the selection reward of a task.
+     */
     void contribute(TimefoldBuildContext ctx, CompiledObjective objective);
 }

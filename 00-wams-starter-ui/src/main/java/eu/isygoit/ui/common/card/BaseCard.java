@@ -4,10 +4,10 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -41,7 +41,9 @@ import java.util.List;
 @CssImport("./styles/scss/common.scss")
 public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
 
-    /** Actions shown as buttons in the footer; the others are listed in the "..." menu. */
+    /**
+     * Actions shown as buttons in the footer; the others are listed in the "..." menu.
+     */
     protected static final int MAX_VISIBLE_ACTIONS = 3;
 
     // ── Infrastructure ────────────────────────────────────────────────────────
@@ -62,13 +64,20 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     protected VerticalLayout businessCodeStack;
 
     // ── Constructor ───────────────────────────────────────────────────────────
+    /**
+     * Status chip a subclass built while assembling its title: instead of staying in the title it is shown at the
+     * left of the footer (the default {@link #buildStatusTag()}). Set it from {@link #buildTitle()}.
+     */
+    protected Span footerStatusTag;
+
+    // ── Template method – call this in subclass constructor ─────────────────
 
     protected BaseCard(V parentView, S objectService) {
         this.parentView = parentView;
         this.objectService = objectService;
     }
 
-    // ── Template method – call this in subclass constructor ─────────────────
+    // ── Abstract contract ─────────────────────────────────────────────────────
 
     /**
      * Re-colors an existing chip (e.g. after a status change) by swapping its
@@ -85,8 +94,6 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
         chip.addClassName("status-chip");
         chip.addClassName(color.cssClass());
     }
-
-    // ── Abstract contract ─────────────────────────────────────────────────────
 
     protected final void initCard() {
         applyCardShell();
@@ -132,12 +139,6 @@ public abstract class BaseCard<V extends Component, S> extends VerticalLayout {
     protected Span buildStatusTag() {
         return footerStatusTag;
     }
-
-    /**
-     * Status chip a subclass built while assembling its title: instead of staying in the title it is shown at the
-     * left of the footer (the default {@link #buildStatusTag()}). Set it from {@link #buildTitle()}.
-     */
-    protected Span footerStatusTag;
 
     // ── Enum-tags hook ────────────────────────────────────────────────────────
 

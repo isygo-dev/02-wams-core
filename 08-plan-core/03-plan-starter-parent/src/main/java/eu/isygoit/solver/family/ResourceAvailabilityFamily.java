@@ -6,26 +6,10 @@ import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.TimeWindow;
 import eu.isygoit.dto.request.params.ResourceAvailabilityParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PreprocessContext;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Family {@code resource_availability} (design 4.3 / 6.5.6): extra unavailable intervals ({@code unavailable}) and/or
@@ -42,120 +26,14 @@ import java.util.Set;
 @Component
 public class ResourceAvailabilityFamily implements ConstraintFamily {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "resource_availability";
 
     private static final Set<IEnumEnforcement.Types> SUPPORTED =
             Collections.unmodifiableSet(EnumSet.allOf(IEnumEnforcement.Types.class));
     private static final ConstraintChecker CHECKER = new Checker();
-
-    @Override
-    public String type() {
-        return TYPE;
-    }
-
-    @Override
-    public Class<?> paramsType() {
-        return ResourceAvailabilityParams.class;
-    }
-
-    @Override
-    public Set<IEnumEnforcement.Types> supportedEnforcements() {
-        return SUPPORTED;
-    }
-
-    @Override
-    public String descriptionKey() {
-        return "plan.constraint.resource_availability.description";
-    }
-
-    @Override
-    public List<String> paramsHint() {
-        return List.of("unavailable", "availableOnly");
-    }
-
-    @Override
-    public ScopeKind scopeKind() {
-        return ScopeKind.RESOURCES;
-    }
-
-    @Override
-    public void validate(ValidationContext ctx, Constraint constraint, Object params) {
-        if (!(params instanceof ResourceAvailabilityParams p)) {
-            return;
-        }
-        if (p.unavailable().isEmpty() && p.availableOnly().isEmpty()) {
-            ctx.error("PARAMS_INVALID", path(ctx, constraint, null), "resource_availability needs unavailable and/or availableOnly windows");
-            return;
-        }
-        validateWindows(ctx, constraint, "unavailable", p.unavailable());
-        validateWindows(ctx, constraint, "availableOnly", p.availableOnly());
-    }
-
-    @Override
-    public ModelCost estimate(CandidateIndexView index, Constraint constraint, Object params) {
-        if (!(params instanceof ResourceAvailabilityParams p)
-                || constraint.enforcement() == IEnumEnforcement.Types.STRICTLY_REQUIRED
-                || constraint.enforcement() == IEnumEnforcement.Types.CONFIGURABLE_HARD) {
-            return ModelCost.ZERO; // HARD: preprocess prune
-        }
-        boolean[] inScope = scopeMask(index, constraint);
-        int[] blocked = blockedRuns(index.horizon(), p);
-        long windows = blocked.length / 2;
-        long candidates = 0;
-        for (int t = 0; t < index.taskCount(); t++) {
-            for (int c = index.candidateBegin(t); c < index.candidateEnd(t); c++) {
-                if (inScope[index.candidateResource(c)] && index.candidateDuration(c) > 0) {
-                    candidates++;
-                }
-            }
-        }
-        long soft = constraint.enforcement() == IEnumEnforcement.Types.SOFT ? candidates : 0;
-        // per candidate: <= 2 literals and <= 3 constraints per reachable window (upper bound: every window)
-        long perCandidate = Math.max(1, windows);
-        return new ModelCost(soft + 2 * candidates * perCandidate, 0, 3 * candidates * perCandidate, 0, 0, 0);
-    }
-
-    @Override
-    public void preprocess(PreprocessContext ctx, Constraint constraint, Object params) {
-        if (!(params instanceof ResourceAvailabilityParams p)) {
-            return;
-        }
-        PlanningProblem problem = ctx.candidates().problem(); // needs from WP2: Mutable.problem()
-        boolean[] inScope = new boolean[problem.resources().size()];
-        for (int r : ctx.resolveResources(constraint.scope())) {
-            inScope[r] = true;
-        }
-        int horizonTicks = (int) ctx.horizon().horizonTicks();
-        int[] blocked = blockedRuns(ctx.horizon(), p);
-        if (blocked.length == 0) {
-            return;
-        }
-        Map<Integer, int[]> runsByDuration = new HashMap<>();
-        for (int t = 0; t < problem.tasks().size(); t++) {
-            // needs from WP2: Mutable.candidateBegin/candidateEnd/candidateResource/candidateDuration
-            for (int c = ctx.candidates().candidateBegin(t); c < ctx.candidates().candidateEnd(t); c++) {
-                int d = ctx.candidates().candidateDuration(c);
-                if (d <= 0 || !inScope[ctx.candidates().candidateResource(c)]) {
-                    continue;
-                }
-                int[] runs = runsByDuration.computeIfAbsent(d, k -> allowedStartRuns(blocked, k, horizonTicks));
-                if (runs.length == 0) {
-                    ctx.pruneCandidate(c, "UNAVAILABLE", constraint.id());
-                } else {
-                    // needs from WP2: Mutable.restrictCandidateStart(candidate, inclusive runs): intersects the candidate start domain
-                    ctx.candidates().restrictCandidateStart(c, runs);
-                }
-            }
-        }
-    }
-
-    @Override
-    public ConstraintChecker checker() {
-        return CHECKER;
-    }
-
-    // ------------------------------------------------------------------ shared semantics
 
     /**
      * Blocked time of the constraint in ticks.
@@ -262,7 +140,9 @@ public class ResourceAvailabilityFamily implements ConstraintFamily {
         return result;
     }
 
-    /** @return {@code mask[r]} = the resource is selected by the constraint scope */
+    /**
+     * @return {@code mask[r]} = the resource is selected by the constraint scope
+     */
     public static boolean[] scopeMask(CandidateIndexView index, Constraint constraint) {
         boolean[] mask = new boolean[index.resourceCount()];
         for (int r : index.resolveResources(constraint.scope())) {
@@ -325,9 +205,126 @@ public class ResourceAvailabilityFamily implements ConstraintFamily {
         return field == null ? base : base + "." + field;
     }
 
+    @Override
+    public String type() {
+        return TYPE;
+    }
+
+    @Override
+    public Class<?> paramsType() {
+        return ResourceAvailabilityParams.class;
+    }
+
+    // ------------------------------------------------------------------ shared semantics
+
+    @Override
+    public Set<IEnumEnforcement.Types> supportedEnforcements() {
+        return SUPPORTED;
+    }
+
+    @Override
+    public String descriptionKey() {
+        return "plan.constraint.resource_availability.description";
+    }
+
+    @Override
+    public List<String> paramsHint() {
+        return List.of("unavailable", "availableOnly");
+    }
+
+    @Override
+    public ScopeKind scopeKind() {
+        return ScopeKind.RESOURCES;
+    }
+
+    @Override
+    public void validate(ValidationContext ctx, Constraint constraint, Object params) {
+        if (!(params instanceof ResourceAvailabilityParams p)) {
+            return;
+        }
+        if (p.unavailable().isEmpty() && p.availableOnly().isEmpty()) {
+            ctx.error("PARAMS_INVALID", path(ctx, constraint, null), "resource_availability needs unavailable and/or availableOnly windows");
+            return;
+        }
+        validateWindows(ctx, constraint, "unavailable", p.unavailable());
+        validateWindows(ctx, constraint, "availableOnly", p.availableOnly());
+    }
+
+    @Override
+    public ModelCost estimate(CandidateIndexView index, Constraint constraint, Object params) {
+        if (!(params instanceof ResourceAvailabilityParams p)
+                || constraint.enforcement() == IEnumEnforcement.Types.STRICTLY_REQUIRED
+                || constraint.enforcement() == IEnumEnforcement.Types.CONFIGURABLE_HARD) {
+            return ModelCost.ZERO; // HARD: preprocess prune
+        }
+        boolean[] inScope = scopeMask(index, constraint);
+        int[] blocked = blockedRuns(index.horizon(), p);
+        long windows = blocked.length / 2;
+        long candidates = 0;
+        for (int t = 0; t < index.taskCount(); t++) {
+            for (int c = index.candidateBegin(t); c < index.candidateEnd(t); c++) {
+                if (inScope[index.candidateResource(c)] && index.candidateDuration(c) > 0) {
+                    candidates++;
+                }
+            }
+        }
+        long soft = constraint.enforcement() == IEnumEnforcement.Types.SOFT ? candidates : 0;
+        // per candidate: <= 2 literals and <= 3 constraints per reachable window (upper bound: every window)
+        long perCandidate = Math.max(1, windows);
+        return new ModelCost(soft + 2 * candidates * perCandidate, 0, 3 * candidates * perCandidate, 0, 0, 0);
+    }
+
+    @Override
+    public void preprocess(PreprocessContext ctx, Constraint constraint, Object params) {
+        if (!(params instanceof ResourceAvailabilityParams p)) {
+            return;
+        }
+        PlanningProblem problem = ctx.candidates().problem(); // needs from WP2: Mutable.problem()
+        boolean[] inScope = new boolean[problem.resources().size()];
+        for (int r : ctx.resolveResources(constraint.scope())) {
+            inScope[r] = true;
+        }
+        int horizonTicks = (int) ctx.horizon().horizonTicks();
+        int[] blocked = blockedRuns(ctx.horizon(), p);
+        if (blocked.length == 0) {
+            return;
+        }
+        Map<Integer, int[]> runsByDuration = new HashMap<>();
+        for (int t = 0; t < problem.tasks().size(); t++) {
+            // needs from WP2: Mutable.candidateBegin/candidateEnd/candidateResource/candidateDuration
+            for (int c = ctx.candidates().candidateBegin(t); c < ctx.candidates().candidateEnd(t); c++) {
+                int d = ctx.candidates().candidateDuration(c);
+                if (d <= 0 || !inScope[ctx.candidates().candidateResource(c)]) {
+                    continue;
+                }
+                int[] runs = runsByDuration.computeIfAbsent(d, k -> allowedStartRuns(blocked, k, horizonTicks));
+                if (runs.length == 0) {
+                    ctx.pruneCandidate(c, "UNAVAILABLE", constraint.id());
+                } else {
+                    // needs from WP2: Mutable.restrictCandidateStart(candidate, inclusive runs): intersects the candidate start domain
+                    ctx.candidates().restrictCandidateStart(c, runs);
+                }
+            }
+        }
+    }
+
+    @Override
+    public ConstraintChecker checker() {
+        return CHECKER;
+    }
+
     // ------------------------------------------------------------------ checker
 
     private static final class Checker implements ConstraintChecker {
+        private static boolean overlaps(int[] blocked, int start, int end) {
+            for (int k = 0; k < blocked.length; k += 2) {
+                if (start < blocked[k + 1] && end > blocked[k]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         @Override
         public void check(CheckContext ctx, Constraint constraint, Object params, ViolationSink sink) {
             if (!(params instanceof ResourceAvailabilityParams p)) {
@@ -352,15 +349,6 @@ public class ResourceAvailabilityFamily implements ConstraintFamily {
                     }
                 }
             }
-        }
-
-        private static boolean overlaps(int[] blocked, int start, int end) {
-            for (int k = 0; k < blocked.length; k += 2) {
-                if (start < blocked[k + 1] && end > blocked[k]) {
-                    return true;
-                }
-            }
-            return false;
         }
     }
 }

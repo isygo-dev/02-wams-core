@@ -29,40 +29,6 @@ import java.util.TreeMap;
 @Component
 public class ForbiddenPairContributor implements CpSatConstraintContributor {
 
-    @Override
-    public String type() {
-        return ForbiddenPairFamily.TYPE;
-    }
-
-    @Override
-    public EnforcementSupport support() {
-        return EnforcementSupport.ALL;
-    }
-
-    @Override
-    public void apply(CpModelContext ctx, CompiledConstraint constraint, Enforcer enforcer) {
-        ForbiddenPairParams p = (ForbiddenPairParams) constraint.params();
-        CandidateIndex index = ctx.index();
-        if (p.kind() == ForbiddenPairParams.Kind.RESOURCE_RESOURCE) {
-            resourcePairs(ctx, index, enforcer, p);
-            return;
-        }
-        boolean overlap = p.relation() == ForbiddenPairParams.Relation.TIME_OVERLAP;
-        for (ForbiddenPairParams.IdPair pair : p.pairs()) {
-            ctx.checkpoint();
-            int a = index.taskIdx(pair.a());
-            int b = index.taskIdx(pair.b());
-            if (a < 0 || b < 0 || a == b) {
-                continue;
-            }
-            if (overlap) {
-                timeOverlap(ctx, enforcer, a, b);
-            } else {
-                sameResource(ctx, index, enforcer, a, b);
-            }
-        }
-    }
-
     private static void timeOverlap(CpModelContext ctx, Enforcer enforcer, int a, int b) {
         CpModel model = ctx.model();
         Literal instance = enforcer.instance(a, -1);
@@ -130,6 +96,40 @@ public class ForbiddenPairContributor implements CpSatConstraintContributor {
                     }
                 }
                 ContribSupport.count(ctx, 0, 0, (long) e.getValue().size() * other.size(), 0);
+            }
+        }
+    }
+
+    @Override
+    public String type() {
+        return ForbiddenPairFamily.TYPE;
+    }
+
+    @Override
+    public EnforcementSupport support() {
+        return EnforcementSupport.ALL;
+    }
+
+    @Override
+    public void apply(CpModelContext ctx, CompiledConstraint constraint, Enforcer enforcer) {
+        ForbiddenPairParams p = (ForbiddenPairParams) constraint.params();
+        CandidateIndex index = ctx.index();
+        if (p.kind() == ForbiddenPairParams.Kind.RESOURCE_RESOURCE) {
+            resourcePairs(ctx, index, enforcer, p);
+            return;
+        }
+        boolean overlap = p.relation() == ForbiddenPairParams.Relation.TIME_OVERLAP;
+        for (ForbiddenPairParams.IdPair pair : p.pairs()) {
+            ctx.checkpoint();
+            int a = index.taskIdx(pair.a());
+            int b = index.taskIdx(pair.b());
+            if (a < 0 || b < 0 || a == b) {
+                continue;
+            }
+            if (overlap) {
+                timeOverlap(ctx, enforcer, a, b);
+            } else {
+                sameResource(ctx, index, enforcer, a, b);
             }
         }
     }

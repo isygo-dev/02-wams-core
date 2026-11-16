@@ -39,7 +39,9 @@ class MaxLoadPerPeriodFamilyTest {
         return FamilyKit.hard("load", "max_load_per_period", params);
     }
 
-    /** s1 [8,16) and s2 [18,26)... both start on day 0; s3 starts on day 1. */
+    /**
+     * s1 [8,16) and s2 [18,26)... both start on day 0; s3 starts on day 1.
+     */
     private Sink check(Constraint c, boolean s3Selected) {
         PlanningProblem p = problem(c);
         View v = View.of(p).allCandidates();

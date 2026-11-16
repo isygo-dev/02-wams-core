@@ -6,11 +6,7 @@ import eu.isygoit.dto.request.Horizon;
 import eu.isygoit.dto.request.PlanningProblem;
 import eu.isygoit.dto.request.params.NoOverlapParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -18,16 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class NoOverlapFamilyTest {
 
@@ -50,6 +39,44 @@ class NoOverlapFamilyTest {
                 List.of(c), List.of(), null, null));
         return ctx;
     }
+
+    /**
+     * windows[t] = {est, lst, duration}.
+     */
+    private static CandidateIndexView index(int[][] windows) {
+        CandidateIndexView idx = mock(CandidateIndexView.class);
+        int[] group = new int[windows.length];
+        for (int t = 0; t < group.length; t++) {
+            group[t] = t;
+        }
+        when(idx.groupTasksByTagPrefix("class-")).thenReturn(new int[][]{group, new int[]{0}});
+        when(idx.resolveTasks(any())).thenReturn(group);
+        when(idx.estStart(anyInt())).thenAnswer(i -> windows[i.getArgument(0, Integer.class)][0]);
+        when(idx.lstStart(anyInt())).thenAnswer(i -> windows[i.getArgument(0, Integer.class)][1]);
+        when(idx.candidateBegin(anyInt())).thenAnswer(i -> i.getArgument(0, Integer.class));
+        when(idx.candidateEnd(anyInt())).thenAnswer(i -> i.getArgument(0, Integer.class) + 1);
+        when(idx.candidateDuration(anyInt())).thenAnswer(i -> windows[i.getArgument(0, Integer.class)][2]);
+        when(idx.duration(anyInt())).thenAnswer(i -> windows[i.getArgument(0, Integer.class)][2]);
+        when(idx.taskId(anyInt())).thenAnswer(i -> "t" + i.getArgument(0));
+        return idx;
+    }
+
+    private static CheckContext checkContext(CandidateIndexView idx, int[][] times, boolean[] selected) {
+        SolutionView sol = mock(SolutionView.class);
+        when(sol.selected(anyInt())).thenAnswer(i -> selected[i.getArgument(0, Integer.class)]);
+        when(sol.start(anyInt())).thenAnswer(i -> times[i.getArgument(0, Integer.class)][0]);
+        when(sol.end(anyInt())).thenAnswer(i -> times[i.getArgument(0, Integer.class)][1]);
+        CheckContext ctx = mock(CheckContext.class);
+        when(ctx.index()).thenReturn(idx);
+        when(ctx.solution()).thenReturn(sol);
+        return ctx;
+    }
+
+    private static <T> T any() {
+        return org.mockito.ArgumentMatchers.any();
+    }
+
+    // ------------------------------------------------------------------ index fake: 4 tasks, one group {0,1,2,3}
 
     @Test
     void identity() {
@@ -95,27 +122,6 @@ class NoOverlapFamilyTest {
         verify(ctx3, never()).error(anyString(), anyString(), anyString());
     }
 
-    // ------------------------------------------------------------------ index fake: 4 tasks, one group {0,1,2,3}
-
-    /** windows[t] = {est, lst, duration}. */
-    private static CandidateIndexView index(int[][] windows) {
-        CandidateIndexView idx = mock(CandidateIndexView.class);
-        int[] group = new int[windows.length];
-        for (int t = 0; t < group.length; t++) {
-            group[t] = t;
-        }
-        when(idx.groupTasksByTagPrefix("class-")).thenReturn(new int[][]{group, new int[]{0}});
-        when(idx.resolveTasks(any())).thenReturn(group);
-        when(idx.estStart(anyInt())).thenAnswer(i -> windows[i.getArgument(0, Integer.class)][0]);
-        when(idx.lstStart(anyInt())).thenAnswer(i -> windows[i.getArgument(0, Integer.class)][1]);
-        when(idx.candidateBegin(anyInt())).thenAnswer(i -> i.getArgument(0, Integer.class));
-        when(idx.candidateEnd(anyInt())).thenAnswer(i -> i.getArgument(0, Integer.class) + 1);
-        when(idx.candidateDuration(anyInt())).thenAnswer(i -> windows[i.getArgument(0, Integer.class)][2]);
-        when(idx.duration(anyInt())).thenAnswer(i -> windows[i.getArgument(0, Integer.class)][2]);
-        when(idx.taskId(anyInt())).thenAnswer(i -> "t" + i.getArgument(0));
-        return idx;
-    }
-
     @Test
     void groupsDropSingletonsAndFollowTheScopeKind() {
         CandidateIndexView idx = index(new int[][]{{0, 10, 5}, {0, 10, 5}});
@@ -126,6 +132,8 @@ class NoOverlapFamilyTest {
                 new NoOverlapParams(null, null));
         assertEquals(1, byTag.length);
     }
+
+    // ------------------------------------------------------------------ checker
 
     @Test
     void conflictPairsSkipPairsTheDomainsAlreadySeparateAndZeroSizeTasks() {
@@ -150,19 +158,6 @@ class NoOverlapFamilyTest {
         assertEquals(9, soft.boolVars());
         ModelCost relaxable = family.estimate(idx, byPrefix(IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION), p);
         assertEquals(6, relaxable.boolVars());
-    }
-
-    // ------------------------------------------------------------------ checker
-
-    private static CheckContext checkContext(CandidateIndexView idx, int[][] times, boolean[] selected) {
-        SolutionView sol = mock(SolutionView.class);
-        when(sol.selected(anyInt())).thenAnswer(i -> selected[i.getArgument(0, Integer.class)]);
-        when(sol.start(anyInt())).thenAnswer(i -> times[i.getArgument(0, Integer.class)][0]);
-        when(sol.end(anyInt())).thenAnswer(i -> times[i.getArgument(0, Integer.class)][1]);
-        CheckContext ctx = mock(CheckContext.class);
-        when(ctx.index()).thenReturn(idx);
-        when(ctx.solution()).thenReturn(sol);
-        return ctx;
     }
 
     private List<String> run(int gap, int[][] times, boolean[] selected) {
@@ -195,9 +190,5 @@ class NoOverlapFamilyTest {
         // with a gap the zero-size task does occupy [5, 5+gap)
         List<String> withGap = run(2, new int[][]{{0, 10}, {2, 8}, {20, 30}, {5, 5}}, new boolean[]{true, false, true, true});
         assertEquals(List.of("t0:1"), withGap);
-    }
-
-    private static <T> T any() {
-        return org.mockito.ArgumentMatchers.any();
     }
 }

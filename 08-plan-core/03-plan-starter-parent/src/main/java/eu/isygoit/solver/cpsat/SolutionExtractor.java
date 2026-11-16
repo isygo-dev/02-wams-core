@@ -25,64 +25,12 @@ import java.util.List;
  */
 public final class SolutionExtractor {
 
-    /** Reason code of an optional task the solver chose not to select (the validator may refine it, design 8.4). */
+    /**
+     * Reason code of an optional task the solver chose not to select (the validator may refine it, design 8.4).
+     */
     public static final String REASON_NOT_SELECTED = "NOT_SELECTED";
 
     private SolutionExtractor() {
-    }
-
-    /** Read access to the values of one solution. */
-    public interface Values {
-        /** @return the value of an integer variable or linear expression */
-        long value(LinearArgument expression);
-
-        /** @return the value of a literal */
-        boolean isTrue(Literal literal);
-
-        /**
-         * @param solver a solver that holds a solution
-         * @return values read from the solver
-         */
-        static Values of(CpSolver solver) {
-            return new Values() {
-                @Override
-                public long value(LinearArgument expression) {
-                    return solver.value(expression);
-                }
-
-                @Override
-                public boolean isTrue(Literal literal) {
-                    return solver.booleanValue(literal);
-                }
-            };
-        }
-
-        /**
-         * @param callback a solution callback inside {@code onSolutionCallback}
-         * @return values read from the callback
-         */
-        static Values of(CpSolverSolutionCallback callback) {
-            return new Values() {
-                @Override
-                public long value(LinearArgument expression) {
-                    return callback.value(expression);
-                }
-
-                @Override
-                public boolean isTrue(Literal literal) {
-                    return callback.booleanValue(literal);
-                }
-            };
-        }
-    }
-
-    /**
-     * The extracted plan.
-     *
-     * @param assignments the selected tasks sorted by start tick then task id
-     * @param unassigned  the unselected optional tasks sorted by task id
-     */
-    public record Extracted(List<Assignment> assignments, List<UnassignedTask> unassigned) {
     }
 
     /**
@@ -155,7 +103,9 @@ public final class SolutionExtractor {
                 resources);
     }
 
-    /** The slot whose start equals the task start (slot mode), preferring one that contains the whole task. */
+    /**
+     * The slot whose start equals the task start (slot mode), preferring one that contains the whole task.
+     */
     private static String slotOf(CandidateIndex index, int t, int start, int duration) {
         int from = index.taskSlotStart[t];
         int to = index.taskSlotStart[t + 1];
@@ -172,5 +122,65 @@ public final class SolutionExtractor {
             }
         }
         return fallback;
+    }
+
+    /**
+     * Read access to the values of one solution.
+     */
+    public interface Values {
+        /**
+         * @param solver a solver that holds a solution
+         * @return values read from the solver
+         */
+        static Values of(CpSolver solver) {
+            return new Values() {
+                @Override
+                public long value(LinearArgument expression) {
+                    return solver.value(expression);
+                }
+
+                @Override
+                public boolean isTrue(Literal literal) {
+                    return solver.booleanValue(literal);
+                }
+            };
+        }
+
+        /**
+         * @param callback a solution callback inside {@code onSolutionCallback}
+         * @return values read from the callback
+         */
+        static Values of(CpSolverSolutionCallback callback) {
+            return new Values() {
+                @Override
+                public long value(LinearArgument expression) {
+                    return callback.value(expression);
+                }
+
+                @Override
+                public boolean isTrue(Literal literal) {
+                    return callback.booleanValue(literal);
+                }
+            };
+        }
+
+        /**
+         * @return the value of an integer variable or linear expression
+         */
+        long value(LinearArgument expression);
+
+        /**
+         * @return the value of a literal
+         */
+        boolean isTrue(Literal literal);
+    }
+
+    /**
+     * The extracted plan.
+     *
+     * @param assignments the selected tasks sorted by start tick then task id
+     * @param unassigned  the unselected optional tasks sorted by task id
+     */
+    public record Extracted(List<Assignment> assignments, List<UnassignedTask> unassigned) {
     }
 }

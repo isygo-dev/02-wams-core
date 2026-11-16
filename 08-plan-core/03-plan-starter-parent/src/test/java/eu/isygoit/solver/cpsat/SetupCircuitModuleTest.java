@@ -2,11 +2,7 @@ package eu.isygoit.solver.cpsat;
 
 import com.google.ortools.sat.IntVar;
 import com.google.ortools.sat.LinearExpr;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.SetupEntry;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Task;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.exception.LimitExceededException;
 import eu.isygoit.solver.cpsat.contrib.ContribFixture;
 import eu.isygoit.solver.family.FamilyKit;
@@ -17,20 +13,14 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-/** G14: three tasks (A, A, B classes) on one unary machine, setup 5 between different classes. */
+/**
+ * G14: three tasks (A, A, B classes) on one unary machine, setup 5 between different classes.
+ */
 class SetupCircuitModuleTest {
 
     private final SetupCircuitModule module = new SetupCircuitModule();
-
-    @BeforeEach
-    void requiresNatives() {
-        Assumptions.assumeTrue(ContribFixture.nativeAvailable(),
-                "OR-Tools natives not available");
-    }
 
     private static Task task(String id, String setupClass) {
         return new Task(id, null, null, 10, null, null, null, null, null, null, null, null, null, null, null, null,
@@ -39,6 +29,12 @@ class SetupCircuitModuleTest {
 
     private static Resource machine(int capacity) {
         return new Resource("m", null, null, capacity, null, null, null, null, null, null, null, "mat", null);
+    }
+
+    @BeforeEach
+    void requiresNatives() {
+        Assumptions.assumeTrue(ContribFixture.nativeAvailable(),
+                "OR-Tools natives not available");
     }
 
     private PlanningProblem problem(int horizon, int capacity, SetupMatrix matrix) {

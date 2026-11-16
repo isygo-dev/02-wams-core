@@ -18,15 +18,19 @@ import java.util.List;
  */
 public record ForbiddenPairParams(Kind kind, Relation relation, List<IdPair> pairs) {
 
+    public ForbiddenPairParams {
+        pairs = CollectionCopies.list(pairs);
+    }
+
     /**
      * What the pairs identify.
      */
-    public enum Kind { TASK_TASK, RESOURCE_RESOURCE }
+    public enum Kind {TASK_TASK, RESOURCE_RESOURCE}
 
     /**
      * Relation forbidden between two tasks (TASK_TASK only).
      */
-    public enum Relation { SAME_RESOURCE, TIME_OVERLAP }
+    public enum Relation {SAME_RESOURCE, TIME_OVERLAP}
 
     /**
      * An unordered pair of ids.
@@ -35,9 +39,5 @@ public record ForbiddenPairParams(Kind kind, Relation relation, List<IdPair> pai
      * @param b second id
      */
     public record IdPair(String a, String b) {
-    }
-
-    public ForbiddenPairParams {
-        pairs = CollectionCopies.list(pairs);
     }
 }

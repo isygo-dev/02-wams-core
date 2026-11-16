@@ -9,12 +9,7 @@ import eu.isygoit.solver.registry.ObjectiveFamilyRegistry;
 import eu.isygoit.solver.registry.TimefoldContributorRegistry;
 import eu.isygoit.solver.spi.ConstraintFamily;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * The documented capability matrix of the Timefold subset (design 4.5) and its derivation from the registries (5.6).
@@ -31,10 +26,14 @@ import java.util.TreeSet;
  */
 public final class TimefoldCapabilities {
 
-    /** The engine id. */
+    /**
+     * The engine id.
+     */
     public static final String ENGINE_ID = "timefold";
 
-    /** The exact supported feature set (design 4.5). */
+    /**
+     * The exact supported feature set (design 4.5).
+     */
     public static final Set<Feature> FEATURES = Collections.unmodifiableSet(EnumSet.of(
             Feature.SLOT_MODE,
             Feature.DURATIONS_VARIABLE,
@@ -55,8 +54,8 @@ public final class TimefoldCapabilities {
      * objectives = the contributor types that have an objective family (or all contributor types when
      * {@code objectiveFamilies} is {@code null}). {@code provesOptimality} is always {@code false}.
      *
-     * @param contributors     the Timefold contributor registry (required)
-     * @param families         the constraint family registry, may be {@code null}
+     * @param contributors      the Timefold contributor registry (required)
+     * @param families          the constraint family registry, may be {@code null}
      * @param objectiveFamilies the objective family registry, may be {@code null}
      * @return the capabilities of engine {@code timefold}
      */

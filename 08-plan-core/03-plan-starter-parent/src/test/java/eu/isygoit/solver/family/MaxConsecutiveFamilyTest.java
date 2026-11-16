@@ -14,15 +14,15 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static eu.isygoit.solver.family.FamilyKit.map;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MaxConsecutiveFamilyTest {
 
     private final MaxConsecutiveFamily family = new MaxConsecutiveFamily();
 
-    /** 4 days of hourly ticks, one nurse, one 8-tick shift per day starting at 08:00. */
+    /**
+     * 4 days of hourly ticks, one nurse, one 8-tick shift per day starting at 08:00.
+     */
     private PlanningProblem problem(Constraint c) {
         return FamilyKit.problem(FamilyKit.horizon(96, 3600), "UTC", List.of(FamilyKit.resource("ana", 1)),
                 List.of(FamilyKit.task("d0", 8), FamilyKit.task("d1", 8), FamilyKit.task("d2", 8), FamilyKit.task("d3", 8)),

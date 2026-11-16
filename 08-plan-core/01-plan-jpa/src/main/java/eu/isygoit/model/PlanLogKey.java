@@ -1,7 +1,6 @@
 package eu.isygoit.model;
 
 import eu.isygoit.model.schema.SchemaColumnConstantName;
-import eu.isygoit.model.schema.SchemaConstantSize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

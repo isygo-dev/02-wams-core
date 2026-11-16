@@ -19,7 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-/** Instance-level formulation: one instance literal per candidate overlapping blocked time. */
+/**
+ * Instance-level formulation: one instance literal per candidate overlapping blocked time.
+ */
 class ResourceAvailabilityContributorTest {
 
     private final ResourceAvailabilityContributor contributor = new ResourceAvailabilityContributor();
@@ -29,7 +31,9 @@ class ResourceAvailabilityContributorTest {
         return new TimeWindow(ContribTestSupport.T0.plusSeconds(from * 60L), ContribTestSupport.T0.plusSeconds(to * 60L));
     }
 
-    /** One task (start domain [est, lst]) with one candidate of the given duration on r0; r1 is out of scope. */
+    /**
+     * One task (start domain [est, lst]) with one candidate of the given duration on r0; r1 is out of scope.
+     */
     private ContribTestSupport fixture(int est, int lst, int duration) {
         ContribTestSupport s = new ContribTestSupport(2);
         s.task(est, lst, false, 0, duration, 1, duration);

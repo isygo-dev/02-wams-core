@@ -84,7 +84,9 @@ public class PlanLogKafkaProducer extends KafkaJsonProducer<LogEntry> {
         });
     }
 
-    /** Warns at most once per minute (debug otherwise) so a broker outage cannot flood the log. */
+    /**
+     * Warns at most once per minute (debug otherwise) so a broker outage cannot flood the log.
+     */
     private void warnThrottled(String message, String reason) {
         long now = System.currentTimeMillis();
         long last = lastWarnMillis.get();

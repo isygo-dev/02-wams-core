@@ -18,6 +18,15 @@ import java.util.List;
 @Component
 public class PreferredWindowsContributor implements CpSatConstraintContributor {
 
+    private static Literal candidateFor(CpModelContext ctx, CandidateIndexView index, int task, int resource) {
+        for (int c = index.candidateBegin(task); c < index.candidateEnd(task); c++) {
+            if (index.candidateResource(c) == resource) {
+                return ctx.cand(c);
+            }
+        }
+        return null;
+    }
+
     @Override
     public String type() {
         return PreferredWindowsFamily.TYPE;
@@ -63,14 +72,5 @@ public class PreferredWindowsContributor implements CpSatConstraintContributor {
             constraints += 2;
         }
         ctx.count(boolVars, 0, constraints, 0);
-    }
-
-    private static Literal candidateFor(CpModelContext ctx, CandidateIndexView index, int task, int resource) {
-        for (int c = index.candidateBegin(task); c < index.candidateEnd(task); c++) {
-            if (index.candidateResource(c) == resource) {
-                return ctx.cand(c);
-            }
-        }
-        return null;
     }
 }

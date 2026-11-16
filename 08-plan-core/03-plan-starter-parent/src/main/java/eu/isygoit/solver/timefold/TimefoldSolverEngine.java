@@ -9,30 +9,11 @@ import ai.timefold.solver.core.config.solver.termination.TerminationConfig;
 import eu.isygoit.config.PlanLimitsProperties;
 import eu.isygoit.dto.request.Resource;
 import eu.isygoit.dto.request.SolverOptions;
-import eu.isygoit.dto.response.Assignment;
-import eu.isygoit.dto.response.Diagnostics;
-import eu.isygoit.dto.response.Metrics;
-import eu.isygoit.dto.response.ModelStats;
-import eu.isygoit.dto.response.PlanningSolution;
-import eu.isygoit.dto.response.ResourceAssignment;
-import eu.isygoit.dto.response.SearchStats;
-import eu.isygoit.dto.response.SolveResult;
-import eu.isygoit.dto.response.TierValue;
-import eu.isygoit.dto.response.UnassignedTask;
+import eu.isygoit.dto.response.*;
 import eu.isygoit.enums.IEnumEnforcement;
 import eu.isygoit.enums.IEnumSolverStatus;
 import eu.isygoit.exception.InvalidRequestException;
-import eu.isygoit.solver.CompiledConstraint;
-import eu.isygoit.solver.CompiledObjective;
-import eu.isygoit.solver.CompiledProblem;
-import eu.isygoit.solver.EngineCapabilities;
-import eu.isygoit.solver.IncumbentSnapshot;
-import eu.isygoit.solver.SolveCancelledException;
-import eu.isygoit.solver.SolveContext;
-import eu.isygoit.solver.SolveListener;
-import eu.isygoit.solver.SolveProgress;
-import eu.isygoit.solver.SolverCancellationToken;
-import eu.isygoit.solver.SolverEngine;
+import eu.isygoit.solver.*;
 import eu.isygoit.solver.index.CandidateIndex;
 import eu.isygoit.solver.registry.ConstraintFamilyRegistry;
 import eu.isygoit.solver.registry.ObjectiveFamilyRegistry;
@@ -42,12 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -81,7 +57,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class TimefoldSolverEngine implements SolverEngine {
 
-    /** Minimum interval between two progress events. */
+    /**
+     * Minimum interval between two progress events.
+     */
     private static final long PROGRESS_INTERVAL_MILLIS = 1000L;
 
     private final TimefoldContributorRegistry contributors;
@@ -104,10 +82,102 @@ public class TimefoldSolverEngine implements SolverEngine {
         this.limits = limits == null ? new PlanLimitsProperties() : limits;
     }
 
-    /** Convenience constructor with default limits (tests). */
+    /**
+     * Convenience constructor with default limits (tests).
+     */
     public TimefoldSolverEngine(TimefoldContributorRegistry contributors, ConstraintFamilyRegistry families,
                                 ObjectiveFamilyRegistry objectiveFamilies) {
         this(contributors, families, objectiveFamilies, new PlanLimitsProperties());
+    }
+
+    private static void unsupported(String feature, String detail) {
+        throw new InvalidRequestException("ENGINE_UNSUPPORTED_FEATURE",
+                "Engine 'timefold' does not support " + feature + ": " + detail);
+    }
+
+    private static int tierOf(CompiledProblem problem) {
+        int tier = Integer.MAX_VALUE;
+        for (CompiledObjective co : problem.objectives()) {
+            if (co.objective().weight() > 0) {
+                tier = Math.min(tier, co.tier());
+            }
+        }
+        return tier == Integer.MAX_VALUE ? 0 : tier;
+    }
+
+    private static String forbiddenBySuffix(TimefoldBuildContext ctx, int task) {
+        Set<String> ids = ctx.forbiddingConstraints(task);
+        return ids.isEmpty() ? "" : " (options removed by " + String.join(", ", ids) + ")";
+    }
+
+    // ------------------------------------------------------------------------------------------------ building
+
+    /**
+     * Trivial upper bound of the soft score (capacity relaxed): a required task pays its cheapest option, an optional
+     * task is selected only when its reward exceeds its cheapest option. Reaching it proves the plan best possible, so
+     * it is used as the best-score termination limit. Guarded to 2^53 like every objective sum.
+     */
+    private static long scoreUpperBound(SlotOptions options, CandidateIndex index) {
+        long bound = 0L;
+        long magnitude = 0L;
+        for (int t = 0; t < options.taskCount(); t++) {
+            if (options.taskOptionCount(t) == 0) {
+                continue;
+            }
+            long minPenalty = Long.MAX_VALUE;
+            long maxPenalty = 0L;
+            for (int o = options.taskOptionStart(t); o < options.taskOptionEnd(t); o++) {
+                minPenalty = Math.min(minPenalty, options.penalty(o));
+                maxPenalty = Math.max(maxPenalty, options.penalty(o));
+            }
+            long reward = options.reward(t);
+            long best = index.required(t) ? -minPenalty : Math.max(0L, reward - minPenalty);
+            bound = ScaledMath.guard(ScaledMath.addExact(bound, best), "Timefold score bound");
+            magnitude = ScaledMath.guard(ScaledMath.addExact(magnitude, ScaledMath.addExact(maxPenalty, reward)),
+                    "Timefold score magnitude");
+        }
+        return bound;
+    }
+
+    private static List<Assignment> extractAssignments(TimefoldPlan plan, SlotOptions frozen, CandidateIndex index) {
+        List<Assignment> assignments = new ArrayList<>();
+        for (TimefoldTask task : plan.getTasks()) {
+            if (task.getOption() != null) {
+                assignments.add(assignment(index, frozen, task.getTaskIdx(), task.getOption()));
+            }
+        }
+        assignments.sort(Comparator.comparingInt(Assignment::startTick).thenComparing(Assignment::taskId));
+        return assignments;
+    }
+
+    private static Assignment assignment(CandidateIndex index, SlotOptions options, int task, int option) {
+        int start = options.start(option);
+        int end = options.end(option);
+        int candidate = options.candidate(option);
+        String role = index.roles[index.reqRole[index.taskReqStart[task]]];
+        return new Assignment(index.taskId(task), !index.required(task), start, end,
+                index.horizon().toInstant(start), index.horizon().toInstant(end), index.slotId(options.slot(option)),
+                List.of(new ResourceAssignment(index.resourceId(options.resource(option)), role,
+                        index.candidateAmount(candidate))));
+    }
+
+    private static Metrics metrics(CompiledProblem problem, long startNanos, long buildStartNanos, long solveStartNanos,
+                                   long endNanos, int optionCount, int entities, int solutions, long firstSolutionMillis,
+                                   int tier, Long tierValue, Double objective) {
+        CandidateIndex index = problem.index();
+        long buildMillis = Math.max(0L, (solveStartNanos - buildStartNanos) / 1_000_000L);
+        long solveMillis = Math.max(0L, (endNanos - solveStartNanos) / 1_000_000L);
+        long durationMillis = Math.max(0L, (endNanos - startNanos) / 1_000_000L);
+        ModelStats model = new ModelStats(index.taskCount(), index.resourceCount(), optionCount, 0, entities, 4, 0, 0, 0,
+                0, 0);
+        SearchStats search = new SearchStats(0L, 0L, solutions, objective, null, null, tierValue == null ? 0 : 1);
+        List<TierValue> tiers = tierValue == null ? List.of() : List.of(new TierValue(tier, tierValue, null, "FEASIBLE"));
+        return new Metrics(durationMillis, buildMillis, solveMillis, firstSolutionMillis < 0 ? null : firstSolutionMillis,
+                1, model, search, tiers);
+    }
+
+    private static long elapsedMillis(long startNanos) {
+        return Math.max(0L, (System.nanoTime() - startNanos) / 1_000_000L);
     }
 
     @Override
@@ -119,6 +189,8 @@ public class TimefoldSolverEngine implements SolverEngine {
     public EngineCapabilities capabilities() {
         return TimefoldCapabilities.of(contributors, families, objectiveFamilies);
     }
+
+    // ------------------------------------------------------------------------------------------------ results
 
     @Override
     public SolveResult solve(CompiledProblem problem, SolveContext context) {
@@ -160,7 +232,7 @@ public class TimefoldSolverEngine implements SolverEngine {
         }
         if (!emptyRequired.isEmpty()) {
             return unknown("No schedulable option remains for required task(s): " + String.join(", ", emptyRequired)
-                    + " (infeasibility is not proven by this engine)", problem, startNanos, buildStartNanos,
+                            + " (infeasibility is not proven by this engine)", problem, startNanos, buildStartNanos,
                     frozen.optionCount(), entities.size());
         }
         long scoreBound = scoreUpperBound(frozen, index);
@@ -240,8 +312,6 @@ public class TimefoldSolverEngine implements SolverEngine {
                 solveStartNanos);
     }
 
-    // ------------------------------------------------------------------------------------------------ building
-
     private void applyContributors(CompiledProblem problem, TimefoldBuildContext ctx, Runnable checkpoint) {
         for (CompiledConstraint cc : problem.constraints()) {
             checkpoint.run();
@@ -272,7 +342,9 @@ public class TimefoldSolverEngine implements SolverEngine {
         }
     }
 
-    /** Defensive re-check of the subset (the ProblemVerifier normally rejects these first); never silently ignored. */
+    /**
+     * Defensive re-check of the subset (the ProblemVerifier normally rejects these first); never silently ignored.
+     */
     private void checkSupported(CompiledProblem problem) {
         CandidateIndex index = problem.index();
         if (index.edgeCount > 0) {
@@ -317,53 +389,6 @@ public class TimefoldSolverEngine implements SolverEngine {
         }
     }
 
-    private static void unsupported(String feature, String detail) {
-        throw new InvalidRequestException("ENGINE_UNSUPPORTED_FEATURE",
-                "Engine 'timefold' does not support " + feature + ": " + detail);
-    }
-
-    private static int tierOf(CompiledProblem problem) {
-        int tier = Integer.MAX_VALUE;
-        for (CompiledObjective co : problem.objectives()) {
-            if (co.objective().weight() > 0) {
-                tier = Math.min(tier, co.tier());
-            }
-        }
-        return tier == Integer.MAX_VALUE ? 0 : tier;
-    }
-
-    private static String forbiddenBySuffix(TimefoldBuildContext ctx, int task) {
-        Set<String> ids = ctx.forbiddingConstraints(task);
-        return ids.isEmpty() ? "" : " (options removed by " + String.join(", ", ids) + ")";
-    }
-
-    /**
-     * Trivial upper bound of the soft score (capacity relaxed): a required task pays its cheapest option, an optional
-     * task is selected only when its reward exceeds its cheapest option. Reaching it proves the plan best possible, so
-     * it is used as the best-score termination limit. Guarded to 2^53 like every objective sum.
-     */
-    private static long scoreUpperBound(SlotOptions options, CandidateIndex index) {
-        long bound = 0L;
-        long magnitude = 0L;
-        for (int t = 0; t < options.taskCount(); t++) {
-            if (options.taskOptionCount(t) == 0) {
-                continue;
-            }
-            long minPenalty = Long.MAX_VALUE;
-            long maxPenalty = 0L;
-            for (int o = options.taskOptionStart(t); o < options.taskOptionEnd(t); o++) {
-                minPenalty = Math.min(minPenalty, options.penalty(o));
-                maxPenalty = Math.max(maxPenalty, options.penalty(o));
-            }
-            long reward = options.reward(t);
-            long best = index.required(t) ? -minPenalty : Math.max(0L, reward - minPenalty);
-            bound = ScaledMath.guard(ScaledMath.addExact(bound, best), "Timefold score bound");
-            magnitude = ScaledMath.guard(ScaledMath.addExact(magnitude, ScaledMath.addExact(maxPenalty, reward)),
-                    "Timefold score magnitude");
-        }
-        return bound;
-    }
-
     private SolverConfig solverConfig(SolverOptions options, long remainingMillis, long scoreBound) {
         TerminationConfig termination = new TerminationConfig()
                 .withSpentLimit(Duration.ofMillis(remainingMillis))
@@ -383,8 +408,6 @@ public class TimefoldSolverEngine implements SolverEngine {
                 .withEnvironmentMode(deterministic ? EnvironmentMode.REPRODUCIBLE : EnvironmentMode.NON_REPRODUCIBLE)
                 .withRandomSeed(options.seed());
     }
-
-    // ------------------------------------------------------------------------------------------------ results
 
     private SolveResult finished(IEnumSolverStatus.Types status, CompiledProblem problem, SlotOptions frozen,
                                  List<TimefoldTask> tasks, long tierValue, long startNanos, long buildStartNanos,
@@ -424,28 +447,6 @@ public class TimefoldSolverEngine implements SolverEngine {
                         tierValue, (double) tierValue));
     }
 
-    private static List<Assignment> extractAssignments(TimefoldPlan plan, SlotOptions frozen, CandidateIndex index) {
-        List<Assignment> assignments = new ArrayList<>();
-        for (TimefoldTask task : plan.getTasks()) {
-            if (task.getOption() != null) {
-                assignments.add(assignment(index, frozen, task.getTaskIdx(), task.getOption()));
-            }
-        }
-        assignments.sort(Comparator.comparingInt(Assignment::startTick).thenComparing(Assignment::taskId));
-        return assignments;
-    }
-
-    private static Assignment assignment(CandidateIndex index, SlotOptions options, int task, int option) {
-        int start = options.start(option);
-        int end = options.end(option);
-        int candidate = options.candidate(option);
-        String role = index.roles[index.reqRole[index.taskReqStart[task]]];
-        return new Assignment(index.taskId(task), !index.required(task), start, end,
-                index.horizon().toInstant(start), index.horizon().toInstant(end), index.slotId(options.slot(option)),
-                List.of(new ResourceAssignment(index.resourceId(options.resource(option)), role,
-                        index.candidateAmount(candidate))));
-    }
-
     private SolveResult unknown(String message, CompiledProblem problem, long startNanos, long buildStartNanos,
                                 int options, int entities) {
         long now = System.nanoTime();
@@ -453,24 +454,5 @@ public class TimefoldSolverEngine implements SolverEngine {
                 new Diagnostics(message, List.of(), null, List.of(), Map.of()),
                 metrics(problem, startNanos, buildStartNanos, now, now, options, entities, 0, -1L, tierOf(problem),
                         null, null));
-    }
-
-    private static Metrics metrics(CompiledProblem problem, long startNanos, long buildStartNanos, long solveStartNanos,
-                                   long endNanos, int optionCount, int entities, int solutions, long firstSolutionMillis,
-                                   int tier, Long tierValue, Double objective) {
-        CandidateIndex index = problem.index();
-        long buildMillis = Math.max(0L, (solveStartNanos - buildStartNanos) / 1_000_000L);
-        long solveMillis = Math.max(0L, (endNanos - solveStartNanos) / 1_000_000L);
-        long durationMillis = Math.max(0L, (endNanos - startNanos) / 1_000_000L);
-        ModelStats model = new ModelStats(index.taskCount(), index.resourceCount(), optionCount, 0, entities, 4, 0, 0, 0,
-                0, 0);
-        SearchStats search = new SearchStats(0L, 0L, solutions, objective, null, null, tierValue == null ? 0 : 1);
-        List<TierValue> tiers = tierValue == null ? List.of() : List.of(new TierValue(tier, tierValue, null, "FEASIBLE"));
-        return new Metrics(durationMillis, buildMillis, solveMillis, firstSolutionMillis < 0 ? null : firstSolutionMillis,
-                1, model, search, tiers);
-    }
-
-    private static long elapsedMillis(long startNanos) {
-        return Math.max(0L, (System.nanoTime() - startNanos) / 1_000_000L);
     }
 }

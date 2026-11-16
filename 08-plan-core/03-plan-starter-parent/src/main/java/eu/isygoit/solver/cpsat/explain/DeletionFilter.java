@@ -21,56 +21,6 @@ import java.util.function.LongSupplier;
  */
 public final class DeletionFilter {
 
-    /** Verdict of the oracle on a candidate subset. */
-    public enum Kind {
-        /** The subset is proven infeasible; {@link Verdict#subset()} is an infeasible subset of it. */
-        INFEASIBLE,
-        /** The subset is feasible (or at least satisfiable): the removed item is necessary. */
-        SATISFIABLE,
-        /** No answer within the limit. */
-        UNKNOWN
-    }
-
-    /**
-     * @param kind   the verdict
-     * @param subset for {@link Kind#INFEASIBLE}: a subset of the tested set that is still infeasible; {@code null} or
-     *               empty means "use the whole tested set"
-     */
-    public record Verdict(Kind kind, int[] subset) {
-        /** @return an INFEASIBLE verdict */
-        public static Verdict infeasible(int[] subset) {
-            return new Verdict(Kind.INFEASIBLE, subset);
-        }
-
-        /** @return a SATISFIABLE verdict */
-        public static Verdict satisfiable() {
-            return new Verdict(Kind.SATISFIABLE, null);
-        }
-
-        /** @return an UNKNOWN verdict */
-        public static Verdict unknown() {
-            return new Verdict(Kind.UNKNOWN, null);
-        }
-    }
-
-    /** Decides whether a set of assumption indices is infeasible. */
-    @FunctionalInterface
-    public interface Oracle {
-        /**
-         * @param subset the candidate set (never modified by the oracle)
-         * @return the verdict
-         */
-        Verdict test(int[] subset);
-    }
-
-    /**
-     * @param core        the final core (ascending order not required)
-     * @param minimal     whether it is proven minimal
-     * @param oracleCalls number of oracle invocations
-     */
-    public record Result(int[] core, boolean minimal, int oracleCalls) {
-    }
-
     private final int maxItems;
     private final long deadlineNanos;
     private final LongSupplier nanoClock;
@@ -155,5 +105,69 @@ public final class DeletionFilter {
             out[pos++] = value;
         }
         return new Result(out, complete && allConclusive, calls);
+    }
+    /**
+     * Verdict of the oracle on a candidate subset.
+     */
+    public enum Kind {
+        /**
+         * The subset is proven infeasible; {@link Verdict#subset()} is an infeasible subset of it.
+         */
+        INFEASIBLE,
+        /**
+         * The subset is feasible (or at least satisfiable): the removed item is necessary.
+         */
+        SATISFIABLE,
+        /**
+         * No answer within the limit.
+         */
+        UNKNOWN
+    }
+    /**
+     * Decides whether a set of assumption indices is infeasible.
+     */
+    @FunctionalInterface
+    public interface Oracle {
+        /**
+         * @param subset the candidate set (never modified by the oracle)
+         * @return the verdict
+         */
+        Verdict test(int[] subset);
+    }
+
+    /**
+     * @param kind   the verdict
+     * @param subset for {@link Kind#INFEASIBLE}: a subset of the tested set that is still infeasible; {@code null} or
+     *               empty means "use the whole tested set"
+     */
+    public record Verdict(Kind kind, int[] subset) {
+        /**
+         * @return an INFEASIBLE verdict
+         */
+        public static Verdict infeasible(int[] subset) {
+            return new Verdict(Kind.INFEASIBLE, subset);
+        }
+
+        /**
+         * @return a SATISFIABLE verdict
+         */
+        public static Verdict satisfiable() {
+            return new Verdict(Kind.SATISFIABLE, null);
+        }
+
+        /**
+         * @return an UNKNOWN verdict
+         */
+        public static Verdict unknown() {
+            return new Verdict(Kind.UNKNOWN, null);
+        }
+    }
+
+    /**
+     * @param core        the final core (ascending order not required)
+     * @param minimal     whether it is proven minimal
+     * @param oracleCalls number of oracle invocations
+     */
+    public record Result(int[] core, boolean minimal, int oracleCalls) {
     }
 }

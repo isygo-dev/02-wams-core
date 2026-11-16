@@ -4,16 +4,7 @@ import eu.isygoit.dto.request.Constraint;
 import eu.isygoit.dto.request.Horizon;
 import eu.isygoit.dto.request.params.TimeWindowParams;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ConstraintChecker;
-import eu.isygoit.solver.spi.ConstraintFamily;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.PreprocessContext;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -38,22 +29,79 @@ import java.util.Set;
 @Component
 public class TimeWindowFamily implements ConstraintFamily {
 
-    /** The family id. */
+    /**
+     * The family id.
+     */
     public static final String TYPE = "time_window";
-    /** Marker of an absent bound in {@link #bounds}. */
+    /**
+     * Marker of an absent bound in {@link #bounds}.
+     */
     public static final int NONE = Integer.MIN_VALUE;
-    /** Index of the earliest-start bound in {@link #bounds}. */
+    /**
+     * Index of the earliest-start bound in {@link #bounds}.
+     */
     public static final int EARLIEST_START = 0;
-    /** Index of the latest-start bound in {@link #bounds}. */
+    /**
+     * Index of the latest-start bound in {@link #bounds}.
+     */
     public static final int LATEST_START = 1;
-    /** Index of the earliest-end bound in {@link #bounds}. */
+    /**
+     * Index of the earliest-end bound in {@link #bounds}.
+     */
     public static final int EARLIEST_END = 2;
-    /** Index of the latest-end bound in {@link #bounds}. */
+    /**
+     * Index of the latest-end bound in {@link #bounds}.
+     */
     public static final int LATEST_END = 3;
 
     private static final Set<IEnumEnforcement.Types> SUPPORTED =
             Collections.unmodifiableSet(EnumSet.allOf(IEnumEnforcement.Types.class));
     private static final ConstraintChecker CHECKER = new Checker();
+    private static final String[] CODES = {"EARLIEST_START_VIOLATED", "LATEST_START_VIOLATED", "EARLIEST_END_VIOLATED",
+            "LATEST_END_VIOLATED"};
+
+    /**
+     * Converts the four bounds to ticks (clamped to {@code [0, horizonTicks]}); the instants were validated as aligned.
+     *
+     * @return {@code {earliestStart, latestStart, earliestEnd, latestEnd}}, {@link #NONE} for an absent bound
+     */
+    public static int[] bounds(Horizon h, TimeWindowParams p) {
+        return new int[]{
+                toTick(h, p.earliestStart()), toTick(h, p.latestStart()), toTick(h, p.earliestEnd()), toTick(h, p.latestEnd())};
+    }
+
+    private static int toTick(Horizon h, Instant t) {
+        if (t == null) {
+            return NONE;
+        }
+        return Math.max(0, Math.min((int) h.horizonTicks(), h.floorTick(t)));
+    }
+
+    /**
+     * Violation (ticks outside the window) of the bound {@code which} for a task occupying {@code [start, end)}.
+     *
+     * @param which one of {@link #EARLIEST_START} ... {@link #LATEST_END}
+     * @param bound the bound tick, not {@link #NONE}
+     * @return the number of ticks violated, 0 when satisfied
+     */
+    public static long violation(int which, int bound, int start, int end) {
+        return switch (which) {
+            case EARLIEST_START -> Math.max(0L, (long) bound - start);
+            case LATEST_START -> Math.max(0L, (long) start - bound);
+            case EARLIEST_END -> Math.max(0L, (long) bound - end);
+            default -> Math.max(0L, (long) end - bound);
+        };
+    }
+
+    private static int tick(ValidationContext ctx, Constraint constraint, String field, Instant t) {
+        return t == null ? -1 : ctx.tick(t, path(ctx, constraint, field));
+    }
+
+    private static String path(ValidationContext ctx, Constraint constraint, String field) {
+        int i = ctx.problem().constraints().indexOf(constraint);
+        String base = "constraints[" + (i < 0 ? "?" : String.valueOf(i)) + "].params";
+        return field == null ? base : base + "." + field;
+    }
 
     @Override
     public String type() {
@@ -74,6 +122,8 @@ public class TimeWindowFamily implements ConstraintFamily {
     public String descriptionKey() {
         return "plan.constraint.time_window.description";
     }
+
+    // ------------------------------------------------------------------ shared semantics
 
     @Override
     public List<String> paramsHint() {
@@ -160,60 +210,12 @@ public class TimeWindowFamily implements ConstraintFamily {
         }
     }
 
+    // ------------------------------------------------------------------ checker
+
     @Override
     public ConstraintChecker checker() {
         return CHECKER;
     }
-
-    // ------------------------------------------------------------------ shared semantics
-
-    /**
-     * Converts the four bounds to ticks (clamped to {@code [0, horizonTicks]}); the instants were validated as aligned.
-     *
-     * @return {@code {earliestStart, latestStart, earliestEnd, latestEnd}}, {@link #NONE} for an absent bound
-     */
-    public static int[] bounds(Horizon h, TimeWindowParams p) {
-        return new int[]{
-                toTick(h, p.earliestStart()), toTick(h, p.latestStart()), toTick(h, p.earliestEnd()), toTick(h, p.latestEnd())};
-    }
-
-    private static int toTick(Horizon h, Instant t) {
-        if (t == null) {
-            return NONE;
-        }
-        return Math.max(0, Math.min((int) h.horizonTicks(), h.floorTick(t)));
-    }
-
-    /**
-     * Violation (ticks outside the window) of the bound {@code which} for a task occupying {@code [start, end)}.
-     *
-     * @param which one of {@link #EARLIEST_START} ... {@link #LATEST_END}
-     * @param bound the bound tick, not {@link #NONE}
-     * @return the number of ticks violated, 0 when satisfied
-     */
-    public static long violation(int which, int bound, int start, int end) {
-        return switch (which) {
-            case EARLIEST_START -> Math.max(0L, (long) bound - start);
-            case LATEST_START -> Math.max(0L, (long) start - bound);
-            case EARLIEST_END -> Math.max(0L, (long) bound - end);
-            default -> Math.max(0L, (long) end - bound);
-        };
-    }
-
-    private static int tick(ValidationContext ctx, Constraint constraint, String field, Instant t) {
-        return t == null ? -1 : ctx.tick(t, path(ctx, constraint, field));
-    }
-
-    private static String path(ValidationContext ctx, Constraint constraint, String field) {
-        int i = ctx.problem().constraints().indexOf(constraint);
-        String base = "constraints[" + (i < 0 ? "?" : String.valueOf(i)) + "].params";
-        return field == null ? base : base + "." + field;
-    }
-
-    // ------------------------------------------------------------------ checker
-
-    private static final String[] CODES = {"EARLIEST_START_VIOLATED", "LATEST_START_VIOLATED", "EARLIEST_END_VIOLATED",
-            "LATEST_END_VIOLATED"};
 
     private static final class Checker implements ConstraintChecker {
         @Override

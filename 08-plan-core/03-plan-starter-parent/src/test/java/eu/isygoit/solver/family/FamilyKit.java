@@ -1,31 +1,14 @@
 package eu.isygoit.solver.family;
 
 import eu.isygoit.config.PlanLimitsProperties;
-import eu.isygoit.dto.request.Constraint;
-import eu.isygoit.dto.request.ConstraintScope;
-import eu.isygoit.dto.request.Horizon;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.ResourceRequirement;
-import eu.isygoit.dto.request.Task;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.enums.IEnumEnforcement;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
-import eu.isygoit.solver.spi.ViolationSink;
+import eu.isygoit.solver.spi.*;
 import eu.isygoit.util.ParamsBinder;
 import eu.isygoit.util.ScaledMath;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Test kit of the WP4b family tests: builders for the request records and plain-Java fakes of the SPI views
@@ -35,7 +18,9 @@ import java.util.TreeMap;
  */
 public final class FamilyKit {
 
-    /** Start of every test horizon (a Monday, UTC). */
+    /**
+     * Start of every test horizon (a Monday, UTC).
+     */
     public static final Instant START = Instant.parse("2026-09-07T00:00:00Z");
 
     private FamilyKit() {
@@ -102,7 +87,46 @@ public final class FamilyKit {
 
     // ------------------------------------------------------------------ candidate index fake
 
-    /** Plain fake of the index view; candidates are declared with {@code candidate(..)} and frozen on first read. */
+    /**
+     * Runs the family checker on a constraint.
+     */
+    public static Sink run(eu.isygoit.solver.spi.ConstraintFamily family, PlanningProblem problem, View view,
+                           Solution solution, Constraint constraint) {
+        Object params = ParamsBinder.bind(constraint.params(), family.paramsType());
+        Sink sink = new Sink();
+        family.checker().check(check(problem, view, solution), constraint, params, sink);
+        return sink;
+    }
+
+    // ------------------------------------------------------------------ solution fake
+
+    /**
+     * Binds the params of a constraint with the family's type.
+     */
+    public static Object bind(eu.isygoit.solver.spi.ConstraintFamily family, Constraint constraint) {
+        return ParamsBinder.bind(constraint.params(), family.paramsType());
+    }
+
+    // ------------------------------------------------------------------ validation + sink
+
+    /**
+     * Builds a params map from alternating keys and values.
+     */
+    public static Map<String, Object> map(Object... keyValues) {
+        Map<String, Object> out = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < keyValues.length; i += 2) {
+            out.put((String) keyValues[i], keyValues[i + 1]);
+        }
+        return out;
+    }
+
+    public static Set<String> setOf(String... values) {
+        return new LinkedHashSet<>(Arrays.asList(values));
+    }
+
+    /**
+     * Plain fake of the index view; candidates are declared with {@code candidate(..)} and frozen on first read.
+     */
     public static final class View implements CandidateIndexView {
         private final PlanningProblem problem;
         private final PlanLimitsProperties limits = new PlanLimitsProperties();
@@ -133,7 +157,9 @@ public final class FamilyKit {
             return new View(problem);
         }
 
-        /** Adds a candidate with the task duration and role "default". */
+        /**
+         * Adds a candidate with the task duration and role "default".
+         */
         public View candidate(String task, String resource) {
             return candidate(task, resource, "default");
         }
@@ -146,7 +172,9 @@ public final class FamilyKit {
             return this;
         }
 
-        /** Every task can use every resource. */
+        /**
+         * Every task can use every resource.
+         */
         public View allCandidates() {
             for (Task t : problem.tasks()) {
                 for (Resource r : problem.resources()) {
@@ -475,9 +503,9 @@ public final class FamilyKit {
         }
     }
 
-    // ------------------------------------------------------------------ solution fake
-
-    /** Hand-built solution: tasks are selected by {@code assign}. */
+    /**
+     * Hand-built solution: tasks are selected by {@code assign}.
+     */
     public static final class Solution implements SolutionView {
         private final View view;
         private final int[] start;
@@ -498,7 +526,9 @@ public final class FamilyKit {
             }
         }
 
-        /** Assigns the task with role "default" to the named resources. */
+        /**
+         * Assigns the task with role "default" to the named resources.
+         */
         public Solution assign(String task, int startTick, int endTick, String... resourceIds) {
             int t = view.taskIdx(task);
             selected[t] = true;
@@ -511,7 +541,9 @@ public final class FamilyKit {
             return this;
         }
 
-        /** Selects the task without any resource yet (see {@link #addResource}). */
+        /**
+         * Selects the task without any resource yet (see {@link #addResource}).
+         */
         public Solution select(String task, int startTick, int endTick) {
             int t = view.taskIdx(task);
             selected[t] = true;
@@ -520,7 +552,9 @@ public final class FamilyKit {
             return this;
         }
 
-        /** Adds one more resource under a given role to an already assigned task. */
+        /**
+         * Adds one more resource under a given role to an already assigned task.
+         */
         public Solution addResource(String task, String role, String resourceId) {
             int t = view.taskIdx(task);
             resources.get(t).add(new int[]{view.resourceIdx(resourceId), 1});
@@ -586,13 +620,13 @@ public final class FamilyKit {
         }
     }
 
-    // ------------------------------------------------------------------ validation + sink
-
-    /** Collecting validation context. */
+    /**
+     * Collecting validation context.
+     */
     public static final class Validation implements ValidationContext {
-        private final View view;
         public final List<String> errors = new ArrayList<>();
         public final List<String> warnings = new ArrayList<>();
+        private final View view;
 
         public Validation(View view) {
             this.view = view;
@@ -653,11 +687,10 @@ public final class FamilyKit {
         }
     }
 
-    /** Collecting violation sink. */
+    /**
+     * Collecting violation sink.
+     */
     public static final class Sink implements ViolationSink {
-        public record Violation(String taskId, String resourceId, String code, String message, long measure) {
-        }
-
         public final List<Violation> violations = new ArrayList<>();
 
         @Override
@@ -672,32 +705,8 @@ public final class FamilyKit {
         public long measure() {
             return violations.stream().mapToLong(Violation::measure).sum();
         }
-    }
 
-    /** Runs the family checker on a constraint. */
-    public static Sink run(eu.isygoit.solver.spi.ConstraintFamily family, PlanningProblem problem, View view,
-                           Solution solution, Constraint constraint) {
-        Object params = ParamsBinder.bind(constraint.params(), family.paramsType());
-        Sink sink = new Sink();
-        family.checker().check(check(problem, view, solution), constraint, params, sink);
-        return sink;
-    }
-
-    /** Binds the params of a constraint with the family's type. */
-    public static Object bind(eu.isygoit.solver.spi.ConstraintFamily family, Constraint constraint) {
-        return ParamsBinder.bind(constraint.params(), family.paramsType());
-    }
-
-    /** Builds a params map from alternating keys and values. */
-    public static Map<String, Object> map(Object... keyValues) {
-        Map<String, Object> out = new java.util.LinkedHashMap<>();
-        for (int i = 0; i < keyValues.length; i += 2) {
-            out.put((String) keyValues[i], keyValues[i + 1]);
+        public record Violation(String taskId, String resourceId, String code, String message, long measure) {
         }
-        return out;
-    }
-
-    public static Set<String> setOf(String... values) {
-        return new LinkedHashSet<>(Arrays.asList(values));
     }
 }

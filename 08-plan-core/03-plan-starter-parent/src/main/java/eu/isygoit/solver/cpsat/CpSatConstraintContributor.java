@@ -14,10 +14,14 @@ import eu.isygoit.solver.CompiledConstraint;
  */
 public interface CpSatConstraintContributor {
 
-    /** @return the same id as the {@code ConstraintFamily} it formulates */
+    /**
+     * @return the same id as the {@code ConstraintFamily} it formulates
+     */
     String type();
 
-    /** @return which of HARD / SOFT / RELAXABLE this FORMULATION implements */
+    /**
+     * @return which of HARD / SOFT / RELAXABLE this FORMULATION implements
+     */
     EnforcementSupport support();
 
     /**

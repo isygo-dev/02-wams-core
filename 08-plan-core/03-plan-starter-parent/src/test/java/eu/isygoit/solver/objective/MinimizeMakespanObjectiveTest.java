@@ -3,22 +3,13 @@ package eu.isygoit.solver.objective;
 import eu.isygoit.dto.request.ConstraintScope;
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeIndex;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.FakeSolution;
-import eu.isygoit.solver.objective.ObjectiveTestSupport.RecordingValidation;
+import eu.isygoit.solver.objective.ObjectiveTestSupport.*;
 import eu.isygoit.solver.spi.ModelCost;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.ctx;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.objective;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.problem;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.resource;
-import static eu.isygoit.solver.objective.ObjectiveTestSupport.task;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MinimizeMakespanObjectiveTest {
 

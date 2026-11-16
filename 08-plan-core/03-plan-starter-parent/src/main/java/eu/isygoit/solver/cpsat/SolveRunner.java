@@ -43,49 +43,32 @@ public final class SolveRunner {
         this.properties = properties == null ? new CpSatProperties() : properties;
     }
 
-    /** Result of a run; read after {@link #run}. Public fields keep the value object trivial. */
-    public static final class Outcome {
-        /** Aggregate status: OPTIMAL (all tiers optimal), FEASIBLE, INFEASIBLE, MODEL_INVALID or UNKNOWN. */
-        public CpSolverStatus status = CpSolverStatus.UNKNOWN;
-        /** The solver that holds the final incumbent, {@code null} when there is no solution. */
-        public CpSolver solver;
-        /** A stop was requested (before or during the search). */
-        public boolean cancelled;
-        /** The time budget was exhausted before a (further) solve could start. */
-        public boolean timeLimit;
-        /** Deterministic mode was requested but the wall clock cut the search (results may differ between runs). */
-        public boolean deterministicBroken;
-        /** The number of workers actually configured. */
-        public int workers;
-        /** Total solutions found over all solves. */
-        public int solutions;
-        /** Milliseconds from the request start to the first solution, or null. */
-        public Long firstSolutionMillis;
-        /** Total branches over all solves. */
-        public long branches;
-        /** Total conflicts over all solves. */
-        public long conflicts;
-        /** Objective of the last solved model (scaled units), null without objective or solution. */
-        public Double objective;
-        /** Best bound of the last solved model, null when unknown (weighted multi-tier, no objective). */
-        public Double bestBound;
-        /** Relative gap of the last solved model, null when unknown. */
-        public Double gap;
-        /** Milliseconds spent inside the solver calls. */
-        public long solveMillis;
-        /** Number of tiers whose value was obtained. */
-        public int tiersSolved;
-        /** Per tier values and statuses (empty without objective terms). */
-        public List<TierValue> tiers = new ArrayList<>();
-
-        /** @return true when {@link #solver} holds a solution */
-        public boolean hasSolution() {
-            return solver != null && (status == CpSolverStatus.OPTIMAL || status == CpSolverStatus.FEASIBLE);
+    private static boolean gapReached(Attempt last, double gapTolerance) {
+        if (gapTolerance <= 0.0d || last == null || last.callback() == null) {
+            return true;
         }
+        return ProgressCallback.gap(last.callback().lastObjective(), last.callback().lastBound()) <= GAP_EPSILON;
     }
 
-    private record Attempt(CpSolverStatus status, CpSolver solver, ProgressCallback callback,
-                           CpSatParameters.Applied applied, boolean cancelled, boolean timeUp) {
+    private static void accumulate(Outcome outcome, Attempt attempt) {
+        if (attempt.applied() != null && outcome.workers == 0) {
+            outcome.workers = attempt.applied().workers();
+        }
+        if (attempt.callback() != null) {
+            outcome.solutions += attempt.callback().solutionCount();
+            if (outcome.firstSolutionMillis == null) {
+                outcome.firstSolutionMillis = attempt.callback().firstSolutionMillis();
+            }
+        }
+        if (attempt.solver() != null) {
+            outcome.branches += attempt.solver().numBranches();
+            outcome.conflicts += attempt.solver().numConflicts();
+            if (attempt.applied() != null && attempt.applied().deterministic()
+                    && attempt.status() != CpSolverStatus.OPTIMAL && attempt.status() != CpSolverStatus.INFEASIBLE
+                    && attempt.solver().wallTime() >= attempt.applied().wallLimitSeconds() * 0.98d) {
+                outcome.deterministicBroken = true;
+            }
+        }
     }
 
     /**
@@ -258,15 +241,6 @@ public final class SolveRunner {
         }
     }
 
-    private static boolean gapReached(Attempt last, double gapTolerance) {
-        if (gapTolerance <= 0.0d || last == null || last.callback() == null) {
-            return true;
-        }
-        return ProgressCallback.gap(last.callback().lastObjective(), last.callback().lastBound()) <= GAP_EPSILON;
-    }
-
-    // ---------------------------------------------------------------------------------------------- attempt
-
     private Attempt attempt(BuiltModel built, SolveContext context, int tier, String phase, long budgetMillis,
                             double gapTolerance, boolean hints, boolean hasObjective) {
         CpModelContext ctx = built.context();
@@ -294,24 +268,86 @@ public final class SolveRunner {
         return new Attempt(status, solver, callback, applied, token.isCancellationRequested(), false);
     }
 
-    private static void accumulate(Outcome outcome, Attempt attempt) {
-        if (attempt.applied() != null && outcome.workers == 0) {
-            outcome.workers = attempt.applied().workers();
+    // ---------------------------------------------------------------------------------------------- attempt
+
+    /**
+     * Result of a run; read after {@link #run}. Public fields keep the value object trivial.
+     */
+    public static final class Outcome {
+        /**
+         * Aggregate status: OPTIMAL (all tiers optimal), FEASIBLE, INFEASIBLE, MODEL_INVALID or UNKNOWN.
+         */
+        public CpSolverStatus status = CpSolverStatus.UNKNOWN;
+        /**
+         * The solver that holds the final incumbent, {@code null} when there is no solution.
+         */
+        public CpSolver solver;
+        /**
+         * A stop was requested (before or during the search).
+         */
+        public boolean cancelled;
+        /**
+         * The time budget was exhausted before a (further) solve could start.
+         */
+        public boolean timeLimit;
+        /**
+         * Deterministic mode was requested but the wall clock cut the search (results may differ between runs).
+         */
+        public boolean deterministicBroken;
+        /**
+         * The number of workers actually configured.
+         */
+        public int workers;
+        /**
+         * Total solutions found over all solves.
+         */
+        public int solutions;
+        /**
+         * Milliseconds from the request start to the first solution, or null.
+         */
+        public Long firstSolutionMillis;
+        /**
+         * Total branches over all solves.
+         */
+        public long branches;
+        /**
+         * Total conflicts over all solves.
+         */
+        public long conflicts;
+        /**
+         * Objective of the last solved model (scaled units), null without objective or solution.
+         */
+        public Double objective;
+        /**
+         * Best bound of the last solved model, null when unknown (weighted multi-tier, no objective).
+         */
+        public Double bestBound;
+        /**
+         * Relative gap of the last solved model, null when unknown.
+         */
+        public Double gap;
+        /**
+         * Milliseconds spent inside the solver calls.
+         */
+        public long solveMillis;
+        /**
+         * Number of tiers whose value was obtained.
+         */
+        public int tiersSolved;
+        /**
+         * Per tier values and statuses (empty without objective terms).
+         */
+        public List<TierValue> tiers = new ArrayList<>();
+
+        /**
+         * @return true when {@link #solver} holds a solution
+         */
+        public boolean hasSolution() {
+            return solver != null && (status == CpSolverStatus.OPTIMAL || status == CpSolverStatus.FEASIBLE);
         }
-        if (attempt.callback() != null) {
-            outcome.solutions += attempt.callback().solutionCount();
-            if (outcome.firstSolutionMillis == null) {
-                outcome.firstSolutionMillis = attempt.callback().firstSolutionMillis();
-            }
-        }
-        if (attempt.solver() != null) {
-            outcome.branches += attempt.solver().numBranches();
-            outcome.conflicts += attempt.solver().numConflicts();
-            if (attempt.applied() != null && attempt.applied().deterministic()
-                    && attempt.status() != CpSolverStatus.OPTIMAL && attempt.status() != CpSolverStatus.INFEASIBLE
-                    && attempt.solver().wallTime() >= attempt.applied().wallLimitSeconds() * 0.98d) {
-                outcome.deterministicBroken = true;
-            }
-        }
+    }
+
+    private record Attempt(CpSolverStatus status, CpSolver solver, ProgressCallback callback,
+                           CpSatParameters.Applied applied, boolean cancelled, boolean timeUp) {
     }
 }

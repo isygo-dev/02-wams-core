@@ -2,13 +2,7 @@ package eu.isygoit.solver;
 
 import eu.isygoit.solver.cpsat.EnforcementSupport;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * What an engine supports (design 5.6 / 4.5): static features plus per-type constraint/objective support derived from
@@ -31,36 +25,6 @@ public record EngineCapabilities(
         Set<String> objectives,
         boolean provesOptimality) {
 
-    /** Features a problem can require (design 4.5). */
-    public enum Feature {
-        FREE_START,
-        SLOT_MODE,
-        /** Non-slot duration. */
-        DURATIONS_VARIABLE,
-        RESOURCE_DURATIONS,
-        /** Capacity greater than 1 together with demand greater than 1. */
-        CUMULATIVE_DEMAND,
-        OPTIONAL_TASKS,
-        PRECEDENCES,
-        TIME_WINDOWS,
-        CALENDARS,
-        SETUPS,
-        /** Requirement count greater than 1, or more than one requirement. */
-        MULTI_RESOURCE,
-        PINS,
-        /** Warm start hint. */
-        INITIAL_SOLUTION,
-        LOCKED,
-        /** More than one tier. */
-        LEXICOGRAPHIC,
-        RELAXATION,
-        EXPLAIN_ASSUMPTIONS,
-        DETERMINISTIC,
-        PROGRESS,
-        COST_PER_USE,
-        MAX_LOAD_TICKS
-    }
-
     public EngineCapabilities {
         features = features == null || features.isEmpty()
                 ? Collections.emptySet()
@@ -73,7 +37,21 @@ public record EngineCapabilities(
                 : Collections.unmodifiableSet(new TreeSet<>(objectives));
     }
 
-    /** @return {@code true} when the engine supports the feature */
+    private static Set<String> missing(Collection<String> known, Set<String> supported) {
+        Set<String> result = new TreeSet<>();
+        if (known != null) {
+            for (String type : known) {
+                if (!supported.contains(type)) {
+                    result.add(type);
+                }
+            }
+        }
+        return Collections.unmodifiableSet(result);
+    }
+
+    /**
+     * @return {@code true} when the engine supports the feature
+     */
     public boolean supports(Feature f) {
         return features.contains(f);
     }
@@ -94,15 +72,45 @@ public record EngineCapabilities(
         return missing(allKnownTypes, objectives);
     }
 
-    private static Set<String> missing(Collection<String> known, Set<String> supported) {
-        Set<String> result = new TreeSet<>();
-        if (known != null) {
-            for (String type : known) {
-                if (!supported.contains(type)) {
-                    result.add(type);
-                }
-            }
-        }
-        return Collections.unmodifiableSet(result);
+    /**
+     * Features a problem can require (design 4.5).
+     */
+    public enum Feature {
+        FREE_START,
+        SLOT_MODE,
+        /**
+         * Non-slot duration.
+         */
+        DURATIONS_VARIABLE,
+        RESOURCE_DURATIONS,
+        /**
+         * Capacity greater than 1 together with demand greater than 1.
+         */
+        CUMULATIVE_DEMAND,
+        OPTIONAL_TASKS,
+        PRECEDENCES,
+        TIME_WINDOWS,
+        CALENDARS,
+        SETUPS,
+        /**
+         * Requirement count greater than 1, or more than one requirement.
+         */
+        MULTI_RESOURCE,
+        PINS,
+        /**
+         * Warm start hint.
+         */
+        INITIAL_SOLUTION,
+        LOCKED,
+        /**
+         * More than one tier.
+         */
+        LEXICOGRAPHIC,
+        RELAXATION,
+        EXPLAIN_ASSUMPTIONS,
+        DETERMINISTIC,
+        PROGRESS,
+        COST_PER_USE,
+        MAX_LOAD_TICKS
     }
 }

@@ -27,15 +27,15 @@ public record PrecedenceParams(
         Integer maxLag,
         PairingMode pairing) {
 
-    /**
-     * Pairing of the {@code from} and {@code to} sets. ALL_PAIRS: every from x every to (guarded by maxPairwise);
-     * BY_ORDER: i-th from -> i-th to.
-     */
-    public enum PairingMode { ALL_PAIRS, BY_ORDER }
-
     public PrecedenceParams {
         type = type == null ? PrecedenceRef.Type.FINISH_START : type;
         minLag = minLag == null ? Integer.valueOf(0) : minLag;
         pairing = pairing == null ? PairingMode.ALL_PAIRS : pairing;
     }
+
+    /**
+     * Pairing of the {@code from} and {@code to} sets. ALL_PAIRS: every from x every to (guarded by maxPairwise);
+     * BY_ORDER: i-th from -> i-th to.
+     */
+    public enum PairingMode {ALL_PAIRS, BY_ORDER}
 }

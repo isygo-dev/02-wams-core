@@ -1,10 +1,6 @@
 package eu.isygoit.solver.cpsat.contrib;
 
-import com.google.ortools.sat.CpModel;
-import com.google.ortools.sat.IntVar;
-import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.LinearExprBuilder;
-import com.google.ortools.sat.Literal;
+import com.google.ortools.sat.*;
 import eu.isygoit.dto.request.params.GroupingParams;
 import eu.isygoit.solver.CompiledConstraint;
 import eu.isygoit.solver.cpsat.CpModelContext;

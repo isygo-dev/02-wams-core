@@ -3,12 +3,7 @@ package eu.isygoit.solver.objective;
 import eu.isygoit.dto.request.Objective;
 import eu.isygoit.dto.request.Task;
 import eu.isygoit.dto.request.params.TardinessParams;
-import eu.isygoit.solver.spi.CandidateIndexView;
-import eu.isygoit.solver.spi.CheckContext;
-import eu.isygoit.solver.spi.ModelCost;
-import eu.isygoit.solver.spi.ScopeKind;
-import eu.isygoit.solver.spi.SolutionView;
-import eu.isygoit.solver.spi.ValidationContext;
+import eu.isygoit.solver.spi.*;
 import eu.isygoit.util.ScaledMath;
 import org.springframework.stereotype.Component;
 
@@ -24,14 +19,18 @@ import java.util.List;
 @Component
 public class MinimizeTotalTardinessObjective extends AbstractObjectiveFamily {
 
-    /** Family id. */
+    /**
+     * Family id.
+     */
     public static final String TYPE = "minimize_total_tardiness";
 
     public MinimizeTotalTardinessObjective() {
         super(TYPE, TardinessParams.class, false, List.of("weightBy"), ScopeKind.TASKS);
     }
 
-    /** @return the weighting of the (possibly {@code null}) bound params, default NONE */
+    /**
+     * @return the weighting of the (possibly {@code null}) bound params, default NONE
+     */
     public static TardinessParams.WeightBy weightBy(Object params) {
         return params instanceof TardinessParams p && p.weightBy() != null ? p.weightBy() : TardinessParams.WeightBy.NONE;
     }

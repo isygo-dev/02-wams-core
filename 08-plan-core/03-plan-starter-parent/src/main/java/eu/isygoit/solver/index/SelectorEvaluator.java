@@ -59,6 +59,15 @@ public final class SelectorEvaluator {
         }
     }
 
+    private static boolean containsAll(List<String> ids) {
+        for (String id : ids) {
+            if (ALL.equalsIgnoreCase(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Evaluates a selector.
      *
@@ -137,18 +146,24 @@ public final class SelectorEvaluator {
         return out;
     }
 
-    /** @return the number of resources selected by the selector */
+    /**
+     * @return the number of resources selected by the selector
+     */
     public int cardinality(ResourceSelector selector) {
         return evaluate(selector).cardinality();
     }
 
-    /** @return the resource index of an id, or {@code -1} */
+    /**
+     * @return the resource index of an id, or {@code -1}
+     */
     public int resourceIdx(String id) {
         Integer idx = id == null ? null : idIndex.get(id);
         return idx == null ? -1 : idx;
     }
 
-    /** @return the number of distinct selectors evaluated so far (cache size, for tests) */
+    /**
+     * @return the number of distinct selectors evaluated so far (cache size, for tests)
+     */
     public int distinctSelectors() {
         return bitCache.size();
     }
@@ -162,14 +177,5 @@ public final class SelectorEvaluator {
             }
         }
         return union;
-    }
-
-    private static boolean containsAll(List<String> ids) {
-        for (String id : ids) {
-            if (ALL.equalsIgnoreCase(id)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

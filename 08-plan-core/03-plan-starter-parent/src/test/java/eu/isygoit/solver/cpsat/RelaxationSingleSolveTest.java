@@ -14,12 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static eu.isygoit.solver.cpsat.CpSatTestKit.assignment;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.on;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.options;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.resource;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.task;
-import static eu.isygoit.solver.cpsat.CpSatTestKit.tier;
+import static eu.isygoit.solver.cpsat.CpSatTestKit.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -97,8 +92,8 @@ class RelaxationSingleSolveTest {
                 problem.horizon(), problem.slots(), problem.calendars(), problem.setupMatrices(), problem.resources(),
                 problem.tasks(), problem.constraints(), problem.objectives(), restricted, problem.initialSolution());
         CompiledProblem compiled = CpSatTestKit.compile(hard, List.of(
-                CpSatTestKit.latestEnd(0, "deadline-A", "A", 6, IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION, 5),
-                CpSatTestKit.latestEnd(1, "deadline-B", "B", 6, IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION, 0)),
+                        CpSatTestKit.latestEnd(0, "deadline-A", "A", 6, IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION, 5),
+                        CpSatTestKit.latestEnd(1, "deadline-B", "B", 6, IEnumEnforcement.Types.RELAXABLE_WITH_AUTHORIZATION, 0)),
                 List.of(MAKESPAN));
         SolveResult result = engine.solve(compiled, CpSatTestKit.context(restricted, null));
         assertEquals(IEnumSolverStatus.Types.INFEASIBLE, result.status());

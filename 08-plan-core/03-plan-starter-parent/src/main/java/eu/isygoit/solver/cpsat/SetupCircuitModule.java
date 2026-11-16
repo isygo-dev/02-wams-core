@@ -4,12 +4,7 @@ import com.google.ortools.sat.BoolVar;
 import com.google.ortools.sat.CircuitConstraint;
 import com.google.ortools.sat.CpModel;
 import com.google.ortools.sat.LinearExpr;
-import com.google.ortools.sat.Literal;
-import eu.isygoit.dto.request.PlanningProblem;
-import eu.isygoit.dto.request.Resource;
-import eu.isygoit.dto.request.SetupEntry;
-import eu.isygoit.dto.request.SetupMatrix;
-import eu.isygoit.dto.request.Task;
+import eu.isygoit.dto.request.*;
 import eu.isygoit.exception.LimitExceededException;
 import eu.isygoit.solver.cpsat.contrib.ContribSupport;
 import eu.isygoit.solver.family.FamilySupport;
@@ -41,69 +36,10 @@ import java.util.Map;
 @Component
 public class SetupCircuitModule implements CpSatStructuralModule {
 
-    /** Fixed order of this module (design 6.1 step 7). */
+    /**
+     * Fixed order of this module (design 6.1 step 7).
+     */
     public static final int ORDER = 700;
-
-    @Override
-    public String name() {
-        return "setup_circuit";
-    }
-
-    @Override
-    public int order() {
-        return ORDER;
-    }
-
-    @Override
-    public void apply(CpModelContext ctx) {
-        PlanningProblem problem = ctx.problem();
-        if (problem.setupMatrices().isEmpty()) {
-            return;
-        }
-        CandidateIndex index = ctx.index();
-        CpModel model = ctx.model();
-        Map<String, SetupMatrix> matrices = new HashMap<>();
-        for (SetupMatrix m : problem.setupMatrices()) {
-            matrices.put(m.id(), m);
-        }
-        int[][] byResource = FamilySupport.candidatesByResource(index);
-        long budget = index.limits().getMaxSetupArcs();
-        long arcsSoFar = 0;
-        for (int r = 0; r < index.resourceCount(); r++) {
-            ctx.checkpoint();
-            Resource resource = problem.resources().get(r);
-            SetupMatrix matrix = resource.setupMatrixId() == null ? null : matrices.get(resource.setupMatrixId());
-            int[] cands = byResource[r];
-            if (matrix == null || allZero(matrix) || index.capacity(r) != 1 || cands.length < 2) {
-                continue;
-            }
-            Map<String, Integer> explicit = explicitEntries(matrix);
-            int n = cands.length;
-            List<int[]> feasible = new ArrayList<>();
-            for (int i = 0; i < n; i++) {
-                int ti = index.candidateTask(cands[i]);
-                for (int j = 0; j < n; j++) {
-                    int tj = index.candidateTask(cands[j]);
-                    if (i == j || ti == tj) {
-                        continue;
-                    }
-                    int s = ticks(matrix, explicit, problem.tasks().get(ti), problem.tasks().get(tj));
-                    long earliestEnd = (long) index.estStart(ti) + index.candidateDuration(cands[i]) + s;
-                    if (earliestEnd <= index.lstStart(tj)) {
-                        feasible.add(new int[]{i, j, s});
-                        if (arcsSoFar + feasible.size() > budget) {
-                            throw new LimitExceededException("max-setup-arcs", arcsSoFar + feasible.size(), budget);
-                        }
-                    }
-                }
-                if (i % 256 == 0) {
-                    ctx.checkpoint();
-                }
-            }
-            arcsSoFar += feasible.size();
-            buildCircuit(ctx, model, index, r, cands, feasible);
-        }
-    }
 
     private static void buildCircuit(CpModelContext ctx, CpModel model, CandidateIndex index, int r, int[] cands,
                                      List<int[]> feasible) {
@@ -168,5 +104,66 @@ public class SetupCircuitModule implements CpSatStructuralModule {
             return entry;
         }
         return a.equals(b) ? matrix.sameClassTicks() : matrix.defaultTicks();
+    }
+
+    @Override
+    public String name() {
+        return "setup_circuit";
+    }
+
+    @Override
+    public int order() {
+        return ORDER;
+    }
+
+    @Override
+    public void apply(CpModelContext ctx) {
+        PlanningProblem problem = ctx.problem();
+        if (problem.setupMatrices().isEmpty()) {
+            return;
+        }
+        CandidateIndex index = ctx.index();
+        CpModel model = ctx.model();
+        Map<String, SetupMatrix> matrices = new HashMap<>();
+        for (SetupMatrix m : problem.setupMatrices()) {
+            matrices.put(m.id(), m);
+        }
+        int[][] byResource = FamilySupport.candidatesByResource(index);
+        long budget = index.limits().getMaxSetupArcs();
+        long arcsSoFar = 0;
+        for (int r = 0; r < index.resourceCount(); r++) {
+            ctx.checkpoint();
+            Resource resource = problem.resources().get(r);
+            SetupMatrix matrix = resource.setupMatrixId() == null ? null : matrices.get(resource.setupMatrixId());
+            int[] cands = byResource[r];
+            if (matrix == null || allZero(matrix) || index.capacity(r) != 1 || cands.length < 2) {
+                continue;
+            }
+            Map<String, Integer> explicit = explicitEntries(matrix);
+            int n = cands.length;
+            List<int[]> feasible = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                int ti = index.candidateTask(cands[i]);
+                for (int j = 0; j < n; j++) {
+                    int tj = index.candidateTask(cands[j]);
+                    if (i == j || ti == tj) {
+                        continue;
+                    }
+                    int s = ticks(matrix, explicit, problem.tasks().get(ti), problem.tasks().get(tj));
+                    long earliestEnd = (long) index.estStart(ti) + index.candidateDuration(cands[i]) + s;
+                    if (earliestEnd <= index.lstStart(tj)) {
+                        feasible.add(new int[]{i, j, s});
+                        if (arcsSoFar + feasible.size() > budget) {
+                            throw new LimitExceededException("max-setup-arcs", arcsSoFar + feasible.size(), budget);
+                        }
+                    }
+                }
+                if (i % 256 == 0) {
+                    ctx.checkpoint();
+                }
+            }
+            arcsSoFar += feasible.size();
+            buildCircuit(ctx, model, index, r, cands, feasible);
+        }
     }
 }

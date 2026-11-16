@@ -9,11 +9,11 @@ import java.util.Map;
 /**
  * Explanations attached to a solve result.
  *
- * @param message            human readable summary
- * @param infeasibilityCore  legacy flat list of ids (constraint ids and task ids), kept for CSV/UI
- * @param core               structured IIS-style core, null when feasible
- * @param warnings           non-fatal observations
- * @param details            free-form details (insertion ordered)
+ * @param message           human readable summary
+ * @param infeasibilityCore legacy flat list of ids (constraint ids and task ids), kept for CSV/UI
+ * @param core              structured IIS-style core, null when feasible
+ * @param warnings          non-fatal observations
+ * @param details           free-form details (insertion ordered)
  */
 public record Diagnostics(
         String message,

@@ -13,10 +13,14 @@ import eu.isygoit.solver.cpsat.EnforcementSupport;
  */
 public interface TimefoldConstraintContributor {
 
-    /** @return the same id as the {@code ConstraintFamily} it formulates */
+    /**
+     * @return the same id as the {@code ConstraintFamily} it formulates
+     */
     String type();
 
-    /** @return which of HARD / SOFT / RELAXABLE this formulation implements (Timefold: hard and soft only) */
+    /**
+     * @return which of HARD / SOFT / RELAXABLE this formulation implements (Timefold: hard and soft only)
+     */
     EnforcementSupport support();
 
     /**
