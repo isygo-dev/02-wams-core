@@ -61,8 +61,8 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
     private final PlanFeignService service;
     private final ObjectMapper objectMapper;
     private final PlanJobActions actions;
-    private final Div infoHolder = new Div();    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::refreshStatus);
-    private final HorizontalLayout actionsBar = new HorizontalLayout();
+    private final Div infoHolder = new Div();
+    private final HorizontalLayout actionsBar = new HorizontalLayout();    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::refreshStatus);
     private final PlanJsonEditor resultText;
     private final AtomicBoolean loading = new AtomicBoolean();
     private Long jobId;
@@ -144,10 +144,6 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
         }));
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  Loading
-    // ══════════════════════════════════════════════════════════════
-
     private void apply(PlanJobDto job) {
         PlanJobDto previous = current;
         current = job;
@@ -165,6 +161,10 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
             startPolling();
         }
     }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Loading
+    // ══════════════════════════════════════════════════════════════
 
     private void notifyTerminalStatus(PlanJobDto previous, IEnumJobStatusCode.Types status) {
         if (previous == null || PlanJobStatusRules.isTerminal(previous.getStatus())) {
@@ -259,15 +259,15 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
         }
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  Actions (same gating as the cards)
-    // ══════════════════════════════════════════════════════════════
-
     private Button button(String labelKey, VaadinIcon icon, Runnable onClick) {
         Button button = new Button(I18n.t(labelKey), icon.create());
         button.addClickListener(event -> onClick.run());
         return button;
     }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Actions (same gating as the cards)
+    // ══════════════════════════════════════════════════════════════
 
     private void openList() {
         getUI().ifPresent(ui -> ui.navigate("plan/jobs"));
@@ -281,15 +281,15 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
         }
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  Polling (scoped to this view)
-    // ══════════════════════════════════════════════════════════════
-
     @Override
     protected void onDetach(DetachEvent detachEvent) {
         stopPolling();
         super.onDetach(detachEvent);
     }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Polling (scoped to this view)
+    // ══════════════════════════════════════════════════════════════
 
     private void startPolling() {
         if (pollRegistration != null) {
@@ -319,6 +319,8 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
             pollUi = null;
         }
     }
+
+
 
 
 }

@@ -58,6 +58,7 @@ public class ProblemVerifier {
     private final ConstraintFamilyRegistry constraintRegistry;
     private final ObjectiveFamilyRegistry objectiveRegistry;
     private final PlanLimitsProperties limits;
+
     /**
      * Creates the verifier.
      *

@@ -57,6 +57,7 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
     private final Grid<LogEntry> logsGrid = new Grid<>(LogEntry.class, false);
     private final eu.isygoit.ui.common.component.GridPager<LogEntry> logsPager =
             new eu.isygoit.ui.common.component.GridPager<>(logsGrid);
+
     public PlanLogsView(PlanFeignService planFeignService, ObjectMapper objectMapper) {
         this.planFeignService = planFeignService;
         this.objectMapper = objectMapper;
@@ -69,12 +70,12 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
         add(buildToolbar());
         configureGrid();
         add(logsGrid, refreshButton);
-    }    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::loadLogs);
+    }
 
     @Override
     public String getPageTitle() {
         return I18n.t("plan.ui.logs.title");
-    }
+    }    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::loadLogs);
 
     /**
      * Pre-fills and loads the logs when opened with a {@code ?jobId=} query parameter (the
@@ -194,6 +195,8 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
         dialog.add(details);
         dialog.open();
     }
+
+
 
 
 }

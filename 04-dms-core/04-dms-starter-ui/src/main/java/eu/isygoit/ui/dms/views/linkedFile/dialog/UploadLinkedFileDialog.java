@@ -20,14 +20,18 @@ import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * Uploads a file as a {@link LinkedFileRequestDto}: the file itself (its name
  * becomes {@code originalFileName}), {@code path}, {@code tags} and
  * {@code categoryNames}. {@code code} is assigned by the server (read-only, not sent).
+ *
+ * <p>Tags are entered as comma-separated {@code key:value} pairs, e.g.
+ * {@code priority:high, color:red, team:finance}.</p>
  */
 @Slf4j
 public class UploadLinkedFileDialog extends DmsActionDialog {
@@ -80,9 +84,44 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
         return null;
     }
 
+    /**
+     * Parses a comma-separated list of {@code key:value} (or {@code key=value}) pairs
+     * into an ordered map. Entries without a separator, or with an empty key/value,
+     * are skipped.
+     */
+    private static Map<String, String> parseTags(String input) {
+        Map<String, String> result = new LinkedHashMap<>();
+        if (input == null) {
+            return result;
+        }
+        for (String pair : input.split(",")) {
+            String trimmed = pair.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+            int sep = indexOfSeparator(trimmed);
+            if (sep <= 0 || sep >= trimmed.length() - 1) {
+                continue;
+            }
+            String key = trimmed.substring(0, sep).trim();
+            String value = trimmed.substring(sep + 1).trim();
+            if (!key.isEmpty() && !value.isEmpty()) {
+                result.put(key, value);
+            }
+        }
+        return result;
+    }
+
+    private static int indexOfSeparator(String s) {
+        int colon = s.indexOf(':');
+        int equal = s.indexOf('=');
+        if (colon < 0) return equal;
+        if (equal < 0) return colon;
+        return Math.min(colon, equal);
+    }
+
     private void buildForm() {
         uploadPanel = new DmsUploadPanel(this::enableOkButton);
-
 
         categoryComboBox = new ComboBox<>(I18n.t("dms.linkedfile.dialog.field.category"));
         categoryComboBox.setPlaceholder(I18n.t("dms.linkedfile.dialog.field.category.placeholder"));
@@ -104,6 +143,10 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
 
         tagsField = new TextField(I18n.t("dms.linkedfile.dialog.field.tags"));
         tagsField.setPlaceholder(I18n.t("dms.linkedfile.dialog.field.tags.placeholder"));
+        // Hint the new key:value format — add this key to the i18n bundle:
+        //   EN: "Comma-separated pairs, e.g. priority:high, color:red"
+        //   FR: "Paires séparées par virgule, ex. priority:high, color:red"
+        tagsField.setHelperText(I18n.t("dms.linkedfile.dialog.field.tags.helper"));
         tagsField.setWidthFull();
 
         FormLayout form = DialogLayout.responsiveForm();
@@ -161,6 +204,14 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
             path = path.replaceAll("/+", "/");
         }
 
+        // Validate tags *before* the network round-trip so a typo doesn't waste an upload.
+        String rawTags = tagsField.getValue();
+        Map<String, String> tagMap = parseTags(rawTags);
+        if (rawTags != null && !rawTags.isBlank() && tagMap.isEmpty()) {
+            append(I18n.t("dms.linkedfile.dialog.field.tags.error.invalid"));
+            return false;
+        }
+
         parentView.showLoading(true);
         try {
             String selectedCategory = categoryComboBox.getValue();
@@ -175,15 +226,8 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
             request.setPath(path);
             request.setFile(uploadPanel.getUploadedFile());
 
-            if (tagsField.getValue() != null && !tagsField.getValue().isBlank()) {
-                List<String> tagList = new ArrayList<>();
-                for (String tag : tagsField.getValue().split(",")) {
-                    String trimmed = tag.trim();
-                    if (!trimmed.isEmpty()) {
-                        tagList.add(trimmed);
-                    }
-                }
-                request.setTags(tagList);
+            if (!tagMap.isEmpty()) {
+                request.setTags(tagMap);
             }
             if (hasCategory) {
                 request.setCategoryNames(List.of(selectedCategory));

@@ -38,8 +38,8 @@ public class KeyStatisticsPanel extends VerticalLayout {
     private final ProgressBar loadingBar = new ProgressBar();
     // Status group
     private StatCard totalCard;
-    private StatCard activeCard;    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::loadStatistics);
-    private StatCard disabledCard;
+    private StatCard activeCard;
+    private StatCard disabledCard;    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::loadStatistics);
     private StatCard pendingDeletionCard;
     // Type group
     private StatCard symmetricCard;

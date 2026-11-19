@@ -16,7 +16,9 @@ import eu.isygoit.ui.sms.views.object.ObjectStorageManagementView;
 import feign.FeignException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Edits the tags of one stored object. Only {@link FileTagsDto#getTags()} is
@@ -91,10 +93,10 @@ public class FileTagsDialog extends SmsActionDialog {
 
     @Override
     protected boolean onOk() {
-        List<String> tags = new ArrayList<>();
+        Map<String, String> tags = new HashMap<>();
         for (TextField field : tagFields) {
             String value = field.getValue();
-            if (value != null && !value.isBlank()) tags.add(value.trim());
+            if (value != null && !value.isBlank()) tags.put(value.trim(), value.trim());
         }
 
         parentView.showLoading(true);

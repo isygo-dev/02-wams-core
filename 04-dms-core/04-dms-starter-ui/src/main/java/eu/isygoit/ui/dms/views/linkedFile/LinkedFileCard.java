@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class LinkedFileCard extends BaseCodeAssignableCard<LinkedFileManagementView, LinkedFileService, LinkedFileResponseDto> {
@@ -222,7 +223,7 @@ public class LinkedFileCard extends BaseCodeAssignableCard<LinkedFileManagementV
         return row;
     }
 
-    private HorizontalLayout createTagsRow(List<String> tags) {
+    private HorizontalLayout createTagsRow(Map<String, String> tags) {
         HorizontalLayout row = new HorizontalLayout();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
@@ -241,11 +242,16 @@ public class LinkedFileCard extends BaseCodeAssignableCard<LinkedFileManagementV
         HorizontalLayout tagsContainer = new HorizontalLayout();
         tagsContainer.setSpacing(true);
         tagsContainer.addClassName("dms-chip-container");
+        tagsContainer.getStyle().set("flex-wrap", "wrap");
 
-        for (String tag : tags) {
-            Span tagChip = new Span(tag);
+        for (Map.Entry<String, String> entry : tags.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+
+            Span tagChip = new Span(key + ": " + (value != null ? value : "—"));
             tagChip.addClassName("wams-tag-chip");
             tagChip.addClassName(LumoUtility.FontSize.XXSMALL);
+            tagChip.getElement().setAttribute("title", key + ": " + value);
             tagsContainer.add(tagChip);
         }
 

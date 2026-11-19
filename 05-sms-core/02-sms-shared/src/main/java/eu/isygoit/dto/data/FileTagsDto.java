@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * The type File tags dto.
@@ -20,5 +20,5 @@ public class FileTagsDto {
     private String bucketName;
     private String path;
     private String filetName;
-    private List<String> tags;
+    private Map<String, String> tags;
 }

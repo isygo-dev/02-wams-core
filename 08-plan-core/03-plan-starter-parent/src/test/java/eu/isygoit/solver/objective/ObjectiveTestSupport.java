@@ -103,14 +103,14 @@ final class ObjectiveTestSupport {
      */
     static final class TaskBuilder {
         private final String id;
+        private final Set<String> tags = new LinkedHashSet<>();
+        private final List<Preference> preferences = new ArrayList<>();
         private Integer duration = 10;
         private Integer priority;
         private Boolean required;
         private Long prize;
         private Instant dueDate;
         private String setupClass;
-        private final Set<String> tags = new LinkedHashSet<>();
-        private final List<Preference> preferences = new ArrayList<>();
 
         private TaskBuilder(String id) {
             this.id = id;

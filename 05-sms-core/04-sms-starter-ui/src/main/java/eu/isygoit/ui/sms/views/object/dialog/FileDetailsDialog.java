@@ -20,6 +20,7 @@ import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -113,27 +114,49 @@ public class FileDetailsDialog extends SmsDetailsDialog {
         }
     }
 
+
     private void displayMetadata(MetaData meta) {
         Div grid = createDetailGrid();
 
-        addFieldToGrid(grid, VaadinIcon.FILE_O, I18n.t("sms.objects.details.field.content.type"), meta.getContentType());
-        addFieldToGrid(grid, VaadinIcon.HARDDRIVE, I18n.t("sms.objects.details.field.size"),
-                meta.getSize() != 0 ? LinkedFilesSupport.formatFileSize(meta.getSize()) : null);
-        addFieldToGrid(grid, VaadinIcon.CODE, I18n.t("sms.objects.details.field.etag"), meta.getEtag(), true);
-        addFieldToGrid(grid, VaadinIcon.CHILD, I18n.t("sms.objects.details.field.version"), meta.getVersionID(), true);
-        addFieldToGrid(grid, VaadinIcon.CALENDAR, I18n.t("sms.objects.details.field.last.modified"), meta.getLastModified());
+        addFieldToGrid(grid, VaadinIcon.FILE_O,
+                I18n.t("sms.objects.details.field.content.type"),
+                meta.getContentType());
 
-        if (meta.getTags() != null && !meta.getTags().isEmpty()) {
-            addFieldToGrid(grid, VaadinIcon.TAGS, I18n.t("sms.objects.details.field.tags"),
-                    String.join(", ", meta.getTags()));
-        }
-        if (meta.getTagsMap() != null && !meta.getTagsMap().isEmpty()) {
-            String mapStr = meta.getTagsMap().entrySet().stream()
-                    .map(e -> e.getKey() + "=" + e.getValue())
+        addFieldToGrid(grid, VaadinIcon.HARDDRIVE,
+                I18n.t("sms.objects.details.field.size"),
+                meta.getSize() != 0
+                        ? LinkedFilesSupport.formatFileSize(meta.getSize())
+                        : null);
+
+        addFieldToGrid(grid, VaadinIcon.CODE,
+                I18n.t("sms.objects.details.field.etag"),
+                meta.getEtag(), true);
+
+        addFieldToGrid(grid, VaadinIcon.CHILD,
+                I18n.t("sms.objects.details.field.version"),
+                meta.getVersionID(), true);
+
+        addFieldToGrid(grid, VaadinIcon.CALENDAR,
+                I18n.t("sms.objects.details.field.last.modified"),
+                meta.getLastModified());
+
+        Map<String, String> tags = meta.getTags();
+
+        if (tags != null && !tags.isEmpty()) {
+            String tagsDisplay = tags.entrySet().stream()
+                    .map(entry -> entry.getKey() + "=" + entry.getValue())
                     .collect(Collectors.joining(", "));
-            addFieldToGrid(grid, VaadinIcon.TAG, I18n.t("sms.objects.details.field.tags.map"), mapStr);
+
+            addFieldToGrid(grid, VaadinIcon.TAGS,
+                    I18n.t("sms.objects.details.field.tags"),
+                    tagsDisplay);
+
+            addFieldToGrid(grid, VaadinIcon.TAG,
+                    I18n.t("sms.objects.details.field.tags.map"),
+                    tagsDisplay);
         }
 
         metadataLayout.add(grid);
     }
+
 }

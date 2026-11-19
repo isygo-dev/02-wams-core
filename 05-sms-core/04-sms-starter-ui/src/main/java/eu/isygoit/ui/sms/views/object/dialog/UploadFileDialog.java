@@ -15,8 +15,8 @@ import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Uploads one object to the selected bucket: the file (see {@link SmsUploadPanel}),
@@ -102,11 +102,11 @@ public class UploadFileDialog extends SmsActionDialog {
                 }
             }
 
-            List<String> tags = new ArrayList<>();
+            Map<String, String> tags = new HashMap<>();
             if (tagsField.getValue() != null && !tagsField.getValue().isBlank()) {
                 for (String t : tagsField.getValue().split(",")) {
                     String trimmed = t.trim();
-                    if (!trimmed.isEmpty()) tags.add(trimmed);
+                    if (!trimmed.isEmpty()) tags.put(trimmed, trimmed);
                 }
             }
 

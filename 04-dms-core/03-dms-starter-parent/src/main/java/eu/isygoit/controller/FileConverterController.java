@@ -38,6 +38,21 @@ public class FileConverterController extends ControllerExceptionHandler implemen
     @Autowired
     private IConverterService converterService;
 
+    /**
+     * Maps a target file type to its MIME type.
+     * <p>
+     * Prefer this over {@code Files.probeContentType(...)}: it never returns {@code null}
+     * and does not depend on the OS file-type detection.
+     */
+    private static String mimeOf(IEnumFile.Types type) {
+        return switch (type) {
+            case TEXT -> MediaType.TEXT_PLAIN_VALUE;
+            case HTML -> MediaType.TEXT_HTML_VALUE;
+            case PDF -> MediaType.APPLICATION_PDF_VALUE;
+            default -> MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        };
+    }
+
     @Override
     public ResponseEntity<Resource> convertPdf(
             IEnumFile.Types targetFormat,
@@ -103,20 +118,5 @@ public class FileConverterController extends ControllerExceptionHandler implemen
         } catch (MalformedURLException e) {
             throw new ConvertFileException(targetFormat.meaning(), e);
         }
-    }
-
-    /**
-     * Maps a target file type to its MIME type.
-     * <p>
-     * Prefer this over {@code Files.probeContentType(...)}: it never returns {@code null}
-     * and does not depend on the OS file-type detection.
-     */
-    private static String mimeOf(IEnumFile.Types type) {
-        return switch (type) {
-            case TEXT -> MediaType.TEXT_PLAIN_VALUE;
-            case HTML -> MediaType.TEXT_HTML_VALUE;
-            case PDF -> MediaType.APPLICATION_PDF_VALUE;
-            default -> MediaType.APPLICATION_OCTET_STREAM_VALUE;
-        };
     }
 }

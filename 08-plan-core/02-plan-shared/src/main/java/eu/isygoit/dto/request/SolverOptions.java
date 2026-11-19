@@ -62,6 +62,7 @@ public record SolverOptions(
      * Upper bound of the default explain time.
      */
     public static final int DEFAULT_EXPLAIN_TIME_CAP_SECONDS = 10;
+
     public SolverOptions {
         engine = normalizeEngine(engine);
         maxTimeSeconds = maxTimeSeconds == null ? Integer.valueOf(DEFAULT_MAX_TIME_SECONDS) : maxTimeSeconds;

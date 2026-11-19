@@ -52,6 +52,7 @@ public final class StructuralSolutionChecker {
     private final Map<String, Map<String, Integer>> matrixEntries = new HashMap<>();
     private final int[][] runsCache;
     private final boolean[] runsComputed;
+
     /**
      * @param problem the normalized problem
      * @param index   read-only index view; only the always-available methods are used (ids, counts, lookups, horizon)

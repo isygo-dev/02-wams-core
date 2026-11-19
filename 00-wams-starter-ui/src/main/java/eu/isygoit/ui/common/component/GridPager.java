@@ -16,8 +16,8 @@ public final class GridPager<T> {
 
     private final Grid<T> grid;
     private final int pageSize;
-    private List<T> items = List.of();    private final PagerBar pager = new PagerBar(this::goToPage);
-    private int page;
+    private List<T> items = List.of();
+    private int page;    private final PagerBar pager = new PagerBar(this::goToPage);
     public GridPager(Grid<T> grid) {
         this(grid, DEFAULT_PAGE_SIZE);
     }
@@ -52,6 +52,8 @@ public final class GridPager<T> {
         }
         pager.update(page, pageSize, items.size());
     }
+
+
 
 
 }

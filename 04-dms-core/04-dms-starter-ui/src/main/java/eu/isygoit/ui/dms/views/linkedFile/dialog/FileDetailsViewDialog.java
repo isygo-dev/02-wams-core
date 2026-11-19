@@ -13,6 +13,7 @@ import eu.isygoit.ui.dms.views.common.DmsDetailsDialog;
 import eu.isygoit.ui.dms.views.common.DmsDialogSupport;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Read-only file details, built entirely from the {@link LinkedFileResponseDto}
@@ -24,12 +25,23 @@ public class FileDetailsViewDialog extends DmsDetailsDialog {
     public FileDetailsViewDialog(LinkedFileResponseDto file) {
         super(I18n.t("dms.linkedfile.details.title"));
         applyWidth(DialogLayout.WIDTH_M);
-        buildContent(file);
+
+        VerticalLayout content = buildContent(file);
+
+        addTab(I18n.t("dms.linkedfile.details.section.identity"),
+                createSection(I18n.t("dms.linkedfile.details.section.identity"), content));
+
+        addAuditTab(file.getCreatedBy(), DmsDialogSupport.formatDateTime(file.getCreateDate()),
+                file.getUpdatedBy(), DmsDialogSupport.formatDateTime(file.getUpdateDate()));
     }
 
-    private void buildContent(LinkedFileResponseDto file) {
+    /**
+     * Builds the identity tab's body. Pure: does not touch the dialog.
+     */
+    private VerticalLayout buildContent(LinkedFileResponseDto file) {
         Div grid = createDetailGrid();
-        addFieldToGrid(grid, VaadinIcon.FILE, I18n.t("dms.linkedfile.details.field.code"), dash(file.getCode()), true);
+        addFieldToGrid(grid, VaadinIcon.FILE, I18n.t("dms.linkedfile.details.field.code"),
+                dash(file.getCode()), true);
         addFieldToGrid(grid, VaadinIcon.FILE_O, I18n.t("dms.linkedfile.details.field.original.name"),
                 dash(file.getOriginalFileName()));
         addFieldToGrid(grid, VaadinIcon.FOLDER_O, I18n.t("dms.linkedfile.details.field.path"),
@@ -40,22 +52,67 @@ public class FileDetailsViewDialog extends DmsDetailsDialog {
         VerticalLayout content = new VerticalLayout(grid);
         content.setPadding(false);
         content.setSpacing(true);
-        if (file.getTags() != null && !file.getTags().isEmpty()) {
-            content.add(buildChipRow(VaadinIcon.TAGS, I18n.t("dms.linkedfile.details.field.tags"),
-                    file.getTags(), "wams-tag-chip"));
+
+        // Use getTags() so derived tags (mimetype/category/extension fallback) are shown too.
+        Map<String, String> tagMap = file.getTags();
+        if (tagMap != null && !tagMap.isEmpty()) {
+            content.add(buildTagRow(VaadinIcon.TAGS,
+                    I18n.t("dms.linkedfile.details.field.tags"), tagMap));
         }
         if (file.getCategoryNames() != null && !file.getCategoryNames().isEmpty()) {
-            content.add(buildChipRow(VaadinIcon.LIST, I18n.t("dms.linkedfile.details.field.categories"),
+            content.add(buildListRow(VaadinIcon.LIST,
+                    I18n.t("dms.linkedfile.details.field.categories"),
                     file.getCategoryNames(), "wams-category-chip"));
         }
-        addTab(I18n.t("dms.linkedfile.details.section.identity"),
-                createSection(I18n.t("dms.linkedfile.details.section.identity"), content));
 
-        addAuditTab(file.getCreatedBy(), DmsDialogSupport.formatDateTime(file.getCreateDate()),
-                file.getUpdatedBy(), DmsDialogSupport.formatDateTime(file.getUpdateDate()));
+        return content;
     }
 
-    private VerticalLayout buildChipRow(VaadinIcon icon, String label, List<String> values, String chipClass) {
+    /**
+     * Renders {@code key: value} chips for a {@link Map} (tags).
+     */
+    private VerticalLayout buildTagRow(VaadinIcon icon, String label, Map<String, String> tags) {
+        VerticalLayout section = headerSection(icon, label);
+
+        HorizontalLayout chips = new HorizontalLayout();
+        chips.addClassName(DialogLayout.CLASS_ROW);
+        chips.getStyle().set("flex-wrap", "wrap");
+        for (Map.Entry<String, String> entry : tags.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            Span chip = new Span(key + ": " + (value != null ? value : "—"));
+            chip.addClassNames("wams-tag-chip", LumoUtility.FontSize.XXSMALL);
+            chip.getElement().setAttribute("title", key + ": " + value);
+            chips.add(chip);
+        }
+
+        section.add(chips);
+        return section;
+    }
+
+    /**
+     * Renders value-only chips for a {@link List} (categories).
+     */
+    private VerticalLayout buildListRow(VaadinIcon icon, String label, List<String> values, String chipClass) {
+        VerticalLayout section = headerSection(icon, label);
+
+        HorizontalLayout chips = new HorizontalLayout();
+        chips.addClassName(DialogLayout.CLASS_ROW);
+        chips.getStyle().set("flex-wrap", "wrap");
+        for (String value : values) {
+            Span chip = new Span(value != null ? value : "—");
+            chip.addClassNames(chipClass, LumoUtility.FontSize.XXSMALL);
+            chips.add(chip);
+        }
+
+        section.add(chips);
+        return section;
+    }
+
+    /**
+     * Shared icon + label header used by every chip row.
+     */
+    private VerticalLayout headerSection(VaadinIcon icon, String label) {
         VerticalLayout section = new VerticalLayout();
         section.setPadding(false);
         section.setSpacing(false);
@@ -63,20 +120,14 @@ public class FileDetailsViewDialog extends DmsDetailsDialog {
         com.vaadin.flow.component.icon.Icon iconComponent = icon.create();
         iconComponent.addClassName("detail-field-icon");
         iconComponent.getElement().setAttribute("aria-hidden", "true");
+
         Span labelSpan = new Span(label);
         labelSpan.addClassName(LumoUtility.FontWeight.SEMIBOLD);
+
         HorizontalLayout header = new HorizontalLayout(iconComponent, labelSpan);
         header.setSpacing(true);
 
-        HorizontalLayout chips = new HorizontalLayout();
-        chips.addClassName(DialogLayout.CLASS_ROW);
-        for (String value : values) {
-            Span chip = new Span(value);
-            chip.addClassNames(chipClass, LumoUtility.FontSize.XXSMALL);
-            chips.add(chip);
-        }
-
-        section.add(header, chips);
+        section.add(header);
         return section;
     }
 }

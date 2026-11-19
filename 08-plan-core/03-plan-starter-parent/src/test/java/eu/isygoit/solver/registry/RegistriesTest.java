@@ -224,68 +224,68 @@ class RegistriesTest {
     record StubObjective(String type) implements ObjectiveFamily {
 
         public Class<?> paramsType() {
-                return Void.class;
-            }
-
-            public String descriptionKey() {
-                return "plan.objective." + type + ".description";
-            }
-
-            public List<String> paramsHint() {
-                return List.of();
-            }
-
-            public boolean reward() {
-                return false;
-            }
-
-            public void validate(ValidationContext ctx, Objective objective, Object params) {
-            }
-
-            public ModelCost estimate(CandidateIndexView index, Objective objective, Object params) {
-                return ModelCost.ZERO;
-            }
-
-            public ObjectiveEvaluator evaluator() {
-                return (ctx, objective, params) -> 0L;
-            }
+            return Void.class;
         }
+
+        public String descriptionKey() {
+            return "plan.objective." + type + ".description";
+        }
+
+        public List<String> paramsHint() {
+            return List.of();
+        }
+
+        public boolean reward() {
+            return false;
+        }
+
+        public void validate(ValidationContext ctx, Objective objective, Object params) {
+        }
+
+        public ModelCost estimate(CandidateIndexView index, Objective objective, Object params) {
+            return ModelCost.ZERO;
+        }
+
+        public ObjectiveEvaluator evaluator() {
+            return (ctx, objective, params) -> 0L;
+        }
+    }
 
     // ------------------------------------------------------------------ contributors
 
     record CpConstraint(String type) implements CpSatConstraintContributor {
 
         public EnforcementSupport support() {
-                return EnforcementSupport.HARD_ONLY;
-            }
-
-            public void apply(CpModelContext ctx, CompiledConstraint constraint, Enforcer enforcer) {
-            }
+            return EnforcementSupport.HARD_ONLY;
         }
+
+        public void apply(CpModelContext ctx, CompiledConstraint constraint, Enforcer enforcer) {
+        }
+    }
 
     record CpObjective(String type) implements CpSatObjectiveContributor {
 
         public void contribute(CpModelContext ctx, CompiledObjective objective, ObjectiveSink sink) {
-            }
         }
+    }
 
     // ------------------------------------------------------------------ solver registry and aliases
 
     record TfConstraint(String type) implements TimefoldConstraintContributor {
 
         public EnforcementSupport support() {
-                return EnforcementSupport.HARD_ONLY;
-            }
-
-            public void contribute(TimefoldBuildContext ctx, CompiledConstraint constraint) {
-            }
+            return EnforcementSupport.HARD_ONLY;
         }
+
+        public void contribute(TimefoldBuildContext ctx, CompiledConstraint constraint) {
+        }
+    }
 
     record TfObjective(String type) implements TimefoldObjectiveContributor {
 
         public void contribute(TimefoldBuildContext ctx, CompiledObjective objective) {
-            }
         }
+    }
 
     static class StubEngine implements SolverEngine {
         private final String name;

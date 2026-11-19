@@ -51,7 +51,7 @@ public class MinIOStorageService implements IObjectStorageService {
                     .bucketName(bucketName)
                     .path(path)
                     .objectName(multipartFile.getOriginalFilename())
-                    .tagsMap(tags)
+                    .tags(tags)
                     .contentType(multipartFile.getContentType())
                     .build();
 

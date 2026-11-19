@@ -15,8 +15,10 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * The type Msg template.
@@ -111,14 +113,14 @@ public class MsgTemplate extends AuditableEntity<Long>
     private String extension;
 
     @Column(name = SchemaColumnConstantName.C_TYPE, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
-    private String type;
+    private String mimetype;
 
-    @ElementCollection
-    @CollectionTable(name = SchemaTableConstantName.T_MSG_TEMPLATE_FILE_TAGS
-            , joinColumns = @JoinColumn(name = SchemaColumnConstantName.C_MSG_TEMPLATE,
-            referencedColumnName = SchemaColumnConstantName.C_ID,
-            foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_TAGS_REF_MSG_TEMPLATE_FILE)))
-    @Column(name = SchemaColumnConstantName.C_TAG_OWNER)
-    private List<String> tags;
+    /**
+     * Stored as a single JSON column (e.g. {"mimetype":"…","category":"…","extension":"…"}).
+     * Keeps the existing C_TAG column — no join table required.
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = ComSchemaColumnConstantName.C_TAG, columnDefinition = "jsonb")
+    private Map<String, String> tags;
     //END IFileEntity : SecondaryTable
 }

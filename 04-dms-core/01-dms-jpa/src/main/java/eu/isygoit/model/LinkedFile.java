@@ -10,8 +10,11 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The type Linked file.
@@ -50,13 +53,13 @@ public class LinkedFile extends LinkedFileModel<Long> implements ITenantAssignab
     @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
     private String tenant;
 
-    @ElementCollection
-    @CollectionTable(name = SchemaTableConstantName.T_LINKED_FILE_TAGS
-            , joinColumns = @JoinColumn(name = SchemaColumnConstantName.C_LINKED_FILE,
-            referencedColumnName = SchemaColumnConstantName.C_CODE,
-            foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_TAGS_REF_LINKED_FILE)))
-    @Column(name = SchemaColumnConstantName.C_TAG_OWNER)
-    private List<String> tags;
+    /**
+     * Stored as a single JSON column (e.g. {"mimetype":"…","category":"…","extension":"…"}).
+     * Keeps the existing C_TAG column — no join table required.
+     */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = ComSchemaColumnConstantName.C_TAG, columnDefinition = "jsonb")
+    private Map<String, String> tags;
 
     @ManyToMany(fetch = FetchType.LAZY /* NO CASCADE */)
     @JoinTable(name = SchemaTableConstantName.T_ASSO_LINKED_FILE_CATEGORY, joinColumns = {

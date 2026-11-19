@@ -77,7 +77,7 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
         }
 
         add(headerLayout, refreshFab);
-    }    protected final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
+    }
 
     /**
      * Registers another reload to run when the page's single floating refresh button is clicked
@@ -85,7 +85,7 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
      */
     public void addRefreshAction(Runnable action) {
         extraRefreshActions.add(action);
-    }
+    }    protected final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
 
     private void onRefreshRequested() {
         loadStatistics();

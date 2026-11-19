@@ -115,7 +115,14 @@ public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileRe
             // fetching everything and filtering client-side.
             results = searchByCategoriesSafe(Arrays.asList(selectedCategory));
         } else if (tagsQuery != null && !tagsQuery.isBlank()) {
-            results = searchByTagsSafe(Arrays.asList(tagsQuery));
+            // Split comma-separated tag terms so the backend gets ["high", "urgent"]
+            // rather than a single literal "high, urgent" — same split the client
+            // filter uses, so the two stay consistent.
+            List<String> tags = Arrays.stream(tagsQuery.split(","))
+                    .map(String::trim)
+                    .filter(t -> !t.isEmpty())
+                    .collect(Collectors.toList());
+            results = searchByTagsSafe(tags);
         } else {
             // An empty filter asks the backend for all files belonging to this tenant.
             results = searchByCategoriesSafe(List.of());
@@ -153,6 +160,14 @@ public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileRe
         String tagsText = tagsField.getValue() != null ? tagsField.getValue().toLowerCase().trim() : "";
         String selectedCategory = categoryFilterComboBox.getValue();
 
+        // Split the tag filter once. Supports both "high" and "priority:high, color:red".
+        List<String> searchTags = tagsText.isEmpty()
+                ? List.of()
+                : Arrays.stream(tagsText.split(","))
+                .map(String::trim)
+                .filter(t -> !t.isEmpty())
+                .collect(Collectors.toList());
+
         return files.stream()
                 .filter(file -> {
                     if (!searchText.isEmpty()) {
@@ -165,15 +180,20 @@ public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileRe
                         }
                     }
 
-                    if (!tagsText.isEmpty()) {
-                        List<String> searchTags = Arrays.asList(tagsText.split(","));
-                        boolean hasMatchingTag = searchTags.stream()
-                                .filter(tag -> !tag.trim().isEmpty())
-                                .anyMatch(searchTag ->
-                                        file.getTags() != null &&
-                                                file.getTags().stream()
-                                                        .anyMatch(fileTag -> fileTag.toLowerCase().contains(searchTag.trim()))
-                                );
+                    if (!searchTags.isEmpty()) {
+                        // getTags() is never null: it returns the explicit tags when set,
+                        // otherwise derived mimetype/category/extension values — same
+                        // contract used by LinkedFileCard and FileDetailsViewDialog.
+                        Map<String, String> tagMap = file.getTags();
+                        boolean hasMatchingTag = searchTags.stream().anyMatch(searchTag ->
+                                tagMap.entrySet().stream().anyMatch(entry -> {
+                                    String key = entry.getKey() != null ? entry.getKey().toLowerCase() : "";
+                                    String value = entry.getValue() != null ? entry.getValue().toLowerCase() : "";
+                                    return key.contains(searchTag)
+                                            || value.contains(searchTag)
+                                            || (key + ":" + value).contains(searchTag);
+                                })
+                        );
                         if (!hasMatchingTag) {
                             return false;
                         }

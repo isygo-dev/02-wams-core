@@ -32,6 +32,7 @@ public final class SolutionViewImpl implements SolutionView {
     private final int[][] amounts;
     private final int[] slot;
     private final int[][] byResource;
+
     private SolutionViewImpl(int taskCount, boolean[] selected, int[] start, int[] end, int[][] resources,
                              String[][] roles, int[][] amounts, int[] slot, int[][] byResource) {
         this.taskCount = taskCount;

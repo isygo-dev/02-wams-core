@@ -106,6 +106,7 @@ public final class DeletionFilter {
         }
         return new Result(out, complete && allConclusive, calls);
     }
+
     /**
      * Verdict of the oracle on a candidate subset.
      */
@@ -123,6 +124,7 @@ public final class DeletionFilter {
          */
         UNKNOWN
     }
+
     /**
      * Decides whether a set of assumption indices is infeasible.
      */

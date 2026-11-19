@@ -53,18 +53,14 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
             String bucketName,
             String path,
             String fileName,
-            List<String> tags,
+            Map<String, String> tags,
             MultipartFile file) {
         try {
-            Map<String, String> tagMap = null;
-            if (!CollectionUtils.isEmpty(tags)) {
-                tagMap = tags.stream().distinct().collect(Collectors.toMap(s -> s, s -> s));
-            }
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(tenant);
             storageFactoryService.getService(config.getType()).upload(config,
                     bucketName.toLowerCase(),
                     path.replace("#", "/").toLowerCase(),
-                    tagMap,
+                    tags,
                     file);
             return ResponseFactory.responseOk();
         } catch (Throwable e) {
@@ -167,8 +163,7 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
         try {
             Map<String, String> tagMap = null;
             if (!CollectionUtils.isEmpty(fileTags.getTags())) {
-                tagMap = fileTags.getTags().stream().distinct()
-                        .collect(Collectors.toMap(s -> s, s -> s));
+                tagMap = fileTags.getTags();
             }
             StorageConfig config = storageConfigService.findByTenantIgnoreCase(fileTags.getTenant());
             // Combine path and file name into the full object key, same as

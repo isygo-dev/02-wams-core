@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -52,7 +53,7 @@ public interface ObjectStorageServiceApi {
             @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
             @RequestParam(name = RestApiConstants.PATH) String path,
             @RequestParam(name = RestApiConstants.FILE_NAME) String fileName,
-            @RequestParam(name = RestApiConstants.TAGS) List<String> tags,
+            @RequestParam(name = RestApiConstants.TAGS) Map<String, String> tags,
             @RequestPart(name = RestApiConstants.FILE) MultipartFile file);
 
     /**
