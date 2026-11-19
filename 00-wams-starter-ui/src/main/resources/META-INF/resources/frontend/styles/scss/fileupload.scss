@@ -37,55 +37,98 @@
 // -----------------------------------------------------------------------------
 
 .file-row {
-  display: flex;
+  // One grid for every row: the columns line up from a row to the next, all left aligned.
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 11rem 7rem 5rem 4.5rem auto;
   align-items: center;
-  gap: var(--lumo-space-s);
+  column-gap: var(--lumo-space-m);
   width: 100%;
+  box-sizing: border-box;
   padding: var(--lumo-space-s) var(--lumo-space-m);
-  border-bottom: 1px solid var(--lumo-contrast-10pct);
+  border: 1px solid var(--lumo-contrast-10pct);
+  border-radius: var(--lumo-border-radius-l);
   background: var(--lumo-base-color);
-  transition: background-color var(--wams-motion-duration) var(--wams-motion-ease);
+  transition: box-shadow var(--wams-motion-duration) var(--wams-motion-ease),
+  border-color var(--wams-motion-duration) var(--wams-motion-ease);
 
   &:hover {
-    background: var(--lumo-contrast-5pct);
+    border-color: var(--lumo-primary-color-50pct);
+    box-shadow: var(--lumo-box-shadow-xs);
   }
 
-  &:last-child {
-    border-bottom: none;
+  // --- File icon, in a tinted rounded square ---
+  &__icon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--lumo-border-radius-m);
+    background: var(--lumo-primary-color-10pct);
   }
 
-  // --- File icon ---
   &__icon,
   vaadin-icon.file-row__icon {
-    flex: 0 0 auto;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     color: var(--lumo-primary-color);
   }
 
-  // --- File name ---
-  &__name {
-    flex: 1 1 auto;
+  // --- File name (+ pending tag) ---
+  &__main {
+    display: flex;
+    align-items: center;
+    gap: var(--lumo-space-s);
     min-width: 0;
-    font-weight: 500;
-    font-size: var(--lumo-font-size-xs);
-    color: var(--lumo-body-text-color);
+  }
+
+  &__name {
+    min-width: 0;
+    font-weight: 700;
+    font-size: var(--lumo-font-size-s);
+    color: var(--lumo-header-text-color);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  // --- File size ---
+  // --- Category: an input while the file is pending, a tag once stored ---
+  &__category {
+    min-width: 0;
+    text-align: start;
+  }
+
+  &__tag {
+    display: inline-block;
+    max-width: 100%;
+    padding: 2px var(--lumo-space-s);
+    border-radius: 999px;
+    background: var(--lumo-primary-color-10pct);
+    color: var(--lumo-primary-text-color);
+    font-size: var(--lumo-font-size-xs);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  // --- Upload date and size ---
+  &__date,
   &__size {
-    flex: 0 0 auto;
-    margin-left: var(--lumo-space-s);
+    text-align: start;
     color: var(--lumo-secondary-text-color);
-    font-size: var(--lumo-font-size-xxs);
+    font-size: var(--lumo-font-size-xs);
+    white-space: nowrap;
+  }
+
+  // --- Type: chip style in dialog.scss (.file-row__type) ---
+  &__type {
+    justify-self: start;
   }
 
   // --- Download link / icon ---
   &__download {
-    flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -106,17 +149,22 @@
 
   // --- Action container (download + delete buttons) ---
   &__actions {
-    flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--lumo-space-xs);
+    min-width: 3.5rem;
   }
 }
 
+// A file that is not stored yet: dashed outline and a light amber tint
+.file-row--pending {
+  border-style: dashed;
+  border-color: var(--lumo-warning-color-50pct);
+  background: var(--lumo-warning-color-10pct);
+}
+
 .file-row--existing {
-  padding: 8px 12px;
-  border: 1px solid var(--lumo-contrast-20pct);
-  border-radius: var(--lumo-border-radius-l);
   background: var(--lumo-contrast-5pct);
 }
 
@@ -136,17 +184,12 @@
     color: var(--lumo-header-text-color);
   }
 
+  // rows are separate cards
   &__list {
     display: flex;
     flex-direction: column;
+    gap: var(--lumo-space-s);
     width: 100%;
-    border: 1px solid var(--lumo-contrast-10pct);
-    border-radius: var(--lumo-border-radius-l);
-    overflow: hidden;
-
-    .file-row:last-child {
-      border-bottom: none;
-    }
   }
 }
 
@@ -176,16 +219,17 @@
 // 5. Responsive tweaks
 // -----------------------------------------------------------------------------
 
-@media (max-width: 600px) {
+@media (max-width: 760px) {
+  // narrow screens: icon and name on the first line, the details wrap below
   .file-row {
-    flex-wrap: wrap;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    row-gap: var(--lumo-space-xs);
 
-    &__name {
-      flex-basis: 100%;
-    }
-
-    &__size {
-      margin-left: 0;
+    &__category,
+    &__date,
+    &__size,
+    &__type {
+      grid-column: 2 / -1;
     }
   }
 }

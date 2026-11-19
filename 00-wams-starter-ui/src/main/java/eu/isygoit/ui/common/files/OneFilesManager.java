@@ -5,17 +5,17 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.server.StreamResource;
+import eu.isygoit.dto.common.LinkedFileDto;
 import eu.isygoit.exception.StorageException;
 import eu.isygoit.i18n.I18n;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +24,10 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import static eu.isygoit.ui.common.files.LinkedFilesSupport.PendingFile;
@@ -38,12 +42,14 @@ import static eu.isygoit.ui.common.files.LinkedFilesSupport.PendingFile;
 public class OneFilesManager extends VerticalLayout {
 
     private final VerticalLayout container = new VerticalLayout();
-    private final HorizontalLayout existingFileRow = new HorizontalLayout();
-    private final HorizontalLayout stagedFileRow = new HorizontalLayout();
 
     private String fileName;
     private String fileType;
     private Long fileId;
+    private String fileCategory;
+    private String fileExtension;
+    private Long fileSize;
+    private LocalDateTime fileDate;
 
     private PendingFile pendingFile;
     private boolean markedForDeletion = false;
@@ -126,9 +132,44 @@ public class OneFilesManager extends VerticalLayout {
     }
 
     public void setFile(String name, String type, Long id) {
+        if (!Objects.equals(this.fileId, id)) {
+            this.fileCategory = null;
+            this.fileExtension = null;
+            this.fileSize = null;
+            this.fileDate = null;
+        }
         this.fileName = name;
         this.fileType = type;
         this.fileId = id;
+        this.markedForDeletion = false;
+        this.pendingFile = null;
+        render();
+    }
+
+    /**
+     * Shows the stored file with all its columns (category, upload date, size, type).
+     */
+    public void setFile(LinkedFileDto<Long> dto) {
+        if (dto == null) {
+            clearFile();
+            return;
+        }
+        setFile(dto.getOriginalFileName(), dto.getMimetype(), dto.getId());
+        this.fileCategory = dto.getCategory();
+        this.fileExtension = dto.getExtension();
+        this.fileSize = dto.getSize();
+        this.fileDate = dto.getCreateDate();
+        render();
+    }
+
+    private void clearFile() {
+        this.fileName = null;
+        this.fileType = null;
+        this.fileId = null;
+        this.fileCategory = null;
+        this.fileExtension = null;
+        this.fileSize = null;
+        this.fileDate = null;
         this.markedForDeletion = false;
         this.pendingFile = null;
         render();
@@ -157,83 +198,48 @@ public class OneFilesManager extends VerticalLayout {
     }
 
     private void renderExistingFile() {
-        existingFileRow.removeAll();
         if (markedForDeletion || fileName == null || fileName.isBlank()) {
-            existingFileRow.setVisible(false);
             return;
         }
 
-        existingFileRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        existingFileRow.setSpacing(true);
-        existingFileRow.setWidthFull();
-        existingFileRow.addClassNames("file-row", "file-row--existing");
-
-        Icon icon = LinkedFilesSupport.getFileIcon(fileType);
-        icon.addClassName("file-row__icon");
-
-        Span nameSpan = new Span(fileName);
-        nameSpan.addClassName("file-row__name");
-        nameSpan.setTitle(fileName);
-
-        existingFileRow.add(icon, nameSpan);
-        if (fileType != null && !fileType.isBlank()) {
-            Span typeChip = new Span((fileType.contains("/") ? fileType.substring(fileType.indexOf('/') + 1) : fileType)
-                    .toUpperCase());
-            typeChip.addClassName("file-row__type");
-            existingFileRow.add(typeChip);
-        }
-
+        List<Component> actions = new ArrayList<>();
         if (downloader != null && fileId != null) {
             Anchor download = new Anchor(buildDownloadResource(), "");
-            download.add(VaadinIcon.DOWNLOAD.create());
+            Icon downloadIcon = VaadinIcon.DOWNLOAD.create();
+            downloadIcon.addClassName("file-row__download-icon");
+            download.add(downloadIcon);
             download.setTarget("_blank");
             download.addClassName("file-row__download");
             download.getElement().setAttribute("title", I18n.t("files.download.tooltip"));
-            existingFileRow.add(download);
+            actions.add(download);
         }
-
         if (!readOnly) {
             Button deleteBtn = new Button(VaadinIcon.TRASH.create());
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_ERROR);
+            deleteBtn.addClassName("file-row__delete");
             deleteBtn.setTooltipText(I18n.t("files.delete.tooltip"));
             deleteBtn.addClickListener(e -> {
                 markedForDeletion = true;
                 if (onDeleteStateChanged != null) onDeleteStateChanged.accept(true);
                 render();
             });
-            existingFileRow.add(deleteBtn);
+            actions.add(deleteBtn);
         }
 
-        existingFileRow.expand(nameSpan);
-        existingFileRow.setVisible(true);
-        container.add(existingFileRow);
+        Div row = LinkedFileRow.build(new LinkedFileRow.Content(fileType, fileName, fileCategory, false,
+                null, false, fileDate, fileSize, fileExtension, actions.toArray(new Component[0])));
+        row.addClassName("file-row--existing");
+        container.add(row);
     }
 
     private void renderStagedFile() {
-        stagedFileRow.removeAll();
         if (pendingFile == null) {
-            stagedFileRow.setVisible(false);
             return;
         }
 
-        stagedFileRow.setAlignItems(FlexComponent.Alignment.CENTER);
-        stagedFileRow.setSpacing(true);
-        stagedFileRow.setWidthFull();
-        stagedFileRow.addClassName("file-row");
-
-        Icon fileIcon = LinkedFilesSupport.getFileIcon(pendingFile.mimeType);
-        fileIcon.addClassName("file-row__icon");
-
-        Span nameSpan = new Span(pendingFile.name);
-        nameSpan.addClassName("file-row__name");
-        nameSpan.setTitle(pendingFile.name);
-
-        Span pendingChip = new Span(I18n.t("files.pending"));
-        pendingChip.addClassName("status-chip");
-        pendingChip.addClassName("status-chip--pending");
-
-        Button removeBtn = new Button(VaadinIcon.CLOSE_SMALL.create());
-        removeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        Button removeBtn = new Button(VaadinIcon.TRASH.create());
+        removeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_ERROR);
+        removeBtn.addClassName("file-row__remove-pending");
         removeBtn.setTooltipText(I18n.t("files.remove.pending"));
         removeBtn.addClickListener(e -> {
             pendingFile = null;
@@ -241,10 +247,11 @@ public class OneFilesManager extends VerticalLayout {
             render();
         });
 
-        stagedFileRow.add(fileIcon, nameSpan, pendingChip, removeBtn);
-        stagedFileRow.expand(nameSpan);
-        stagedFileRow.setVisible(true);
-        container.add(stagedFileRow);
+        Div row = LinkedFileRow.build(new LinkedFileRow.Content(pendingFile.mimeType, pendingFile.name,
+                pendingFile.category, true, value -> pendingFile.category = value, true, LocalDateTime.now(),
+                (long) pendingFile.content.length, null, removeBtn));
+        row.getElement().setAttribute("title", I18n.t("files.pending.tooltip"));
+        container.add(row);
     }
 
     private Component buildUploadArea() {

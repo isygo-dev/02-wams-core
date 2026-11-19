@@ -5,13 +5,12 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
@@ -25,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -314,88 +314,32 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
         }
     }
 
-    private HorizontalLayout buildCommittedRow(F file) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("file-row");
-
-        Icon fileIcon = LinkedFilesSupport.getFileIcon(file.getMimetype());
-        fileIcon.addClassName("file-row__icon");
-
-        String name = file.getOriginalFileName() != null ? file.getOriginalFileName() : "-";
-        Span fileName = new Span(name);
-        fileName.addClassName("file-row__name");
-        fileName.setTitle(name);
-
-        Span fileSize = new Span(LinkedFilesSupport.formatFileSize(file.getSize()));
-        fileSize.addClassName("file-row__size");
-
-        row.add(fileIcon, fileName, fileSize);
-        // file type: the extension, else the subtype of the mime type ("pdf" of "application/pdf")
-        String type = file.getExtension() != null && !file.getExtension().isBlank() ? file.getExtension()
-                : file.getMimetype() != null && file.getMimetype().contains("/")
-                ? file.getMimetype().substring(file.getMimetype().indexOf('/') + 1) : file.getMimetype();
-        if (type != null && !type.isBlank()) {
-            Span typeChip = new Span(type.replaceFirst("^\\.", "").toUpperCase());
-            typeChip.addClassName("file-row__type");
-            row.add(typeChip);
-        }
-
-        HorizontalLayout actions = new HorizontalLayout();
-        actions.setSpacing(true);
-        actions.setPadding(false);
-        actions.setAlignItems(FlexComponent.Alignment.CENTER);
-        actions.addClassName("file-row__actions");
-
+    private Div buildCommittedRow(F file) {
+        List<Component> actions = new ArrayList<>();
         if (downloader != null) {
             actions.add(buildDownloadLink(file));
         }
         if (!readOnly && deleter != null) {
             actions.add(buildDeleteButton(file));
         }
-        if (actions.getComponentCount() > 0) {
-            row.add(actions);
-        }
-
-        row.expand(fileName);
-        return row;
+        return LinkedFileRow.build(new LinkedFileRow.Content(file.getMimetype(), file.getOriginalFileName(),
+                file.getCategory(), false, null, false, file.getCreateDate(), file.getSize(), file.getExtension(),
+                actions.toArray(new Component[0])));
     }
 
-    private HorizontalLayout buildPendingRow(PendingFile pending) {
-        HorizontalLayout row = new HorizontalLayout();
-        row.setAlignItems(FlexComponent.Alignment.CENTER);
-        row.setSpacing(true);
-        row.setWidthFull();
-        row.addClassName("file-row");
-
-        Icon fileIcon = LinkedFilesSupport.getFileIcon(pending.mimeType);
-        fileIcon.addClassName("file-row__icon");
-
-        Span fileName = new Span(pending.name);
-        fileName.addClassName("file-row__name");
-        fileName.setTitle(pending.name);
-
-        Span fileSize = new Span(LinkedFilesSupport.formatFileSize((long) pending.content.length));
-        fileSize.addClassName("file-row__size");
-
-        Span pendingChip = new Span(I18n.t("files.pending"));
-        pendingChip.addClassName("status-chip");
-        pendingChip.addClassName("status-chip--pending");
-        pendingChip.getElement().setAttribute("title", I18n.t("files.pending.tooltip"));
-
-        Button removeBtn = new Button(VaadinIcon.CLOSE_SMALL.create());
-        removeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+    private Div buildPendingRow(PendingFile pending) {
+        Button removeBtn = new Button(VaadinIcon.TRASH.create());
+        removeBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_ERROR);
         removeBtn.addClassName("file-row__remove-pending");
         removeBtn.setTooltipText(I18n.t("files.remove.pending"));
         removeBtn.addClickListener(e -> {
             pendingFiles.remove(pending);
             renderFiles();
         });
-
-        row.add(fileIcon, fileName, fileSize, pendingChip, removeBtn);
-        row.expand(fileName);
+        Div row = LinkedFileRow.build(new LinkedFileRow.Content(pending.mimeType, pending.name,
+                pending.category, true, value -> pending.category = value, true, LocalDateTime.now(),
+                (long) pending.content.length, null, removeBtn));
+        row.getElement().setAttribute("title", I18n.t("files.pending.tooltip"));
         return row;
     }
 
