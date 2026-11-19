@@ -131,12 +131,12 @@ public class ObjectStorageController extends ControllerExceptionHandler implemen
     public ResponseEntity<List<FileStorageDto>> filterObjects(
             String tenant,
             String bucketName,
-            String tags,
+            List<String> tags,
             IEnumLogicalOperator.Types condition) {
         log.info("getObjectByTags request received");
         try {
             Map<String, String> tagMap = null;
-            List<String> tagList = Arrays.stream(tags.split("[,:]")).toList();
+            List<String> tagList = tags;
             if (!CollectionUtils.isEmpty(tagList)) {
                 tagMap = tagList.stream().distinct()
                         .collect(Collectors.toMap(s -> s, s -> s));

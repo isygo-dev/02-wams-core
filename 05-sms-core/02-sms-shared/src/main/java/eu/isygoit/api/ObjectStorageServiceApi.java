@@ -53,7 +53,7 @@ public interface ObjectStorageServiceApi {
             @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
             @RequestParam(name = RestApiConstants.PATH) String path,
             @RequestParam(name = RestApiConstants.FILE_NAME) String fileName,
-            @RequestParam(name = RestApiConstants.TAGS) Map<String, String> tags,
+            @RequestParam(name = RestApiConstants.TAGS, required = false) Map<String, String> tags,
             @RequestPart(name = RestApiConstants.FILE) MultipartFile file);
 
     /**
@@ -149,7 +149,7 @@ public interface ObjectStorageServiceApi {
     ResponseEntity<List<FileStorageDto>> filterObjects(
             @RequestParam(name = RestApiConstants.TENANT_NAME) String tenant,
             @RequestParam(name = RestApiConstants.BUCKET_NAME) String bucketName,
-            @RequestParam(name = RestApiConstants.TAGS) String tags,
+            @RequestParam(name = RestApiConstants.TAGS, required = false) List<String> tags,
             @RequestParam(name = RestApiConstants.CONDITION) IEnumLogicalOperator.Types condition);
 
     /**
