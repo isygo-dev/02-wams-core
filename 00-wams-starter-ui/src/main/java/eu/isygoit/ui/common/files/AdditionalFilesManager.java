@@ -16,7 +16,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.server.StreamResource;
-import eu.isygoit.dto.common.LinkedFileMinDto;
+import eu.isygoit.dto.common.LinkedFileDto;
 import eu.isygoit.exception.StorageException;
 import eu.isygoit.i18n.I18n;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +92,7 @@ import static eu.isygoit.ui.common.files.LinkedFilesSupport.PendingFile;
  */
 @Slf4j
 @CssImport(value = "./styles/upload-file-list-theme.scss", themeFor = "vaadin-upload")
-public class AdditionalFilesManager<F extends LinkedFileMinDto<Long>> extends VerticalLayout {
+public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends VerticalLayout {
 
     /* ═══════════════════════════════════════════════════════════════
      * Callbacks
@@ -148,11 +148,11 @@ public class AdditionalFilesManager<F extends LinkedFileMinDto<Long>> extends Ve
         add(titleSpan, fileListLayout, emptyState);
     }
 
-    public static <F extends LinkedFileMinDto<Long>> AdditionalFilesManager<F> from(List<F> files) {
+    public static <F extends LinkedFileDto<Long>> AdditionalFilesManager<F> from(List<F> files) {
         return new AdditionalFilesManager<>(files);
     }
 
-    public static <F extends LinkedFileMinDto<Long>> AdditionalFilesManager<F> empty() {
+    public static <F extends LinkedFileDto<Long>> AdditionalFilesManager<F> empty() {
         return new AdditionalFilesManager<>(Collections.emptyList());
     }
 
@@ -567,7 +567,7 @@ public class AdditionalFilesManager<F extends LinkedFileMinDto<Long>> extends Ve
      * can append it to the committed list. Only used in immediate mode.
      */
     @FunctionalInterface
-    public interface Uploader<F extends LinkedFileMinDto<Long>> {
+    public interface Uploader<F extends LinkedFileDto<Long>> {
         F upload(InputStream content, String originalFileName,
                  String contentType, long size) throws Exception;
     }

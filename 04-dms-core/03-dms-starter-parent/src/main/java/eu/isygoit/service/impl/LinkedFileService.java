@@ -159,7 +159,6 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
     private void storeInRemoteHostedStorageSystem(String senderTenant, LinkedFileRequestDto dto, MultipartFile file) {
         try {
             ResponseEntity<Object> response = smsStorageLinkedFileService.upload(
-
                     senderTenant, senderTenant,
                     dto.getPath().replace(File.separator, "#"),
                     file.getOriginalFilename(),

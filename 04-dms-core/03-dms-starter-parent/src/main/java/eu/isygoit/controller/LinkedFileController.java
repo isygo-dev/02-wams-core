@@ -5,6 +5,7 @@ import eu.isygoit.api.LinkedFileApi;
 import eu.isygoit.com.rest.controller.ResponseFactory;
 import eu.isygoit.com.rest.controller.constants.CtrlConstants;
 import eu.isygoit.com.rest.controller.impl.ControllerExceptionHandler;
+import eu.isygoit.com.rest.service.media.FileDownloadResponses;
 import eu.isygoit.constants.RestApiConstants;
 import eu.isygoit.dto.common.LinkedFileRequestDto;
 import eu.isygoit.dto.common.LinkedFileResponseDto;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -125,17 +127,22 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
     @Override
     public ResponseEntity<LinkedFileResponseDto> upload(
             LinkedFileRequestDto linkedFile) throws IOException {
-        String tenant = requestContextService.getCurrentContext().getSenderTenant();
-        log.info("Uploading file from tenant {} : {}", tenant, linkedFile.getFile().getOriginalFilename());
-        if (linkedFile.getFile() == null) {
+        // Validate BEFORE touching linkedFile or its file — otherwise the log statement
+        // below would throw a NullPointerException on a missing file.
+        if (linkedFile == null || linkedFile.getFile() == null) {
+            log.warn("Upload rejected: empty request or missing file part");
             return ResponseFactory.responseBadRequest();
         }
+
+        String tenant = requestContextService.getCurrentContext().getSenderTenant();
+        log.info("Uploading file from tenant {} : {}", tenant, linkedFile.getFile().getOriginalFilename());
         try {
             return ResponseFactory.responseOk(LinkedFileResponseDto.builder()
                     .code(linkedFileService.upload(tenant, linkedFile, linkedFile.getFile()))
                     .build());
         } catch (Throwable e) {
-            log.info(e.getMessage());
+            // Use log.error (not log.info) so the stack trace is recorded.
+            log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
             return getBackExceptionResponse(e);
         }
     }
@@ -146,9 +153,21 @@ public class LinkedFileController extends ControllerExceptionHandler implements 
         log.info("Downloading file from tenant {} : {}", tenant, code);
         try {
             Resource resource = linkedFileService.download(tenant, code);
+            if (resource == null) {
+                log.warn("No file found for code {} in tenant {}", code, tenant);
+                return ResponseEntity.notFound().build();
+            }
+
+            // Do NOT call Files.probeContentType(resource.getFile().toPath()): the resource
+            // may be an in-memory byte array (e.g. backed by a Feign call), and probing the
+            // filesystem would throw FileNotFoundException. "multipart/form-data" was also
+            // incorrect here — that is a request format, not a file download response.
+            String contentType = FileDownloadResponses.resolveContentType(resource, resource.getFilename());
+
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, "multipart/form-data")
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .header(HttpHeaders.CONTENT_TYPE, contentType)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
         } catch (Throwable e) {
             log.error(CtrlConstants.ERROR_API_EXCEPTION, e);
