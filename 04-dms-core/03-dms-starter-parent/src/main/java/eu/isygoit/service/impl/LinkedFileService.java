@@ -144,7 +144,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
                 .crc32(crc32)
                 .size(fileSize)
                 .path(dto.getPath())
-                .category(category.getName())
+                .category(category != null ? category.getName() : null)
                 .mimetype(file.getContentType())
                 .version(existingCount == 0 ? 1L : existingCount + 1L)
                 .build();
@@ -161,12 +161,18 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
                     file.getOriginalFilename(),
                     dto.getTags(), file
             );
-            if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Remote upload success: tenant={}, file={}, tags={}",
-                        senderTenant, file.getOriginalFilename(), dto.getTags());
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new StoreFileException("Remote storage refused file " + file.getOriginalFilename()
+                        + " (status " + response.getStatusCode() + ")");
             }
+            log.info("Remote upload success: tenant={}, file={}, tags={}",
+                    senderTenant, file.getOriginalFilename(), dto.getTags());
+        } catch (StoreFileException e) {
+            throw e;
         } catch (Exception e) {
+            // do not save a file record whose content never reached the storage
             log.error("Remote storage error", e);
+            throw new StoreFileException("Unable to store file remotely: " + file.getOriginalFilename(), e);
         }
     }
 

@@ -17,6 +17,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -138,10 +140,12 @@ public class MsgTemplate extends AuditableEntity<Long>
     private String category;
 
     /** When the stored file was first uploaded (file audit, in the file table). */
-    @Column(name = ComSchemaColumnConstantName.C_CREATE_DATE, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE, updatable = false)
+    @CreatedDate
+    @Column(name = ComSchemaColumnConstantName.C_CREATE_DATE, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private LocalDateTime fileCreateDate;
 
     /** When the stored file was last uploaded or replaced (file audit, in the file table). */
+    @LastModifiedDate
     @Column(name = ComSchemaColumnConstantName.C_UPDATE_DATE, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private LocalDateTime fileUpdateDate;
     //END IFileEntity : SecondaryTable
