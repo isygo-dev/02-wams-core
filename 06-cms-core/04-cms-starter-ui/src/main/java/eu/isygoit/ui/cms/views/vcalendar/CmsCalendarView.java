@@ -71,8 +71,8 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
     private final Button todayButton = new Button(I18n.t("cms.calendar.view.today"));
     private final Span navigationTitle = new Span();
     private final Span navigationSubtitle = new Span();
-    private final Span feedback = new Span();    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::refresh);
-    private final Span eventCount = new Span();
+    private final Span feedback = new Span();
+    private final Span eventCount = new Span();    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::refresh);
     private final ProgressBar loadingBar = new ProgressBar();
     private final Tabs viewTabs = new Tabs();
     private final Div viewContainer = new Div();

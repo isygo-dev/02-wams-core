@@ -39,8 +39,8 @@ public class KeyStatisticsPanel extends VerticalLayout {
     // Status group
     private StatCard totalCard;
     private StatCard activeCard;
-    private StatCard disabledCard;    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::loadStatistics);
-    private StatCard pendingDeletionCard;
+    private StatCard disabledCard;
+    private StatCard pendingDeletionCard;    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::loadStatistics);
     // Type group
     private StatCard symmetricCard;
     private StatCard asymmetricCard;
