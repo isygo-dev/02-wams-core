@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * Read-only file details, built entirely from the {@link LinkedFileResponseDto}
  * already held by the calling {@code LinkedFileCard}: one details tab (identity,
- * tags and categories) plus the audit tab.
+ * tags and category) plus the audit tab.
  */
 public class FileDetailsViewDialog extends DmsDetailsDialog {
 
@@ -59,10 +59,11 @@ public class FileDetailsViewDialog extends DmsDetailsDialog {
             content.add(buildTagRow(VaadinIcon.TAGS,
                     I18n.t("dms.linkedfile.details.field.tags"), tagMap));
         }
-        if (file.getCategoryNames() != null && !file.getCategoryNames().isEmpty()) {
+        // Single String category in LinkedFileResponseDto.
+        if (file.getCategory() != null && !file.getCategory().isEmpty()) {
             content.add(buildListRow(VaadinIcon.LIST,
                     I18n.t("dms.linkedfile.details.field.categories"),
-                    file.getCategoryNames(), "wams-category-chip"));
+                    List.of(file.getCategory()), "wams-category-chip"));
         }
 
         return content;

@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.annotation.Criteria;
 import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.model.extendable.LinkedFileModel;
 import eu.isygoit.model.schema.*;
@@ -61,15 +62,7 @@ public class LinkedFile extends LinkedFileModel<Long> implements ITenantAssignab
     @Column(name = ComSchemaColumnConstantName.C_TAG, columnDefinition = "jsonb")
     private Map<String, String> tags;
 
-    @ManyToMany(fetch = FetchType.LAZY /* NO CASCADE */)
-    @JoinTable(name = SchemaTableConstantName.T_ASSO_LINKED_FILE_CATEGORY, joinColumns = {
-            @JoinColumn(foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_CATEGORY_REF_LINKED_FILE),
-                    name = SchemaColumnConstantName.C_FILE,
-                    referencedColumnName = SchemaColumnConstantName.C_CODE)}
-            , inverseJoinColumns = {
-            @JoinColumn(foreignKey = @ForeignKey(name = SchemaFkConstantName.FK_LINKED_FILE_REF_CATEGORY),
-                    name = SchemaColumnConstantName.C_CATEGORY,
-                    referencedColumnName = SchemaColumnConstantName.C_NAME)}
-            , uniqueConstraints = {@UniqueConstraint(name = SchemaUcConstantName.UC_FILE_CATEGORY, columnNames = {SchemaColumnConstantName.C_FILE, SchemaColumnConstantName.C_CATEGORY})})
-    private List<Category> categories;
+    @Criteria(1)
+    @Column(name = ComSchemaColumnConstantName.C_CATEGORY, length = SchemaConstantSize.S_NAME)
+    private String category;
 }

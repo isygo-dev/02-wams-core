@@ -28,7 +28,6 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -85,8 +84,8 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
             }
         }
 
-        // Resolve categories from names (create them if necessary)
-        List<Category> categories = resolveCategories(dto.getCategoryNames());
+        // Resolve category from names (create them if necessary)
+        Category category = resolveCategory(dto.getCategory());
 
         // Generate a code if not provided
         if (!StringUtils.hasText(dto.getCode())) {
@@ -111,7 +110,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
 
 
         // Build LinkedFile entity
-        LinkedFile linkedFile = buildLinkedFile(senderTenant, dto, file, content.length, crc16, crc32, categories, existingFiles.size());
+        LinkedFile linkedFile = buildLinkedFile(senderTenant, dto, file, content.length, crc16, crc32, category, existingFiles.size());
 
         // Update existing record if same code already exists
         linkedFileRepository.findByCodeIgnoreCase(dto.getCode())
@@ -124,19 +123,17 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
     /**
      * Resolves a list of category names into Category entities (creates if not found).
      */
-    private List<Category> resolveCategories(List<String> categoryNames) {
-        if (CollectionUtils.isEmpty(categoryNames)) return List.of();
-        return categoryNames.stream()
-                .map(name -> categoryRepository.findByName(name)
-                        .orElseGet(() -> categoryRepository.save(Category.builder().name(name).description(name).build())))
-                .toList();
+    private Category resolveCategory(String categoryName) {
+        if (!StringUtils.hasText(categoryName)) return null;
+        return categoryRepository.findByName(categoryName)
+                .orElseGet(() -> categoryRepository.save(Category.builder().name(categoryName).description(categoryName).build()));
     }
 
     /**
      * Creates a LinkedFile entity with calculated fields and resolved relationships.
      */
     private LinkedFile buildLinkedFile(String senderTenant, LinkedFileRequestDto dto, MultipartFile file, long fileSize,
-                                       long crc16, long crc32, List<Category> categories, int existingCount) {
+                                       long crc16, long crc32, Category category, int existingCount) {
         return LinkedFile.builder()
                 .code(dto.getCode())
                 .originalFileName(file.getOriginalFilename())
@@ -147,7 +144,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
                 .crc32(crc32)
                 .size(fileSize)
                 .path(dto.getPath())
-                .categories(categories)
+                .category(category.getName())
                 .mimetype(file.getContentType())
                 .version(existingCount == 0 ? 1L : existingCount + 1L)
                 .build();

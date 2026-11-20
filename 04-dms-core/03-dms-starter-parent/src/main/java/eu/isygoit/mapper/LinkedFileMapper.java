@@ -17,17 +17,4 @@ import java.util.stream.Collectors;
 @Mapper(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS, componentModel = "spring")
 public interface LinkedFileMapper extends EntityMapper<LinkedFile, LinkedFileResponseDto> {
 
-    @Override
-    @Mapping(target = "categoryNames", source = "categories", qualifiedByName = "mapCategoriesToNames")
-    LinkedFileResponseDto entityToDto(LinkedFile entity);
-
-    @Named("mapCategoriesToNames")
-    default List<String> mapCategoriesToNames(List<Category> categories) {
-        if (categories == null) {
-            return null;
-        }
-        return categories.stream()
-                .map(Category::getName)
-                .collect(Collectors.toList());
-    }
 }

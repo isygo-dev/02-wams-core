@@ -32,12 +32,4 @@ public class MsgTemplateFile extends FileEntity<Long> implements IFileEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "msg_template_file_sequence_generator")
     @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
-
-    /**
-     * Stored as a single JSON column (e.g. {"mimetype":"…","category":"…","extension":"…"}).
-     * Keeps the existing C_TAG column — no join table required.
-     */
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = ComSchemaColumnConstantName.C_TAG, columnDefinition = "jsonb")
-    private Map<String, String> tags;
 }

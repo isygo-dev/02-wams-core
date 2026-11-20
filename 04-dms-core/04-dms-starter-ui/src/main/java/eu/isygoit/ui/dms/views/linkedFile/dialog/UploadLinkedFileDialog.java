@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 /**
  * Uploads a file as a {@link LinkedFileRequestDto}: the file itself (its name
  * becomes {@code originalFileName}), {@code path}, {@code tags} and
- * {@code categoryNames}. {@code code} is assigned by the server (read-only, not sent).
+ * {@code category}. {@code code} is assigned by the server (read-only, not sent).
  *
  * <p>Tags are entered as comma-separated {@code key:value} pairs, e.g.
  * {@code priority:high, color:red, team:finance}.</p>
@@ -230,7 +230,7 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
                 request.setTags(tagMap);
             }
             if (hasCategory) {
-                request.setCategoryNames(List.of(selectedCategory));
+                request.setCategory(selectedCategory);
             }
 
             ResponseEntity<LinkedFileResponseDto> response = linkedFileService.upload(request);

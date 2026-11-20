@@ -115,12 +115,12 @@ public class MsgTemplate extends AuditableEntity<Long>
     @Column(name = SchemaColumnConstantName.C_TYPE, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private String mimetype;
 
-    /**
-     * Stored as a single JSON column (e.g. {"mimetype":"…","category":"…","extension":"…"}).
-     * Keeps the existing C_TAG column — no join table required.
-     */
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = ComSchemaColumnConstantName.C_TAG, columnDefinition = "jsonb")
+    @Column(name = ComSchemaColumnConstantName.C_TAG, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private Map<String, String> tags;
+
+    @Criteria(1)
+    @Column(name = ComSchemaColumnConstantName.C_CATEGORY, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
+    private String category;
     //END IFileEntity : SecondaryTable
 }

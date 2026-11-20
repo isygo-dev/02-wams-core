@@ -180,9 +180,9 @@ public class LinkedFileCard extends BaseCodeAssignableCard<LinkedFileManagementV
             body.add(createTagsRow(file.getTags()));
         }
 
-        // Categories row
-        if (file.getCategoryNames() != null && !file.getCategoryNames().isEmpty()) {
-            body.add(createCategoriesRow(file.getCategoryNames()));
+        // Category row (single String in LinkedFileResponseDto)
+        if (file.getCategory() != null && !file.getCategory().isEmpty()) {
+            body.add(createCategoryRow(file.getCategory()));
         }
 
         // Tenant row
@@ -260,7 +260,7 @@ public class LinkedFileCard extends BaseCodeAssignableCard<LinkedFileManagementV
         return row;
     }
 
-    private HorizontalLayout createCategoriesRow(List<String> categories) {
+    private HorizontalLayout createCategoryRow(String category) {
         HorizontalLayout row = new HorizontalLayout();
         row.setAlignItems(FlexComponent.Alignment.CENTER);
         row.setSpacing(true);
@@ -276,19 +276,12 @@ public class LinkedFileCard extends BaseCodeAssignableCard<LinkedFileManagementV
         labelSpan.addClassName(LumoUtility.FontSize.XXSMALL);
         labelSpan.addClassName("meta-row-label");
 
-        HorizontalLayout categoriesContainer = new HorizontalLayout();
-        categoriesContainer.setSpacing(true);
-        categoriesContainer.addClassName("dms-chip-container");
+        Span categoryChip = new Span(category);
+        categoryChip.addClassName("wams-category-chip");
+        categoryChip.addClassName(LumoUtility.FontSize.XXSMALL);
 
-        for (String category : categories) {
-            Span categoryChip = new Span(category);
-            categoryChip.addClassName("wams-category-chip");
-            categoryChip.addClassName(LumoUtility.FontSize.XXSMALL);
-            categoriesContainer.add(categoryChip);
-        }
-
-        row.add(iconComponent, labelSpan, categoriesContainer);
-        row.expand(categoriesContainer);
+        row.add(iconComponent, labelSpan, categoryChip);
+        row.expand(categoryChip);
         return row;
     }
 

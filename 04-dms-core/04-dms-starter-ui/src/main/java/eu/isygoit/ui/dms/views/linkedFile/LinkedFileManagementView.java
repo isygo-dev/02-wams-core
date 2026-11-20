@@ -199,11 +199,9 @@ public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileRe
                         }
                     }
 
+                    // Single String category in LinkedFileResponseDto.
                     if (selectedCategory != null && !selectedCategory.isEmpty()) {
-                        boolean hasCategory = file.getCategoryNames() != null &&
-                                file.getCategoryNames().stream()
-                                        .anyMatch(cat -> cat.equals(selectedCategory));
-                        if (!hasCategory) {
+                        if (!selectedCategory.equals(file.getCategory())) {
                             return false;
                         }
                     }
@@ -282,7 +280,8 @@ public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileRe
                 .setHeader(I18n.t("dms.linkedfile.table.code")).setAutoWidth(true);
         grid.addColumn(LinkedFileResponseDto::getPath)
                 .setHeader(I18n.t("dms.linkedfile.card.path")).setAutoWidth(true).setFlexGrow(1);
-        grid.addColumn(file -> file.getCategoryNames() == null ? "" : String.join(", ", file.getCategoryNames()))
+        // Single String category in LinkedFileResponseDto.
+        grid.addColumn(file -> file.getCategory() == null ? "" : file.getCategory())
                 .setHeader(I18n.t("dms.linkedfile.card.categories")).setAutoWidth(true);
         addCardActionsColumn(grid);
         return true;
