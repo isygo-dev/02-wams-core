@@ -18,6 +18,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -115,6 +116,19 @@ public class MsgTemplate extends AuditableEntity<Long>
     @Column(name = SchemaColumnConstantName.C_TYPE, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private String mimetype;
 
+    @Column(name = ComSchemaColumnConstantName.C_CRC_16, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
+    private Long crc16;
+
+    @Column(name = ComSchemaColumnConstantName.C_CRC_32, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
+    private Long crc32;
+
+    @Column(name = ComSchemaColumnConstantName.C_SIZE, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
+    private Long size;
+
+    @OrderBy(ComSchemaColumnConstantName.C_VERSION + " ASC")
+    @Column(name = ComSchemaColumnConstantName.C_VERSION, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
+    private Long version;
+
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = ComSchemaColumnConstantName.C_TAG, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private Map<String, String> tags;
@@ -122,5 +136,13 @@ public class MsgTemplate extends AuditableEntity<Long>
     @Criteria(1)
     @Column(name = ComSchemaColumnConstantName.C_CATEGORY, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
     private String category;
+
+    /** When the stored file was first uploaded (file audit, in the file table). */
+    @Column(name = ComSchemaColumnConstantName.C_CREATE_DATE, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE, updatable = false)
+    private LocalDateTime fileCreateDate;
+
+    /** When the stored file was last uploaded or replaced (file audit, in the file table). */
+    @Column(name = ComSchemaColumnConstantName.C_UPDATE_DATE, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
+    private LocalDateTime fileUpdateDate;
     //END IFileEntity : SecondaryTable
 }

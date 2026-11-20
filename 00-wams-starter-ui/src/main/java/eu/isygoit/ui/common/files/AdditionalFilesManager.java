@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import static eu.isygoit.ui.common.files.LinkedFilesSupport.CategoryUpdater;
 import static eu.isygoit.ui.common.files.LinkedFilesSupport.PendingFile;
 
 /**
@@ -113,6 +114,9 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
     private boolean readOnly = false;
     private boolean staging = false;
 
+    private boolean categoryEditable = false;
+    private CategoryUpdater categoryUpdater;
+
     private Downloader downloader;
     private Uploader<F> uploader;
     private Deleter deleter;
@@ -193,6 +197,20 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
      */
     public AdditionalFilesManager<F> staging(boolean staging) {
         this.staging = staging;
+        return this;
+    }
+
+    /**
+     * Makes the category an input (a tag otherwise): typed on a staged file, saved through the
+     * {@link #categoryUpdater(CategoryUpdater)} for a stored one. Never in read-only mode.
+     */
+    public AdditionalFilesManager<F> categoryEditable(boolean categoryEditable) {
+        this.categoryEditable = categoryEditable;
+        return this;
+    }
+
+    public AdditionalFilesManager<F> categoryUpdater(CategoryUpdater categoryUpdater) {
+        this.categoryUpdater = categoryUpdater;
         return this;
     }
 
@@ -323,7 +341,9 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
             actions.add(buildDeleteButton(file));
         }
         return LinkedFileRow.build(new LinkedFileRow.Content(file.getMimetype(), file.getOriginalFileName(),
-                file.getCategory(), false, null, false, file.getCreateDate(), file.getSize(), file.getExtension(),
+                file.getCategory(),
+                categoryEditable && !readOnly && categoryUpdater != null, value -> updateCategory(file, value), false,
+                file.getCreateDate(), file.getSize(), file.getExtension(),
                 actions.toArray(new Component[0])));
     }
 
@@ -337,7 +357,7 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
             renderFiles();
         });
         Div row = LinkedFileRow.build(new LinkedFileRow.Content(pending.mimeType, pending.name,
-                pending.category, true, value -> pending.category = value, true, LocalDateTime.now(),
+                pending.category, categoryEditable && !readOnly, value -> pending.category = value, true, LocalDateTime.now(),
                 (long) pending.content.length, null, removeBtn));
         row.getElement().setAttribute("title", I18n.t("files.pending.tooltip"));
         return row;
@@ -346,6 +366,23 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
     /* ═══════════════════════════════════════════════════════════════
      * Rendering
      * ═══════════════════════════════════════════════════════════════ */
+
+    private void updateCategory(F file, String category) {
+        try {
+            if (categoryUpdater.update(file.getId(), category)) {
+                file.setCategory(category);
+                notifyChanged();
+                Notification.show(I18n.t("files.category.updated"), 3000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                return;
+            }
+        } catch (Exception ex) {
+            log.error("Category update failed for file {}", file.getId(), ex);
+        }
+        Notification.show(I18n.t("files.category.error"), 4000, Notification.Position.BOTTOM_END)
+                .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        renderFiles(); // back to the stored value
+    }
 
     private Anchor buildDownloadLink(F file) {
         String name = file.getOriginalFileName() != null

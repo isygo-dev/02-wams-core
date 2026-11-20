@@ -1,7 +1,6 @@
 package eu.isygoit.model;
 
-import eu.isygoit.model.extendable.FileEntity;
-import eu.isygoit.model.schema.ComSchemaColumnConstantName;
+import eu.isygoit.model.extendable.FileModel;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.model.schema.SchemaTableConstantName;
 import jakarta.persistence.*;
@@ -10,10 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
-import java.util.Map;
 
 /**
  * The type Msg template file.
@@ -25,7 +20,7 @@ import java.util.Map;
 @DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
-public class MsgTemplateFile extends FileEntity<Long> implements IFileEntity {
+public class MsgTemplateFile extends FileModel<Long> implements IFileEntity {
 
     @Id
     @SequenceGenerator(name = "msg_template_file_sequence_generator", sequenceName = "msg_template_file_sequence", allocationSize = 1)

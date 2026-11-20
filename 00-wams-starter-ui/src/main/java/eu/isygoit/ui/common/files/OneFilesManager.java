@@ -15,7 +15,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.server.StreamResource;
-import eu.isygoit.dto.common.LinkedFileDto;
+import eu.isygoit.dto.common.FileEntityDto;
 import eu.isygoit.exception.StorageException;
 import eu.isygoit.i18n.I18n;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import static eu.isygoit.ui.common.files.LinkedFilesSupport.CategoryUpdater;
 import static eu.isygoit.ui.common.files.LinkedFilesSupport.PendingFile;
 
 /**
@@ -60,6 +61,9 @@ public class OneFilesManager extends VerticalLayout {
     private boolean staging = false;
     private int maxFileSize = 25 * 1024 * 1024;
     private String[] acceptedMimeTypes;
+
+    private boolean categoryEditable = false;
+    private CategoryUpdater categoryUpdater;
 
     private Downloader downloader;
     private Uploader uploader;
@@ -111,6 +115,20 @@ public class OneFilesManager extends VerticalLayout {
         return this;
     }
 
+    /**
+     * Makes the category an input (a tag otherwise): typed on the staged file, saved through the
+     * {@link #categoryUpdater(CategoryUpdater)} for the stored one. Never in read-only mode.
+     */
+    public OneFilesManager categoryEditable(boolean categoryEditable) {
+        this.categoryEditable = categoryEditable;
+        return this;
+    }
+
+    public OneFilesManager categoryUpdater(CategoryUpdater categoryUpdater) {
+        this.categoryUpdater = categoryUpdater;
+        return this;
+    }
+
     public OneFilesManager downloader(Downloader downloader) {
         this.downloader = downloader;
         return this;
@@ -149,7 +167,7 @@ public class OneFilesManager extends VerticalLayout {
     /**
      * Shows the stored file with all its columns (category, upload date, size, type).
      */
-    public void setFile(LinkedFileDto<Long> dto) {
+    public void setFile(FileEntityDto<Long> dto) {
         if (dto == null) {
             clearFile();
             return;
@@ -158,11 +176,12 @@ public class OneFilesManager extends VerticalLayout {
         this.fileCategory = dto.getCategory();
         this.fileExtension = dto.getExtension();
         this.fileSize = dto.getSize();
-        this.fileDate = dto.getCreateDate();
+        // the audit of the file itself (last upload, else first upload); empty when it was never recorded
+        this.fileDate = dto.getFileUpdateDate() != null ? dto.getFileUpdateDate() : dto.getFileCreateDate();
         render();
     }
 
-    private void clearFile() {
+    public void clearFile() {
         this.fileName = null;
         this.fileType = null;
         this.fileId = null;
@@ -226,8 +245,8 @@ public class OneFilesManager extends VerticalLayout {
             actions.add(deleteBtn);
         }
 
-        Div row = LinkedFileRow.build(new LinkedFileRow.Content(fileType, fileName, fileCategory, false,
-                null, false, fileDate, fileSize, fileExtension, actions.toArray(new Component[0])));
+        Div row = LinkedFileRow.build(new LinkedFileRow.Content(fileType, fileName, fileCategory,
+                categoryEditable && !readOnly && categoryUpdater != null, this::updateCategory, false, fileDate, fileSize, fileExtension, actions.toArray(new Component[0])));
         row.addClassName("file-row--existing");
         container.add(row);
     }
@@ -248,10 +267,26 @@ public class OneFilesManager extends VerticalLayout {
         });
 
         Div row = LinkedFileRow.build(new LinkedFileRow.Content(pendingFile.mimeType, pendingFile.name,
-                pendingFile.category, true, value -> pendingFile.category = value, true, LocalDateTime.now(),
+                pendingFile.category, categoryEditable && !readOnly, value -> pendingFile.category = value, true, LocalDateTime.now(),
                 (long) pendingFile.content.length, null, removeBtn));
         row.getElement().setAttribute("title", I18n.t("files.pending.tooltip"));
         container.add(row);
+    }
+
+    private void updateCategory(String category) {
+        try {
+            if (categoryUpdater.update(fileId, category)) {
+                fileCategory = category;
+                Notification.show(I18n.t("files.category.updated"), 3000, Notification.Position.BOTTOM_END)
+                        .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                return;
+            }
+        } catch (Exception ex) {
+            log.error("Category update failed for file {}", fileId, ex);
+        }
+        Notification.show(I18n.t("files.category.error"), 4000, Notification.Position.BOTTOM_END)
+                .addThemeVariants(NotificationVariant.LUMO_ERROR);
+        render(); // back to the stored value
     }
 
     private Component buildUploadArea() {

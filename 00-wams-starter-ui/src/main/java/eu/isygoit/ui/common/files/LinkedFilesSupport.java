@@ -58,6 +58,14 @@ public final class LinkedFilesSupport {
     }
 
     /**
+     * Saves the new category of a stored file. Returns {@code true} when it was saved.
+     */
+    @FunctionalInterface
+    public interface CategoryUpdater {
+        boolean update(Long fileId, String category) throws Exception;
+    }
+
+    /**
      * File staged locally, uploaded only after the parent has been created / updated.
      */
     public static final class PendingFile {
