@@ -33,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
@@ -249,7 +250,44 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
     public void deleteFile(String senderTenant, String code) throws IOException {
         LinkedFile file = linkedFileRepository.findByTenantIgnoreCaseAndCodeIgnoreCase(senderTenant, code)
                 .orElseThrow(() -> new FileNotFoundException("File not found with tenant:" + senderTenant + " code:" + code));
+
+        if (appProperties.getLocalStorageActive()) {
+            deleteFromLocalFileSystem(file);
+        } else {
+            deleteFromRemoteHostedStorageSystem(file);
+        }
+
         this.delete(senderTenant, file.getId());
+    }
+
+    private void deleteFromRemoteHostedStorageSystem(LinkedFile file) {
+        ResponseEntity<Object> response = smsStorageLinkedFileService.delete(
+                file.getTenant(),
+                file.getTenant(),
+                file.getPath() != null ? file.getPath().replace(File.separator, "#") : "",
+                file.getOriginalFileName());
+        if (response == null || !response.getStatusCode().is2xxSuccessful()) {
+            throw new StoreFileException("Remote storage refused deletion of file " + file.getOriginalFileName()
+                    + (response != null ? " (status " + response.getStatusCode() + ")" : ""));
+        }
+    }
+
+    private void deleteFromLocalFileSystem(LinkedFile file) throws IOException {
+        if (!StringUtils.hasText(appProperties.getUploadDirectory())) {
+            throw new StoreFileException("Local storage upload directory is empty for tenant: " + file.getTenant()
+                    + ", file: " + file.getOriginalFileName());
+        }
+
+        Path tenantDirectory = Path.of(appProperties.getUploadDirectory(), file.getTenant()).toAbsolutePath().normalize();
+        Path fileDirectory = StringUtils.hasText(file.getPath())
+                ? tenantDirectory.resolve(file.getPath()).normalize()
+                : tenantDirectory;
+        Path filePath = fileDirectory.resolve(file.getCode() + "." + file.getExtension()).normalize();
+        if (!filePath.startsWith(tenantDirectory)) {
+            throw new StoreFileException("Local storage path is outside tenant directory for file: "
+                    + file.getOriginalFileName());
+        }
+        Files.deleteIfExists(filePath);
     }
 
     /**

@@ -237,11 +237,11 @@ public class OneFilesManager extends VerticalLayout {
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE, ButtonVariant.LUMO_ERROR);
             deleteBtn.addClassName("file-row__delete");
             deleteBtn.setTooltipText(I18n.t("files.delete.tooltip"));
-            deleteBtn.addClickListener(e -> {
+            deleteBtn.addClickListener(e -> new FileDeleteConfirmDialog(fileName, () -> {
                 markedForDeletion = true;
                 if (onDeleteStateChanged != null) onDeleteStateChanged.accept(true);
                 render();
-            });
+            }).open());
             actions.add(deleteBtn);
         }
 
