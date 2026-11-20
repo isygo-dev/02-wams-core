@@ -5,7 +5,7 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.PasswordField;
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
 import eu.isygoit.i18n.I18n;
 
 @Tag("auth-password-field")
@@ -26,8 +26,8 @@ public class AuthPasswordField extends Component implements HasComponents {
         capsLockHint.setVisible(false);
         capsLockHint.getElement().setAttribute("role", "status");
         field.getElement().addEventListener("auth-caps-lock", event -> {
-            JsonObject eventData = event.getEventData();
-            capsLockHint.setVisible(eventData.getBoolean("event.detail"));
+            JsonNode eventData = event.getEventData();
+            capsLockHint.setVisible(eventData.get("event.detail").asBoolean());
         }).addEventData("event.detail");
         field.getElement().executeJs(
                 "this.inputElement.addEventListener('keyup', event => this.dispatchEvent(" +

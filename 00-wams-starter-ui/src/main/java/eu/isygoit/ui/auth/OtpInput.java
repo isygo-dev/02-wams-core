@@ -7,7 +7,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
 import eu.isygoit.i18n.I18n;
 
 import java.util.ArrayList;
@@ -127,8 +127,8 @@ public class OtpInput extends Component implements HasComponents {
                 }
             });
             field.getElement().addEventListener("paste", event -> {
-                JsonObject eventData = event.getEventData();
-                String pastedValue = eventData.getString("event.clipboardData.getData('text')");
+                JsonNode eventData = event.getEventData();
+                String pastedValue = eventData.get("event.clipboardData.getData('text')").asText();
                 distributePaste(pastedValue);
             }).addEventData("event.clipboardData.getData('text')");
 
