@@ -156,8 +156,13 @@ public final class ValidationResult {
          * @return the transport form used by {@code POST /validate}
          */
         public ValidationReportDto.Issue toDto() {
+            return toDto("en");
+        }
+
+        public ValidationReportDto.Issue toDto(String language) {
             return ValidationReportDto.Issue.builder()
                     .code(code).severity(severity).message(message).path(path)
+                    .remediation(ValidationRemediation.forIssue(language, code, path, args))
                     .args(new java.util.HashMap<>(args)).build();
         }
 

@@ -28,6 +28,7 @@ import eu.isygoit.service.IPlanJobService;
 import eu.isygoit.service.IPlanLogService;
 import eu.isygoit.service.impl.planning.PlanningRequestValidator;
 import eu.isygoit.service.impl.planning.PlanningService;
+import eu.isygoit.service.impl.planning.ValidationRemediation;
 import eu.isygoit.solver.EngineCapabilities;
 import eu.isygoit.solver.SolverEngine;
 import eu.isygoit.solver.SolverRegistry;
@@ -264,11 +265,16 @@ public class PlanJobService
         }
     }
 
-    private static ValidationReportDto invalid(String code, String message, String path) {
+    private static ValidationReportDto invalid(String code, String message, String path, String language) {
         List<ValidationReportDto.Issue> issues = new ArrayList<>();
         issues.add(ValidationReportDto.Issue.builder()
-                .code(code).severity("ERROR").message(message).path(path).build());
+                .code(code).severity("ERROR").message(message).path(path)
+                .remediation(ValidationRemediation.forIssue(language, code, path, null)).build());
         return ValidationReportDto.builder().valid(false).normalizedRequest(null).errors(issues).build();
+    }
+
+    private static String languageOf(PlanningRequest request) {
+        return request == null || request.meta() == null ? "en" : request.meta().locale();
     }
 
     private static String pathOf(String message) {
@@ -550,15 +556,19 @@ public class PlanJobService
     public ValidationReportDto validate(PlanningRequest request, String engineOrNull) {
         String engine = engineOrNull == null || engineOrNull.isBlank() ? null : engineOrNull.trim();
         try {
+            String requestJson = writeJson(request);
+            requestValidator.validateRequestBytes(requestJson.getBytes(StandardCharsets.UTF_8).length);
             ValidationReportDto report = planningService.validate(request, engine);
-            return report != null ? report : invalid("INVALID_REQUEST", "The validation produced no report", null);
+            return report != null ? report
+                    : invalid("INVALID_REQUEST", "The validation produced no report", null, languageOf(request));
         } catch (LimitExceededException e) {
-            return invalid(e.code(), e.getMessage(), e.limitName());
+            return invalid(e.code(), e.getMessage(), e.limitName(), languageOf(request));
         } catch (InvalidRequestException e) {
-            return invalid(e.code(), e.getMessage(), pathOf(e.getMessage()));
+            return invalid(e.code(), e.getMessage(), pathOf(e.getMessage()), languageOf(request));
         } catch (RuntimeException e) {
             log.debug("Dry-run validation failed unexpectedly", e);
-            return invalid("INVALID_REQUEST", e.getMessage() == null ? "The request is invalid" : e.getMessage(), null);
+            return invalid("INVALID_REQUEST", e.getMessage() == null ? "The request is invalid" : e.getMessage(),
+                    null, languageOf(request));
         }
     }
 

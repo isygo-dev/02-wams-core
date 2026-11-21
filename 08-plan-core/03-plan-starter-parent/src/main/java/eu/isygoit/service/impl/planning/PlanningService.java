@@ -489,8 +489,9 @@ public class PlanningService {
                                        ModelEstimateDto estimate, PlanningProblem problem) {
         List<ValidationReportDto.Issue> errors = new ArrayList<>();
         List<ValidationReportDto.Issue> warnings = new ArrayList<>();
+        String language = request == null || request.meta() == null ? "en" : request.meta().locale();
         for (ValidationResult.Issue issue : all.issues()) {
-            (issue.isError() ? errors : warnings).add(issue.toDto());
+            (issue.isError() ? errors : warnings).add(issue.toDto(language));
         }
         PlanningRequest normalized = request == null || problem == null ? null : new PlanningRequest(
                 request.meta(), request.domain(), problem.horizon(), problem.slots(),

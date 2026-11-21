@@ -85,6 +85,10 @@ public class ValidationReportDto {
          */
         private String path;
         /**
+         * Actionable, engine-agnostic correction guidance for the issue.
+         */
+        private String remediation;
+        /**
          * Values for the i18n placeholders of the message key {@code plan.error.<code>}.
          */
         @Builder.Default

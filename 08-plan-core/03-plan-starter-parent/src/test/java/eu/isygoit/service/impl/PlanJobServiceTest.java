@@ -14,6 +14,7 @@ import eu.isygoit.exception.ConflictException;
 import eu.isygoit.exception.InvalidRequestException;
 import eu.isygoit.exception.JobNotFoundException;
 import eu.isygoit.exception.JobQueueException;
+import eu.isygoit.exception.LimitExceededException;
 import eu.isygoit.model.PlanJob;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
 import eu.isygoit.repository.PlanJobRepository;
@@ -556,6 +557,20 @@ class PlanJobServiceTest {
         assertFalse(third.isValid());
         assertEquals(1, third.getErrors().size());
         assertFalse(fourth.isValid());
+    }
+
+    @Test
+    void validateChecksTheExactSerializedRequestSizeBeforePlanning() {
+        doThrow(new LimitExceededException("max-request-bytes", 101, 100))
+                .when(requestValidator).validateRequestBytes(anyLong());
+
+        ValidationReportDto report = service.validate(request(null), null);
+
+        assertFalse(report.isValid());
+        assertEquals(LimitExceededException.CODE, report.getErrors().get(0).getCode());
+        assertTrue(report.getErrors().get(0).getRemediation().contains("Reduce"));
+        verify(requestValidator).validateRequestBytes(anyLong());
+        verify(planningService, never()).validate(any(), any());
     }
 
     private EngineCapabilities cpSatCapabilities() {
