@@ -16,18 +16,23 @@ import java.util.Locale;
  *
  * @param engine               default "cp_sat"; aliases "cp-sat", "cpsat" become "cp_sat"; "timefold"
  * @param maxTimeSeconds       default 30, {@code >= 1} (upper bound: limits.max-time-seconds, checked by the service)
- * @param numWorkers           default 8, 1..32 (clamped to limits.max-workers by the service)
+ * @param numWorkers           default 8, 1..32 (clamped to limits.max-workers and properties.worker-cap by the service)
  * @param seed                 default 0, must fit an int
- * @param logSearch            default false
+ * @param logSearch            default false; OR-ed with properties.logSearch-progress
  * @param relaxationLevels     allow-list of relaxable constraint ids, empty = all authorized ones
  * @param deterministic        default false; true makes the run reproducible
  * @param objectiveScale       decimal to long multiplier, default 100, 1..1_000_000
- * @param gapTolerance         relative gap at which the search stops, default 0.0 (prove optimality), 0..1
+ * @param gapTolerance         relative gap at which the search stops, default 0.0 (fall back to properties.default-relative-gap), 0..1
  * @param lexicographicMode    default AUTO
  * @param explainInfeasibility default true: run the explanation pass when INFEASIBLE
  * @param explainTimeSeconds   default {@code min(10, 20% of maxTimeSeconds)}, {@code >= 1}
  * @param keepIncumbentOnStop  default true: a stop request with an incumbent yields STOPPED_FEASIBLE
  * @param fallbackToTimefold   default false; when true, retry with Timefold after CP-SAT returns UNKNOWN without a solution
+ * @param feasibilityMode      default AUTO: let {@code hasObjective} and {@code properties.stop-after-first-solution}
+ *                             decide; FORCE_FEASIBLE overrides both to stop at the first feasible solution;
+ *                             FORCE_OPTIMIZE overrides both to keep optimizing until the gap or budget is met
+ * @param maxConflicts         default 0: use {@code properties.max-number-of-conflicts}; {@code > 0} caps the number
+ *                             of conflicts for this solve (fast infeasibility detection). Never negative.
  */
 public record SolverOptions(
         String engine,
@@ -43,7 +48,9 @@ public record SolverOptions(
         Boolean explainInfeasibility,
         Integer explainTimeSeconds,
         Boolean keepIncumbentOnStop,
-        Boolean fallbackToTimefold) {
+        Boolean fallbackToTimefold,
+        FeasibilityMode feasibilityMode,
+        Integer maxConflicts) {
 
     public static final String ENGINE_CP_SAT = "cp_sat";
     public static final String ENGINE_TIMEFOLD = "timefold";
@@ -62,6 +69,10 @@ public record SolverOptions(
      * Upper bound of the default explain time.
      */
     public static final int DEFAULT_EXPLAIN_TIME_CAP_SECONDS = 10;
+    /**
+     * Sentinel meaning "defer to {@code properties.max-number-of-conflicts}".
+     */
+    public static final int DEFAULT_MAX_CONFLICTS = 0;
 
     public SolverOptions {
         engine = normalizeEngine(engine);
@@ -78,6 +89,8 @@ public record SolverOptions(
         keepIncumbentOnStop = keepIncumbentOnStop == null
                 ? Boolean.valueOf(DEFAULT_KEEP_INCUMBENT_ON_STOP) : keepIncumbentOnStop;
         fallbackToTimefold = fallbackToTimefold == null ? Boolean.FALSE : fallbackToTimefold;
+        feasibilityMode = feasibilityMode == null ? FeasibilityMode.AUTO : feasibilityMode;
+        maxConflicts = maxConflicts == null ? Integer.valueOf(DEFAULT_MAX_CONFLICTS) : maxConflicts;
         if (fallbackToTimefold && !ENGINE_CP_SAT.equals(engine)) {
             throw new IllegalArgumentException("fallbackToTimefold requires the cp_sat engine");
         }
@@ -102,25 +115,44 @@ public record SolverOptions(
         } else if (explainTimeSeconds < 1) {
             throw new IllegalArgumentException("explainTimeSeconds must be positive");
         }
+        if (maxConflicts.intValue() < 0) {
+            throw new IllegalArgumentException("maxConflicts must be non-negative");
+        }
         relaxationLevels = CollectionCopies.list(relaxationLevels);
     }
 
     /**
+     * Backward-compatible constructor for the pre-{@code feasibilityMode}/{@code maxConflicts} shape
+     * (14-argument canonical form used before the performance-tuning fields were introduced).
+     */
+    public SolverOptions(String engine, Integer maxTimeSeconds, Integer numWorkers, Long seed, Boolean logSearch,
+                         java.util.List<String> relaxationLevels, Boolean deterministic, Integer objectiveScale,
+                         Double gapTolerance, LexicographicMode lexicographicMode, Boolean explainInfeasibility,
+                         Integer explainTimeSeconds, Boolean keepIncumbentOnStop, Boolean fallbackToTimefold) {
+        this(engine, maxTimeSeconds, numWorkers, seed, logSearch, relaxationLevels, deterministic, objectiveScale,
+                gapTolerance, lexicographicMode, explainInfeasibility, explainTimeSeconds, keepIncumbentOnStop,
+                fallbackToTimefold, null, null);
+    }
+
+    /**
      * Backward-compatible constructor; fallback remains disabled unless explicitly requested.
+     * (13-argument form used before {@code fallbackToTimefold} was introduced.)
      */
     public SolverOptions(String engine, Integer maxTimeSeconds, Integer numWorkers, Long seed, Boolean logSearch,
                          java.util.List<String> relaxationLevels, Boolean deterministic, Integer objectiveScale,
                          Double gapTolerance, LexicographicMode lexicographicMode, Boolean explainInfeasibility,
                          Integer explainTimeSeconds, Boolean keepIncumbentOnStop) {
         this(engine, maxTimeSeconds, numWorkers, seed, logSearch, relaxationLevels, deterministic, objectiveScale,
-                gapTolerance, lexicographicMode, explainInfeasibility, explainTimeSeconds, keepIncumbentOnStop, null);
+                gapTolerance, lexicographicMode, explainInfeasibility, explainTimeSeconds, keepIncumbentOnStop,
+                null, null, null);
     }
 
     /**
      * @return options with every default applied
      */
     public static SolverOptions defaults() {
-        return new SolverOptions(null, null, null, null, null, null, null, null, null, null, null, null, null);
+        return new SolverOptions(null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null);
     }
 
     /**
@@ -150,16 +182,29 @@ public record SolverOptions(
     }
 
     /**
-     * Returns a copy with the requested primary engine and fallback strategy.
+     * Returns a copy with the requested primary engine and fallback strategy; all other fields are preserved.
      */
     public SolverOptions withEngineAndFallback(String selectedEngine, boolean retryWithTimefold) {
         return new SolverOptions(selectedEngine, maxTimeSeconds, numWorkers, seed, logSearch, relaxationLevels,
                 deterministic, objectiveScale, gapTolerance, lexicographicMode, explainInfeasibility,
-                explainTimeSeconds, keepIncumbentOnStop, Boolean.valueOf(retryWithTimefold));
+                explainTimeSeconds, keepIncumbentOnStop, Boolean.valueOf(retryWithTimefold),
+                feasibilityMode, maxConflicts);
     }
 
     /**
      * How the lexicographic tiers are solved.
      */
     public enum LexicographicMode {AUTO, WEIGHTED, SEQUENTIAL}
+
+    /**
+     * How the feasibility/optimization trade-off is resolved.
+     * <ul>
+     *   <li>{@link #AUTO}: let {@code hasObjective} and {@code properties.stop-after-first-solution} decide.</li>
+     *   <li>{@link #FORCE_FEASIBLE}: stop at the first feasible solution, regardless of {@code hasObjective}
+     *       or {@code properties.stop-after-first-solution}. Intended for publication flows.</li>
+     *   <li>{@link #FORCE_OPTIMIZE}: keep optimizing until the gap or wall-clock budget is met, regardless of
+     *       {@code properties.stop-after-first-solution}. Intended for offline plan optimization.</li>
+     * </ul>
+     */
+    public enum FeasibilityMode {AUTO, FORCE_FEASIBLE, FORCE_OPTIMIZE}
 }

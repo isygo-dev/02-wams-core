@@ -253,7 +253,7 @@ public final class SolveRunner {
         }
         CpSolver solver = new CpSolver();
         CpSatParameters.Applied applied = CpSatParameters.apply(solver, ctx.options(), properties, ctx.limits,
-                budgetMillis, hints, gapTolerance);
+                budgetMillis, hints, gapTolerance, true);
         ProgressCallback callback = new ProgressCallback(ctx, context.listener(), token, context.startNanos(), tier, phase,
                 properties, hasObjective);
         CpSolverStatus status;
