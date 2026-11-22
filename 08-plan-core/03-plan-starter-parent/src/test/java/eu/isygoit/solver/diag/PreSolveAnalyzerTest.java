@@ -224,6 +224,122 @@ class PreSolveAnalyzerTest {
     }
 
     @Test
+    void interchangeableTasksAboveTheEnergyOfTheirSharedResourcesAreReportedAsAGroup() {
+        PlanningProblem p = problem(12, List.of(resource("R", 1, "x"), resource("S", 1, "x")), List.of(
+                task("A", 10).requires(requirement("default", 1, null, "x")).build(),
+                task("B", 10).requires(requirement("default", 1, null, "x")).build(),
+                task("C", 10).requires(requirement("default", 1, null, "x")).build()));
+        Diagnostics d = analyze(p).orElseThrow();
+        CoreItem summary = items(d, CoreItems.GROUP_CAPACITY_EXCEEDED).stream()
+                .filter(i -> CoreItems.RESOURCE.equals(i.kind())).findFirst().orElseThrow();
+        assertTrue(summary.message().contains("30"), summary.message());
+        assertTrue(summary.message().contains("24"), summary.message());
+        assertTrue(items(d, CoreItems.CAPACITY_EXCEEDED).isEmpty(), "no single resource is overloaded");
+        List<?> groups = (List<?>) d.details().get("groupCapacity");
+        assertEquals(1, groups.size());
+        Map<?, ?> group = (Map<?, ?>) groups.get(0);
+        assertEquals(30L, ((Number) group.get("demand")).longValue());
+        assertEquals(24L, ((Number) group.get("supply")).longValue());
+        assertEquals(6L, ((Number) group.get("deficit")).longValue());
+        assertEquals(3, ((Number) group.get("taskCount")).intValue());
+        assertEquals(2, ((Number) group.get("resourceCount")).intValue());
+        assertEquals(List.of("default"), new ArrayList<>((java.util.Collection<?>) group.get("roles")));
+        assertTrue(d.infeasibilityCore().containsAll(List.of("A", "B", "C")));
+    }
+
+    @Test
+    void interchangeableTasksWithinTheSharedEnergyYieldNothing() {
+        PlanningProblem p = problem(30, List.of(resource("R", 1, "x"), resource("S", 1, "x")), List.of(
+                task("A", 10).requires(requirement("default", 1, null, "x")).build(),
+                task("B", 10).requires(requirement("default", 1, null, "x")).build(),
+                task("C", 10).requires(requirement("default", 1, null, "x")).build()));
+        assertTrue(analyze(p).isEmpty());
+    }
+
+    @Test
+    void optionalTasksAreNotCountedInTheGroupDemand() {
+        PlanningProblem p = problem(12, List.of(resource("R", 1, "x"), resource("S", 1, "x")), List.of(
+                task("A", 10).requires(requirement("default", 1, null, "x")).build(),
+                task("B", 10).requires(requirement("default", 1, null, "x")).optional(5L).build(),
+                task("C", 10).requires(requirement("default", 1, null, "x")).optional(5L).build()));
+        assertTrue(analyze(p).isEmpty());
+    }
+
+    @Test
+    void maxLoadOfTheSharedResourcesBoundsTheGroupSupply() {
+        PlanningProblem p = problem(100, List.of(
+                TestProblems.resourceWith("R", 1, List.of(), 10, null),
+                TestProblems.resourceWith("S", 1, List.of(), 10, null)), List.of(
+                task("A", 10).build(), task("B", 10).build(), task("C", 10).build()));
+        Diagnostics d = analyze(p).orElseThrow();
+        Map<?, ?> group = (Map<?, ?>) ((List<?>) d.details().get("groupCapacity")).get(0);
+        assertEquals(30L, ((Number) group.get("demand")).longValue());
+        assertEquals(20L, ((Number) group.get("supply")).longValue());
+    }
+
+    @Test
+    void theSlotGridLimitsTheSupplyOfTheGroup() {
+        List<Resource> resources = List.of(resource("R", 1), resource("S", 1));
+        List<Task> seven = new ArrayList<>();
+        List<Task> six = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            Task t = task("T" + i, 10).build();
+            seven.add(t);
+            if (i < 6) {
+                six.add(t);
+            }
+        }
+        PlanningProblem tooMany = problem(100, resources, seven);
+        StubIndexView index = StubIndexView.of(tooMany);
+        for (int i = 0; i < 7; i++) {
+            index.runs("T" + i, 0, 0, 20, 20, 40, 40);
+        }
+        Diagnostics d = analyze(tooMany, index).orElseThrow();
+        Map<?, ?> group = (Map<?, ?>) ((List<?>) d.details().get("groupCapacity")).get(0);
+        assertEquals(70L, ((Number) group.get("demand")).longValue());
+        assertEquals(60L, ((Number) group.get("supply")).longValue());
+
+        PlanningProblem fits = problem(100, resources, six);
+        StubIndexView fitIndex = StubIndexView.of(fits);
+        for (int i = 0; i < 6; i++) {
+            fitIndex.runs("T" + i, 0, 0, 20, 20, 40, 40);
+        }
+        assertTrue(analyze(fits, fitIndex).isEmpty());
+    }
+
+    @Test
+    void sharedAndDedicatedResourcesAreCombinedIntoOneViolatedGroup() {
+        List<Resource> resources = List.of(
+                resource("D", 1, "math"), resource("U1", 1, "math", "fr"), resource("U2", 1, "math", "fr"));
+        List<Task> tasks = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            tasks.add(task("fr" + i, 10).requires(requirement("default", 1, null, "fr")).build());
+        }
+        for (int i = 0; i < 3; i++) {
+            tasks.add(task("math" + i, 10).requires(requirement("default", 1, null, "math")).build());
+        }
+        Diagnostics d = analyze(problem(20, resources, tasks)).orElseThrow();
+        List<?> groups = (List<?>) d.details().get("groupCapacity");
+        assertEquals(1, groups.size());
+        Map<?, ?> group = (Map<?, ?>) groups.get(0);
+        assertEquals(70L, ((Number) group.get("demand")).longValue());
+        assertEquals(60L, ((Number) group.get("supply")).longValue());
+        assertEquals(7, ((Number) group.get("taskCount")).intValue());
+        assertEquals(3, ((Number) group.get("resourceCount")).intValue());
+    }
+
+    @Test
+    void aSingleOverloadedResourceIsNotReportedTwice() {
+        PlanningProblem p = problem(100, List.of(resource("R", 1), resource("S", 1)), List.of(
+                task("A", 30).deadline(50).requires(requirementOn("default", "R")).build(),
+                task("B", 30).deadline(50).requires(requirementOn("default", "R")).build()));
+        Diagnostics d = analyze(p).orElseThrow();
+        assertFalse(items(d, CoreItems.CAPACITY_EXCEEDED).isEmpty());
+        assertTrue(items(d, CoreItems.GROUP_CAPACITY_EXCEEDED).isEmpty());
+        assertNull(d.details().get("groupCapacity"));
+    }
+
+    @Test
     void findingsAreCappedAndTheCoreIsOrdered() {
         List<Task> tasks = new ArrayList<>();
         for (int i = 0; i < PreSolveAnalyzer.MAX_FINDINGS + 10; i++) {

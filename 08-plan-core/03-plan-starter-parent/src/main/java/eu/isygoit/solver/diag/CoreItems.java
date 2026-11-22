@@ -39,6 +39,7 @@ public final class CoreItems {
     public static final String WINDOW_EMPTY = "WINDOW_EMPTY";
     public static final String CRITICAL_PATH_TOO_LONG = "CRITICAL_PATH_TOO_LONG";
     public static final String CAPACITY_EXCEEDED = "CAPACITY_EXCEEDED";
+    public static final String GROUP_CAPACITY_EXCEEDED = "GROUP_CAPACITY_EXCEEDED";
     public static final String PRECEDENCE = "PRECEDENCE";
     public static final String CALENDAR = "CALENDAR";
     public static final String REQUIREMENT_COUNT = "REQUIREMENT_COUNT";

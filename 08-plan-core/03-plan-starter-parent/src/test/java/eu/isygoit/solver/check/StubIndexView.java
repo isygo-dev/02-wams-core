@@ -27,6 +27,7 @@ public final class StubIndexView implements CandidateIndexView, PreSolveAnalyzer
     private final List<List<int[]>> cands = new ArrayList<>();
     private final int[] est;
     private final int[] lst;
+    private final Map<Integer, int[]> taskRuns = new HashMap<>();
     private int[] candBegin;
     private int[] flatTask;
     private int[] flatResource;
@@ -93,6 +94,17 @@ public final class StubIndexView implements CandidateIndexView, PreSolveAnalyzer
     public StubIndexView window(String taskId, int estStart, int lstStart) {
         est[taskIx.get(taskId)] = estStart;
         lst[taskIx.get(taskId)] = lstStart;
+        return this;
+    }
+
+    /**
+     * Overrides the start domain of a task with inclusive runs {@code [lo0,hi0,lo1,hi1,...]}, as slot starts do.
+     */
+    public StubIndexView runs(String taskId, int... inclusiveRuns) {
+        int t = taskIx.get(taskId);
+        taskRuns.put(t, inclusiveRuns);
+        est[t] = inclusiveRuns[0];
+        lst[t] = inclusiveRuns[inclusiveRuns.length - 1];
         return this;
     }
 
@@ -356,6 +368,22 @@ public final class StubIndexView implements CandidateIndexView, PreSolveAnalyzer
             }
         }
         return Arrays.copyOf(tmp, n);
+    }
+
+    @Override
+    public int[] requirementCandidateIds(int task, int requirement) {
+        List<Integer> ids = new ArrayList<>();
+        for (int c = candBegin[task]; c < candBegin[task + 1]; c++) {
+            if (flatReq[c] == requirement) {
+                ids.add(c);
+            }
+        }
+        return ids.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    @Override
+    public int[] startRuns(int candidate) {
+        return taskRuns.get(flatTask[candidate]);
     }
 
     @Override

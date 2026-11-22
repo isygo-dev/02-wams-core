@@ -27,6 +27,10 @@ import java.util.*;
  *       reported);</li>
  *   <li>single-resource energy: forced work of a resource exceeds its available capacity inside the joint window of
  *       the forced tasks, or its {@code maxLoadTicks} ({@code CAPACITY_EXCEEDED});</li>
+ *   <li>group capacity (Hall's condition through a maximum flow): the required tasks that can only be served by a SET
+ *       of interchangeable resources need more work than the set can offer, given the start domains of the candidates
+ *       (calendars, slots) and the {@code maxLoadTicks} ({@code GROUP_CAPACITY_EXCEEDED}; the groups are listed in
+ *       {@code details.groupCapacity});</li>
  *   <li>a pin or locked assignment that is not a candidate / lies outside the start domain
  *       ({@code PIN_CONFLICT}, {@code LOCKED_CONFLICT}).</li>
  * </ol>
@@ -43,6 +47,11 @@ public final class PreSolveAnalyzer {
      * Maximum number of findings reported.
      */
     public static final int MAX_FINDINGS = 50;
+
+    private static final int MAX_GROUP_FINDINGS = 3;
+    private static final int MAX_GROUP_ITEMS = 15;
+    private static final int MAX_GROUP_DETAIL_IDS = 200;
+    private static final int MAX_GROUP_DETAIL_TASKS = 2000;
 
     private static final Set<String> PRUNING_TYPES =
             Set.of("task_eligibility", "fixed_assignment", "time_window", "resource_availability");
@@ -79,6 +88,9 @@ public final class PreSolveAnalyzer {
         details.put("phase", "PRESOLVE");
         details.put("findings", run.items.size());
         details.put("truncated", run.truncated);
+        if (!run.groupDetails.isEmpty()) {
+            details.put("groupCapacity", run.groupDetails);
+        }
         String message = "The problem is infeasible before solving: " + run.items.get(0).message()
                 + (run.items.size() > 1 ? " (and " + (run.items.size() - 1) + " more finding(s))" : "");
         return Optional.of(CoreItems.diagnostics(message, core, List.of(), details));
@@ -119,6 +131,25 @@ public final class PreSolveAnalyzer {
         default List<String[]> pruneReasons(int task, int requirement) {
             return List.of();
         }
+
+        /**
+         * @param task        task index
+         * @param requirement requirement position inside the task (0-based)
+         * @return the global candidate ids of the requirement, or {@code null} when unknown (the group capacity proof is
+         * then skipped)
+         */
+        default int[] requirementCandidateIds(int task, int requirement) {
+            return null;
+        }
+
+        /**
+         * @param candidate global candidate id
+         * @return the INCLUSIVE start runs {@code [lo0,hi0,lo1,hi1,...]} of the candidate, or {@code null} when the start
+         * domain is the plain interval {@code [estStart, lstStart]} of its task
+         */
+        default int[] startRuns(int candidate) {
+            return null;
+        }
     }
 
     // ------------------------------------------------------------------------------------------------ one run
@@ -131,6 +162,7 @@ public final class PreSolveAnalyzer {
         final Task[] tasks;
         final List<CoreItem> items = new ArrayList<>();
         final Set<Integer> flagged = new HashSet<>();
+        final List<Map<String, Object>> groupDetails = new ArrayList<>();
         boolean truncated;
         boolean[] rootWindow;
 
@@ -153,6 +185,7 @@ public final class PreSolveAnalyzer {
             boolean[] covered = criticalPath();
             windowFindings(covered);
             energyFindings();
+            groupCapacityFindings();
             pinAndLockFindings();
         }
 
@@ -473,6 +506,71 @@ public final class PreSolveAnalyzer {
             }
         }
 
+        // ---- (5b) group capacity
+
+        void groupCapacityFindings() {
+            List<GroupCapacity.Violation> violations = GroupCapacity.find(index, structure, tasks, flagged);
+            Set<String> energyResources = new HashSet<>();
+            for (CoreItem item : items) {
+                if (CoreItems.RESOURCE.equals(item.kind()) && CoreItems.CAPACITY_EXCEEDED.equals(item.reasonCode())) {
+                    energyResources.add(item.id());
+                }
+            }
+            int reported = 0;
+            for (GroupCapacity.Violation violation : violations) {
+                if (violation.resources().length == 1
+                        && energyResources.contains(index.resourceId(violation.resources()[0]))) {
+                    continue;
+                }
+                if (reported++ >= MAX_GROUP_FINDINGS) {
+                    break;
+                }
+                reportGroup(violation);
+            }
+        }
+
+        void reportGroup(GroupCapacity.Violation violation) {
+            int tickSeconds = problem.horizon().tickSeconds();
+            long deficitMinutes = Math.round(violation.deficit() * tickSeconds / 60.0);
+            List<String> resourceIds = new ArrayList<>();
+            for (int r : violation.resources()) {
+                resourceIds.add(index.resourceId(r));
+            }
+            List<String> taskIds = new ArrayList<>();
+            for (int t : violation.tasks()) {
+                taskIds.add(index.taskId(t));
+            }
+            String sample = String.join(", ", resourceIds.subList(0, Math.min(5, resourceIds.size())))
+                    + (resourceIds.size() > 5 ? " and " + (resourceIds.size() - 5) + " more" : "");
+            String message = "the " + taskIds.size() + " required task(s) that can only use the " + resourceIds.size()
+                    + " resource(s) [" + sample + "] (roles " + violation.roles() + ") need " + violation.demand()
+                    + " units of work but these resources can offer only " + violation.supply()
+                    + " together: deficit " + violation.deficit() + " units (" + deficitMinutes + " min)";
+            add(CoreItems.item(CoreItems.RESOURCE, resourceIds.get(0), CoreItems.GROUP_CAPACITY_EXCEEDED, message));
+            for (int i = 1; i < Math.min(resourceIds.size(), MAX_GROUP_ITEMS); i++) {
+                add(CoreItems.item(CoreItems.RESOURCE, resourceIds.get(i), CoreItems.GROUP_CAPACITY_EXCEEDED,
+                        "resource '" + resourceIds.get(i) + "' belongs to a group of " + resourceIds.size()
+                                + " resources whose total capacity is " + violation.supply() + " units for "
+                                + violation.demand() + " units of work"));
+            }
+            for (int i = 0; i < Math.min(taskIds.size(), MAX_GROUP_ITEMS); i++) {
+                add(CoreItems.item(CoreItems.TASK, taskIds.get(i), CoreItems.GROUP_CAPACITY_EXCEEDED,
+                        "task '" + taskIds.get(i) + "' can only run on the overloaded group of "
+                                + resourceIds.size() + " resources"));
+            }
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("resources", new ArrayList<>(resourceIds.subList(0, Math.min(resourceIds.size(), MAX_GROUP_DETAIL_IDS))));
+            entry.put("resourceCount", resourceIds.size());
+            entry.put("tasks", new ArrayList<>(taskIds.subList(0, Math.min(taskIds.size(), MAX_GROUP_DETAIL_TASKS))));
+            entry.put("taskCount", taskIds.size());
+            entry.put("roles", new ArrayList<>(violation.roles()));
+            entry.put("demand", violation.demand());
+            entry.put("supply", violation.supply());
+            entry.put("deficit", violation.deficit());
+            entry.put("tickSeconds", tickSeconds);
+            groupDetails.add(entry);
+        }
+
         // ---- (6) pins and locks
 
         void pinAndLockFindings() {
@@ -612,6 +710,30 @@ public final class PreSolveAnalyzer {
                 }
             }
             return new ArrayList<>(distinct.values());
+        }
+
+        @Override
+        public int[] requirementCandidateIds(int task, int requirement) {
+            int global = ix.taskReqStart[task] + requirement;
+            int from = ix.reqCandStart[global];
+            int[] out = new int[ix.reqCandStart[global + 1] - from];
+            for (int i = 0; i < out.length; i++) {
+                out[i] = from + i;
+            }
+            return out;
+        }
+
+        @Override
+        public int[] startRuns(int candidate) {
+            int from = ix.candStartRunStart[candidate];
+            int to = ix.candStartRunStart[candidate + 1];
+            if (to > from) {
+                return Arrays.copyOfRange(ix.candStartRuns, from, to);
+            }
+            int task = ix.candTask[candidate];
+            from = ix.taskStartRunStart[task];
+            to = ix.taskStartRunStart[task + 1];
+            return to > from ? Arrays.copyOfRange(ix.taskStartRuns, from, to) : null;
         }
 
         @Override
