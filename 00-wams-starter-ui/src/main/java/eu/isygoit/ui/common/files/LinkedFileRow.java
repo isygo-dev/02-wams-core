@@ -11,6 +11,7 @@ import eu.isygoit.i18n.I18n;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
@@ -51,16 +52,24 @@ final class LinkedFileRow {
         Div category = new Div();
         category.addClassName("file-row__category");
         if (c.categoryEditable()) {
-            TextField input = new TextField();
-            input.addThemeVariants(TextFieldVariant.LUMO_SMALL);
-            input.setPlaceholder(I18n.t("files.category.placeholder"));
-            input.setAriaLabel(I18n.t("files.category.placeholder"));
-            input.setValue(c.category() != null ? c.category() : "");
-            input.setWidthFull();
-            if (c.onCategory() != null) {
-                input.addValueChangeListener(e -> c.onCategory().accept(e.getValue()));
+            if (c.categoryEditorFactory() != null && c.onCategory() != null) {
+                // Caller-supplied editor (e.g. an AnnexPickers combo box)
+                Component editor = c.categoryEditorFactory().apply(
+                        c.category() != null ? c.category() : "", c.onCategory());
+                category.add(editor);
+            } else {
+                // Default: free-text field
+                TextField input = new TextField();
+                input.addThemeVariants(TextFieldVariant.LUMO_SMALL);
+                input.setPlaceholder(I18n.t("files.category.placeholder"));
+                input.setAriaLabel(I18n.t("files.category.placeholder"));
+                input.setValue(c.category() != null ? c.category() : "");
+                input.setWidthFull();
+                if (c.onCategory() != null) {
+                    input.addValueChangeListener(e -> c.onCategory().accept(e.getValue()));
+                }
+                category.add(input);
             }
-            category.add(input);
         } else if (c.category() != null && !c.category().isBlank()) {
             Span tag = new Span(c.category());
             tag.addClassName("file-row__tag");
@@ -97,20 +106,25 @@ final class LinkedFileRow {
     /**
      * What a row shows; any value may be {@code null} (its cell is then left empty so the columns stay aligned).
      *
-     * @param mimetype         mime type, gives the icon (and the type when there is no extension)
-     * @param name             file name
-     * @param category         category of the file
-     * @param categoryEditable {@code true} while the file is not stored yet: the category is an input; once stored it
-     *                         is shown as a tag
-     * @param onCategory       called with the typed category
-     * @param pending          the file is not stored yet: shows the "pending" tag
-     * @param date             upload date
-     * @param size             size in bytes
-     * @param extension        file extension, preferred for the type
-     * @param actions          the download and delete actions, in this order
+     * @param mimetype              mime type, gives the icon (and the type when there is no extension)
+     * @param name                  file name
+     * @param category              category of the file
+     * @param categoryEditable      {@code true} while the file is not stored yet: the category is an input; once stored it
+     *                              is shown as a tag
+     * @param onCategory            called with the typed category
+     * @param pending               the file is not stored yet: shows the "pending" tag
+     * @param date                  upload date
+     * @param size                  size in bytes
+     * @param extension             file extension, preferred for the type
+     * @param categoryEditorFactory optional factory that produces the category editor; receives the current value
+     *                              and the {@code onChange} callback the returned component must invoke when the user
+     *                              picks or enters a new value. When {@code null}, the row falls back to a plain
+     *                              {@link TextField}.
+     * @param actions               the download and delete actions, in this order
      */
     record Content(String mimetype, String name, String category, boolean categoryEditable,
                    Consumer<String> onCategory, boolean pending, LocalDateTime date, Long size, String extension,
+                   BiFunction<String, Consumer<String>, Component> categoryEditorFactory,
                    Component... actions) {
     }
 }

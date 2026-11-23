@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import static eu.isygoit.ui.common.files.LinkedFilesSupport.CategoryUpdater;
@@ -89,6 +90,18 @@ import static eu.isygoit.ui.common.files.LinkedFilesSupport.PendingFile;
  *     .build();
  * }</pre>
  *
+ * <h3>Annex-backed category picker</h3>
+ * <pre>{@code
+ * filesManager.categoryEditor((current, onChange) -> {
+ *     ComboBox<String> picker = AnnexPickers.pickerWithoutLabel(
+ *             "files.category.placeholder", "STUFILECAT", annexService,
+ *             AnnexPickers.currentLanguage());
+ *     AnnexPickers.select(picker, current);
+ *     picker.addValueChangeListener(e -> onChange.accept(e.getValue()));
+ *     return picker;
+ * });
+ * }</pre>
+ *
  * @param <F> the concrete linked-file DTO type
  */
 @Slf4j
@@ -116,6 +129,7 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
 
     private boolean categoryEditable = true;
     private CategoryUpdater categoryUpdater;
+    private BiFunction<String, Consumer<String>, Component> categoryEditorFactory;
 
     private Downloader downloader;
     private Uploader<F> uploader;
@@ -211,6 +225,24 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
 
     public AdditionalFilesManager<F> categoryUpdater(CategoryUpdater categoryUpdater) {
         this.categoryUpdater = categoryUpdater;
+        return this;
+    }
+
+    /**
+     * Replaces the free-text category field of every row with a caller-supplied
+     * editor (e.g. an annex-backed picker). When {@code null}, rows fall back to
+     * the default {@link com.vaadin.flow.component.textfield.TextField}. Only
+     * consulted while the category is editable (i.e. {@link #categoryEditable}
+     * is {@code true}, the manager is not read-only, and — for committed files —
+     * a {@link #categoryUpdater} is set).
+     * <p>
+     * The factory receives the current category value and the {@code onChange}
+     * callback the returned component must invoke when the user picks or enters
+     * a new value.
+     */
+    public AdditionalFilesManager<F> categoryEditor(
+            BiFunction<String, Consumer<String>, Component> factory) {
+        this.categoryEditorFactory = factory;
         return this;
     }
 
@@ -344,6 +376,7 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
                 file.getCategory(),
                 categoryEditable && !readOnly && categoryUpdater != null, value -> updateCategory(file, value), false,
                 file.getCreateDate(), file.getSize(), file.getExtension(),
+                categoryEditorFactory,
                 actions.toArray(new Component[0])));
     }
 
@@ -358,7 +391,9 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
         });
         Div row = LinkedFileRow.build(new LinkedFileRow.Content(pending.mimeType, pending.name,
                 pending.category, categoryEditable && !readOnly, value -> pending.category = value, true, LocalDateTime.now(),
-                (long) pending.content.length, null, removeBtn));
+                (long) pending.content.length, null,
+                categoryEditorFactory,
+                removeBtn));
         row.getElement().setAttribute("title", I18n.t("files.pending.tooltip"));
         return row;
     }

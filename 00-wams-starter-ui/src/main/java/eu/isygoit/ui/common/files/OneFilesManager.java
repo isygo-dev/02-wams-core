@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import static eu.isygoit.ui.common.files.LinkedFilesSupport.CategoryUpdater;
@@ -64,6 +65,7 @@ public class OneFilesManager extends VerticalLayout {
 
     private boolean categoryEditable = true;
     private CategoryUpdater categoryUpdater;
+    private BiFunction<String, Consumer<String>, Component> categoryEditorFactory;
 
     private Downloader downloader;
     private Uploader uploader;
@@ -126,6 +128,22 @@ public class OneFilesManager extends VerticalLayout {
 
     public OneFilesManager categoryUpdater(CategoryUpdater categoryUpdater) {
         this.categoryUpdater = categoryUpdater;
+        return this;
+    }
+
+    /**
+     * Replaces the free-text category field of the row with a caller-supplied
+     * editor (e.g. an annex-backed picker). When {@code null}, the row falls
+     * back to the default {@link com.vaadin.flow.component.textfield.TextField}.
+     * Only consulted while the category is editable.
+     * <p>
+     * The factory receives the current category value and the {@code onChange}
+     * callback the returned component must invoke when the user picks or enters
+     * a new value.
+     */
+    public OneFilesManager categoryEditor(
+            BiFunction<String, Consumer<String>, Component> factory) {
+        this.categoryEditorFactory = factory;
         return this;
     }
 
@@ -246,7 +264,9 @@ public class OneFilesManager extends VerticalLayout {
         }
 
         Div row = LinkedFileRow.build(new LinkedFileRow.Content(fileType, fileName, fileCategory,
-                categoryEditable && !readOnly && categoryUpdater != null, this::updateCategory, false, fileDate, fileSize, fileExtension, actions.toArray(new Component[0])));
+                categoryEditable && !readOnly && categoryUpdater != null, this::updateCategory, false, fileDate, fileSize, fileExtension,
+                categoryEditorFactory,
+                actions.toArray(new Component[0])));
         row.addClassName("file-row--existing");
         container.add(row);
     }
@@ -268,7 +288,9 @@ public class OneFilesManager extends VerticalLayout {
 
         Div row = LinkedFileRow.build(new LinkedFileRow.Content(pendingFile.mimeType, pendingFile.name,
                 pendingFile.category, categoryEditable && !readOnly, value -> pendingFile.category = value, true, LocalDateTime.now(),
-                (long) pendingFile.content.length, null, removeBtn));
+                (long) pendingFile.content.length, null,
+                categoryEditorFactory,
+                removeBtn));
         row.getElement().setAttribute("title", I18n.t("files.pending.tooltip"));
         container.add(row);
     }
@@ -319,7 +341,7 @@ public class OneFilesManager extends VerticalLayout {
                     render();
                 } else {
                     uploader.upload(new ByteArrayInputStream(content), name, mime, event.getContentLength());
-                    // In immediate mode, we expect the caller to update the file state via setFile() 
+                    // In immediate mode, we expect the caller to update the file state via setFile()
                     // or handle it themselves. But usually OneFilesManager is used in staging mode in dialogs.
                 }
             } catch (Exception ex) {
