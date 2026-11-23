@@ -114,7 +114,7 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
     private boolean readOnly = false;
     private boolean staging = false;
 
-    private boolean categoryEditable = false;
+    private boolean categoryEditable = true;
     private CategoryUpdater categoryUpdater;
 
     private Downloader downloader;

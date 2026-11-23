@@ -73,6 +73,10 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
     private final Span navigationSubtitle = new Span();
     private final Span feedback = new Span();
     private final Span eventCount = new Span();
+    {
+        feedback.addClassName("calendar-feedback");
+        eventCount.addClassName("calendar-count");
+    }
     private final ProgressBar loadingBar = new ProgressBar();    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::refresh);
     private final Tabs viewTabs = new Tabs();
     private final Div viewContainer = new Div();
@@ -93,13 +97,14 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
         setPadding(true);
         setSpacing(true);
         addClassName("management-view");
-        addClassName("cms-calendar-page");
+        addClassName("calendar-page");
 
         monthlyView = new MonthlyCalendarView(this::showDay);
         weeklyView = new WeeklyCalendarView();
         dailyView = new DailyCalendarView();
         viewContainer.setWidthFull();
-        viewContainer.addClassName("cms-calendar-grid-container");
+        viewContainer.addClassName("calendar-view-container");
+        viewContainer.addClassName("calendar-grid-panel");
         viewContainer.add(monthlyView, weeklyView, dailyView);
 
         configureControls();
@@ -114,7 +119,7 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
         calendarSelector.setPlaceholder(I18n.t("cms.calendar.view.calendar.placeholder"));
         calendarSelector.setItemLabelGenerator(calendar ->
                 calendar.getName() == null ? calendar.getCode() : calendar.getName());
-        calendarSelector.setWidth("min(320px, 100%)");
+        calendarSelector.addClassName("calendar-header__selector");
         calendarSelector.setEnabled(false);
         calendarSelector.addValueChangeListener(event -> {
             if (event.getValue() != null) {
@@ -138,20 +143,19 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
             }
             updateVisibleView();
         });
-        viewTabs.addClassName("cms-calendar-tabs");
 
         previousButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        previousButton.addClassName("cms-calendar-nav__arrow");
+        previousButton.addClassName("calendar-nav__arrow");
         previousButton.setTooltipText(I18n.t("cms.calendar.view.previous"));
         previousButton.addClickListener(event -> navigate(-1));
 
         nextButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        nextButton.addClassName("cms-calendar-nav__arrow");
+        nextButton.addClassName("calendar-nav__arrow");
         nextButton.setTooltipText(I18n.t("cms.calendar.view.next"));
         nextButton.addClickListener(event -> navigate(1));
 
         todayButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        todayButton.addClassName("cms-calendar-nav__today");
+        todayButton.addClassName("calendar-nav__today");
         todayButton.addClickListener(event -> {
             currentDate = LocalDate.now();
             datePicker.setValue(currentDate);
@@ -159,7 +163,7 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
         });
 
         datePicker.setWidth("180px");
-        datePicker.addClassName("cms-calendar-nav__picker");
+        datePicker.addClassName("calendar-nav__picker");
         datePicker.addValueChangeListener(event -> {
             if (event.getValue() != null) {
                 currentDate = event.getValue();
@@ -168,63 +172,76 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
         });
     }
 
-    private HorizontalLayout buildHeader() {
-        Div iconTile = new Div(VaadinIcon.CALENDAR.create());
-        iconTile.addClassName("cms-calendar-header__icon");
+    /** Same header card as the pilot calendar; the calendar selector takes the place of the "add" action. */
+    private Div buildHeader() {
+        Div card = new Div();
+        card.addClassName("calendar-header");
+
+        Div iconTile = new Div(VaadinIcon.CALENDAR_O.create());
+        iconTile.addClassName("calendar-header__icon");
 
         H2 title = new H2(I18n.t("cms.calendar.view.schedule.title"));
-        title.addClassName("cms-calendar-header__title");
+        title.addClassName("calendar-header__title");
+
         Span subtitle = new Span(I18n.t("cms.calendar.view.schedule.subtitle"));
-        subtitle.addClassName("cms-calendar-header__subtitle");
+        subtitle.addClassName("calendar-header__subtitle");
 
-        VerticalLayout text = new VerticalLayout(title, subtitle);
-        text.setPadding(false);
-        text.setSpacing(false);
-        text.addClassName("cms-calendar-header__text");
+        VerticalLayout textStack = new VerticalLayout(title, subtitle);
+        textStack.setPadding(false);
+        textStack.setSpacing(false);
+        textStack.addClassName("calendar-header__text");
 
-        HorizontalLayout heading = new HorizontalLayout(iconTile, text);
-        heading.setPadding(false);
-        heading.setSpacing(true);
-        heading.setAlignItems(Alignment.CENTER);
-        heading.addClassName("cms-calendar-header__heading");
+        HorizontalLayout left = new HorizontalLayout(iconTile, textStack);
+        left.setPadding(false);
+        left.setSpacing(true);
+        left.setAlignItems(Alignment.CENTER);
+        left.addClassName("calendar-header__left");
 
-        HorizontalLayout header = new HorizontalLayout(heading, calendarSelector);
-        header.setWidthFull();
-        header.setPadding(false);
-        header.setSpacing(true);
-        header.setAlignItems(Alignment.CENTER);
-        header.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        header.addClassName("cms-calendar-header");
-        return header;
+        HorizontalLayout root = new HorizontalLayout(left, calendarSelector);
+        root.setWidthFull();
+        root.setPadding(false);
+        root.setSpacing(true);
+        root.setAlignItems(Alignment.CENTER);
+        root.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        root.addClassName("calendar-header__inner");
+
+        card.add(root);
+        return card;
     }
 
     private HorizontalLayout buildNavigationBar() {
-        navigationTitle.addClassName("cms-calendar-nav__title");
-        navigationSubtitle.addClassName("cms-calendar-nav__subtitle");
+        HorizontalLayout bar = new HorizontalLayout();
+        bar.setWidthFull();
+        bar.setPadding(false);
+        bar.setSpacing(true);
+        bar.setAlignItems(Alignment.CENTER);
+        bar.setJustifyContentMode(JustifyContentMode.BETWEEN);
+        bar.addClassName("calendar-nav");
 
-        VerticalLayout labels = new VerticalLayout(navigationTitle, navigationSubtitle);
-        labels.setPadding(false);
-        labels.setSpacing(false);
-        labels.setAlignItems(Alignment.CENTER);
+        navigationTitle.addClassName("calendar-nav__title");
+        navigationSubtitle.addClassName("calendar-nav__subtitle");
 
-        HorizontalLayout center = new HorizontalLayout(previousButton, labels, nextButton);
+        VerticalLayout centerStack = new VerticalLayout(navigationTitle, navigationSubtitle);
+        centerStack.setPadding(false);
+        centerStack.setSpacing(false);
+        centerStack.setAlignItems(Alignment.CENTER);
+        centerStack.addClassName("calendar-nav__center-text");
+
+        HorizontalLayout center = new HorizontalLayout(previousButton, centerStack, nextButton);
         center.setPadding(false);
         center.setSpacing(true);
         center.setAlignItems(Alignment.CENTER);
+        center.addClassName("calendar-nav__center");
 
         HorizontalLayout actions = new HorizontalLayout(datePicker, todayButton);
         actions.setPadding(false);
         actions.setSpacing(true);
         actions.setAlignItems(Alignment.CENTER);
+        actions.addClassName("calendar-nav__actions");
 
-        HorizontalLayout navigation = new HorizontalLayout(center, actions);
-        navigation.setWidthFull();
-        navigation.setPadding(false);
-        navigation.setSpacing(true);
-        navigation.setAlignItems(Alignment.CENTER);
-        navigation.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        navigation.addClassName("cms-calendar-nav");
-        return navigation;
+        bar.add(center, actions);
+        bar.expand(center);
+        return bar;
     }
 
     @Override
@@ -365,11 +382,11 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
         LocalDate weekStart = currentDate.with(DayOfWeek.MONDAY);
         LocalDate weekEnd = weekStart.plusDays(6);
         navigationTitle.setText(currentMode == CalendarMode.MONTH
-                ? DateTimeFormatter.ofPattern("MMMM yyyy").format(currentDate)
+                ? DateTimeFormatter.ofPattern("MMMM yyyy", I18n.getCurrentLocale()).format(currentDate)
                 : currentMode == CalendarMode.WEEK
-                ? DateTimeFormatter.ofPattern("dd MMM yyyy").format(weekStart)
-                + " – " + DateTimeFormatter.ofPattern("dd MMM yyyy").format(weekEnd)
-                : DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy").format(currentDate));
+                ? DateTimeFormatter.ofPattern("dd MMM yyyy", I18n.getCurrentLocale()).format(weekStart)
+                + " – " + DateTimeFormatter.ofPattern("dd MMM yyyy", I18n.getCurrentLocale()).format(weekEnd)
+                : DateTimeFormatter.ofPattern("EEEE, dd MMMM yyyy", I18n.getCurrentLocale()).format(currentDate));
         navigationSubtitle.setText(currentMode == CalendarMode.MONTH
                 ? I18n.t("cms.calendar.view.month.subtitle")
                 : currentMode == CalendarMode.WEEK
@@ -409,12 +426,12 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
 
     private void showError(String message) {
         feedback.setText(message);
-        feedback.addClassName("cms-calendar-feedback--error");
+        feedback.addClassName("calendar-feedback--error");
     }
 
     private void clearFeedback() {
         feedback.setText("");
-        feedback.removeClassName("cms-calendar-feedback--error");
+        feedback.removeClassName("calendar-feedback--error");
         eventCount.setText("");
     }
 

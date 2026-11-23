@@ -2,7 +2,9 @@ package eu.isygoit.ui.common.files;
 
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import eu.isygoit.dto.common.LinkedFileDto;
 import eu.isygoit.exception.OperationNotSupportedException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
@@ -10,7 +12,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.function.BiFunction;
 
 /**
  * Shared helpers for dialogs that manage linked files.
@@ -85,6 +89,51 @@ public final class LinkedFilesSupport {
 
         public MultipartFile toMultipartFile() {
             return new ByteArrayMultipartFile(name, name, mimeType, content);
+        }
+
+        /**
+         * Stores the category typed on this staged file, once the file has been uploaded: the upload answers with
+         * the files of the parent, the new one is the most recent with the same name. A failure never blocks the
+         * save of the parent, the category can still be edited afterwards.
+         *
+         * @param uploadResponse answer of the upload call (may be {@code null})
+         * @param updater        (fileId, category) {@code ->} the category update call of the parent service
+         */
+        /**
+         * Single-file variant: stores the category typed on this staged file once it has been uploaded.
+         *
+         * @param updater category {@code ->} the category update call of the parent service
+         */
+        public void storeSingleCategory(java.util.function.Function<String, ResponseEntity<Boolean>> updater) {
+            if (category == null || category.isBlank()) {
+                return;
+            }
+            try {
+                updater.apply(category.trim());
+            } catch (RuntimeException ex) {
+                // the file is stored; only its category is missing
+            }
+        }
+
+        public void storeCategory(ResponseEntity<? extends List<? extends LinkedFileDto<?>>> uploadResponse,
+                                  BiFunction<Long, String, ResponseEntity<Boolean>> updater) {
+            if (category == null || category.isBlank() || uploadResponse == null || uploadResponse.getBody() == null) {
+                return;
+            }
+            Long newest = null;
+            for (LinkedFileDto<?> file : uploadResponse.getBody()) {
+                if (file.getId() instanceof Number id && name.equals(file.getOriginalFileName())
+                        && (newest == null || id.longValue() > newest)) {
+                    newest = id.longValue();
+                }
+            }
+            if (newest != null) {
+                try {
+                    updater.apply(newest, category.trim());
+                } catch (RuntimeException ex) {
+                    // the file is stored; only its category is missing
+                }
+            }
         }
     }
 

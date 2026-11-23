@@ -36,7 +36,7 @@ import java.util.Map;
                 name = SchemaUcConstantName.UC_LINKED_FILE,
                 columnNames = {
                         SchemaColumnConstantName.C_TENANT,
-                        SchemaColumnConstantName.C_ORIGINAL_FILE_NAME,
+                        SchemaColumnConstantName.C_CODE,
                         SchemaColumnConstantName.C_VERSION,
                 })
 })
