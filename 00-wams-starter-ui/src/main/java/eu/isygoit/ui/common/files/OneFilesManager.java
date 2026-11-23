@@ -62,7 +62,7 @@ public class OneFilesManager extends VerticalLayout {
     private int maxFileSize = 25 * 1024 * 1024;
     private String[] acceptedMimeTypes;
 
-    private boolean categoryEditable = false;
+    private boolean categoryEditable = true;
     private CategoryUpdater categoryUpdater;
 
     private Downloader downloader;
