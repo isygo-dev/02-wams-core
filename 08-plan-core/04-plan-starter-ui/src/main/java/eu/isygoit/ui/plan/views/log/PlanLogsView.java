@@ -75,7 +75,7 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
     @Override
     public String getPageTitle() {
         return I18n.t("plan.ui.logs.title");
-    }    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::loadLogs);
+    }
 
     /**
      * Pre-fills and loads the logs when opened with a {@code ?jobId=} query parameter (the
@@ -90,7 +90,7 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
                     jobIdField.setValue(value.trim());
                     loadLogs();
                 });
-    }
+    }    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::loadLogs);
 
     private HorizontalLayout buildToolbar() {
         jobIdField.setLabel(I18n.t("plan.ui.logs.job.id"));

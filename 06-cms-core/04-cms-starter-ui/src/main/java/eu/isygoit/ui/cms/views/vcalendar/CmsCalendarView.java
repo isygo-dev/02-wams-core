@@ -72,8 +72,8 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
     private final Span navigationTitle = new Span();
     private final Span navigationSubtitle = new Span();
     private final Span feedback = new Span();
-    private final Span eventCount = new Span();    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::refresh);
-    private final ProgressBar loadingBar = new ProgressBar();
+    private final Span eventCount = new Span();
+    private final ProgressBar loadingBar = new ProgressBar();    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::refresh);
     private final Tabs viewTabs = new Tabs();
     private final Div viewContainer = new Div();
     private final MonthlyCalendarView monthlyView;

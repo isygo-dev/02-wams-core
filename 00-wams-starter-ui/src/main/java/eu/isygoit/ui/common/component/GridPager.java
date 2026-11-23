@@ -17,10 +17,10 @@ public final class GridPager<T> {
     private final Grid<T> grid;
     private final int pageSize;
     private List<T> items = List.of();
-    private int page;    private final PagerBar pager = new PagerBar(this::goToPage);
+    private int page;
     public GridPager(Grid<T> grid) {
         this(grid, DEFAULT_PAGE_SIZE);
-    }
+    }    private final PagerBar pager = new PagerBar(this::goToPage);
 
     public GridPager(Grid<T> grid, int pageSize) {
         this.grid = grid;

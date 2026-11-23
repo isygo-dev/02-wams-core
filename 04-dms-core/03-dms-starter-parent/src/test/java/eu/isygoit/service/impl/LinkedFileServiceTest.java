@@ -8,8 +8,8 @@ import eu.isygoit.repository.CategoryRepository;
 import eu.isygoit.repository.LinkedFileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,16 +22,13 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class LinkedFileServiceTest {
 
+    @TempDir
+    Path tempDirectory;
     @Mock
     private AppProperties appProperties;
     @Mock
@@ -40,10 +37,6 @@ class LinkedFileServiceTest {
     private CategoryRepository categoryRepository;
     @Mock
     private SmsStorageLinkedFileService smsStorageLinkedFileService;
-
-    @TempDir
-    Path tempDirectory;
-
     private LinkedFileService linkedFileService;
 
     @BeforeEach

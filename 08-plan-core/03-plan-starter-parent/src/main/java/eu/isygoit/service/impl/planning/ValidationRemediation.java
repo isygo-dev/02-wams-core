@@ -73,11 +73,10 @@ public final class ValidationRemediation {
                     "Choisissez un solveur répertorié par le point de terminaison des capacités du service Plan.",
                     "اختر محلّلاً مدرجاً في نقطة نهاية إمكانات خدمة Plan.");
             case "ENGINE_UNSUPPORTED_FEATURE", "ENGINE_UNSUPPORTED_CONSTRAINT",
-                    "ENGINE_UNSUPPORTED_ENFORCEMENT", "ENGINE_UNSUPPORTED_OBJECTIVE" ->
-                    translated(lang,
-                            "Choose a solver that supports this feature or remove/change the unsupported request element; check the Plan service capabilities for the selected solver.",
-                            "Choisissez un solveur compatible ou supprimez/modifiez l'élément non pris en charge ; consultez les capacités du service Plan pour le solveur choisi.",
-                            "اختر محلّلاً يدعم هذه الميزة أو احذف/عدّل عنصر الطلب غير المدعوم؛ راجع إمكانات خدمة Plan للمحلّل المحدد.");
+                 "ENGINE_UNSUPPORTED_ENFORCEMENT", "ENGINE_UNSUPPORTED_OBJECTIVE" -> translated(lang,
+                    "Choose a solver that supports this feature or remove/change the unsupported request element; check the Plan service capabilities for the selected solver.",
+                    "Choisissez un solveur compatible ou supprimez/modifiez l'élément non pris en charge ; consultez les capacités du service Plan pour le solveur choisi.",
+                    "اختر محلّلاً يدعم هذه الميزة أو احذف/عدّل عنصر الطلب غير المدعوم؛ راجع إمكانات خدمة Plan للمحلّل المحدد.");
             case "PRECEDENCE_CYCLE" -> translated(lang,
                     "Remove or reverse one or more precedence links so the task dependency graph is acyclic.",
                     "Supprimez ou inversez un ou plusieurs liens de précédence afin que le graphe des dépendances soit sans cycle.",

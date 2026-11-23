@@ -41,10 +41,14 @@ import eu.isygoit.dto.request.SolverOptions;
  */
 public final class CpSatParameters {
 
-    /** Used only when the caller passes {@code null} properties (tests, misconfiguration). */
+    /**
+     * Used only when the caller passes {@code null} properties (tests, misconfiguration).
+     */
     private static final CpSatProperties FALLBACK = new CpSatProperties();
 
-    /** Sentinel for "no worker cap"; guards against {@code workerCap <= 0} in YAML. */
+    /**
+     * Sentinel for "no worker cap"; guards against {@code workerCap <= 0} in YAML.
+     */
     private static final int UNBOUNDED_WORKER_CAP = Integer.MAX_VALUE;
 
     private CpSatParameters() {
@@ -53,14 +57,14 @@ public final class CpSatParameters {
     /**
      * Applies the parameters to a fresh solver.
      *
-     * @param solver        the solver (parameters are set on {@code solver.getParameters()})
-     * @param options       per-request options (non-null)
-     * @param properties    deployment defaults (nullable; falls back to built-in defaults)
-     * @param limits        service limits (worker clamp), nullable
-     * @param budgetMillis  wall-clock budget of THIS solve, in milliseconds ({@code >= 1})
-     * @param hasHints      true when the model carries hints
-     * @param gapTolerance  caller-supplied relative gap ({@code > 0}); {@code 0} = use properties default
-     * @param hasObjective  true when the model calls {@code Minimize}/{@code Maximize}
+     * @param solver       the solver (parameters are set on {@code solver.getParameters()})
+     * @param options      per-request options (non-null)
+     * @param properties   deployment defaults (nullable; falls back to built-in defaults)
+     * @param limits       service limits (worker clamp), nullable
+     * @param budgetMillis wall-clock budget of THIS solve, in milliseconds ({@code >= 1})
+     * @param hasHints     true when the model carries hints
+     * @param gapTolerance caller-supplied relative gap ({@code > 0}); {@code 0} = use properties default
+     * @param hasObjective true when the model calls {@code Minimize}/{@code Maximize}
      * @return what was applied, for reporting / tests
      */
     public static Applied apply(CpSolver solver,
@@ -176,13 +180,13 @@ public final class CpSatParameters {
     /**
      * What {@link #apply} configured, for reporting / tests.
      *
-     * @param workers               effective worker count
-     * @param deterministic         true when the reproducible parameters were applied
-     * @param wallLimitSeconds      wall-clock limit that was set
-     * @param feasibilityOnly       true when {@code stop_after_first_solution} was set
-     * @param logSearch             true when solver search logging is on
-     * @param maxNumberOfConflicts  applied conflict cap, or {@code null} when unbounded
-     * @param seed                  effective random seed
+     * @param workers              effective worker count
+     * @param deterministic        true when the reproducible parameters were applied
+     * @param wallLimitSeconds     wall-clock limit that was set
+     * @param feasibilityOnly      true when {@code stop_after_first_solution} was set
+     * @param logSearch            true when solver search logging is on
+     * @param maxNumberOfConflicts applied conflict cap, or {@code null} when unbounded
+     * @param seed                 effective random seed
      */
     public record Applied(int workers,
                           boolean deterministic,

@@ -24,26 +24,6 @@ final class LinkedFileRow {
     private LinkedFileRow() {
     }
 
-    /**
-     * What a row shows; any value may be {@code null} (its cell is then left empty so the columns stay aligned).
-     *
-     * @param mimetype         mime type, gives the icon (and the type when there is no extension)
-     * @param name             file name
-     * @param category         category of the file
-     * @param categoryEditable {@code true} while the file is not stored yet: the category is an input; once stored it
-     *                         is shown as a tag
-     * @param onCategory       called with the typed category
-     * @param pending          the file is not stored yet: shows the "pending" tag
-     * @param date             upload date
-     * @param size             size in bytes
-     * @param extension        file extension, preferred for the type
-     * @param actions          the download and delete actions, in this order
-     */
-    record Content(String mimetype, String name, String category, boolean categoryEditable,
-                   Consumer<String> onCategory, boolean pending, LocalDateTime date, Long size, String extension,
-                   Component... actions) {
-    }
-
     static Div build(Content c) {
         Div row = new Div();
         row.addClassName("file-row");
@@ -112,5 +92,25 @@ final class LinkedFileRow {
         String type = extension != null && !extension.isBlank() ? extension
                 : mimetype != null && mimetype.contains("/") ? mimetype.substring(mimetype.indexOf('/') + 1) : mimetype;
         return type == null ? "" : type.replaceFirst("^\\.", "").toUpperCase();
+    }
+
+    /**
+     * What a row shows; any value may be {@code null} (its cell is then left empty so the columns stay aligned).
+     *
+     * @param mimetype         mime type, gives the icon (and the type when there is no extension)
+     * @param name             file name
+     * @param category         category of the file
+     * @param categoryEditable {@code true} while the file is not stored yet: the category is an input; once stored it
+     *                         is shown as a tag
+     * @param onCategory       called with the typed category
+     * @param pending          the file is not stored yet: shows the "pending" tag
+     * @param date             upload date
+     * @param size             size in bytes
+     * @param extension        file extension, preferred for the type
+     * @param actions          the download and delete actions, in this order
+     */
+    record Content(String mimetype, String name, String category, boolean categoryEditable,
+                   Consumer<String> onCategory, boolean pending, LocalDateTime date, Long size, String extension,
+                   Component... actions) {
     }
 }

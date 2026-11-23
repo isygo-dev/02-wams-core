@@ -40,21 +40,6 @@ final class GroupCapacity {
     }
 
     /**
-     * A violated set of resources.
-     *
-     * @param resources the resources of the set (ascending index)
-     * @param tasks     the required tasks that can only be served by resources of the set (ascending index)
-     * @param roles     the requirement roles involved
-     * @param demand    work units (ticks x amount) the tasks need
-     * @param supply    work units the resources can offer together
-     */
-    record Violation(int[] resources, int[] tasks, Set<String> roles, long demand, long supply) {
-        long deficit() {
-            return demand - supply;
-        }
-    }
-
-    /**
      * Searches the violated resource sets.
      *
      * @param index     the index view
@@ -67,6 +52,21 @@ final class GroupCapacity {
                                 Set<Integer> skipped) {
         Network network = Network.build(index, structure, tasks, skipped);
         return network == null ? List.of() : network.violations();
+    }
+
+    /**
+     * A violated set of resources.
+     *
+     * @param resources the resources of the set (ascending index)
+     * @param tasks     the required tasks that can only be served by resources of the set (ascending index)
+     * @param roles     the requirement roles involved
+     * @param demand    work units (ticks x amount) the tasks need
+     * @param supply    work units the resources can offer together
+     */
+    record Violation(int[] resources, int[] tasks, Set<String> roles, long demand, long supply) {
+        long deficit() {
+            return demand - supply;
+        }
     }
 
     private static final class Group {
@@ -219,6 +219,14 @@ final class GroupCapacity {
             return supply;
         }
 
+        private static int find(int[] parent, int x) {
+            while (parent[x] != x) {
+                parent[x] = parent[parent[x]];
+                x = parent[x];
+            }
+            return x;
+        }
+
         List<Violation> violations() {
             int groupCount = groups.size();
             int firstGroup = 2;
@@ -296,14 +304,6 @@ final class GroupCapacity {
             }
             out.sort(Comparator.comparingLong(Violation::deficit).reversed());
             return out;
-        }
-
-        private static int find(int[] parent, int x) {
-            while (parent[x] != x) {
-                parent[x] = parent[parent[x]];
-                x = parent[x];
-            }
-            return x;
         }
     }
 

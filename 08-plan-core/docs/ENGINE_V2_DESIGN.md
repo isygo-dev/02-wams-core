@@ -1227,6 +1227,7 @@ family from the core (`diagnostics.details.explainSkipped`), exceeding it in the
 (`PAIRWISE_TOO_LARGE`).
 
 ### 6.1 Build order (`CpModelBuilder.build(CompiledProblem, SolveContext, BuildMode)`; `BuildMode` = `SOLVE` |
+
 `EXPLAIN`)
 
 ```
@@ -1789,6 +1790,7 @@ happens:
    constraints) in the report for UI feedback.
 
 ### 7.4 New error codes (existing `InvalidRequestException.code()` UPPER_SNAKE convention; i18n key =
+
 `plan.error.` + code lower-cased with dots)
 
 Keys are added to every bundle `i18n/plan/messages*.properties` of the host (English text first; the UI bundle
@@ -2007,6 +2009,7 @@ subset G1, G3, G12 and the rejection checks). Delete obsolete v1 statements (per
 32-bit Timefold guard, cumulative relaxation order).
 
 ### 9.5 Golden scenarios (files in `examples/`, requests rewritten to IR 2.0; every file carries a placeholder
+
 `meta.clientRef`)
 
 Expected outcomes are asserted by `EngineV2GoldenTest` (service level, no Spring) and by the smoke test (job level).

@@ -200,9 +200,9 @@ class ProfileConnectionsPanel extends VerticalLayout {
             log.warn("Failed to load sessions page {}", page, e);
         }
         return null;
-    }    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
+    }
 
-
+    private final ProfilePagerBar sessionsPager = new ProfilePagerBar(this::loadSessions);
 
 
 }
