@@ -33,7 +33,6 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
         this.appProperties = appProperties;
     }
 
-    //@Cacheable(cacheNames = SchemaTableConstantName.T_ACCESS_TOKEN, key = "{#application, #accountCode, #token, #tokenType}")
     public AccessToken findAccessToken(String application, String accountCode,
                                        Long crc16, Long crc32,
                                        IEnumToken.Types tokenType) {
@@ -63,22 +62,12 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
     public AccessToken beforeCreate(AccessToken accessToken) {
         //Deactivate old tokens (user, token type, application)
         if (appProperties.isDeactivateOldTokens()) {
+            log.info("Deactivate old tokens (user, token type, application) for "
+                    + accessToken.getAccountCode(), accessToken.getTokenType(), accessToken.getApplication());
             repository().deactivateOldTokens(accessToken.getAccountCode(),
                     accessToken.getTokenType(),
                     accessToken.getApplication());
         }
         return accessToken;
-    }
-
-    //@CachePut(cacheNames = SchemaTableConstantName.T_ACCESS_TOKEN, key = "{#accessToken.application, #accessToken.accountCode, #accessToken.token, #accessToken.tokenType}")
-    @Override
-    public AccessToken create(AccessToken accessToken) {
-        return super.create(accessToken);
-    }
-
-    //@CachePut(cacheNames = SchemaTableConstantName.T_ACCESS_TOKEN, key = "{#accessToken.application, #accessToken.accountCode, #accessToken.token, #accessToken.tokenType}")
-    @Override
-    public AccessToken update(AccessToken accessToken) {
-        return super.update(accessToken);
     }
 }
