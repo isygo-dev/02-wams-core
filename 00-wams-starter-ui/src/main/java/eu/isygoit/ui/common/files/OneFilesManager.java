@@ -191,7 +191,7 @@ public class OneFilesManager extends VerticalLayout {
             return;
         }
         setFile(dto.getOriginalFileName(), dto.getMimetype(), dto.getId());
-        this.fileCategory = dto.getCategory();
+        this.fileCategory = dto.getFileCategory();
         this.fileExtension = dto.getExtension();
         this.fileSize = dto.getSize();
         // the audit of the file itself (last upload, else first upload); empty when it was never recorded

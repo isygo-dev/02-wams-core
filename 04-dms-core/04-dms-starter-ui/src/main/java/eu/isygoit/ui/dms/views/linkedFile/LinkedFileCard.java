@@ -24,6 +24,7 @@ import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -171,7 +172,7 @@ public class LinkedFileCard extends BaseCodeAssignableCard<LinkedFileManagementV
         body.addClassName("wams-body-rows");
 
         // Path row
-        if (file.getPath() != null && !file.getPath().isEmpty()) {
+        if (StringUtils.hasText(file.getPath())) {
             body.add(createIconRow(VaadinIcon.FOLDER, I18n.t("dms.linkedfile.card.path"), file.getPath()));
         }
 
@@ -181,21 +182,16 @@ public class LinkedFileCard extends BaseCodeAssignableCard<LinkedFileManagementV
         }
 
         // Category row (single String in LinkedFileResponseDto)
-        if (file.getCategory() != null && !file.getCategory().isEmpty()) {
-            body.add(createCategoryRow(file.getCategory()));
+        if (StringUtils.hasText(file.getFileCategory())) {
+            body.add(createCategoryRow(file.getFileCategory()));
         }
 
         // Tenant row
-        if (file.getTenant() != null && !file.getTenant().isEmpty()) {
+        if (StringUtils.hasText(file.getTenant())) {
             body.add(createIconRow(VaadinIcon.BUILDING, I18n.t("dms.linkedfile.card.tenant"), file.getTenant()));
         }
 
         add(body);
-    }
-
-    private String formatDateTime(LocalDateTime dateTime) {
-        if (dateTime == null) return null;
-        return dateTime.format(DATE_FORMATTER);
     }
 
     private HorizontalLayout createIconRow(VaadinIcon icon, String label, String value) {

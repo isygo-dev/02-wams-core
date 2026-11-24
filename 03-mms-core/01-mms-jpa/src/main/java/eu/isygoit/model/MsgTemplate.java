@@ -44,7 +44,7 @@ import java.util.Map;
                 referencedColumnName = SchemaColumnConstantName.C_ID)
 )
 public class MsgTemplate extends AuditableEntity<Long>
-        implements ITenantAssignable, ICodeAssignable, IFileEntity {
+        implements ITenantAssignable, ICodeAssignable, ISingleFileEntity {
 
     @Id
     @SequenceGenerator(name = "template_sequence_generator", sequenceName = "template_sequence", allocationSize = 1)
@@ -137,7 +137,7 @@ public class MsgTemplate extends AuditableEntity<Long>
 
     @Criteria(1)
     @Column(name = ComSchemaColumnConstantName.C_CATEGORY, table = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
-    private String category;
+    private String fileCategory;
 
     /**
      * When the stored file was first uploaded (file audit, in the file table).

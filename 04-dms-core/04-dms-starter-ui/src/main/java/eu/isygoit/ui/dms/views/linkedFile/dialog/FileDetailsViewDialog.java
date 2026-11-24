@@ -11,6 +11,7 @@ import eu.isygoit.i18n.I18n;
 import eu.isygoit.ui.common.dialog.DialogLayout;
 import eu.isygoit.ui.dms.views.common.DmsDetailsDialog;
 import eu.isygoit.ui.dms.views.common.DmsDialogSupport;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -60,10 +61,10 @@ public class FileDetailsViewDialog extends DmsDetailsDialog {
                     I18n.t("dms.linkedfile.details.field.tags"), tagMap));
         }
         // Single String category in LinkedFileResponseDto.
-        if (file.getCategory() != null && !file.getCategory().isEmpty()) {
+        if (StringUtils.hasText(file.getFileCategory())) {
             content.add(buildListRow(VaadinIcon.LIST,
                     I18n.t("dms.linkedfile.details.field.categories"),
-                    List.of(file.getCategory()), "wams-category-chip"));
+                    List.of(file.getFileCategory()), "wams-category-chip"));
         }
 
         return content;

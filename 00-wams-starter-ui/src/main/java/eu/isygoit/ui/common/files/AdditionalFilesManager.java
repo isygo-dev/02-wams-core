@@ -373,7 +373,7 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
             actions.add(buildDeleteButton(file));
         }
         return LinkedFileRow.build(new LinkedFileRow.Content(file.getMimetype(), file.getOriginalFileName(),
-                file.getCategory(),
+                file.getFileCategory(),
                 categoryEditable && !readOnly && categoryUpdater != null, value -> updateCategory(file, value), false,
                 file.getCreateDate(), file.getSize(), file.getExtension(),
                 categoryEditorFactory,
@@ -405,7 +405,7 @@ public class AdditionalFilesManager<F extends LinkedFileDto<Long>> extends Verti
     private void updateCategory(F file, String category) {
         try {
             if (categoryUpdater.update(file.getId(), category)) {
-                file.setCategory(category);
+                file.setFileCategory(category);
                 notifyChanged();
                 Notification.show(I18n.t("files.category.updated"), 3000, Notification.Position.BOTTOM_END)
                         .addThemeVariants(NotificationVariant.LUMO_SUCCESS);

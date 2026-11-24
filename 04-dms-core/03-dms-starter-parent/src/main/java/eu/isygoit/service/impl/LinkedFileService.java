@@ -86,7 +86,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
         }
 
         // Resolve category from names (create them if necessary)
-        Category category = resolveCategory(dto.getCategory());
+        Category category = resolveCategory(dto.getFileCategory());
 
         // Generate a code if not provided
         if (!StringUtils.hasText(dto.getCode())) {
@@ -145,7 +145,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
                 .crc32(crc32)
                 .size(fileSize)
                 .path(dto.getPath())
-                .category(category != null ? category.getName() : null)
+                .fileCategory(category != null ? category.getName() : null)
                 .mimetype(file.getContentType())
                 .version(existingCount == 0 ? 1L : existingCount + 1L)
                 .build();

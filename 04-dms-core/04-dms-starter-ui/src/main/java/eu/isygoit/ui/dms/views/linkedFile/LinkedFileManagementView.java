@@ -28,6 +28,7 @@ import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -200,8 +201,8 @@ public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileRe
                     }
 
                     // Single String category in LinkedFileResponseDto.
-                    if (selectedCategory != null && !selectedCategory.isEmpty()) {
-                        if (!selectedCategory.equals(file.getCategory())) {
+                    if (StringUtils.hasText(selectedCategory)) {
+                        if (!selectedCategory.equals(file.getFileCategory())) {
                             return false;
                         }
                     }
@@ -281,7 +282,7 @@ public class LinkedFileManagementView extends AbstractPaginatedView<LinkedFileRe
         grid.addColumn(LinkedFileResponseDto::getPath)
                 .setHeader(I18n.t("dms.linkedfile.card.path")).setAutoWidth(true).setFlexGrow(1);
         // Single String category in LinkedFileResponseDto.
-        grid.addColumn(file -> file.getCategory() == null ? "" : file.getCategory())
+        grid.addColumn(file -> file.getFileCategory() == null ? "" : file.getFileCategory())
                 .setHeader(I18n.t("dms.linkedfile.card.categories")).setAutoWidth(true);
         addCardActionsColumn(grid);
         return true;

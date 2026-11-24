@@ -230,7 +230,7 @@ public class UploadLinkedFileDialog extends DmsActionDialog {
                 request.setTags(tagMap);
             }
             if (hasCategory) {
-                request.setCategory(selectedCategory);
+                request.setFileCategory(selectedCategory);
             }
 
             ResponseEntity<LinkedFileResponseDto> response = linkedFileService.upload(request);

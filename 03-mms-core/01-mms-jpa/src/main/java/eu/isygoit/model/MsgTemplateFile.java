@@ -20,7 +20,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_MSG_TEMPLATE_FILE)
-public class MsgTemplateFile extends FileModel<Long> implements IFileEntity {
+public class MsgTemplateFile extends FileModel<Long> implements ISingleFileEntity {
 
     @Id
     @SequenceGenerator(name = "msg_template_file_sequence_generator", sequenceName = "msg_template_file_sequence", allocationSize = 1)

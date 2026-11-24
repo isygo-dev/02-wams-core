@@ -63,5 +63,5 @@ public class LinkedFile extends LinkedFileModel<Long> implements ITenantAssignab
 
     @Criteria(1)
     @Column(name = ComSchemaColumnConstantName.C_CATEGORY, length = SchemaConstantSize.S_NAME)
-    private String category;
+    private String fileCategory;
 }
