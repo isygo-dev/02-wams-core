@@ -386,4 +386,28 @@ public class OneFilesManager extends VerticalLayout {
     public interface Uploader {
         void upload(InputStream content, String originalFileName, String contentType, long size) throws Exception;
     }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public String getFileCategory() {
+        return fileCategory;
+    }
+
+    public String getFileExtension() {
+        return fileExtension;
+    }
+
+    public Long getFileSize() {
+        return fileSize;
+    }
+
+    public LocalDateTime getFileDate() {
+        return fileDate;
+    }
 }
