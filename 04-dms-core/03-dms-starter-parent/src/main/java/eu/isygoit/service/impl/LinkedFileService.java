@@ -325,7 +325,7 @@ public class LinkedFileService extends CodeAssignableTenantService<Long, LinkedF
      */
     @Override
     public List<LinkedFile> searchByCategories(String tenant, List<String> categories) {
-        return linkedFileRepository.findByTenantIgnoreCaseAndCategoryIn(tenant, categories);
+        return linkedFileRepository.findByTenantIgnoreCaseAndFileCategoryIn(tenant, categories);
     }
 
     /**
