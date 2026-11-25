@@ -39,7 +39,7 @@ public class LandingView extends BaseLandingView implements BeforeEnterObserver 
      * Add new modules here and they'll automatically appear on the landing page.
      */
     private static final List<ModuleInfo> MODULES = List.of(
-            new ModuleInfo("KMS", "kms", VaadinIcon.KEY)
+            new ModuleInfo("KMS", "kms", VaadinIcon.KEY.create())
     );
 
     @Override

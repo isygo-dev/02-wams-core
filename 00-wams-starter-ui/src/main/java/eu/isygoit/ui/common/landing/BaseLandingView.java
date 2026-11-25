@@ -4,10 +4,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -24,22 +21,21 @@ import eu.isygoit.ui.common.view.ViewTitleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Abstract base class for landing pages that display modules as interactive cards.
  *
- * <p>This class handles all the UI rendering for a module-based landing page:
+ * <p>This class handles the UI rendering for a module-based landing page:
  * a hero section, a cards container with one card per module, and a footer.
- * Subclasses must implement {@link #getModules()} to provide the list of
- * modules to display.</p>
- * <p>
- * If only one module is returned by {@link #getModules()}, the view skips the
- * landing page entirely and goes straight to the same redirect-with-progress
- * screen used when picking a module from a multi-module landing page — one
- * mechanism ({@link #redirectToModule(ModuleInfo)}) drives both cases, so the
- * navigation experience (a brief "Redirecting to..." screen before moving on)
- * is identical whether there's one module or several.
- * </p>
+ * Subclasses provide the list of modules through {@link #getModules()}.</p>
+ *
+ * <p>Each {@link ModuleInfo} contains a Vaadin {@link Component} as its icon.
+ * Subclasses must create fresh module definitions and fresh icon components
+ * for each call to {@link #getModules()}, so components are never shared
+ * between UIs or component trees.</p>
+ *
+ * <p>If only one module is returned, the view redirects directly to that module.</p>
  *
  * @see ModuleInfo
  */
@@ -50,28 +46,55 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
     private Div emptyState;
 
     /**
-     * Constructor initializes the landing page with module-based content.
-     * If only one module exists, redirects directly to that module's route.
+     * Creates a new image component for a module icon.
+     *
+     * <p>For example, a file located at
+     * {@code META-INF/resources/icons/edyra-pilot.svg} is served at
+     * {@code /icons/edyra-pilot.svg}.</p>
+     *
+     * @param path image URL relative to the application context
+     * @param alt alternative text
+     * @return a new Image component
+     */
+    public static Image createModuleImage(String path, String alt) {
+        Image image = new Image(path, alt);
+        image.setWidth("48px");
+        image.setHeight("48px");
+        image.getStyle()
+                .set("object-fit", "contain")
+                .set("display", "block")
+                .set("flex-shrink", "0");
+        return image;
+    }
+
+    /**
+     * Initializes the landing page with module-based content.
+     * If only one module exists, redirects directly to its route.
+     *
+     * <p>Important: {@link #getModules()} is invoked during construction.
+     * Implementations must not depend on subclass instance fields because
+     * those fields are initialized only after the superclass constructor.</p>
      */
     protected BaseLandingView() {
-        this.ui = UI.getCurrent();
+        this.ui = Objects.requireNonNull(UI.getCurrent(), "A current Vaadin UI is required");
         addClassName("wams-landing");
 
-        List<ModuleInfo> modules = getModules();
+        List<ModuleInfo> modules = List.copyOf(
+                Objects.requireNonNull(getModules(), "getModules() must not return null")
+        );
 
-        // If only one module exists, redirect directly to it
-        if (modules != null && modules.size() == 1) {
+        if (modules.size() == 1) {
             redirectToModule(modules.get(0));
             return;
         }
 
-        setContent(buildMainContent());
+        setContent(buildMainContent(modules));
     }
 
     /**
-     * Get the list of modules to display on the landing page.
+     * Gets the modules displayed on the landing page.
      *
-     * @return List of ModuleInfo objects
+     * @return non-null module definitions
      */
     protected abstract List<ModuleInfo> getModules();
 
@@ -82,13 +105,11 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
 
     @Override
     protected Component createDrawerContent() {
-        // No drawer for landing page
         return null;
     }
 
     @Override
     protected String getModuleKey() {
-        // Landing page has no module accent
         return "";
     }
 
@@ -98,26 +119,11 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
     }
 
     /**
-     * Shows the "Redirecting to..." progress screen, then navigates to the
-     * module's route. Used both when {@link #getModules()} returns a single
-     * module (the whole landing page is skipped in favor of this) and when a
-     * module is picked from a multi-module landing page (card or "Enter"
-     * button), so the transition looks and behaves the same either way.
+     * Shows the redirecting screen, then navigates to the selected module.
      *
-     * <p>Navigates through Vaadin's own client-side router ({@link UI#navigate})
-     * rather than assigning {@code window.location} directly: the latter is a
-     * bare relative path (e.g. "kms", not "/kms"), so the browser resolves it
-     * against whatever the current URL happens to be (trailing slash and all)
-     * instead of the app's actual route — and even when it does land on the
-     * right place, it forces a full page reload instead of an in-app
-     * navigation. The 400ms visual delay (so the "Redirecting to..." screen
-     * is actually visible) is kept, just driven by a client-side promise that
-     * calls back into the server to do the real navigation once it resolves.
-     *
-     * @param module The module to redirect to
+     * @param module module to open
      */
     private void redirectToModule(ModuleInfo module) {
-        // Show loading indicator before redirect
         setContent(buildRedirectingContent(module));
 
         ui.getPage()
@@ -126,10 +132,10 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
     }
 
     /**
-     * Builds a loading indicator page for redirection.
+     * Builds the loading screen displayed before navigation.
      *
-     * @param module The module being redirected to
-     * @return Component with loading indicator
+     * @param module module being opened
+     * @return redirecting content
      */
     private Component buildRedirectingContent(ModuleInfo module) {
         VerticalLayout loadingLayout = new VerticalLayout();
@@ -138,22 +144,21 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
         loadingLayout.setSizeFull();
         loadingLayout.addClassName("wams-redirecting");
 
-        // Icon
-        Icon moduleIcon = module.icon().create();
-        moduleIcon.setSize("48px");
-        moduleIcon.addClassName("wams-redirect-icon");
+        Component moduleIcon = module.icon();
+        applyIconStyle(moduleIcon, "48px", "wams-redirect-icon");
 
-        // Redirecting text
-        H2 redirectingText = new H2(I18n.t("common.landing.redirecting", module.shortName()));
+        H2 redirectingText = new H2(
+                I18n.t("common.landing.redirecting", module.shortName())
+        );
         redirectingText.addClassName(LumoUtility.TextColor.PRIMARY);
         redirectingText.addClassName("wams-redirect-title");
 
-        // Subtitle
-        Paragraph subtitle = new Paragraph(I18n.t("common.landing.redirecting.subtitle"));
+        Paragraph subtitle = new Paragraph(
+                I18n.t("common.landing.redirecting.subtitle")
+        );
         subtitle.addClassName(LumoUtility.TextColor.SECONDARY);
         subtitle.addClassName("wams-redirect-subtitle");
 
-        // Progress bar
         ProgressBar progressBar = new ProgressBar();
         progressBar.setIndeterminate(true);
         progressBar.setWidth("300px");
@@ -163,26 +168,34 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
         return loadingLayout;
     }
 
-    private Component buildMainContent() {
+    /**
+     * Applies common sizing and styling to any Vaadin icon component.
+     * Works with Image, Icon, and other Component implementations.
+     *
+     * @param icon component to style
+     * @param size CSS width and height
+     * @param cssClass CSS class to apply
+     */
+    private void applyIconStyle(Component icon, String size, String cssClass) {
+        icon.getElement().getStyle()
+                .set("width", size)
+                .set("height", size)
+                .set("flex-shrink", "0");
+        icon.addClassName(cssClass);
+    }
+
+    private Component buildMainContent(List<ModuleInfo> modules) {
         VerticalLayout main = new VerticalLayout();
         main.setPadding(false);
         main.setSpacing(false);
         main.setSizeFull();
-        // Top-aligned rather than centered: centering a flex column whose
-        // content (hero + card grid + footer) is taller than the viewport
-        // pushes the overflow symmetrically above the box as well as below
-        // it — since the page can't scroll to a negative position, the top
-        // portion (hero + first card row) becomes permanently unreachable.
-        // Starting from the top means any overflow spills past the bottom
-        // instead, where normal scrolling already reaches it, regardless of
-        // viewport size or module count.
         main.setJustifyContentMode(FlexComponent.JustifyContentMode.START);
         main.setAlignItems(FlexComponent.Alignment.CENTER);
         main.addClassName("wams-landing-main");
 
         main.add(buildHero());
         main.add(buildSearchField());
-        main.add(buildCardsContainer());
+        main.add(buildCardsContainer(modules));
         main.add(buildFooter());
 
         return main;
@@ -204,11 +217,13 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
     private void filterCards(String query) {
         String needle = query == null ? "" : query.trim().toLowerCase();
         boolean anyVisible = false;
+
         for (CardEntry entry : cardEntries) {
             boolean matches = needle.isEmpty() || entry.searchText().contains(needle);
             entry.card().setVisible(matches);
             anyVisible = anyVisible || matches;
         }
+
         if (emptyState != null) {
             emptyState.setVisible(!anyVisible);
         }
@@ -226,7 +241,9 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
         H2 title = new H2(I18n.t("common.landing.search.empty.title"));
         title.addClassName("wams-landing-empty__title");
 
-        Paragraph description = new Paragraph(I18n.t("common.landing.search.empty.description"));
+        Paragraph description = new Paragraph(
+                I18n.t("common.landing.search.empty.description")
+        );
         description.addClassName(LumoUtility.TextColor.SECONDARY);
 
         empty.add(icon, title, description);
@@ -243,7 +260,7 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
         ).toLowerCase();
     }
 
-    // ─── HERO SECTION ──────────────────────────────────────────────────────
+    // ─── HERO SECTION ─────────────────────────────────────────────────────────
 
     private Div buildHero() {
         Div hero = new Div();
@@ -260,20 +277,20 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
         return hero;
     }
 
-    // ─── CARDS CONTAINER ──────────────────────────────────────────────────
+    // ─── CARDS CONTAINER ──────────────────────────────────────────────────────
 
-    private Component buildCardsContainer() {
+    private Component buildCardsContainer(List<ModuleInfo> modules) {
         HorizontalLayout container = new HorizontalLayout();
         container.addClassName("wams-cards-container");
         container.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         container.setAlignItems(FlexComponent.Alignment.STRETCH);
         container.setSpacing(true);
 
-        getModules().forEach(module -> {
+        for (ModuleInfo module : modules) {
             Div card = createCard(module);
             container.add(card);
             cardEntries.add(new CardEntry(card, buildSearchText(module)));
-        });
+        }
 
         emptyState = buildEmptyState();
 
@@ -298,9 +315,8 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
         content.setAlignItems(FlexComponent.Alignment.CENTER);
         content.addClassName("wams-domain-card-content");
 
-        Icon cardIcon = module.icon().create();
-        cardIcon.setSize("28px");
-        cardIcon.addClassName("wams-card-icon");
+        Component cardIcon = module.icon();
+        applyIconStyle(cardIcon, "28px", "wams-card-icon");
 
         Div badge = new Div(module.shortName());
         badge.addClassName("wams-card-badge");
@@ -314,7 +330,10 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
 
         Div featuresContainer = buildFeaturesContainer(i18nPrefix);
 
-        Button enterBtn = new Button(I18n.t(i18nPrefix + ".button"), VaadinIcon.ARROW_RIGHT.create());
+        Button enterBtn = new Button(
+                I18n.t(i18nPrefix + ".button"),
+                VaadinIcon.ARROW_RIGHT.create()
+        );
         enterBtn.addClassName("wams-enter-button");
         enterBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
         enterBtn.addClickListener(e -> redirectToModule(module));
@@ -328,11 +347,10 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
     }
 
     /**
-     * Builds the features container with chips for each feature.
-     * Supports dynamic number of features (1-3+).
+     * Builds the feature chips for a module.
      *
-     * @param i18nPrefix The i18n prefix for feature keys
-     * @return Div containing feature chips
+     * @param i18nPrefix module translation prefix
+     * @return feature container
      */
     private Div buildFeaturesContainer(String i18nPrefix) {
         Div featuresContainer = new Div();
@@ -341,7 +359,7 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
         for (String key : new String[]{".feature.1", ".feature.2", ".feature.3"}) {
             String fullKey = i18nPrefix + key;
             String featureText = I18n.t(fullKey);
-            // Skip keys with no translation (I18n.t returns the key itself).
+
             if (!featureText.equals(fullKey)) {
                 Div chip = new Div(featureText);
                 chip.addClassName("wams-feature-chip");
@@ -352,7 +370,7 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
         return featuresContainer;
     }
 
-    // ─── FOOTER ──────────────────────────────────────────────────────────────
+    // ─── FOOTER ───────────────────────────────────────────────────────────────
 
     private Div buildFooter() {
         Div footer = new Div();
@@ -367,86 +385,78 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
         return footer;
     }
 
-    // ─── UTILITY METHODS ──────────────────────────────────────────────────
+    // ─── UTILITY METHODS ──────────────────────────────────────────────────────
 
     /**
-     * Get a module by its key.
+     * Gets a module by its key.
      *
-     * @param key The module key to look up
-     * @return The ModuleInfo if found, null otherwise
+     * @param key module key
+     * @return module definition, or null if not found
      */
     public ModuleInfo getModuleByKey(String key) {
         return getModules().stream()
-                .filter(m -> m.moduleKey().equals(key))
+                .filter(module -> module.moduleKey().equals(key))
                 .findFirst()
                 .orElse(null);
     }
 
     /**
-     * Get the icon for a module key.
+     * Gets the icon component for a module key.
      *
-     * @param moduleKey The module key
-     * @return The VaadinIcon for the module, or QUESTION if not found
+     * <p>The returned component is a Vaadin component. The caller becomes
+     * responsible for attaching it to exactly one component tree.</p>
+     *
+     * @param moduleKey module key
+     * @return module icon, or the default question icon
      */
-    public VaadinIcon getIconForModule(String moduleKey) {
+    public Component getIconForModule(String moduleKey) {
         ModuleInfo module = getModuleByKey(moduleKey);
-        return module != null ? module.icon() : VaadinIcon.QUESTION;
+        return module != null ? module.icon() : VaadinIcon.QUESTION.create();
     }
 
     /**
-     * Check if a module exists.
+     * Module metadata and its Vaadin component icon.
      *
-     * @param moduleKey The module key to check
-     * @return true if the module exists, false otherwise
-     */
-    public boolean moduleExists(String moduleKey) {
-        return getModuleByKey(moduleKey) != null;
-    }
-
-    /**
-     * Module record containing all metadata for a module.
+     * <p>Do not share a ModuleInfo (or its icon component) between UIs or
+     * component trees. {@link #getModules()} should return fresh ModuleInfo
+     * instances with fresh icon components on every invocation.</p>
      *
-     * @param shortName Display name
-     * @param moduleKey Unique identifier
-     * @param icon      VaadinIcon for the module
-     * @param route     Navigation route (defaults to moduleKey)
+     * @param shortName display name
+     * @param moduleKey unique identifier
+     * @param icon Vaadin component used as the module icon (Image, Icon, etc.)
+     * @param route navigation route; defaults to moduleKey
      */
     public record ModuleInfo(
             String shortName,
             String moduleKey,
-            VaadinIcon icon,
+            Component icon,
             String route
     ) {
-        /**
-         * Convenience constructor with default route = moduleKey.
-         */
-        public ModuleInfo(String shortName, String moduleKey, VaadinIcon icon) {
-            this(shortName, moduleKey, icon, moduleKey);
+        public ModuleInfo {
+            Objects.requireNonNull(shortName, "shortName must not be null");
+            Objects.requireNonNull(moduleKey, "moduleKey must not be null");
+            Objects.requireNonNull(icon, "icon must not be null");
+            Objects.requireNonNull(route, "route must not be null");
         }
 
         /**
-         * Get the i18n prefix for this module.
-         *
-         * @return i18n key prefix for module-specific strings
+         * Convenience constructor with route defaulting to moduleKey.
          */
+        public ModuleInfo(String shortName, String moduleKey, Component icon) {
+            this(shortName, moduleKey, icon, moduleKey);
+        }
+
         public String getI18nPrefix() {
             return "common.landing." + moduleKey;
         }
 
-        /**
-         * Get the CSS module class name.
-         *
-         * @return CSS class for module theming
-         */
         public String getModuleClass() {
             return "wams-module-" + moduleKey;
         }
     }
 
     /**
-     * Pairs a rendered card with its pre-computed, lower-cased searchable
-     * text (name/key/title/description), so {@link #filterCards} can match
-     * against it without re-resolving i18n strings on every keystroke.
+     * Associates a rendered card with its precomputed searchable text.
      */
     private record CardEntry(Div card, String searchText) {
     }
