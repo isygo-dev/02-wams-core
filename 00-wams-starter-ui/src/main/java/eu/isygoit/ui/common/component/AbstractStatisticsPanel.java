@@ -90,7 +90,7 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
     private void onRefreshRequested() {
         loadStatistics();
         extraRefreshActions.forEach(Runnable::run);
-    }    protected final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
+    }
 
     /**
      * Charge les statistiques de manière asynchrone avec gestion du push UI.
@@ -111,7 +111,7 @@ public abstract class AbstractStatisticsPanel extends VerticalLayout {
                 handleError();
             }
         });
-    }
+    }    protected final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::onRefreshRequested);
 
     /**
      * Effectue le chargement effectif des données.

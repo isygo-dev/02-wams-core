@@ -18,14 +18,15 @@ public final class GridPager<T> {
     private final int pageSize;
     private List<T> items = List.of();
     private int page;
+
     public GridPager(Grid<T> grid) {
         this(grid, DEFAULT_PAGE_SIZE);
-    }    private final PagerBar pager = new PagerBar(this::goToPage);
+    }
 
     public GridPager(Grid<T> grid, int pageSize) {
         this.grid = grid;
         this.pageSize = Math.max(1, pageSize);
-    }
+    }    private final PagerBar pager = new PagerBar(this::goToPage);
 
     /**
      * Replaces the items; the current page is kept when it still exists.

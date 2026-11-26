@@ -90,7 +90,7 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
                     jobIdField.setValue(value.trim());
                     loadLogs();
                 });
-    }    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::loadLogs);
+    }
 
     private HorizontalLayout buildToolbar() {
         jobIdField.setLabel(I18n.t("plan.ui.logs.job.id"));
@@ -114,7 +114,7 @@ public class PlanLogsView extends ManagementVerticalView implements AfterNavigat
         toolbar.setAlignItems(FlexComponent.Alignment.END);
         toolbar.expand(jobIdField);
         return toolbar;
-    }
+    }    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::loadLogs);
 
     private void configureGrid() {
         logsGrid.setWidthFull();

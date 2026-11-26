@@ -1,6 +1,5 @@
 package eu.isygoit.service;
 
-import eu.isygoit.com.rest.service.ICrudServiceOperations;
 import eu.isygoit.com.rest.service.tenancy.ICrudTenantServiceOperations;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.AccessToken;
@@ -13,7 +12,7 @@ public interface IAccessTokenService extends ICrudTenantServiceOperations<Long, 
     /**
      * Find by application and account code and token and token type access token.
      *
-     * @param tenant    the tenant
+     * @param tenant      the tenant
      * @param application the application
      * @param accountCode the account code
      * @param tokenType   the token type

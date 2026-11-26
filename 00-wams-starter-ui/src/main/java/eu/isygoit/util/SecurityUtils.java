@@ -35,7 +35,9 @@ public final class SecurityUtils {
     private static final List<String> AUTH_KEYS =
             List.of(USER_KEY, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, TENANT_KEY, ROLES_KEY);
 
-    /** Letters, digits, '-', '_' and '/' only (no dots, colons, backslashes, query, fragment). */
+    /**
+     * Letters, digits, '-', '_' and '/' only (no dots, colons, backslashes, query, fragment).
+     */
     private static final Pattern SAFE_PATH = Pattern.compile("^[a-zA-Z0-9/_-]+$");
 
     private SecurityUtils() {

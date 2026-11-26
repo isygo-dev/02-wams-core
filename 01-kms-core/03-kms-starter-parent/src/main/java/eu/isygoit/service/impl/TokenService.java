@@ -68,7 +68,7 @@ public class TokenService implements ITokenBuilderService {
 
     @Override
     public TokenResponseDto buildTokenAndSave(String tenant, Set<String> audience, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
-        if(StringUtils.isEmpty(tenant)) {
+        if (StringUtils.isEmpty(tenant)) {
             throw new TenantRequiredException("Tenant is required");
         }
 
@@ -99,7 +99,7 @@ public class TokenService implements ITokenBuilderService {
 
     @Override
     public TokenResponseDto buildToken(String tenant, Set<String> audience, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
-        if(StringUtils.isEmpty(tenant)) {
+        if (StringUtils.isEmpty(tenant)) {
             throw new TenantRequiredException("Tenant is required");
         }
         //Get Token config configured by tenant and type, otherwise, default one
@@ -145,7 +145,7 @@ public class TokenService implements ITokenBuilderService {
 
     @Override
     public boolean isTokenValid(String tenant, Set<String> audience, IEnumToken.Types tokenType, String token, String subject) {
-        if(StringUtils.isEmpty(tenant)) {
+        if (StringUtils.isEmpty(tenant)) {
             throw new TenantRequiredException("Tenant is required");
         }
         // Get Token config configured by tenant and type, otherwise, default one

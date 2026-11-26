@@ -2,7 +2,8 @@
 
 ## 1. Contexte et objectif
 
-Tu interviens sur un projet Java/Spring Boot qui utilise Google OR-Tools CP-SAT pour résoudre des problèmes de planification.
+Tu interviens sur un projet Java/Spring Boot qui utilise Google OR-Tools CP-SAT pour résoudre des problèmes de
+planification.
 
 L'objectif est de réaliser un audit technique approfondi, puis d'implémenter les améliorations nécessaires pour :
 
@@ -39,9 +40,11 @@ Starting deterministic search at 281.68s with 8 workers
 
 Le presolve représente donc un coût majeur.
 
-Les opérations Probe présentent notamment des durées très élevées, de l'ordre de plusieurs dizaines de secondes par passe.
+Les opérations Probe présentent notamment des durées très élevées, de l'ordre de plusieurs dizaines de secondes par
+passe.
 
 Investiguer en priorité :
+
 - Le nombre de variables booléennes.
 - Le nombre d'intervalles optionnels.
 - Les contraintes conditionnelles.
@@ -55,16 +58,16 @@ Investiguer en priorité :
 
 Le modèle presolved présente approximativement :
 
-| Élément | Volume |
-|---|---:|
-| Variables | 39 004 |
-| Variables booléennes | 38 488 |
-| Intervalles | 20 419 |
-| Intervalles optionnels | 19 903 |
-| Contraintes Linear1 | 49 140 |
-| Contraintes ExactlyOne | 1 728 |
-| Littéraux ExactlyOne | 38 344 |
-| NoOverlap | 104 |
+| Élément                                |    Volume |
+|----------------------------------------|----------:|
+| Variables                              |    39 004 |
+| Variables booléennes                   |    38 488 |
+| Intervalles                            |    20 419 |
+| Intervalles optionnels                 |    19 903 |
+| Contraintes Linear1                    |    49 140 |
+| Contraintes ExactlyOne                 |     1 728 |
+| Littéraux ExactlyOne                   |    38 344 |
+| NoOverlap                              |       104 |
 | Entrées dans l'expansion de l'objectif | 1 258 724 |
 
 Analyser pourquoi autant d'intervalles sont optionnels et vérifier si leur création est réellement nécessaire.
@@ -93,6 +96,7 @@ Les requêtes GET du statut du PlanJob sont exécutées régulièrement.
 Certaines latences augmentent pendant le calcul, avec des valeurs observées pouvant dépasser 800 ms.
 
 Vérifier :
+
 - La contention CPU.
 - La consommation mémoire.
 - Le Garbage Collector.
@@ -149,7 +153,8 @@ Analyser la génération des combinaisons :
 
 Task × Resource × Slot.
 
-Mettre en place un filtrage préalable efficace pour éliminer les candidats impossibles avant leur transformation en variables CP-SAT.
+Mettre en place un filtrage préalable efficace pour éliminer les candidats impossibles avant leur transformation en
+variables CP-SAT.
 
 Exemples de filtrage à examiner :
 
@@ -184,6 +189,7 @@ Privilégier une construction incrémentale et maîtrisée.
 Analyser la création des intervalles optionnels.
 
 Vérifier si certains intervalles peuvent être :
+
 - Éliminés avant construction.
 - Remplacés par une représentation plus simple.
 - Regroupés lorsque les contraintes métier le permettent.
@@ -218,6 +224,7 @@ L'expansion de l'objectif représente environ 1,25 million d'entrées.
 Analyser précisément sa construction.
 
 Rechercher :
+
 - Les termes dupliqués.
 - Les coefficients nuls.
 - Les expressions inutilement complexes.
@@ -290,7 +297,8 @@ Important :
 - Ne pas supposer qu'une propriété est utilisée simplement parce qu'elle existe dans le YAML.
 - Identifier les paramètres inutilisés ou mal interprétés.
 - Éviter de multiplier les workers sans mesurer la contention CPU.
-- Ne pas désactiver le symmetry breaking sans benchmark : les logs actuels ne montrent pas qu'il est le principal problème.
+- Ne pas désactiver le symmetry breaking sans benchmark : les logs actuels ne montrent pas qu'il est le principal
+  problème.
 - Étudier l'impact de `max-start-choices` sur la taille du modèle.
 - Vérifier le comportement de `stop-after-first-solution`.
 - Vérifier le traitement du relative gap.
@@ -383,7 +391,8 @@ Optimiser les requêtes de statut.
 
 Éviter de charger inutilement les objets complets lorsque seul le statut est demandé.
 
-Étudier la possibilité de réduire la fréquence de polling du frontend, par exemple à 10–15 secondes, si cela est compatible avec les besoins fonctionnels.
+Étudier la possibilité de réduire la fréquence de polling du frontend, par exemple à 10–15 secondes, si cela est
+compatible avec les besoins fonctionnels.
 
 Ne pas modifier le contrat API existant sans nécessité.
 
@@ -464,6 +473,7 @@ Ajouter ou adapter les tests unitaires et d'intégration.
 ### Tests fonctionnels
 
 Vérifier que les optimisations ne changent pas :
+
 - Les règles métier.
 - Les contraintes de ressources.
 - Les contraintes temporelles.
@@ -488,25 +498,26 @@ Créer ou réutiliser des scénarios représentatifs :
 
 Comparer :
 
-| Indicateur | Avant | Après |
-|---|---:|---:|
-| Model build duration | | |
-| Presolve duration | | |
-| Search duration | | |
-| Total duration | | |
-| Variables | | |
-| Intervals | | |
-| Constraints | | |
-| Objective terms | | |
-| Memory usage | | |
-| CPU usage | | |
-| API latency | | |
+| Indicateur           | Avant | Après |
+|----------------------|------:|------:|
+| Model build duration |       |       |
+| Presolve duration    |       |       |
+| Search duration      |       |       |
+| Total duration       |       |       |
+| Variables            |       |       |
+| Intervals            |       |       |
+| Constraints          |       |       |
+| Objective terms      |       |       |
+| Memory usage         |       |       |
+| CPU usage            |       |       |
+| API latency          |       |       |
 
 Ne jamais annoncer un gain de performance sans benchmark réel.
 
 ### Tests Kafka
 
 Vérifier :
+
 - La réception des messages pendant un calcul.
 - L'absence de blocage du polling.
 - La gestion de la saturation de la queue.
@@ -571,6 +582,7 @@ Ne pas faire un refactoring massif sans possibilité d'isoler les régressions.
 ### Étape D — Validation
 
 Exécuter :
+
 - Compilation.
 - Tests unitaires.
 - Tests d'intégration.
@@ -611,6 +623,8 @@ L'évolution sera considérée comme réussie si :
 - Les résultats restent conformes aux règles métier.
 - Les tests fonctionnels et d'intégration passent.
 
-**Consigne finale : commence par comprendre le code réel. Ne suppose pas que les hypothèses issues des logs sont nécessairement des bugs. Identifie les causes dans l'implémentation, mesure les performances, puis optimise.**
+**Consigne finale : commence par comprendre le code réel. Ne suppose pas que les hypothèses issues des logs sont
+nécessairement des bugs. Identifie les causes dans l'implémentation, mesure les performances, puis optimise.**
 
-Ne te contente pas d'un rapport d'analyse : après l'audit, réalise effectivement les évolutions justifiées, teste-les et présente un bilan précis des résultats.
+Ne te contente pas d'un rapport d'analyse : après l'audit, réalise effectivement les évolutions justifiées, teste-les et
+présente un bilan précis des résultats.

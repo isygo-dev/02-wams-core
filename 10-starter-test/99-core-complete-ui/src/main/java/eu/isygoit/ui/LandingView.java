@@ -1,7 +1,5 @@
 package eu.isygoit.ui;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.Route;
 import eu.isygoit.i18n.I18n;

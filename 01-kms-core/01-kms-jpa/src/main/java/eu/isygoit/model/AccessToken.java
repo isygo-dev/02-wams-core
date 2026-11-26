@@ -27,7 +27,7 @@ import java.util.Date;
 @DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_ACCESS_TOKEN)
-public class AccessToken extends AuditableEntity<Long> implements ITenantAssignable{
+public class AccessToken extends AuditableEntity<Long> implements ITenantAssignable {
 
     @Id
     @SequenceGenerator(name = "access_token_sequence_generator", sequenceName = "access_token_sequence", allocationSize = 1)

@@ -63,8 +63,8 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
     private final PlanJobActions actions;
     private final Div infoHolder = new Div();
     private final HorizontalLayout actionsBar = new HorizontalLayout();
-    private final PlanJsonEditor resultText;    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::refreshStatus);
-    private final AtomicBoolean loading = new AtomicBoolean();
+    private final PlanJsonEditor resultText;
+    private final AtomicBoolean loading = new AtomicBoolean();    private final FloatingRefreshButton refreshButton = new FloatingRefreshButton(this::refreshStatus);
     private Long jobId;
     private PlanJobDto current;
     private Registration pollRegistration;
@@ -177,10 +177,6 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
         }
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  Loading
-    // ══════════════════════════════════════════════════════════════
-
     private Div buildInfo(PlanJobDto job) {
         Div holder = new Div();
         VerticalLayout stack = DialogLayout.stack();
@@ -198,6 +194,10 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
         holder.add(stack);
         return holder;
     }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Loading
+    // ══════════════════════════════════════════════════════════════
 
     private void showResult(Object result) {
         try {
@@ -269,10 +269,6 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
         getUI().ifPresent(ui -> ui.navigate("plan/jobs"));
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  Actions (same gating as the cards)
-    // ══════════════════════════════════════════════════════════════
-
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
@@ -280,6 +276,10 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
             startPolling();
         }
     }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Actions (same gating as the cards)
+    // ══════════════════════════════════════════════════════════════
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
@@ -304,10 +304,6 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
         ui.setPollInterval(POLL_INTERVAL_MILLIS);
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  Polling (scoped to this view)
-    // ══════════════════════════════════════════════════════════════
-
     private void stopPolling() {
         if (pollRegistration == null) {
             return;
@@ -319,6 +315,10 @@ public class PlanJobView extends ManagementVerticalView implements HasUrlParamet
             pollUi = null;
         }
     }
+
+    // ══════════════════════════════════════════════════════════════
+    //  Polling (scoped to this view)
+    // ══════════════════════════════════════════════════════════════
 
 
 

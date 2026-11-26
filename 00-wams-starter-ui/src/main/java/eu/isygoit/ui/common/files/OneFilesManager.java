@@ -377,16 +377,6 @@ public class OneFilesManager extends VerticalLayout {
         return pendingFile;
     }
 
-    @FunctionalInterface
-    public interface Downloader {
-        ResponseEntity<Resource> download(Long fileId, Long version);
-    }
-
-    @FunctionalInterface
-    public interface Uploader {
-        void upload(InputStream content, String originalFileName, String contentType, long size) throws Exception;
-    }
-
     public String getFileName() {
         return fileName;
     }
@@ -409,5 +399,15 @@ public class OneFilesManager extends VerticalLayout {
 
     public LocalDateTime getFileDate() {
         return fileDate;
+    }
+
+    @FunctionalInterface
+    public interface Downloader {
+        ResponseEntity<Resource> download(Long fileId, Long version);
+    }
+
+    @FunctionalInterface
+    public interface Uploader {
+        void upload(InputStream content, String originalFileName, String contentType, long size) throws Exception;
     }
 }

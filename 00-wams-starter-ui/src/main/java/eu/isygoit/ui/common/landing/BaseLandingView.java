@@ -46,28 +46,6 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
     private Div emptyState;
 
     /**
-     * Creates a new image component for a module icon.
-     *
-     * <p>For example, a file located at
-     * {@code META-INF/resources/icons/edyra-pilot.svg} is served at
-     * {@code /icons/edyra-pilot.svg}.</p>
-     *
-     * @param path image URL relative to the application context
-     * @param alt alternative text
-     * @return a new Image component
-     */
-    public static Image createModuleImage(String path, String alt) {
-        Image image = new Image(path, alt);
-        image.setWidth("48px");
-        image.setHeight("48px");
-        image.getStyle()
-                .set("object-fit", "contain")
-                .set("display", "block")
-                .set("flex-shrink", "0");
-        return image;
-    }
-
-    /**
      * Initializes the landing page with module-based content.
      * If only one module exists, redirects directly to its route.
      *
@@ -89,6 +67,28 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
         }
 
         setContent(buildMainContent(modules));
+    }
+
+    /**
+     * Creates a new image component for a module icon.
+     *
+     * <p>For example, a file located at
+     * {@code META-INF/resources/icons/edyra-pilot.svg} is served at
+     * {@code /icons/edyra-pilot.svg}.</p>
+     *
+     * @param path image URL relative to the application context
+     * @param alt  alternative text
+     * @return a new Image component
+     */
+    public static Image createModuleImage(String path, String alt) {
+        Image image = new Image(path, alt);
+        image.setWidth("48px");
+        image.setHeight("48px");
+        image.getStyle()
+                .set("object-fit", "contain")
+                .set("display", "block")
+                .set("flex-shrink", "0");
+        return image;
     }
 
     /**
@@ -172,8 +172,8 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
      * Applies common sizing and styling to any Vaadin icon component.
      * Works with Image, Icon, and other Component implementations.
      *
-     * @param icon component to style
-     * @param size CSS width and height
+     * @param icon     component to style
+     * @param size     CSS width and height
      * @param cssClass CSS class to apply
      */
     private void applyIconStyle(Component icon, String size, String cssClass) {
@@ -423,8 +423,8 @@ public abstract class BaseLandingView extends BaseMainLayout implements HasDynam
      *
      * @param shortName display name
      * @param moduleKey unique identifier
-     * @param icon Vaadin component used as the module icon (Image, Icon, etc.)
-     * @param route navigation route; defaults to moduleKey
+     * @param icon      Vaadin component used as the module icon (Image, Icon, etc.)
+     * @param route     navigation route; defaults to moduleKey
      */
     public record ModuleInfo(
             String shortName,

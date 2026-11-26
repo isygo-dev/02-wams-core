@@ -73,19 +73,20 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
     private final Span navigationSubtitle = new Span();
     private final Span feedback = new Span();
     private final Span eventCount = new Span();
-    {
-        feedback.addClassName("calendar-feedback");
-        eventCount.addClassName("calendar-count");
-    }
-    private final ProgressBar loadingBar = new ProgressBar();    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::refresh);
+    private final ProgressBar loadingBar = new ProgressBar();
     private final Tabs viewTabs = new Tabs();
-    private final Div viewContainer = new Div();
+    private final Div viewContainer = new Div();    private final FloatingRefreshButton refreshFab = new FloatingRefreshButton(this::refresh);
     private final MonthlyCalendarView monthlyView;
     private final WeeklyCalendarView weeklyView;
     private final DailyCalendarView dailyView;
     private LocalDate currentDate = LocalDate.now();
     private CalendarMode currentMode = CalendarMode.MONTH;
     private List<CmsCalendarEventSlot> events = List.of();
+
+    {
+        feedback.addClassName("calendar-feedback");
+        eventCount.addClassName("calendar-count");
+    }
     @Autowired
     public CmsCalendarView(VCalendarService calendarService, VCalendarEventService eventService) {
         this.calendarService = calendarService;
@@ -172,7 +173,9 @@ public class CmsCalendarView extends ManagementVerticalView implements AfterNavi
         });
     }
 
-    /** Same header card as the pilot calendar; the calendar selector takes the place of the "add" action. */
+    /**
+     * Same header card as the pilot calendar; the calendar selector takes the place of the "add" action.
+     */
     private Div buildHeader() {
         Div card = new Div();
         card.addClassName("calendar-header");

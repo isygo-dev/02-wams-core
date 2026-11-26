@@ -1,10 +1,5 @@
 package eu.isygoit.ui.sms;
 
-import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.component.page.Push;
-import com.vaadin.flow.component.page.Viewport;
-import com.vaadin.flow.server.PWA;
-
 /*
 @PWA(
         name = "SMS",
