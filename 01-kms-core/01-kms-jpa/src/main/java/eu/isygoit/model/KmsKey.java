@@ -472,38 +472,86 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     // =========================================================================
 
     /**
-     * Returns true if the key is expired (only applicable for imported keys with `validTo`).
+     * Returns true if the key is expired.
+     * <p>
+     * Only applicable for imported (BYOK) keys with a {@code validTo} set —
+     * after this date the key material is no longer usable, regardless of the
+     * stored {@code keyStatus}.
+     * </p>
      */
     public boolean isExpired() {
         return validTo != null && validTo.isBefore(LocalDateTime.now());
     }
 
     /**
-     * Returns true if the key is in `PENDING_DELETION` state.
+     * Effective lifecycle status that takes key‑material expiration into account.
+     * <p>
+     * An expired key is always reported as {@code DISABLED}, regardless of its
+     * stored {@code keyStatus}. All other states are returned unchanged.
+     * </p>
+     *
+     * @return the effective (usable) status
+     */
+    public IEnumKeyStatus.Types getKeyStatus() {
+        if (isExpired()) {
+            return IEnumKeyStatus.Types.DISABLED;
+        }
+        return keyStatus;
+    }
+
+    public void setKeyStatus(IEnumKeyStatus.Types keyStatus) {
+        if (isExpired()) {
+            this.keyStatus = IEnumKeyStatus.Types.DISABLED;
+        } else {
+            this.keyStatus = keyStatus;
+        }
+    }
+
+    /**
+     * Returns true if the key is in {@code PENDING_DELETION} state.
+     * <p>
+     * Returns {@code false} when the key is expired — an expired key is treated
+     * as {@code DISABLED} for all status checks.
+     * </p>
      */
     public boolean isPendingDeletion() {
-        return IEnumKeyStatus.Types.PENDING_DELETION.equals(keyStatus);
+        return IEnumKeyStatus.Types.PENDING_DELETION.equals(getKeyStatus());
     }
 
     /**
-     * Returns true if the key is in `ENABLED` state.
+     * Returns true if the key is effectively enabled — i.e. stored status is
+     * {@code ENABLED} and the key material has not expired.
      */
     public boolean isEnabled() {
-        return IEnumKeyStatus.Types.ENABLED.equals(keyStatus);
+        return IEnumKeyStatus.Types.ENABLED.equals(getKeyStatus());
     }
 
     /**
-     * Returns true if the key is in `DISABLED` state.
+     * Returns true if the key is effectively disabled — i.e. either stored
+     * status is {@code DISABLED} or the key material has expired.
      */
     public boolean isDisabled() {
-        return IEnumKeyStatus.Types.DISABLED.equals(keyStatus);
+        return IEnumKeyStatus.Types.DISABLED.equals(getKeyStatus());
     }
 
     /**
-     * Returns true if the key is in `PENDING_IMPORT` state (awaiting BYOK material).
+     * Returns true if the key is in {@code PENDING_IMPORT} state (awaiting BYOK material).
+     * <p>
+     * Returns {@code false} when the key is expired — an expired key is treated
+     * as {@code DISABLED} for all status checks.
+     * </p>
      */
     public boolean isPendingImport() {
-        return IEnumKeyStatus.Types.PENDING_IMPORT.equals(keyStatus);
+        return IEnumKeyStatus.Types.PENDING_IMPORT.equals(getKeyStatus());
+    }
+
+    /**
+     * Returns true if the key can currently be used for cryptographic operations:
+     * it is {@code ENABLED} and not expired.
+     */
+    @Transient
+    public boolean isUsable() {
+        return isEnabled();
     }
 
     /**
@@ -521,7 +569,13 @@ public class KmsKey extends AuditableEntity<Long> implements ITenantAssignable {
     }
 
     /**
-     * Returns true if the key has already been imported (BYOK) and the import token is no longer needed.
+     * Returns true if the key has already been imported (BYOK) and the import
+     * token is no longer needed.
+     * <p>
+     * Note: this checks presence of material, not usability — pair it with
+     * {@link #isExpired()} / {@link #isUsable()} if the caller also needs to know
+     * whether the imported material is still within its validity window.
+     * </p>
      */
     public boolean hasImportedMaterial() {
         return IEnumKeyOrigin.Types.EXTERNAL.equals(origin) && keyMaterial != null && importToken == null;

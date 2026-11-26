@@ -8,6 +8,7 @@ import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -54,6 +55,7 @@ public class KmsKeyVersion extends AuditableEntity<Long> implements ITenantAssig
     @Column(name = SchemaColumnConstantName.C_VERSION_ID, length = 255, nullable = false)
     private String versionId;
 
+    @Builder.Default
     @ColumnDefault("'ENABLED'")
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_STATUS, length = 50, nullable = false)
@@ -83,4 +85,107 @@ public class KmsKeyVersion extends AuditableEntity<Long> implements ITenantAssig
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_ORIGIN, length = 50)
     private IEnumKeyOrigin.Types origin;
+
+    // =========================================================================
+    // Helper methods (derived fields)
+    // =========================================================================
+
+    /**
+     * Returns true if this key version has expired.
+     * <p>
+     * A version is expired when {@code validTo} is set and lies in the past —
+     * after this date the version's key material is no longer usable,
+     * regardless of the stored {@code keyStatus}.
+     * </p>
+     */
+    public boolean isExpired() {
+        return validTo != null && validTo.isBefore(LocalDateTime.now());
+    }
+
+    /**
+     * Returns true if this key version has been deactivated.
+     * <p>
+     * A version is deactivated when {@code deactivationDate} is set and lies
+     * in the past. Deactivated versions must not be used for new cryptographic
+     * operations (they may still be needed for decryption/verification of data
+     * produced while active).
+     * </p>
+     */
+    public boolean isDeactivated() {
+        return deactivationDate != null && deactivationDate.isBefore(LocalDateTime.now());
+    }
+
+    /**
+     * Effective lifecycle status that takes expiration and deactivation into account.
+     * <p>
+     * A version that is expired or deactivated is always reported as
+     * {@code DISABLED}, regardless of its stored {@code keyStatus}.
+     * All other states are returned unchanged.
+     * </p>
+     *
+     * @return the effective (usable) status
+     */
+    public IEnumKeyStatus.Types getKeyStatus() {
+        if (isExpired() || isDeactivated()) {
+            return IEnumKeyStatus.Types.DISABLED;
+        }
+        return keyStatus;
+    }
+
+    public void setKeyStatus(IEnumKeyStatus.Types keyStatus) {
+        if (isExpired() || isDeactivated()) {
+            this.keyStatus = IEnumKeyStatus.Types.DISABLED;
+        } else {
+            this.keyStatus = keyStatus;
+        }
+    }
+
+    /**
+     * Returns true if the version is in {@code PENDING_DELETION} state.
+     * <p>
+     * Returns {@code false} when the version is expired or deactivated — an
+     * expired/deactivated version is treated as {@code DISABLED} for all
+     * status checks.
+     * </p>
+     */
+    public boolean isPendingDeletion() {
+        return IEnumKeyStatus.Types.PENDING_DELETION.equals(getKeyStatus());
+    }
+
+    /**
+     * Returns true if the version is effectively enabled — i.e. stored status is
+     * {@code ENABLED} and the version is neither expired nor deactivated.
+     */
+    public boolean isEnabled() {
+        return IEnumKeyStatus.Types.ENABLED.equals(getKeyStatus());
+    }
+
+    /**
+     * Returns true if the version is effectively disabled — i.e. either stored
+     * status is {@code DISABLED}, or the version is expired or deactivated.
+     */
+    public boolean isDisabled() {
+        return IEnumKeyStatus.Types.DISABLED.equals(getKeyStatus());
+    }
+
+    /**
+     * Returns true if the version is in {@code PENDING_IMPORT} state (awaiting BYOK material).
+     * <p>
+     * Returns {@code false} when the version is expired or deactivated — an
+     * expired/deactivated version is treated as {@code DISABLED} for all
+     * status checks.
+     * </p>
+     */
+    public boolean isPendingImport() {
+        return IEnumKeyStatus.Types.PENDING_IMPORT.equals(getKeyStatus());
+    }
+
+    /**
+     * Returns true if the version can currently be used for cryptographic operations:
+     * it is {@code ENABLED}, not expired, and not deactivated.
+     */
+    @Transient
+    public boolean isUsable() {
+        return isEnabled();
+    }
 }
