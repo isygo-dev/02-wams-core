@@ -68,10 +68,16 @@ public class TokenService implements ITokenBuilderService {
 
     @Override
     public TokenResponseDto buildTokenAndSave(String tenant, Set<String> audience, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+        if(StringUtils.isEmpty(tenant)) {
+            throw new TenantRequiredException("Tenant is required");
+        }
+
         TokenResponseDto token = this.buildToken(tenant, audience, tokenType, subject, claims);
 
+        //Calculate token crc
         Long crc16 = CRC16Helper.calculate(token.getToken().getBytes());
         Long crc32 = CRC32Helper.calculate(token.getToken().getBytes());
+
         //Save generated token
         AccessToken accessToken = null;
         try {
@@ -85,14 +91,17 @@ public class TokenService implements ITokenBuilderService {
                     .deprecated(Boolean.FALSE)
                     .build();
         } catch (JsonProcessingException e) {
-            throw new TokenAudienceException("Error occurred while processing token audience", e);
+            throw new TokenBuildException("Error occurred while building token", e);
         }
-        accessTokenService.create(accessToken);
+        accessTokenService.create(tenant, accessToken);
         return token;
     }
 
     @Override
     public TokenResponseDto buildToken(String tenant, Set<String> audience, IEnumToken.Types tokenType, String subject, Map<String, Object> claims) {
+        if(StringUtils.isEmpty(tenant)) {
+            throw new TenantRequiredException("Tenant is required");
+        }
         //Get Token config configured by tenant and type, otherwise, default one
         TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType, null);
         if (tokenConfig != null) {
@@ -118,6 +127,7 @@ public class TokenService implements ITokenBuilderService {
                 throw new SignaturAlgorithmNotSupportedException("Unsupported signature algorithm: " + sigAlgo);
             }
 
+            //Create the token
             TokenResponseDto token = jwtService.createToken(new StringBuilder(subject.toLowerCase()).append("@").append(tenant).toString(),
                     claims,
                     StringUtils.hasText(tokenConfig.getKmsKeyVersion()) ? Map.of(JwtConstants.KID_VERSION, tokenConfig.getKmsKeyVersion()) : Collections.emptyMap(),
@@ -135,6 +145,9 @@ public class TokenService implements ITokenBuilderService {
 
     @Override
     public boolean isTokenValid(String tenant, Set<String> audience, IEnumToken.Types tokenType, String token, String subject) {
+        if(StringUtils.isEmpty(tenant)) {
+            throw new TenantRequiredException("Tenant is required");
+        }
         // Get Token config configured by tenant and type, otherwise, default one
         Optional<String> versionIdOpt = jwtService.extractKmsKeyVersionId(token);
         TokenConfig tokenConfig = tokenConfigService.prepareTokenConfig(tenant, tokenType, versionIdOpt.orElse(null));
@@ -154,9 +167,10 @@ public class TokenService implements ITokenBuilderService {
         }
         String tenantFromToken = subjectArray[1];
         String accountCodeFromToken = subjectArray[0];
+        //Calculate token crc
         Long crc16 = CRC16Helper.calculate(token.getBytes());
         Long crc32 = CRC32Helper.calculate(token.getBytes());
-        AccessToken accessToken = accessTokenService.findAccessToken(accountCodeFromToken, crc16, crc32, tokenType);
+        AccessToken accessToken = accessTokenService.findAccessToken(tenantFromToken, accountCodeFromToken, crc16, crc32, tokenType);
         if (accessToken == null) {
             log.error("Token not found or deprecated for tenant: {} / {}", tenant, tokenType.name());
             throw new TokenNotFoundException("Invalid JWT: not found or deprecated");

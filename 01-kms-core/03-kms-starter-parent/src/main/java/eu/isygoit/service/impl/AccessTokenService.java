@@ -2,6 +2,7 @@ package eu.isygoit.service.impl;
 
 import eu.isygoit.annotation.InjectRepository;
 import eu.isygoit.com.rest.service.CrudService;
+import eu.isygoit.com.rest.service.tenancy.CrudTenantService;
 import eu.isygoit.config.AppProperties;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.AccessToken;
@@ -20,7 +21,7 @@ import java.util.Optional;
 @Service
 @Transactional
 @InjectRepository(value = AccessTokenRepository.class)
-public class AccessTokenService extends CrudService<Long, AccessToken, AccessTokenRepository> implements IAccessTokenService {
+public class AccessTokenService extends CrudTenantService<Long, AccessToken, AccessTokenRepository> implements IAccessTokenService {
 
     private final AppProperties appProperties;
 
@@ -33,12 +34,13 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
         this.appProperties = appProperties;
     }
 
-    public AccessToken findAccessToken(String application, String accountCode,
+    public AccessToken findAccessToken(String tenant,
+                                       String application, String accountCode,
                                        Long crc16, Long crc32,
                                        IEnumToken.Types tokenType) {
         Optional<AccessToken> optional =
-                repository().findFirstByApplicationAndAccountCodeIgnoreCaseAndCrc16AndCrc32AndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(
-                        application, accountCode, crc16, crc32, tokenType);
+                repository().findFirstByTenantAndApplicationAndAccountCodeIgnoreCaseAndCrc16AndCrc32AndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(
+                        tenant, application, accountCode, crc16, crc32, tokenType);
         if (optional.isPresent()) {
             return optional.get();
         }
@@ -46,12 +48,13 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
     }
 
     @Override
-    public AccessToken findAccessToken(String accountCode,
+    public AccessToken findAccessToken(String tenant,
+                                       String accountCode,
                                        Long crc16, Long crc32,
                                        IEnumToken.Types tokenType) {
         Optional<AccessToken> optional =
-                repository().findFirstByAccountCodeIgnoreCaseAndCrc16AndCrc32AndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(
-                        accountCode, crc16, crc32, tokenType);
+                repository().findFirstByTenantAndAccountCodeIgnoreCaseAndCrc16AndCrc32AndTokenTypeAndDeprecatedFalseOrderByCreateDateDesc(
+                        tenant, accountCode, crc16, crc32, tokenType);
         if (optional.isPresent()) {
             return optional.get();
         }
@@ -59,12 +62,13 @@ public class AccessTokenService extends CrudService<Long, AccessToken, AccessTok
     }
 
     @Override
-    public AccessToken beforeCreate(AccessToken accessToken) {
+    public AccessToken beforeCreate(String tenant, AccessToken accessToken) {
         //Deactivate old tokens (user, token type, application)
         if (appProperties.isDeactivateOldTokens()) {
             log.info("Deactivate old tokens (user, token type, application) for "
                     + accessToken.getAccountCode(), accessToken.getTokenType(), accessToken.getApplication());
-            repository().deactivateOldTokens(accessToken.getAccountCode(),
+            repository().deactivateOldTokens(accessToken.getTenant(),
+                    accessToken.getAccountCode(),
                     accessToken.getTokenType(),
                     accessToken.getApplication());
         }

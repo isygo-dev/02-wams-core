@@ -1,5 +1,6 @@
 package eu.isygoit.model;
 
+import eu.isygoit.constants.TenantConstants;
 import eu.isygoit.enums.IEnumToken;
 import eu.isygoit.model.jakarta.AuditableEntity;
 import eu.isygoit.model.schema.SchemaColumnConstantName;
@@ -26,13 +27,18 @@ import java.util.Date;
 @DynamicUpdate
 @Entity
 @Table(name = SchemaTableConstantName.T_ACCESS_TOKEN)
-public class AccessToken extends AuditableEntity<Long> {
+public class AccessToken extends AuditableEntity<Long> implements ITenantAssignable{
 
     @Id
     @SequenceGenerator(name = "access_token_sequence_generator", sequenceName = "access_token_sequence", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "access_token_sequence_generator")
     @Column(name = SchemaColumnConstantName.C_ID, updatable = false, nullable = false)
     private Long id;
+
+    //@Convert(converter = LowerCaseConverter.class)
+    @ColumnDefault("'" + TenantConstants.DEFAULT_TENANT_NAME + "'")
+    @Column(name = SchemaColumnConstantName.C_TENANT, length = SchemaConstantSize.TENANT, updatable = false, nullable = false)
+    private String tenant;
 
     @Enumerated(EnumType.STRING)
     @Column(name = SchemaColumnConstantName.C_TOKEN_TYPE, length = IEnumToken.STR_ENUM_SIZE, nullable = false)
